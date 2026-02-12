@@ -2,11 +2,11 @@
 <html lang="en" data-accent-color="violet" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Other endpoints - cornflow 1.2.6 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Auxiliar endpoints" href="auxiliar_endpoints.html" /><link rel="prev" title="Main endpoints" href="endpoints.html" /><script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Other endpoints - cornflow 1.3.0 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Auxiliar endpoints" href="auxiliar_endpoints.html" /><link rel="prev" title="Main endpoints" href="endpoints.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=ad592e98" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=d140fbf8" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=44020203" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,7 +19,7 @@
 }
 </style>
     <meta property="og:type" content="website"/><meta property="og:title" content="Other endpoints"/>
-<meta name="twitter:card" content="summary"/>
+    <meta name="twitter:card" content="summary"/>
   </head>
 <body><div class="sy-head">
   <div class="sy-head-blur"></div>
@@ -205,8 +205,8 @@ data-aria-dark="Switch to auto color mode">
     </div>
   </div>
 </div><div class="flex flex-col break-words justify-between">
-      <div class="min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
-        <article class="yue" role="main">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <article class="yue" role="main">
           <section id="other-endpoints">
 <h1>Other endpoints<a class="headerlink" href="#other-endpoints" title="Link to this heading">¶</a></h1>
 <section id="module-cornflow.endpoints.case">
@@ -216,12 +216,12 @@ or from an existing case, update the case info, patch its data, get all of them 
 These endpoints have different access url, but manage the same data entities</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="cornflow.endpoints.case.CaseEndpoint">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow.endpoints.case.</span></span><span class="sig-name descname"><span class="pre">CaseEndpoint</span></span><a class="headerlink" href="#cornflow.endpoints.case.CaseEndpoint" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cornflow.endpoints.case.</span></span><span class="sig-name descname"><span class="pre">CaseEndpoint</span></span><a class="headerlink" href="#cornflow.endpoints.case.CaseEndpoint" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseMetaResource</span></code></p>
 <p>Endpoint used to create a new case or get all the cases and their related information</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="cornflow.endpoints.case.CaseEndpoint.ROLES_WITH_ACCESS">
-<span class="sig-name descname"><span class="pre">ROLES_WITH_ACCESS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[1,</span> <span class="pre">2,</span> <span class="pre">3]</span></em><a class="headerlink" href="#cornflow.endpoints.case.CaseEndpoint.ROLES_WITH_ACCESS" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ROLES_WITH_ACCESS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[1,</span> <span class="pre">2,</span> <span class="pre">3]</span></span><a class="headerlink" href="#cornflow.endpoints.case.CaseEndpoint.ROLES_WITH_ACCESS" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -247,7 +247,7 @@ an existing session (login) made by a user</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="cornflow.endpoints.case.CaseEndpoint.methods">
-<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">t.ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">t.Collection</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'GET',</span> <span class="pre">'POST'}</span></em><a class="headerlink" href="#cornflow.endpoints.case.CaseEndpoint.methods" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">methods</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">Collection</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'GET',</span> <span class="pre">'POST'}</span></span><a class="headerlink" href="#cornflow.endpoints.case.CaseEndpoint.methods" title="Link to this definition">¶</a></dt>
 <dd><p>The methods this view is registered for. Uses the same default
 (<code class="docutils literal notranslate"><span class="pre">[&quot;GET&quot;,</span> <span class="pre">&quot;HEAD&quot;,</span> <span class="pre">&quot;OPTIONS&quot;]</span></code>) as <code class="docutils literal notranslate"><span class="pre">route</span></code> and
 <code class="docutils literal notranslate"><span class="pre">add_url_rule</span></code> by default.</p>
@@ -257,12 +257,12 @@ an existing session (login) made by a user</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="cornflow.endpoints.case.CaseFromInstanceExecutionEndpoint">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow.endpoints.case.</span></span><span class="sig-name descname"><span class="pre">CaseFromInstanceExecutionEndpoint</span></span><a class="headerlink" href="#cornflow.endpoints.case.CaseFromInstanceExecutionEndpoint" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cornflow.endpoints.case.</span></span><span class="sig-name descname"><span class="pre">CaseFromInstanceExecutionEndpoint</span></span><a class="headerlink" href="#cornflow.endpoints.case.CaseFromInstanceExecutionEndpoint" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseMetaResource</span></code></p>
 <p>Endpoint used to create a new case from an already existing instance and execution</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="cornflow.endpoints.case.CaseFromInstanceExecutionEndpoint.ROLES_WITH_ACCESS">
-<span class="sig-name descname"><span class="pre">ROLES_WITH_ACCESS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[2,</span> <span class="pre">3]</span></em><a class="headerlink" href="#cornflow.endpoints.case.CaseFromInstanceExecutionEndpoint.ROLES_WITH_ACCESS" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ROLES_WITH_ACCESS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[2,</span> <span class="pre">3]</span></span><a class="headerlink" href="#cornflow.endpoints.case.CaseFromInstanceExecutionEndpoint.ROLES_WITH_ACCESS" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -273,7 +273,7 @@ an existing session (login) made by a user</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="cornflow.endpoints.case.CaseFromInstanceExecutionEndpoint.methods">
-<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">t.ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">t.Collection</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'POST'}</span></em><a class="headerlink" href="#cornflow.endpoints.case.CaseFromInstanceExecutionEndpoint.methods" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">methods</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">Collection</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'POST'}</span></span><a class="headerlink" href="#cornflow.endpoints.case.CaseFromInstanceExecutionEndpoint.methods" title="Link to this definition">¶</a></dt>
 <dd><p>The methods this view is registered for. Uses the same default
 (<code class="docutils literal notranslate"><span class="pre">[&quot;GET&quot;,</span> <span class="pre">&quot;HEAD&quot;,</span> <span class="pre">&quot;OPTIONS&quot;]</span></code>) as <code class="docutils literal notranslate"><span class="pre">route</span></code> and
 <code class="docutils literal notranslate"><span class="pre">add_url_rule</span></code> by default.</p>
@@ -283,12 +283,12 @@ an existing session (login) made by a user</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="cornflow.endpoints.case.CaseCopyEndpoint">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow.endpoints.case.</span></span><span class="sig-name descname"><span class="pre">CaseCopyEndpoint</span></span><a class="headerlink" href="#cornflow.endpoints.case.CaseCopyEndpoint" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cornflow.endpoints.case.</span></span><span class="sig-name descname"><span class="pre">CaseCopyEndpoint</span></span><a class="headerlink" href="#cornflow.endpoints.case.CaseCopyEndpoint" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseMetaResource</span></code></p>
 <p>Copies the case to a new case. Original case id goes in the url</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="cornflow.endpoints.case.CaseCopyEndpoint.ROLES_WITH_ACCESS">
-<span class="sig-name descname"><span class="pre">ROLES_WITH_ACCESS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[2,</span> <span class="pre">3]</span></em><a class="headerlink" href="#cornflow.endpoints.case.CaseCopyEndpoint.ROLES_WITH_ACCESS" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ROLES_WITH_ACCESS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[2,</span> <span class="pre">3]</span></span><a class="headerlink" href="#cornflow.endpoints.case.CaseCopyEndpoint.ROLES_WITH_ACCESS" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -298,7 +298,7 @@ an existing session (login) made by a user</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="cornflow.endpoints.case.CaseCopyEndpoint.methods">
-<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">t.ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">t.Collection</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'POST'}</span></em><a class="headerlink" href="#cornflow.endpoints.case.CaseCopyEndpoint.methods" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">methods</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">Collection</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'POST'}</span></span><a class="headerlink" href="#cornflow.endpoints.case.CaseCopyEndpoint.methods" title="Link to this definition">¶</a></dt>
 <dd><p>The methods this view is registered for. Uses the same default
 (<code class="docutils literal notranslate"><span class="pre">[&quot;GET&quot;,</span> <span class="pre">&quot;HEAD&quot;,</span> <span class="pre">&quot;OPTIONS&quot;]</span></code>) as <code class="docutils literal notranslate"><span class="pre">route</span></code> and
 <code class="docutils literal notranslate"><span class="pre">add_url_rule</span></code> by default.</p>
@@ -308,12 +308,12 @@ an existing session (login) made by a user</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="cornflow.endpoints.case.CaseDetailsEndpoint">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow.endpoints.case.</span></span><span class="sig-name descname"><span class="pre">CaseDetailsEndpoint</span></span><a class="headerlink" href="#cornflow.endpoints.case.CaseDetailsEndpoint" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cornflow.endpoints.case.</span></span><span class="sig-name descname"><span class="pre">CaseDetailsEndpoint</span></span><a class="headerlink" href="#cornflow.endpoints.case.CaseDetailsEndpoint" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseMetaResource</span></code></p>
 <p>Endpoint used to get the information of a single case, edit it or delete it</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="cornflow.endpoints.case.CaseDetailsEndpoint.ROLES_WITH_ACCESS">
-<span class="sig-name descname"><span class="pre">ROLES_WITH_ACCESS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[1,</span> <span class="pre">2,</span> <span class="pre">3]</span></em><a class="headerlink" href="#cornflow.endpoints.case.CaseDetailsEndpoint.ROLES_WITH_ACCESS" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ROLES_WITH_ACCESS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[1,</span> <span class="pre">2,</span> <span class="pre">3]</span></span><a class="headerlink" href="#cornflow.endpoints.case.CaseDetailsEndpoint.ROLES_WITH_ACCESS" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -371,7 +371,7 @@ an existing session (login) made by a user.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="cornflow.endpoints.case.CaseDetailsEndpoint.methods">
-<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">t.ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">t.Collection</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'DELETE',</span> <span class="pre">'GET',</span> <span class="pre">'PUT'}</span></em><a class="headerlink" href="#cornflow.endpoints.case.CaseDetailsEndpoint.methods" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">methods</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">Collection</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'DELETE',</span> <span class="pre">'GET',</span> <span class="pre">'PUT'}</span></span><a class="headerlink" href="#cornflow.endpoints.case.CaseDetailsEndpoint.methods" title="Link to this definition">¶</a></dt>
 <dd><p>The methods this view is registered for. Uses the same default
 (<code class="docutils literal notranslate"><span class="pre">[&quot;GET&quot;,</span> <span class="pre">&quot;HEAD&quot;,</span> <span class="pre">&quot;OPTIONS&quot;]</span></code>) as <code class="docutils literal notranslate"><span class="pre">route</span></code> and
 <code class="docutils literal notranslate"><span class="pre">add_url_rule</span></code> by default.</p>
@@ -381,12 +381,12 @@ an existing session (login) made by a user.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="cornflow.endpoints.case.CaseDataEndpoint">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow.endpoints.case.</span></span><span class="sig-name descname"><span class="pre">CaseDataEndpoint</span></span><a class="headerlink" href="#cornflow.endpoints.case.CaseDataEndpoint" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cornflow.endpoints.case.</span></span><span class="sig-name descname"><span class="pre">CaseDataEndpoint</span></span><a class="headerlink" href="#cornflow.endpoints.case.CaseDataEndpoint" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#cornflow.endpoints.case.CaseDetailsEndpoint" title="cornflow.endpoints.case.CaseDetailsEndpoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">CaseDetailsEndpoint</span></code></a></p>
 <p>Endpoint used to get the data of a given case</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="cornflow.endpoints.case.CaseDataEndpoint.ROLES_WITH_ACCESS">
-<span class="sig-name descname"><span class="pre">ROLES_WITH_ACCESS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[1,</span> <span class="pre">2,</span> <span class="pre">3]</span></em><a class="headerlink" href="#cornflow.endpoints.case.CaseDataEndpoint.ROLES_WITH_ACCESS" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ROLES_WITH_ACCESS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[1,</span> <span class="pre">2,</span> <span class="pre">3]</span></span><a class="headerlink" href="#cornflow.endpoints.case.CaseDataEndpoint.ROLES_WITH_ACCESS" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -416,7 +416,7 @@ the data of the instance) and an integer with the HTTP status code.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="cornflow.endpoints.case.CaseDataEndpoint.methods">
-<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">t.ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">t.Collection</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'DELETE',</span> <span class="pre">'GET',</span> <span class="pre">'PATCH',</span> <span class="pre">'PUT'}</span></em><a class="headerlink" href="#cornflow.endpoints.case.CaseDataEndpoint.methods" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">methods</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">Collection</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'DELETE',</span> <span class="pre">'GET',</span> <span class="pre">'PATCH',</span> <span class="pre">'PUT'}</span></span><a class="headerlink" href="#cornflow.endpoints.case.CaseDataEndpoint.methods" title="Link to this definition">¶</a></dt>
 <dd><p>The methods this view is registered for. Uses the same default
 (<code class="docutils literal notranslate"><span class="pre">[&quot;GET&quot;,</span> <span class="pre">&quot;HEAD&quot;,</span> <span class="pre">&quot;OPTIONS&quot;]</span></code>) as <code class="docutils literal notranslate"><span class="pre">route</span></code> and
 <code class="docutils literal notranslate"><span class="pre">add_url_rule</span></code> by default.</p>
@@ -426,12 +426,12 @@ the data of the instance) and an integer with the HTTP status code.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="cornflow.endpoints.case.CaseToInstance">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow.endpoints.case.</span></span><span class="sig-name descname"><span class="pre">CaseToInstance</span></span><a class="headerlink" href="#cornflow.endpoints.case.CaseToInstance" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cornflow.endpoints.case.</span></span><span class="sig-name descname"><span class="pre">CaseToInstance</span></span><a class="headerlink" href="#cornflow.endpoints.case.CaseToInstance" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseMetaResource</span></code></p>
 <p>Endpoint used to create a new instance or instance and execution from a stored case</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="cornflow.endpoints.case.CaseToInstance.ROLES_WITH_ACCESS">
-<span class="sig-name descname"><span class="pre">ROLES_WITH_ACCESS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[2,</span> <span class="pre">3]</span></em><a class="headerlink" href="#cornflow.endpoints.case.CaseToInstance.ROLES_WITH_ACCESS" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ROLES_WITH_ACCESS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[2,</span> <span class="pre">3]</span></span><a class="headerlink" href="#cornflow.endpoints.case.CaseToInstance.ROLES_WITH_ACCESS" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -455,7 +455,7 @@ an existing session (login) made by a user</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="cornflow.endpoints.case.CaseToInstance.methods">
-<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">t.ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">t.Collection</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'POST'}</span></em><a class="headerlink" href="#cornflow.endpoints.case.CaseToInstance.methods" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">methods</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">Collection</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'POST'}</span></span><a class="headerlink" href="#cornflow.endpoints.case.CaseToInstance.methods" title="Link to this definition">¶</a></dt>
 <dd><p>The methods this view is registered for. Uses the same default
 (<code class="docutils literal notranslate"><span class="pre">[&quot;GET&quot;,</span> <span class="pre">&quot;HEAD&quot;,</span> <span class="pre">&quot;OPTIONS&quot;]</span></code>) as <code class="docutils literal notranslate"><span class="pre">route</span></code> and
 <code class="docutils literal notranslate"><span class="pre">add_url_rule</span></code> by default.</p>
@@ -465,12 +465,12 @@ an existing session (login) made by a user</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="cornflow.endpoints.case.CaseCompare">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow.endpoints.case.</span></span><span class="sig-name descname"><span class="pre">CaseCompare</span></span><a class="headerlink" href="#cornflow.endpoints.case.CaseCompare" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cornflow.endpoints.case.</span></span><span class="sig-name descname"><span class="pre">CaseCompare</span></span><a class="headerlink" href="#cornflow.endpoints.case.CaseCompare" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseMetaResource</span></code></p>
 <p>Endpoint used to generate the json patch of two given cases</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="cornflow.endpoints.case.CaseCompare.ROLES_WITH_ACCESS">
-<span class="sig-name descname"><span class="pre">ROLES_WITH_ACCESS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[1,</span> <span class="pre">2,</span> <span class="pre">3]</span></em><a class="headerlink" href="#cornflow.endpoints.case.CaseCompare.ROLES_WITH_ACCESS" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ROLES_WITH_ACCESS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[1,</span> <span class="pre">2,</span> <span class="pre">3]</span></span><a class="headerlink" href="#cornflow.endpoints.case.CaseCompare.ROLES_WITH_ACCESS" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -493,7 +493,7 @@ an existing session (login) made by a user</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="cornflow.endpoints.case.CaseCompare.methods">
-<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">t.ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">t.Collection</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'GET'}</span></em><a class="headerlink" href="#cornflow.endpoints.case.CaseCompare.methods" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">methods</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">Collection</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'GET'}</span></span><a class="headerlink" href="#cornflow.endpoints.case.CaseCompare.methods" title="Link to this definition">¶</a></dt>
 <dd><p>The methods this view is registered for. Uses the same default
 (<code class="docutils literal notranslate"><span class="pre">[&quot;GET&quot;,</span> <span class="pre">&quot;HEAD&quot;,</span> <span class="pre">&quot;OPTIONS&quot;]</span></code>) as <code class="docutils literal notranslate"><span class="pre">route</span></code> and
 <code class="docutils literal notranslate"><span class="pre">add_url_rule</span></code> by default.</p>
@@ -544,9 +544,9 @@ an existing session (login) made by a user</p>
     </div>
   </div>
 </footer>
-      <script src="../_static/documentation_options.js?v=010db75e"></script>
-      <script src="../_static/doctools.js?v=9a2dae69"></script>
-      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/documentation_options.js?v=1f29e9d3"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/design-tabs.js?v=f930bc37"></script>
-      <script src="../_static/shibuya.js?v=9b0e4dde"></script></body>
+      <script src="../_static/shibuya.js?v=cac61aee"></script></body>
 </html>

@@ -2,11 +2,11 @@
 <html lang="en" data-accent-color="violet" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>cornflow-client - cornflow 1.2.6 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="REST API Reference" href="../stable-rest-api-ref.html" /><link rel="prev" title="Auxiliar endpoints" href="auxiliar_endpoints.html" /><script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>cornflow-client - cornflow 1.3.0 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="REST API Reference" href="../stable-rest-api-ref.html" /><link rel="prev" title="Auxiliar endpoints" href="auxiliar_endpoints.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=ad592e98" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=d140fbf8" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=44020203" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,7 +19,7 @@
 }
 </style>
     <meta property="og:type" content="website"/><meta property="og:title" content="cornflow-client"/>
-<meta name="twitter:card" content="summary"/>
+    <meta name="twitter:card" content="summary"/>
   </head>
 <body><div class="sy-head">
   <div class="sy-head-blur"></div>
@@ -242,40 +242,64 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#solution-status">Solution status</a><ul>
 <li><a class="reference internal" href="#cornflow_client.cornflow_client.cornflow_client.constants.SOLUTION_STATUS_INFEASIBLE"><code class="docutils literal notranslate">constants.SOLUTION_STATUS_INFEASIBLE</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.cornflow_client.cornflow_client.constants.SOLUTION_STATUS_FEASIBLE"><code class="docutils literal notranslate">constants.SOLUTION_STATUS_FEASIBLE</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.constants.OrchError"><code class="docutils literal notranslate"><span class="pre">OrchError</span></code></a><ul>
+<li><a class="reference internal" href="#cornflow_client.constants.OrchError.status_code"><code class="docutils literal notranslate">status_code</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.constants.OrchError.to_dict"><code class="docutils literal notranslate">to_dict()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.constants.OrchError.add_note"><code class="docutils literal notranslate">add_note()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.constants.OrchError.args"><code class="docutils literal notranslate">args</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.constants.OrchError.with_traceback"><code class="docutils literal notranslate">with_traceback()</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#cornflow_client.constants.AirflowError"><code class="docutils literal notranslate"><span class="pre">AirflowError</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow_client.constants.AirflowError.status_code"><code class="docutils literal notranslate">status_code</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.constants.AirflowError.log_txt"><code class="docutils literal notranslate">log_txt</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.constants.AirflowError.to_dict"><code class="docutils literal notranslate">to_dict()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.constants.AirflowError.add_note"><code class="docutils literal notranslate">add_note()</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.constants.AirflowError.args"><code class="docutils literal notranslate">args</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.constants.AirflowError.status_code"><code class="docutils literal notranslate">status_code</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.constants.AirflowError.to_dict"><code class="docutils literal notranslate">to_dict()</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.constants.AirflowError.with_traceback"><code class="docutils literal notranslate">with_traceback()</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#cornflow_client.constants.DatabricksError"><code class="docutils literal notranslate"><span class="pre">DatabricksError</span></code></a><ul>
+<li><a class="reference internal" href="#cornflow_client.constants.DatabricksError.log_txt"><code class="docutils literal notranslate">log_txt</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.constants.DatabricksError.add_note"><code class="docutils literal notranslate">add_note()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.constants.DatabricksError.args"><code class="docutils literal notranslate">args</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.constants.DatabricksError.status_code"><code class="docutils literal notranslate">status_code</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.constants.DatabricksError.to_dict"><code class="docutils literal notranslate">to_dict()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.constants.DatabricksError.with_traceback"><code class="docutils literal notranslate">with_traceback()</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#cornflow_client.constants.NoSolverException"><code class="docutils literal notranslate"><span class="pre">NoSolverException</span></code></a><ul>
+<li><a class="reference internal" href="#cornflow_client.constants.NoSolverException.add_note"><code class="docutils literal notranslate">add_note()</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.constants.NoSolverException.args"><code class="docutils literal notranslate">args</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.constants.NoSolverException.with_traceback"><code class="docutils literal notranslate">with_traceback()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#cornflow_client.constants.BadConfiguration"><code class="docutils literal notranslate"><span class="pre">BadConfiguration</span></code></a><ul>
+<li><a class="reference internal" href="#cornflow_client.constants.BadConfiguration.add_note"><code class="docutils literal notranslate">add_note()</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.constants.BadConfiguration.args"><code class="docutils literal notranslate">args</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.constants.BadConfiguration.with_traceback"><code class="docutils literal notranslate">with_traceback()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#cornflow_client.constants.BadInstance"><code class="docutils literal notranslate"><span class="pre">BadInstance</span></code></a><ul>
+<li><a class="reference internal" href="#cornflow_client.constants.BadInstance.add_note"><code class="docutils literal notranslate">add_note()</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.constants.BadInstance.args"><code class="docutils literal notranslate">args</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.constants.BadInstance.with_traceback"><code class="docutils literal notranslate">with_traceback()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#cornflow_client.constants.BadSolution"><code class="docutils literal notranslate"><span class="pre">BadSolution</span></code></a><ul>
+<li><a class="reference internal" href="#cornflow_client.constants.BadSolution.add_note"><code class="docutils literal notranslate">add_note()</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.constants.BadSolution.args"><code class="docutils literal notranslate">args</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.constants.BadSolution.with_traceback"><code class="docutils literal notranslate">with_traceback()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#cornflow_client.constants.BadInstanceChecks"><code class="docutils literal notranslate"><span class="pre">BadInstanceChecks</span></code></a><ul>
+<li><a class="reference internal" href="#cornflow_client.constants.BadInstanceChecks.add_note"><code class="docutils literal notranslate">add_note()</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.constants.BadInstanceChecks.args"><code class="docutils literal notranslate">args</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.constants.BadInstanceChecks.with_traceback"><code class="docutils literal notranslate">with_traceback()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#cornflow_client.constants.BadSolutionChecks"><code class="docutils literal notranslate"><span class="pre">BadSolutionChecks</span></code></a><ul>
+<li><a class="reference internal" href="#cornflow_client.constants.BadSolutionChecks.add_note"><code class="docutils literal notranslate">add_note()</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.constants.BadSolutionChecks.args"><code class="docutils literal notranslate">args</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.constants.BadSolutionChecks.with_traceback"><code class="docutils literal notranslate">with_traceback()</span></code></a></li>
 </ul>
@@ -362,8 +386,8 @@ data-aria-dark="Switch to auto color mode">
     </div>
   </div>
 </div><div class="flex flex-col break-words justify-between">
-      <div class="min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
-        <article class="yue" role="main">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <article class="yue" role="main">
           <section id="cornflow-client">
 <h1>cornflow-client<a class="headerlink" href="#cornflow-client" title="Link to this heading">¶</a></h1>
 <section id="core-classes">
@@ -373,12 +397,12 @@ data-aria-dark="Switch to auto color mode">
 <p>Base code for the application core.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="cornflow_client.core.application.ApplicationCore">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow_client.core.application.</span></span><span class="sig-name descname"><span class="pre">ApplicationCore</span></span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cornflow_client.core.application.</span></span><span class="sig-name descname"><span class="pre">ApplicationCore</span></span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <p>The application template.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="cornflow_client.core.application.ApplicationCore.name">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.name" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">abstract</span></span><span class="w"> </span><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.name" title="Link to this definition">¶</a></dt>
 <dd><p>Mandatory property</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -389,7 +413,7 @@ data-aria-dark="Switch to auto color mode">
 
 <dl class="py property">
 <dt class="sig sig-object py" id="cornflow_client.core.application.ApplicationCore.description">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.description" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">description</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.description" title="Link to this definition">¶</a></dt>
 <dd><p>Optional property</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -400,7 +424,7 @@ data-aria-dark="Switch to auto color mode">
 
 <dl class="py property">
 <dt class="sig sig-object py" id="cornflow_client.core.application.ApplicationCore.default_args">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_args</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.default_args" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">default_args</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.default_args" title="Link to this definition">¶</a></dt>
 <dd><p>Optional property</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -411,7 +435,7 @@ data-aria-dark="Switch to auto color mode">
 
 <dl class="py property">
 <dt class="sig sig-object py" id="cornflow_client.core.application.ApplicationCore.extra_args">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extra_args</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.extra_args" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">extra_args</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.extra_args" title="Link to this definition">¶</a></dt>
 <dd><p>Optional property</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -422,7 +446,7 @@ data-aria-dark="Switch to auto color mode">
 
 <dl class="py property">
 <dt class="sig sig-object py" id="cornflow_client.core.application.ApplicationCore.instance">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">instance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cornflow_client.core.instance.InstanceCore" title="cornflow_client.core.instance.InstanceCore"><span class="pre">InstanceCore</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.instance" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">abstract</span></span><span class="w"> </span><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">instance</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cornflow_client.core.instance.InstanceCore" title="cornflow_client.core.instance.InstanceCore"><span class="pre">InstanceCore</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.instance" title="Link to this definition">¶</a></dt>
 <dd><p>Mandatory property</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -433,7 +457,7 @@ data-aria-dark="Switch to auto color mode">
 
 <dl class="py property">
 <dt class="sig sig-object py" id="cornflow_client.core.application.ApplicationCore.solution">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">solution</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cornflow_client.core.solution.SolutionCore" title="cornflow_client.core.solution.SolutionCore"><span class="pre">SolutionCore</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.solution" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">abstract</span></span><span class="w"> </span><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">solution</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cornflow_client.core.solution.SolutionCore" title="cornflow_client.core.solution.SolutionCore"><span class="pre">SolutionCore</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.solution" title="Link to this definition">¶</a></dt>
 <dd><p>Mandatory property</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -444,7 +468,7 @@ data-aria-dark="Switch to auto color mode">
 
 <dl class="py property">
 <dt class="sig sig-object py" id="cornflow_client.core.application.ApplicationCore.schema">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">schema</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.schema" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">abstract</span></span><span class="w"> </span><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">schema</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.schema" title="Link to this definition">¶</a></dt>
 <dd><p>Mandatory property</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -455,7 +479,7 @@ data-aria-dark="Switch to auto color mode">
 
 <dl class="py property">
 <dt class="sig sig-object py" id="cornflow_client.core.application.ApplicationCore.test_cases">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">test_cases</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.test_cases" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">abstract</span></span><span class="w"> </span><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">test_cases</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.test_cases" title="Link to this definition">¶</a></dt>
 <dd><p>Mandatory property</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -479,7 +503,7 @@ if each element in the list is:</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="cornflow_client.core.application.ApplicationCore.solvers">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">solvers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore" title="cornflow_client.core.experiment.ExperimentCore"><span class="pre">ExperimentCore</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.solvers" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">abstract</span></span><span class="w"> </span><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">solvers</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore" title="cornflow_client.core.experiment.ExperimentCore"><span class="pre">ExperimentCore</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.solvers" title="Link to this definition">¶</a></dt>
 <dd><p>Mandatory property</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -490,7 +514,7 @@ if each element in the list is:</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.application.ApplicationCore.solve">
-<span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solution_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.solve" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solution_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.solve" title="Link to this definition">¶</a></dt>
 <dd><p>Solves the problem instance using the specified configuration.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -508,7 +532,7 @@ if each element in the list is:</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.application.ApplicationCore.check">
-<span class="sig-name descname"><span class="pre">check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instance_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solution_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.check" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instance_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solution_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.check" title="Link to this definition">¶</a></dt>
 <dd><p>Checks the instance and solution data
 :param instance_data: json data of the instance
 :param solution_data: json data of the solution
@@ -555,7 +579,7 @@ if each element in the list is:</p>
 <span id="instancecore"></span><h3>InstanceCore<a class="headerlink" href="#module-cornflow_client.core.instance" title="Link to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="cornflow_client.core.instance.InstanceCore">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow_client.core.instance.</span></span><span class="sig-name descname"><span class="pre">InstanceCore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.core.instance.InstanceCore" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cornflow_client.core.instance.</span></span><span class="sig-name descname"><span class="pre">InstanceCore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.core.instance.InstanceCore" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore" title="cornflow_client.core.instance_solution.InstanceSolutionCore"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstanceSolutionCore</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">CheckCore</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <p>The instance template.</p>
 <dl class="py method">
@@ -595,7 +619,7 @@ if the problem is feasible</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="cornflow_client.core.instance.InstanceCore.schema_checks">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">schema_checks</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#cornflow_client.core.instance.InstanceCore.schema_checks" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">abstract</span></span><span class="w"> </span><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">schema_checks</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></span><a class="headerlink" href="#cornflow_client.core.instance.InstanceCore.schema_checks" title="Link to this definition">¶</a></dt>
 <dd><p>A dictionary representation of the json-schema for the dictionary returned by
 the method Instance.check()</p>
 </dd></dl>
@@ -607,7 +631,7 @@ the method Instance.check()</p>
 <span id="solutioncore"></span><h3>SolutionCore<a class="headerlink" href="#module-cornflow_client.core.solution" title="Link to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="cornflow_client.core.solution.SolutionCore">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow_client.core.solution.</span></span><span class="sig-name descname"><span class="pre">SolutionCore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.core.solution.SolutionCore" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cornflow_client.core.solution.</span></span><span class="sig-name descname"><span class="pre">SolutionCore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.core.solution.SolutionCore" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore" title="cornflow_client.core.instance_solution.InstanceSolutionCore"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstanceSolutionCore</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <p>The solution template.</p>
 </dd></dl>
@@ -617,18 +641,18 @@ the method Instance.check()</p>
 <span id="instancesolution"></span><h3>InstanceSolution<a class="headerlink" href="#module-cornflow_client.core.instance_solution" title="Link to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow_client.core.instance_solution.</span></span><span class="sig-name descname"><span class="pre">InstanceSolutionCore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cornflow_client.core.instance_solution.</span></span><span class="sig-name descname"><span class="pre">InstanceSolutionCore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <p>Common interface for the instance and solution templates</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.data">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.data" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">data</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.data" title="Link to this definition">¶</a></dt>
 <dd><p>input data (not necessarily in json-format)</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.from_dict">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore" title="cornflow_client.core.instance_solution.InstanceSolutionCore"><span class="pre">InstanceSolutionCore</span></a></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.from_dict" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore" title="cornflow_client.core.instance_solution.InstanceSolutionCore"><span class="pre">InstanceSolutionCore</span></a></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.from_dict" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>data</strong> – json-schema in a dictionary format</p>
@@ -651,7 +675,7 @@ the method Instance.check()</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.from_json">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore" title="cornflow_client.core.instance_solution.InstanceSolutionCore"><span class="pre">InstanceSolutionCore</span></a></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.from_json" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore" title="cornflow_client.core.instance_solution.InstanceSolutionCore"><span class="pre">InstanceSolutionCore</span></a></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.from_json" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>path</strong> – path to json-schema json file</p>
@@ -675,7 +699,7 @@ the method Instance.check()</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.schema">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">schema</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.schema" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">abstract</span></span><span class="w"> </span><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">schema</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.schema" title="Link to this definition">¶</a></dt>
 <dd><p>a dictionary representation of the json-schema for the object</p>
 </dd></dl>
 
@@ -702,7 +726,7 @@ the method Instance.check()</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.from_excel">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_excel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore" title="cornflow_client.core.instance_solution.InstanceSolutionCore"><span class="pre">InstanceSolutionCore</span></a></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.from_excel" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_excel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cornflow_client.core.instance_solution.InstanceSolutionCore" title="cornflow_client.core.instance_solution.InstanceSolutionCore"><span class="pre">InstanceSolutionCore</span></a></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.from_excel" title="Link to this definition">¶</a></dt>
 <dd><p>Read an entire excel file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -730,7 +754,7 @@ the method Instance.check()</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.dict_to_int_or_float">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dict_to_int_or_float</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.dict_to_int_or_float" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">dict_to_int_or_float</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.dict_to_int_or_float" title="Link to this definition">¶</a></dt>
 <dd><p>Recursively transforms a dictionary (and nested structures) by converting
 string representations of numbers into actual int or float types.
 Returns a new dictionary with converted values, does not modify the original.</p>
@@ -742,7 +766,7 @@ Returns a new dictionary with converted values, does not modify the original.</p
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.from_element_or_list_to_dict">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_element_or_list_to_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_or_list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.from_element_or_list_to_dict" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_element_or_list_to_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_or_list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.from_element_or_list_to_dict" title="Link to this definition">¶</a></dt>
 <dd><p>Converts a list into a dictionary indexed by the field ‘index’ of each element of the list.
 If the input is not a list, it is converted into a list before converting to a dictionary
 For example: [{‘index’: 4, ‘value’: 5}, {‘index’: 7, ‘value’: 8}]</p>
@@ -753,181 +777,181 @@ For example: [{‘index’: 4, ‘value’: 5}, {‘index’: 7, ‘value’: 8}
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.get_date_from_string">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_date_from_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">datetime</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_date_from_string" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_date_from_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">datetime</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_date_from_string" title="Link to this definition">¶</a></dt>
 <dd><p>Returns a datetime object from an hour-string in format ‘YYYY-MM-DD’</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.get_datetime_from_string">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_datetime_from_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">datetime</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_datetime_from_string" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_datetime_from_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">datetime</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_datetime_from_string" title="Link to this definition">¶</a></dt>
 <dd><p>Returns a datetime object from an hour-string in format ‘YYYY-MM-DDTh:m’</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.get_datetimesec_from_string">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_datetimesec_from_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">datetime</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_datetimesec_from_string" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_datetimesec_from_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">datetime</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_datetimesec_from_string" title="Link to this definition">¶</a></dt>
 <dd><p>Returns a datetime object from an hour-string in format ‘YYYY-MM-DDTh:m:s’</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.get_datetime_from_date_hour">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_datetime_from_date_hour</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hour</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">datetime</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_datetime_from_date_hour" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_datetime_from_date_hour</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hour</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">datetime</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_datetime_from_date_hour" title="Link to this definition">¶</a></dt>
 <dd><p>Returns a datetime object from a date and an hour</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.get_date_hour_from_string">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_date_hour_from_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero_to_twenty_four</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_date_hour_from_string" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_date_hour_from_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero_to_twenty_four</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_date_hour_from_string" title="Link to this definition">¶</a></dt>
 <dd><p>Returns a tuple (date, hour) from an hour-string</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.get_date_string_from_ts">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_date_string_from_ts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_date_string_from_ts" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_date_string_from_ts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_date_string_from_ts" title="Link to this definition">¶</a></dt>
 <dd><p>Returns the string of a given date as ‘YYYY-MM-DD’</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.get_datetime_string_from_ts">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_datetime_string_from_ts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_datetime_string_from_ts" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_datetime_string_from_ts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_datetime_string_from_ts" title="Link to this definition">¶</a></dt>
 <dd><p>Returns the string of a given date as ‘YYYY-MM-DDTh:m’</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.get_datetimesec_string_from_ts">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_datetimesec_string_from_ts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_datetimesec_string_from_ts" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_datetimesec_string_from_ts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_datetimesec_string_from_ts" title="Link to this definition">¶</a></dt>
 <dd><p>Returns the string of a given date as ‘YYYY-MM-DDTh:m:s’</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.get_next_hour_datetime_string">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_next_hour_datetime_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_next_hour_datetime_string" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_next_hour_datetime_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_next_hour_datetime_string" title="Link to this definition">¶</a></dt>
 <dd><p>Returns the hour following the given hour, as a string</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.get_next_hour_datetimesec_string">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_next_hour_datetimesec_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_next_hour_datetimesec_string" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_next_hour_datetimesec_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_next_hour_datetimesec_string" title="Link to this definition">¶</a></dt>
 <dd><p>Returns the hour following the given hour, as a string</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.get_next_hour">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_next_hour</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">datetime</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_next_hour" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_next_hour</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">datetime</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_next_hour" title="Link to this definition">¶</a></dt>
 <dd><p>Returns the hour following the given hour</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.get_previous_hour_datetime_string">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_previous_hour_datetime_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_previous_hour_datetime_string" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_previous_hour_datetime_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_previous_hour_datetime_string" title="Link to this definition">¶</a></dt>
 <dd><p>Returns the hour preceding the given hour, as a string</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.get_previous_hour_datetimesec_string">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_previous_hour_datetimesec_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_previous_hour_datetimesec_string" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_previous_hour_datetimesec_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_previous_hour_datetimesec_string" title="Link to this definition">¶</a></dt>
 <dd><p>Returns the hour preceding the given hour, as a string</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.get_previous_hour">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_previous_hour</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">datetime</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_previous_hour" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_previous_hour</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">datetime</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_previous_hour" title="Link to this definition">¶</a></dt>
 <dd><p>Returns the hour preceding the given hour</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.get_date_string_from_ts_string">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_date_string_from_ts_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_date_string_from_ts_string" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_date_string_from_ts_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_date_string_from_ts_string" title="Link to this definition">¶</a></dt>
 <dd><p>Returns the date in format ‘YYYY-MM-DD’ from a datetime string</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.get_hour_from_ts">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_hour_from_ts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_hour_from_ts" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_hour_from_ts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_hour_from_ts" title="Link to this definition">¶</a></dt>
 <dd><p>Returns the hours (in number) of the given time slot</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.add_time_to_ts">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">add_time_to_ts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weeks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">days</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minutes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seconds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">datetime</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.add_time_to_ts" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">add_time_to_ts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weeks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">days</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minutes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seconds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">datetime</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.add_time_to_ts" title="Link to this definition">¶</a></dt>
 <dd><p>Adds time to a datetime</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.add_time_to_date_string">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">add_time_to_date_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weeks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">days</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minutes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seconds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.add_time_to_date_string" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">add_time_to_date_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weeks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">days</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minutes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seconds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.add_time_to_date_string" title="Link to this definition">¶</a></dt>
 <dd><p>Adds time to a date string</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.add_time_to_datetime_string">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">add_time_to_datetime_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weeks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">days</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minutes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seconds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.add_time_to_datetime_string" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">add_time_to_datetime_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weeks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">days</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minutes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seconds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.add_time_to_datetime_string" title="Link to this definition">¶</a></dt>
 <dd><p>Adds time to a datetime</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.add_time_to_datetimesec_string">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">add_time_to_datetimesec_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weeks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">days</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hours</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minutes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seconds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.add_time_to_datetimesec_string" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">add_time_to_datetimesec_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weeks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">days</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hours</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minutes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seconds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.add_time_to_datetimesec_string" title="Link to this definition">¶</a></dt>
 <dd><p>Adds time to a datetime</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.get_week_from_ts">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_week_from_ts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_week_from_ts" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_week_from_ts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_week_from_ts" title="Link to this definition">¶</a></dt>
 <dd><p>Returns the integer value of the week for the given time slot</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.get_week_from_date_string">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_week_from_date_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_week_from_date_string" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_week_from_date_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_week_from_date_string" title="Link to this definition">¶</a></dt>
 <dd><p>Returns the integer value of the week for the given string</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.get_week_from_datetime_string">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_week_from_datetime_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_week_from_datetime_string" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_week_from_datetime_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_week_from_datetime_string" title="Link to this definition">¶</a></dt>
 <dd><p>Returns the integer value of the week for the given string</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.get_week_from_datetimesec_string">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_week_from_datetimesec_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_week_from_datetimesec_string" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_week_from_datetimesec_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_week_from_datetimesec_string" title="Link to this definition">¶</a></dt>
 <dd><p>Returns the integer value of the week for the given string</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.get_weekday_from_ts">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_weekday_from_ts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_weekday_from_ts" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_weekday_from_ts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_weekday_from_ts" title="Link to this definition">¶</a></dt>
 <dd><p>Returns the number of the weekday from a ts</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.get_weekday_from_date_string">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_weekday_from_date_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_weekday_from_date_string" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_weekday_from_date_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_weekday_from_date_string" title="Link to this definition">¶</a></dt>
 <dd><p>Returns the number of the weekday from a date string in format ‘YYYY-MM-DD’</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.get_weekday_from_datetime_string">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_weekday_from_datetime_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_weekday_from_datetime_string" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_weekday_from_datetime_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_weekday_from_datetime_string" title="Link to this definition">¶</a></dt>
 <dd><p>Returns the number of the weekday from a date string in format ‘YYYY-MM-DDTh:m’</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.get_weekday_from_datetimesec_string">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_weekday_from_datetimesec_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_weekday_from_datetimesec_string" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_weekday_from_datetimesec_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_weekday_from_datetimesec_string" title="Link to this definition">¶</a></dt>
 <dd><p>Returns the number of the weekday from a date string in format ‘YYYY-MM-DDT:h:m:s’</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.get_hour_from_datetime_string">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_hour_from_datetime_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_hour_from_datetime_string" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_hour_from_datetime_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_hour_from_datetime_string" title="Link to this definition">¶</a></dt>
 <dd><p>Returns the integer value of the hour (in number) from ts string in format ‘YYYY-MM-DDTh:m’</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.instance_solution.InstanceSolutionCore.get_hour_from_datetimesec_string">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_hour_from_datetimesec_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_hour_from_datetimesec_string" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_hour_from_datetimesec_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#cornflow_client.core.instance_solution.InstanceSolutionCore.get_hour_from_datetimesec_string" title="Link to this definition">¶</a></dt>
 <dd><p>Returns the integer value of the hour (in number) from ts string in format ‘YYYY-MM-DDTh:m:s’</p>
 </dd></dl>
 
@@ -939,12 +963,12 @@ For example: [{‘index’: 4, ‘value’: 5}, {‘index’: 7, ‘value’: 8}
 <p>Base code for the experiment template.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="cornflow_client.core.experiment.ExperimentCore">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow_client.core.experiment.</span></span><span class="sig-name descname"><span class="pre">ExperimentCore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cornflow_client.core.instance.InstanceCore" title="cornflow_client.core.instance.InstanceCore"><span class="pre">InstanceCore</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">solution</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cornflow_client.core.solution.SolutionCore" title="cornflow_client.core.solution.SolutionCore"><span class="pre">SolutionCore</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cornflow_client.core.experiment.</span></span><span class="sig-name descname"><span class="pre">ExperimentCore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cornflow_client.core.instance.InstanceCore" title="cornflow_client.core.instance.InstanceCore"><span class="pre">InstanceCore</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">solution</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cornflow_client.core.solution.SolutionCore" title="cornflow_client.core.solution.SolutionCore"><span class="pre">SolutionCore</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">CheckCore</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <p>The solver template.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="cornflow_client.core.experiment.ExperimentCore.instance">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">instance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#cornflow_client.core.instance.InstanceCore" title="cornflow_client.core.instance.InstanceCore"><span class="pre">InstanceCore</span></a></em><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.instance" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">instance</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#cornflow_client.core.instance.InstanceCore" title="cornflow_client.core.instance.InstanceCore"><span class="pre">InstanceCore</span></a></span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.instance" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>the instance</p>
@@ -954,7 +978,7 @@ For example: [{‘index’: 4, ‘value’: 5}, {‘index’: 7, ‘value’: 8}
 
 <dl class="py property">
 <dt class="sig sig-object py" id="cornflow_client.core.experiment.ExperimentCore.solution">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">solution</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#cornflow_client.core.solution.SolutionCore" title="cornflow_client.core.solution.SolutionCore"><span class="pre">SolutionCore</span></a></em><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.solution" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">solution</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#cornflow_client.core.solution.SolutionCore" title="cornflow_client.core.solution.SolutionCore"><span class="pre">SolutionCore</span></a></span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.solution" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>the solution</p>
@@ -964,7 +988,7 @@ For example: [{‘index’: 4, ‘value’: 5}, {‘index’: 7, ‘value’: 8}
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.experiment.ExperimentCore.solve">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.solve" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.solve" title="Link to this definition">¶</a></dt>
 <dd><p>Mandatory method</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -979,7 +1003,7 @@ For example: [{‘index’: 4, ‘value’: 5}, {‘index’: 7, ‘value’: 8}
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.experiment.ExperimentCore.get_objective">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_objective</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.get_objective" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_objective</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.get_objective" title="Link to this definition">¶</a></dt>
 <dd><p>Mandatory method</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -1026,7 +1050,7 @@ type.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="cornflow_client.core.experiment.ExperimentCore.schema_checks">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">schema_checks</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.schema_checks" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">abstract</span></span><span class="w"> </span><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">schema_checks</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.schema_checks" title="Link to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>A dictionary representation of the json-schema for the dictionary returned by</dt><dd><p>the method ExperimentCore.check_solution()</p>
 </dd>
@@ -1035,7 +1059,7 @@ type.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.experiment.ExperimentCore.get_solver_config">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_solver_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lib</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pyomo'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_solver</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cbc'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_unknown</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.get_solver_config" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_solver_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lib</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pyomo'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_solver</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cbc'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_unknown</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.get_solver_config" title="Link to this definition">¶</a></dt>
 <dd><p>Format the configuration used to solve the problem.
 Solver configuration can either be directly in config using cornflow mapping name</p>
 <blockquote>
@@ -1210,27 +1234,69 @@ but will not be translated.</p></li>
 </div>
 <p id="module-cornflow_client.constants">Constants values used in schemas functions.</p>
 <dl class="py exception">
-<dt class="sig sig-object py" id="cornflow_client.constants.AirflowError">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow_client.constants.</span></span><span class="sig-name descname"><span class="pre">AirflowError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status_code</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_txt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.AirflowError" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.constants.OrchError">
+<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cornflow_client.constants.</span></span><span class="sig-name descname"><span class="pre">OrchError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status_code</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_txt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.OrchError" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="cornflow_client.constants.AirflowError.status_code">
-<span class="sig-name descname"><span class="pre">status_code</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">400</span></em><a class="headerlink" href="#cornflow_client.constants.AirflowError.status_code" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.constants.OrchError.status_code">
+<span class="sig-name descname"><span class="pre">status_code</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">400</span></span><a class="headerlink" href="#cornflow_client.constants.OrchError.status_code" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.constants.OrchError.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.OrchError.to_dict" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.constants.OrchError.add_note">
+<span class="sig-name descname"><span class="pre">add_note</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.OrchError.add_note" title="Link to this definition">¶</a></dt>
+<dd><p>Exception.add_note(note) –
+add a note to the exception</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow_client.constants.OrchError.args">
+<span class="sig-name descname"><span class="pre">args</span></span><a class="headerlink" href="#cornflow_client.constants.OrchError.args" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.constants.OrchError.with_traceback">
+<span class="sig-name descname"><span class="pre">with_traceback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.OrchError.with_traceback" title="Link to this definition">¶</a></dt>
+<dd><p>Exception.with_traceback(tb) –
+set self.__traceback__ to tb and return self.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="cornflow_client.constants.AirflowError">
+<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cornflow_client.constants.</span></span><span class="sig-name descname"><span class="pre">AirflowError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status_code</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_txt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.AirflowError" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cornflow_client.constants.OrchError" title="cornflow_client.constants.OrchError"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrchError</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow_client.constants.AirflowError.log_txt">
+<span class="sig-name descname"><span class="pre">log_txt</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Airflow</span> <span class="pre">error'</span></span><a class="headerlink" href="#cornflow_client.constants.AirflowError.log_txt" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.constants.AirflowError.add_note">
+<span class="sig-name descname"><span class="pre">add_note</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.AirflowError.add_note" title="Link to this definition">¶</a></dt>
+<dd><p>Exception.add_note(note) –
+add a note to the exception</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow_client.constants.AirflowError.args">
+<span class="sig-name descname"><span class="pre">args</span></span><a class="headerlink" href="#cornflow_client.constants.AirflowError.args" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="cornflow_client.constants.AirflowError.log_txt">
-<span class="sig-name descname"><span class="pre">log_txt</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Airflow</span> <span class="pre">error'</span></em><a class="headerlink" href="#cornflow_client.constants.AirflowError.log_txt" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cornflow_client.constants.AirflowError.status_code">
+<span class="sig-name descname"><span class="pre">status_code</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">400</span></span><a class="headerlink" href="#cornflow_client.constants.AirflowError.status_code" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.constants.AirflowError.to_dict">
 <span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.AirflowError.to_dict" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="cornflow_client.constants.AirflowError.args">
-<span class="sig-name descname"><span class="pre">args</span></span><a class="headerlink" href="#cornflow_client.constants.AirflowError.args" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1243,9 +1309,56 @@ set self.__traceback__ to tb and return self.</p>
 </dd></dl>
 
 <dl class="py exception">
+<dt class="sig sig-object py" id="cornflow_client.constants.DatabricksError">
+<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cornflow_client.constants.</span></span><span class="sig-name descname"><span class="pre">DatabricksError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status_code</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_txt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.DatabricksError" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cornflow_client.constants.OrchError" title="cornflow_client.constants.OrchError"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrchError</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow_client.constants.DatabricksError.log_txt">
+<span class="sig-name descname"><span class="pre">log_txt</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Databricks</span> <span class="pre">error'</span></span><a class="headerlink" href="#cornflow_client.constants.DatabricksError.log_txt" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.constants.DatabricksError.add_note">
+<span class="sig-name descname"><span class="pre">add_note</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.DatabricksError.add_note" title="Link to this definition">¶</a></dt>
+<dd><p>Exception.add_note(note) –
+add a note to the exception</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow_client.constants.DatabricksError.args">
+<span class="sig-name descname"><span class="pre">args</span></span><a class="headerlink" href="#cornflow_client.constants.DatabricksError.args" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow_client.constants.DatabricksError.status_code">
+<span class="sig-name descname"><span class="pre">status_code</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">400</span></span><a class="headerlink" href="#cornflow_client.constants.DatabricksError.status_code" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.constants.DatabricksError.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.DatabricksError.to_dict" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.constants.DatabricksError.with_traceback">
+<span class="sig-name descname"><span class="pre">with_traceback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.DatabricksError.with_traceback" title="Link to this definition">¶</a></dt>
+<dd><p>Exception.with_traceback(tb) –
+set self.__traceback__ to tb and return self.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py exception">
 <dt class="sig sig-object py" id="cornflow_client.constants.NoSolverException">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow_client.constants.</span></span><span class="sig-name descname"><span class="pre">NoSolverException</span></span><a class="headerlink" href="#cornflow_client.constants.NoSolverException" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cornflow_client.constants.</span></span><span class="sig-name descname"><span class="pre">NoSolverException</span></span><a class="headerlink" href="#cornflow_client.constants.NoSolverException" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.constants.NoSolverException.add_note">
+<span class="sig-name descname"><span class="pre">add_note</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.NoSolverException.add_note" title="Link to this definition">¶</a></dt>
+<dd><p>Exception.add_note(note) –
+add a note to the exception</p>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="cornflow_client.constants.NoSolverException.args">
 <span class="sig-name descname"><span class="pre">args</span></span><a class="headerlink" href="#cornflow_client.constants.NoSolverException.args" title="Link to this definition">¶</a></dt>
@@ -1262,8 +1375,15 @@ set self.__traceback__ to tb and return self.</p>
 
 <dl class="py exception">
 <dt class="sig sig-object py" id="cornflow_client.constants.BadConfiguration">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow_client.constants.</span></span><span class="sig-name descname"><span class="pre">BadConfiguration</span></span><a class="headerlink" href="#cornflow_client.constants.BadConfiguration" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cornflow_client.constants.</span></span><span class="sig-name descname"><span class="pre">BadConfiguration</span></span><a class="headerlink" href="#cornflow_client.constants.BadConfiguration" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.constants.BadConfiguration.add_note">
+<span class="sig-name descname"><span class="pre">add_note</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.BadConfiguration.add_note" title="Link to this definition">¶</a></dt>
+<dd><p>Exception.add_note(note) –
+add a note to the exception</p>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="cornflow_client.constants.BadConfiguration.args">
 <span class="sig-name descname"><span class="pre">args</span></span><a class="headerlink" href="#cornflow_client.constants.BadConfiguration.args" title="Link to this definition">¶</a></dt>
@@ -1280,8 +1400,15 @@ set self.__traceback__ to tb and return self.</p>
 
 <dl class="py exception">
 <dt class="sig sig-object py" id="cornflow_client.constants.BadInstance">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow_client.constants.</span></span><span class="sig-name descname"><span class="pre">BadInstance</span></span><a class="headerlink" href="#cornflow_client.constants.BadInstance" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cornflow_client.constants.</span></span><span class="sig-name descname"><span class="pre">BadInstance</span></span><a class="headerlink" href="#cornflow_client.constants.BadInstance" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.constants.BadInstance.add_note">
+<span class="sig-name descname"><span class="pre">add_note</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.BadInstance.add_note" title="Link to this definition">¶</a></dt>
+<dd><p>Exception.add_note(note) –
+add a note to the exception</p>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="cornflow_client.constants.BadInstance.args">
 <span class="sig-name descname"><span class="pre">args</span></span><a class="headerlink" href="#cornflow_client.constants.BadInstance.args" title="Link to this definition">¶</a></dt>
@@ -1298,8 +1425,15 @@ set self.__traceback__ to tb and return self.</p>
 
 <dl class="py exception">
 <dt class="sig sig-object py" id="cornflow_client.constants.BadSolution">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow_client.constants.</span></span><span class="sig-name descname"><span class="pre">BadSolution</span></span><a class="headerlink" href="#cornflow_client.constants.BadSolution" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cornflow_client.constants.</span></span><span class="sig-name descname"><span class="pre">BadSolution</span></span><a class="headerlink" href="#cornflow_client.constants.BadSolution" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.constants.BadSolution.add_note">
+<span class="sig-name descname"><span class="pre">add_note</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.BadSolution.add_note" title="Link to this definition">¶</a></dt>
+<dd><p>Exception.add_note(note) –
+add a note to the exception</p>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="cornflow_client.constants.BadSolution.args">
 <span class="sig-name descname"><span class="pre">args</span></span><a class="headerlink" href="#cornflow_client.constants.BadSolution.args" title="Link to this definition">¶</a></dt>
@@ -1316,8 +1450,15 @@ set self.__traceback__ to tb and return self.</p>
 
 <dl class="py exception">
 <dt class="sig sig-object py" id="cornflow_client.constants.BadInstanceChecks">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow_client.constants.</span></span><span class="sig-name descname"><span class="pre">BadInstanceChecks</span></span><a class="headerlink" href="#cornflow_client.constants.BadInstanceChecks" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cornflow_client.constants.</span></span><span class="sig-name descname"><span class="pre">BadInstanceChecks</span></span><a class="headerlink" href="#cornflow_client.constants.BadInstanceChecks" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.constants.BadInstanceChecks.add_note">
+<span class="sig-name descname"><span class="pre">add_note</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.BadInstanceChecks.add_note" title="Link to this definition">¶</a></dt>
+<dd><p>Exception.add_note(note) –
+add a note to the exception</p>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="cornflow_client.constants.BadInstanceChecks.args">
 <span class="sig-name descname"><span class="pre">args</span></span><a class="headerlink" href="#cornflow_client.constants.BadInstanceChecks.args" title="Link to this definition">¶</a></dt>
@@ -1334,8 +1475,15 @@ set self.__traceback__ to tb and return self.</p>
 
 <dl class="py exception">
 <dt class="sig sig-object py" id="cornflow_client.constants.BadSolutionChecks">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow_client.constants.</span></span><span class="sig-name descname"><span class="pre">BadSolutionChecks</span></span><a class="headerlink" href="#cornflow_client.constants.BadSolutionChecks" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cornflow_client.constants.</span></span><span class="sig-name descname"><span class="pre">BadSolutionChecks</span></span><a class="headerlink" href="#cornflow_client.constants.BadSolutionChecks" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.constants.BadSolutionChecks.add_note">
+<span class="sig-name descname"><span class="pre">add_note</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.BadSolutionChecks.add_note" title="Link to this definition">¶</a></dt>
+<dd><p>Exception.add_note(note) –
+add a note to the exception</p>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="cornflow_client.constants.BadSolutionChecks.args">
 <span class="sig-name descname"><span class="pre">args</span></span><a class="headerlink" href="#cornflow_client.constants.BadSolutionChecks.args" title="Link to this definition">¶</a></dt>
@@ -1498,7 +1646,7 @@ This must be a applied to a dict in order to transform it into json.</p>
 <p>Class to help create and manage data schema and to validate json files.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="cornflow_client.schema.manager.SchemaManager">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow_client.schema.manager.</span></span><span class="sig-name descname"><span class="pre">SchemaManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validator=&lt;class</span> <span class="pre">'jsonschema.validators.Draft7Validator'&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cornflow_client.schema.manager.</span></span><span class="sig-name descname"><span class="pre">SchemaManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;class</span> <span class="pre">'jsonschema.validators.Draft7Validator'&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A schema manager between json-schema, dict-schema and marshmallow</p>
 <p>Class to help create and manage data schema.
@@ -1510,7 +1658,7 @@ Once a schema is loaded, allow the validation of data.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.schema.manager.SchemaManager.from_filepath">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_filepath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.from_filepath" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_filepath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.from_filepath" title="Link to this definition">¶</a></dt>
 <dd><p>Load a json schema from a json file.</p>
 <p>:param path the file path</p>
 <p>return The SchemaManager instance</p>
@@ -1671,7 +1819,7 @@ table3: {config1: a, config2: b},
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.schema.manager.SchemaManager.load_json">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.load_json" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">load_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.load_json" title="Link to this definition">¶</a></dt>
 <dd><p>Load a json file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1697,7 +1845,7 @@ table3: {config1: a, config2: b},
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.schema.manager.SchemaManager.load_schema">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_schema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.load_schema" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">load_schema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.manager.SchemaManager.load_schema" title="Link to this definition">¶</a></dt>
 <dd><p>Load a json schema from a json file.</p>
 <p>:param path the file path</p>
 <p>return The SchemaManager instance</p>
@@ -1735,7 +1883,7 @@ table3: {config1: a, config2: b},
 <span id="dictionary-schema"></span><h3>Dictionary schema<a class="headerlink" href="#module-cornflow_client.schema.dictSchema" title="Link to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="cornflow_client.schema.dictSchema.DictSchema">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow_client.schema.dictSchema.</span></span><span class="sig-name descname"><span class="pre">DictSchema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jsonschema</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.dictSchema.DictSchema" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cornflow_client.schema.dictSchema.</span></span><span class="sig-name descname"><span class="pre">DictSchema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jsonschema</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.dictSchema.DictSchema" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A json-schema to dict-schema parser</p>
 <p>Class to manage internal dictionary schema</p>
@@ -1746,7 +1894,7 @@ table3: {config1: a, config2: b},
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.schema.dictSchema.DictSchema.get_empty_schema">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_empty_schema</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.dictSchema.DictSchema.get_empty_schema" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_empty_schema</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.schema.dictSchema.DictSchema.get_empty_schema" title="Link to this definition">¶</a></dt>
 <dd><p>Create un empty schema dict</p>
 </dd></dl>
 
@@ -1796,9 +1944,9 @@ table3: {config1: a, config2: b},
     </div>
   </div>
 </footer>
-      <script src="../_static/documentation_options.js?v=010db75e"></script>
-      <script src="../_static/doctools.js?v=9a2dae69"></script>
-      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/documentation_options.js?v=1f29e9d3"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/design-tabs.js?v=f930bc37"></script>
-      <script src="../_static/shibuya.js?v=9b0e4dde"></script></body>
+      <script src="../_static/shibuya.js?v=cac61aee"></script></body>
 </html>

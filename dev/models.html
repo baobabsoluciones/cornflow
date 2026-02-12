@@ -2,11 +2,11 @@
 <html lang="en" data-accent-color="violet" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Models - cornflow 1.2.6 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Auxiliar models" href="auxiliar_models.html" /><link rel="prev" title="Code documentation" href="index.html" /><script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Models - cornflow 1.3.0 documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Auxiliar models" href="auxiliar_models.html" /><link rel="prev" title="Code documentation" href="index.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=ad592e98" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=d140fbf8" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=44020203" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,7 +19,7 @@
 }
 </style>
     <meta property="og:type" content="website"/><meta property="og:title" content="Models"/>
-<meta name="twitter:card" content="summary"/>
+    <meta name="twitter:card" content="summary"/>
   </head>
 <body><div class="sy-head">
   <div class="sy-head-blur"></div>
@@ -201,15 +201,15 @@ data-aria-dark="Switch to auto color mode">
     </div>
   </div>
 </div><div class="flex flex-col break-words justify-between">
-      <div class="min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
-        <article class="yue" role="main">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <article class="yue" role="main">
           <section id="models">
 <h1>Models<a class="headerlink" href="#models" title="Link to this heading">¶</a></h1>
 <section id="instance-model">
 <h2>Instance model<a class="headerlink" href="#instance-model" title="Link to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="cornflow.models.InstanceModel">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow.models.</span></span><span class="sig-name descname"><span class="pre">InstanceModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.InstanceModel" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cornflow.models.</span></span><span class="sig-name descname"><span class="pre">InstanceModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.InstanceModel" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="meta_models.html#cornflow.models.base_data_model.BaseDataModel" title="cornflow.models.base_data_model.BaseDataModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseDataModel</span></code></a></p>
 <p>Model class for the Instances
 It inherits from <a class="reference internal" href="meta_models.html#cornflow.models.base_data_model.BaseDataModel" title="cornflow.models.base_data_model.BaseDataModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseDataModel</span></code></a> to have the trace fields and user field</p>
@@ -264,7 +264,7 @@ information to create a new instance</p>
 <h2>Execution model<a class="headerlink" href="#execution-model" title="Link to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="cornflow.models.ExecutionModel">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow.models.</span></span><span class="sig-name descname"><span class="pre">ExecutionModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.ExecutionModel" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cornflow.models.</span></span><span class="sig-name descname"><span class="pre">ExecutionModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.ExecutionModel" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="meta_models.html#cornflow.models.base_data_model.BaseDataModel" title="cornflow.models.base_data_model.BaseDataModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseDataModel</span></code></a></p>
 <p>Model class for the Executions.
 It inherits from <a class="reference internal" href="meta_models.html#cornflow.models.base_data_model.BaseDataModel" title="cornflow.models.base_data_model.BaseDataModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseDataModel</span></code></a> to have the trace fields and user field.</p>
@@ -277,6 +277,7 @@ parent instance.</p></li>
 <li><p><strong>name</strong>: str, the name of the execution given by the user.</p></li>
 <li><p><strong>description</strong>: str, the description of the execution given by the user. It is optional.</p></li>
 <li><p><strong>config</strong>: dict (JSON), the configuration to be used in the execution (<code class="xref py py-class docutils literal notranslate"><span class="pre">ConfigSchema</span></code>).</p></li>
+<li><p><strong>run_id</strong>: str, the run id of the execution.</p></li>
 <li><p><strong>data</strong>: dict (JSON), the results from the execution (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataSchema</span></code>).</p></li>
 <li><p><strong>log_text</strong>: text, the log generated by the airflow webserver during execution. This log is stored as text.</p></li>
 <li><p><strong>log_json</strong>: dict (JSON), the log generated by the airflow webserver during execution.
@@ -375,7 +376,7 @@ for example, any mapped columns or relationships.</p>
 <h2>Case model<a class="headerlink" href="#case-model" title="Link to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="cornflow.models.CaseModel">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow.models.</span></span><span class="sig-name descname"><span class="pre">CaseModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.CaseModel" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cornflow.models.</span></span><span class="sig-name descname"><span class="pre">CaseModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.CaseModel" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="meta_models.html#cornflow.models.base_data_model.BaseDataModel" title="cornflow.models.base_data_model.BaseDataModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseDataModel</span></code></a></p>
 <p>Model class for the Cases. 
 It inherits from <a class="reference internal" href="meta_models.html#cornflow.models.base_data_model.BaseDataModel" title="cornflow.models.base_data_model.BaseDataModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseDataModel</span></code></a> to have the trace fields and user field.</p>
@@ -406,7 +407,7 @@ attributes of the instance’s class are allowed. These could be,
 for example, any mapped columns or relationships.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow.models.CaseModel.from_parent_id">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_parent_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.CaseModel.from_parent_id" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_parent_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.CaseModel.from_parent_id" title="Link to this definition">¶</a></dt>
 <dd><p>Class method to create a new case from an already existing case.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -454,7 +455,7 @@ for example, any mapped columns or relationships.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow.models.CaseModel.apply_patch">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">apply_patch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_patch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.CaseModel.apply_patch" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">apply_patch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_patch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.CaseModel.apply_patch" title="Link to this definition">¶</a></dt>
 <dd><p>Helper method to apply the patch and calculate the new hash</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -490,7 +491,7 @@ for example, any mapped columns or relationships.</p>
 <h2>User model<a class="headerlink" href="#user-model" title="Link to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="cornflow.models.UserModel">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cornflow.models.</span></span><span class="sig-name descname"><span class="pre">UserModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.UserModel" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cornflow.models.</span></span><span class="sig-name descname"><span class="pre">UserModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.UserModel" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="meta_models.html#cornflow.models.meta_models.TraceAttributesModel" title="cornflow.models.meta_models.TraceAttributesModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceAttributesModel</span></code></a></p>
 <p>Model class for the Users.
 It inherits from <code class="xref py py-class docutils literal notranslate"><span class="pre">TraceAttributes</span></code> to have trace fields.</p>
@@ -559,7 +560,7 @@ for example, any mapped columns or relationships.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow.models.UserModel.get_all_users">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_all_users</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.UserModel.get_all_users" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_all_users</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.UserModel.get_all_users" title="Link to this definition">¶</a></dt>
 <dd><p>Query to get all users</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -573,7 +574,7 @@ for example, any mapped columns or relationships.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow.models.UserModel.get_one_user">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_one_user</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.UserModel.get_one_user" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_one_user</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.UserModel.get_one_user" title="Link to this definition">¶</a></dt>
 <dd><p>Query to get the information of one user</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -590,7 +591,7 @@ for example, any mapped columns or relationships.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow.models.UserModel.get_one_user_by_email">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_one_user_by_email</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">email</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.UserModel.get_one_user_by_email" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_one_user_by_email</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">email</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.UserModel.get_one_user_by_email" title="Link to this definition">¶</a></dt>
 <dd><p>Query to get one user from the email</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -607,7 +608,7 @@ for example, any mapped columns or relationships.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow.models.UserModel.get_one_user_by_username">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_one_user_by_username</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.UserModel.get_one_user_by_username" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_one_user_by_username</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.models.UserModel.get_one_user_by_username" title="Link to this definition">¶</a></dt>
 <dd><p>Returns one user (object) given a username</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -638,7 +639,7 @@ for example, any mapped columns or relationships.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow.models.UserModel.generate_random_password">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">generate_random_password</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#cornflow.models.UserModel.generate_random_password" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">generate_random_password</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#cornflow.models.UserModel.generate_random_password" title="Link to this definition">¶</a></dt>
 <dd><p>Method to generate a new random password for the user</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -707,9 +708,9 @@ for example, any mapped columns or relationships.</p>
     </div>
   </div>
 </footer>
-      <script src="../_static/documentation_options.js?v=010db75e"></script>
-      <script src="../_static/doctools.js?v=9a2dae69"></script>
-      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/documentation_options.js?v=1f29e9d3"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/design-tabs.js?v=f930bc37"></script>
-      <script src="../_static/shibuya.js?v=9b0e4dde"></script></body>
+      <script src="../_static/shibuya.js?v=cac61aee"></script></body>
 </html>
