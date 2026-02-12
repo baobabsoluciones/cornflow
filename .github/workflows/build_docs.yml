@@ -20,7 +20,7 @@ jobs:
     - uses: actions/setup-python@v2
       with:
         # Semantic version range syntax or exact version of a Python version
-        python-version: '3.9'
+        python-version: '3.12'
         architecture: 'x64'
     # Standard drop-in approach that should work for most people.
     - name: Install dependencies

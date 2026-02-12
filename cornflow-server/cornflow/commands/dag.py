@@ -10,7 +10,7 @@ def register_deployed_dags_command(
 
     # Internal modules imports
     from cornflow_client.airflow.api import Airflow
-    from cornflow.models import DeployedDAG
+    from cornflow.models import DeployedWorkflow
     from cornflow.shared import db
     from cornflow.shared.const import AIRFLOW_NOT_REACHABLE_MSG
 
@@ -28,7 +28,7 @@ def register_deployed_dags_command(
             current_app.logger.info(f"{AIRFLOW_NOT_REACHABLE_MSG}")
         return False
 
-    dags_registered = [dag.id for dag in DeployedDAG.get_all_objects()]
+    dags_registered = [dag.id for dag in DeployedWorkflow.get_all_objects()]
 
     response = af_client.get_model_dags()
     dag_list = response.json()["dags"]
@@ -40,7 +40,7 @@ def register_deployed_dags_command(
     }
 
     processed_dags = [
-        DeployedDAG(
+        DeployedWorkflow(
             {
                 "id": dag["dag_id"],
                 "description": dag["description"],
@@ -76,15 +76,15 @@ def register_deployed_dags_command(
 
 
 def register_deployed_dags_command_test(dags: list = None, verbose: bool = False):
-    from cornflow.models import DeployedDAG
+    from cornflow.models import DeployedWorkflow
     from flask import current_app
     from cornflow_client import get_pulp_jsonschema, get_empty_schema
 
     if dags is None:
-        dags = ["solve_model_dag", "gc", "timer"]
+        dags = ["solve_model_dag", "gc", "timer", "979073949072767"]
 
     deployed_dag = [
-        DeployedDAG(
+        DeployedWorkflow(
             {
                 "id": "solve_model_dag",
                 "description": None,
@@ -96,7 +96,7 @@ def register_deployed_dags_command_test(dags: list = None, verbose: bool = False
             }
         )
     ] + [
-        DeployedDAG(
+        DeployedWorkflow(
             {
                 "id": dag,
                 "description": None,

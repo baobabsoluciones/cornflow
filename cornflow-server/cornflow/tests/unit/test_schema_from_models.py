@@ -81,7 +81,7 @@
 #         }
 #         required_instance = {"id", "name", "data_hash"}
 #         foreign_keys = [
-#             ("permission_dag", "dag_id", "deployed_dags.id"),
+#             ("permission_dag", "dag_id", "deployed_workflows.id"),
 #             ("permission_dag", "user_id", "users.id"),
 #             ("permission_view", "action_id", "actions.id"),
 #             ("permission_view", "api_view_id", "api_view.id"),
