@@ -131,7 +131,7 @@ services:
     ports:
       - 8080:8080
     healthcheck:
-      test: ["CMD-SHELL", "[ -f /usr/local/airflow/airflow-webserver.pid ]"]
+      test: ["CMD-SHELL", "[ -f /usr/local/airflow/airflow-webserver.pid ]"]    
       interval: 30s
       timeout: 30s
       retries: 5
@@ -165,6 +165,7 @@ services:
     profiles:
       - flower
     ports:
+      - "5555:5555"
       - "5555:5555"
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:5555/"]
