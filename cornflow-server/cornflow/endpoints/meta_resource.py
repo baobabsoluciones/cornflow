@@ -4,13 +4,17 @@ This file has all the logic shared for all the resources
 
 # Import from external libraries
 from flask_restful import Resource
-from flask import g, request
+from flask import g, request, current_app
 from flask_apispec.views import MethodResource
 from functools import wraps
 from pytups import SuperDict
 
 # Import from internal modules
-from cornflow.shared.const import ALL_DEFAULT_ROLES
+from cornflow.shared.const import (
+    ALL_DEFAULT_ROLES,
+    USER_ACCESS_ALL_OBJECTS_NO,
+    USER_ACCESS_ALL_OBJECTS_YES,
+)
 from cornflow.shared.exceptions import InvalidUsage, ObjectDoesNotExist, NoPermission
 
 
@@ -69,8 +73,25 @@ class BaseMetaResource(Resource, MethodResource):
                 owner = self.foreign_data[fk].query.get(getattr(item, fk))
                 if owner is None:
                     raise ObjectDoesNotExist()
-                if self.user.id != owner.user_id:
-                    raise NoPermission()
+                # If we have the USER_ACCESS_ALL_OBJECTS_NO value, 
+                # we need to check if the user is the owner of the object. 
+                # If we have the USER_ACCESS_ALL_OBJECTS_YES value, 
+                # we do not need to check if the user is the owner of the object.
+                # If we have any other value, we raise an exception.
+                if (
+                    int(current_app.config["USER_ACCESS_ALL_OBJECTS"])
+                    == USER_ACCESS_ALL_OBJECTS_NO
+                ):
+                    if self.user.id != owner.user_id:
+                        raise NoPermission()
+                elif (
+                    int(current_app.config["USER_ACCESS_ALL_OBJECTS"])
+                    != USER_ACCESS_ALL_OBJECTS_YES
+                    and int(current_app.config["USER_ACCESS_ALL_OBJECTS"])
+                    != USER_ACCESS_ALL_OBJECTS_NO
+                ):
+                    raise InvalidUsage("Invalid USER_ACCESS_ALL_OBJECTS value")
+
         item.save()
         return item, 201
 
