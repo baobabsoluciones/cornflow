@@ -1,0 +1,114 @@
+# Airflow image compatible with the official Apache Airflow Helm chart.
+# - Keeps the upstream `/entrypoint` (required by the chart).
+# - Adds Cornflow-specific solvers, plugins and optional LDAP webserver config.
+#
+# Build example:
+#   docker build -f airflow_config/Dockerfile.helm -t my-registry/airflow-k8s:2.10.5-cornflow .
+#
+# Notes:
+# - This Dockerfile performs network downloads during build (git clones, wget).
+# - Including Gurobi binaries may have licensing implications; control via SOLVER_LIST.
+
+ARG AIRFLOW_VERSION="2.10.5"
+# Prefer the official image so `/entrypoint` exists.
+# If your registry only mirrors `apache/airflow:2.10.5`, switch the tag accordingly.
+FROM apache/airflow:${AIRFLOW_VERSION}-python3.12
+
+USER root
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Directory where solver installers place artifacts
+ENV SOLVER_DIR=/usr/local/solvers
+
+# System dependencies pulled from the previous custom image lineage (pysolver base),
+# plus what the solver installers need (git/cmake/build tooling/wget).
+RUN set -eux; \
+    # The upstream apache/airflow image may ship extra apt repos (e.g. MariaDB).
+    # When those mirrors are mid-sync, `apt-get update` can fail the build.
+    # We don't need MariaDB packages here, so disable that repo for reproducibility.
+    rm -f /etc/apt/sources.list.d/*mariadb* || true; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends \
+      apt-utils \
+      ca-certificates \
+      curl \
+      default-jre \
+      default-jdk \
+      gcc \
+      g++ \
+      git \
+      krb5-user \
+      ldap-utils \
+      libffi-dev \
+      libldap2-dev \
+      libsasl2-2 \
+      libsasl2-dev \
+      libsasl2-modules \
+      libpq-dev \
+      libssl-dev \
+      make \
+      pkg-config \
+      python3-dev \
+      rsync \
+      ssh \
+      unixodbc \
+      unzip \
+      wget \
+      freetds-bin \
+      protobuf-compiler \
+      libprotobuf-dev \
+      sqlite3 \
+      coinor-cbc \
+      glpk-utils \
+    ;
+
+# The solver installation scripts assume a "cornflow" user exists (they chown to it).
+# We keep the runtime user as "airflow" for compatibility with the Helm chart.
+RUN set -eux; \
+    if ! id -u cornflow >/dev/null 2>&1; then useradd -ms /bin/bash -d /home/cornflow cornflow; fi; \
+    mkdir -p "${SOLVER_DIR}"; \
+    chown -R cornflow: "${SOLVER_DIR}"
+
+# Python deps used by solver installers (GitPython for git.Repo, python-ldap for LDAP integrations).
+# We intentionally do NOT install apache-airflow here; it's already provided by the base image.
+RUN set -eux; \
+    python -m pip install --no-cache-dir \
+      GitPython \
+      cmake \
+      python-ldap
+
+# Copy Cornflow Airflow customization assets into AIRFLOW_HOME (defaults to /opt/airflow on official images).
+# NOTE: this Dockerfile is meant to be built with build-context = `airflow_config/`.
+RUN set -eux; \
+    mkdir -p /opt/airflow/config
+COPY scripts /opt/airflow/scripts
+COPY plugins /opt/airflow/plugins
+COPY webserver_ldap.py /opt/airflow/webserver_ldap.py
+COPY airflow_local_settings.py /opt/airflow/config/airflow_local_settings.py
+
+# Install solvers at build-time.
+# Control which solvers are installed via build-arg or env.
+ARG SOLVER_LIST="HiGHS,CBC,glpk,CHOCO,gurobi"
+ENV SOLVER_LIST=${SOLVER_LIST}
+RUN set -eux; \
+    # solver_installation.py reads SOLVER_LIST and SOLVER_DIR
+    SOLVER_DIR="${SOLVER_DIR}" python /opt/airflow/scripts/solver_installation.py; \
+    # cleanup build residues from git clones (they land in the image root by default)
+    rm -rf /HiGHS /MIPCL /opt/airflow/HiGHS /opt/airflow/MIPCL 2>/dev/null || true; \
+    # cleanup apt lists after any build-time apt usage
+    rm -rf /var/lib/apt/lists/*
+
+# Optional runtime environment for Gurobi (if installed)
+ENV GUROBI_HOME=${SOLVER_DIR}/gurobi/linux64
+ENV PATH=${PATH}:${GUROBI_HOME}/bin
+ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${GUROBI_HOME}/lib
+ENV GRB_LICENSE_FILE=${GUROBI_HOME}/gurobi.lic
+
+# Ensure airflow user can read customization files.
+RUN set -eux; \
+    chown -R airflow: /opt/airflow/scripts /opt/airflow/plugins /opt/airflow/webserver_ldap.py /opt/airflow/config/airflow_local_settings.py || true
+
+# Do NOT override ENTRYPOINT/CMD. The Helm chart expects `/entrypoint`.
+USER airflow
+

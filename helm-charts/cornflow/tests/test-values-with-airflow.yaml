@@ -1,0 +1,161 @@
+# Values for testing the Cornflow chart WITH Airflow
+# This file includes Airflow for a more complete test
+
+# Enable Airflow for complete testing
+airflow:
+  enabled: true
+  executor: KubernetesExecutor
+  images:
+    airflow:
+      repository: apache/airflow
+      tag: "2.10.5"
+      pullPolicy: IfNotPresent
+  
+  # Minimal Airflow configuration
+  webserver:
+    resources:
+      limits:
+        cpu: 500m
+        memory: 1Gi
+      requests:
+        cpu: 250m
+        memory: 512Mi
+    service:
+      type: ClusterIP
+  
+  scheduler:
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 250m
+        memory: 256Mi
+    serviceAccount:
+      create: true
+      name: "airflow-scheduler"
+    # Simplified init containers configuration
+    extraInitContainers:
+      - name: cornflow-dags-init
+        image: alpine/git
+        imagePullPolicy: IfNotPresent
+        command:
+          - /bin/sh
+          - -c
+          - |
+            echo "Test: Simulating DAG copy..."
+            mkdir -p /opt/airflow/dags
+            echo "# Test DAG" > /opt/airflow/dags/test_dag.py
+        volumeMounts:
+          - name: dags
+            mountPath: /opt/airflow/dags
+  
+  triggerer:
+    resources:
+      limits:
+        cpu: 250m
+        memory: 256Mi
+      requests:
+        cpu: 125m
+        memory: 128Mi
+  
+  redis:
+    enabled: false
+  
+  workers:
+    replicas: 1
+  
+  pgbouncer:
+    enabled: true
+  
+  logs:
+    persistence:
+      enabled: true
+      
+  dags:
+    persistence:
+      enabled: true
+      size: 1Gi
+      
+  extraVolumes:
+    - name: dags
+      persistentVolumeClaim:
+        claimName: test-release-airflow-dags
+  
+  extraVolumeMounts:
+    - name: dags
+      mountPath: /opt/airflow/dags
+
+  env:
+    - name: AIRFLOW__API__AUTH_BACKEND
+      value: "airflow.api.auth.backend.basic_auth"
+    - name: PYTHONPATH
+      value: "/opt/airflow/dags/deps"
+    - name: AIRFLOW_CONN_CF_URI
+      value: "http://service_user:Service_user1234@test-release-cornflow-server:5000/"
+
+# Minimal Cornflow configuration
+cornflow:
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+  env:
+    # Basic database configuration
+    DEFAULT_POSTGRES: "1"
+    CORNFLOW_DB_PORT: "5432"
+    CORNFLOW_DB_USER: "cornflow"
+    CORNFLOW_DB_PASSWORD: "cornflow"
+    CORNFLOW_DB: "cornflow"
+    
+    # Basic application configuration
+    APPLICATION_ROOT: "/"
+    EXTERNAL_APP: "0"
+    SERVICE_NAME: "Cornflow"
+    SECRET_KEY: "test-secret-key-for-testing-only"
+    SECRET_BI_KEY: "test-bi-secret-key-for-testing-only"
+    AUTH_TYPE: "1"
+    DEFAULT_ROLE: "2"
+    CORS_ORIGINS: "*"
+    LOG_LEVEL: "20"
+    SIGNUP_ACTIVATED: "1"
+    SERVICE_USER_ALLOW_PASSWORD_LOGIN: "1"
+    OPEN_DEPLOYMENT: "1"
+    USER_ACCESS_ALL_OBJECTS: "0"
+    TOKEN_DURATION: "24"
+    PWD_ROTATION_TIME: "120"
+    
+    # Flask configuration
+    FLASK_ENV: "development"
+    
+    # Service and admin users
+    CORNFLOW_SERVICE_USER: "service_user"
+    CORNFLOW_SERVICE_PWD: "Service_user1234"
+    CORNFLOW_ADMIN_USER: "cornflow_admin"
+    CORNFLOW_ADMIN_PWD: "Cornflow_admin1234"
+    
+    # Airflow configuration
+    AIRFLOW_USER: "admin"
+    AIRFLOW_PWD: "admin"
+
+# Minimal PostgreSQL configuration
+postgresql:
+  enabled: true
+  auth:
+    postgresPassword: "postgres"
+    username: "cornflow"
+    password: "cornflow"
+    database: "cornflow"
+  primary:
+    persistence:
+      enabled: true
+      size: 1Gi
+
+# Basic service configuration
+service:
+  type: ClusterIP
+  port: 5000

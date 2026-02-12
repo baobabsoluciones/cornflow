@@ -1,0 +1,223 @@
+name: Release Cornflow Helm Chart
+
+on:
+  push:
+    tags:
+      - 'helm-chart-v*'
+    paths:
+      - 'helm-charts/cornflow/**'
+
+jobs:
+  release:
+    name: Build and Release Helm Chart
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./helm-charts/cornflow
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.18.3
+
+      - name: Setup Google Cloud CLI
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+
+      - name: Configure gcloud
+        run: |
+          gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
+          gcloud auth configure-docker
+
+      - name: Determine version
+        id: version
+        run: |
+          # Extract version from tag (e.g., helm-chart-v1.2.5 -> 1.2.5)
+          VERSION=${GITHUB_REF#refs/tags/helm-chart-v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Releasing version: ${{ steps.version.outputs.version }}"
+
+      - name: Validate chart
+        run: |
+          # Validate chart structure
+          helm lint .
+          helm dependency update
+          helm dependency build
+          
+          # Test template rendering
+          helm template test-release . -f tests/test-values.yaml > /dev/null
+          helm template test-release . -f tests/test-values-with-airflow.yaml > /dev/null
+          
+          echo "✅ Chart validation passed"
+
+      - name: Update Chart.yaml version
+        run: |
+          # Update version in Chart.yaml
+          sed -i "s/^version: .*/version: ${{ steps.version.outputs.version }}/" Chart.yaml
+          sed -i "s/^appVersion: .*/appVersion: \"${{ steps.version.outputs.version }}\"/" Chart.yaml
+          
+          # Update version in values.yaml if needed
+          sed -i "s/^  tag: .*/  tag: \"release-v${{ steps.version.outputs.version }}\"/" values.yaml
+          
+          echo "Updated Chart.yaml version to ${{ steps.version.outputs.version }}"
+          cat Chart.yaml | grep -E "^(version|appVersion):"
+
+      - name: Package chart
+        run: |
+          # Create packages directory
+          mkdir -p packages
+          
+          # Package the chart
+          helm package . --destination packages/
+          
+          # List generated packages
+          ls -la packages/
+          
+          # Verify package
+          helm show chart packages/*.tgz
+
+      - name: Create index file
+        run: |
+          # Download existing index if it exists
+          gsutil cp gs://cornflow-public-artifacts/index.yaml packages/index.yaml || echo "No existing index found"
+          
+          # Create/update index
+          helm repo index packages/ --url https://storage.googleapis.com/cornflow-public-artifacts/
+          
+          # Show index contents
+          cat packages/index.yaml
+
+      - name: Upload to Google Cloud Storage
+        run: |
+          # Upload chart package
+          gsutil cp packages/*.tgz gs://cornflow-public-artifacts/
+          
+          # Upload index file
+          gsutil cp packages/index.yaml gs://cornflow-public-artifacts/
+          
+          # Make files publicly readable
+          gsutil iam ch allUsers:objectViewer gs://cornflow-public-artifacts/
+          
+          echo "✅ Chart uploaded to gs://cornflow-public-artifacts/"
+
+      - name: Verify upload
+        run: |
+          # List uploaded files
+          echo "Files in bucket:"
+          gsutil ls gs://cornflow-public-artifacts/
+          
+          # Test repository access
+          echo "Testing repository access..."
+          helm repo add cornflow-test https://storage.googleapis.com/cornflow-public-artifacts/
+          helm repo update
+          helm search repo cornflow-test/cornflow
+          
+          # Show chart details
+          helm show chart cornflow-test/cornflow --version ${{ steps.version.outputs.version }}
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Cornflow Helm Chart ${{ steps.version.outputs.version }}
+          body: |
+            ## Cornflow Helm Chart v${{ steps.version.outputs.version }}
+            
+            ### Installation
+            
+            ```bash
+            # Add the repository
+            helm repo add cornflow https://storage.googleapis.com/cornflow-public-artifacts/
+            helm repo update
+            
+            # Install the chart
+            helm install my-cornflow cornflow/cornflow
+            ```
+            
+            ### What's New
+            
+            - Chart version: ${{ steps.version.outputs.version }}
+            - App version: ${{ steps.version.outputs.version }}
+            
+            ### Documentation
+            
+            See the [README.md](https://github.com/baobabsoluciones/cornflow/blob/master/helm-charts/cornflow/README.md) for detailed installation and configuration instructions.
+            
+            ### Testing
+            
+            The chart includes comprehensive tests. See [tests/TEST_README.md](https://github.com/baobabsoluciones/cornflow/blob/master/helm-charts/cornflow/tests/TEST_README.md) for testing instructions.
+          draft: false
+          prerelease: false
+
+      - name: Upload release artifacts
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./packages/*.tgz
+          asset_name: cornflow-${{ steps.version.outputs.version }}.tgz
+          asset_content_type: application/gzip
+
+      - name: Update repository documentation
+        run: |
+          # Create a simple repository info file
+          cat > packages/README.md << EOF
+          # Cornflow Helm Repository
+          
+          This repository contains the official Helm charts for Cornflow.
+          
+          ## Adding the Repository
+          
+          \`\`\`bash
+          helm repo add cornflow https://storage.googleapis.com/cornflow-public-artifacts/
+          helm repo update
+          \`\`\`
+          
+          ## Installing Charts
+          
+          \`\`\`bash
+          # Install Cornflow
+          helm install my-cornflow cornflow/cornflow
+          
+          # Install with custom values
+          helm install my-cornflow cornflow/cornflow -f my-values.yaml
+          \`\`\`
+          
+          ## Available Charts
+          
+          - \`cornflow\`: The main Cornflow application with optional Airflow integration
+          
+          ## Documentation
+          
+          For detailed documentation, visit: https://github.com/baobabsoluciones/cornflow/tree/master/helm-charts/cornflow
+          
+          ## Support
+          
+          For support and questions:
+          - GitHub Issues: https://github.com/baobabsoluciones/cornflow/issues
+          - Email: cornflow@baobabsoluciones.es
+          EOF
+          
+          # Upload README to bucket
+          gsutil cp packages/README.md gs://cornflow-public-artifacts/
+
+      - name: Notify success
+        run: |
+          echo "🎉 Successfully released Cornflow Helm Chart v${{ steps.version.outputs.version }}"
+          echo "📦 Chart package: gs://cornflow-public-artifacts/cornflow-${{ steps.version.outputs.version }}.tgz"
+          echo "📋 Repository URL: https://storage.googleapis.com/cornflow-public-artifacts/"
+          echo "🔗 Installation: helm repo add cornflow https://storage.googleapis.com/cornflow-public-artifacts/"

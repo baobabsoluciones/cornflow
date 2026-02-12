@@ -1,0 +1,187 @@
+name: cornflow-helm-chart tests
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+    paths:
+      - 'helm-charts/cornflow/**'
+      - '.github/workflows/test_cornflow_helm_chart.yml'
+  push:
+    branches:
+      - master
+    paths:
+      - 'helm-charts/cornflow/**'
+      - '.github/workflows/test_cornflow_helm_chart.yml'
+
+jobs:
+  helm-test:
+    name: Test Helm Chart
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./helm-charts/cornflow
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.18.3
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+
+      - name: Setup kind cluster
+        uses: helm/kind-action@v1
+        with:
+          node_image: kindest/node:v1.28.0
+
+      - name: Wait for cluster to be ready
+        run: |
+          kubectl wait --for=condition=ready node --all --timeout=300s
+          kubectl get nodes
+
+      - name: Run quick test (validation only)
+        run: |
+          cd tests
+          chmod +x quick-test.sh
+          ./quick-test.sh
+
+      - name: Run complete test (with cluster)
+        run: |
+          cd tests
+          chmod +x test.sh
+          ./test.sh
+
+      - name: Test chart installation with different configurations
+        run: |
+          # Test 1: Basic installation without Airflow
+          echo "Testing basic installation without Airflow..."
+          helm install test-basic . -f tests/test-values.yaml -n default --wait --timeout=5m
+          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=cornflow -n default --timeout=300s
+          kubectl get pods -n default
+          helm uninstall test-basic -n default
+
+          # Test 2: Installation with Airflow
+          echo "Testing installation with Airflow..."
+          helm install test-airflow . -f tests/test-values-with-airflow.yaml -n default --wait --timeout=10m
+          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=cornflow -n default --timeout=300s
+          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=airflow -n default --timeout=300s
+          kubectl get pods -n default
+          helm uninstall test-airflow -n default
+
+      - name: Test chart linting
+        run: |
+          helm lint .
+          helm template test-release . -f tests/test-values.yaml
+          helm template test-release . -f tests/test-values-with-airflow.yaml
+
+      - name: Test chart dependencies
+        run: |
+          helm dependency update
+          helm dependency build
+
+      - name: Generate test manifests for review
+        run: |
+          mkdir -p test-output
+          helm template test-release . -f tests/test-values.yaml > test-output/manifests-basic.yaml
+          helm template test-release . -f tests/test-values-with-airflow.yaml > test-output/manifests-with-airflow.yaml
+          echo "Generated manifests:"
+          ls -la test-output/
+
+      - name: Upload test artifacts
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: helm-test-manifests
+          path: helm-charts/cornflow/test-output/
+          retention-days: 7
+
+  chart-validation:
+    name: Validate Chart Structure
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./helm-charts/cornflow
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.18.3
+
+      - name: Validate chart structure
+        run: |
+          # Check required files exist
+          test -f Chart.yaml || (echo "Chart.yaml not found" && exit 1)
+          test -f values.yaml || (echo "values.yaml not found" && exit 1)
+          test -d templates || (echo "templates directory not found" && exit 1)
+          test -d tests || (echo "tests directory not found" && exit 1)
+
+          # Check test files exist
+          test -f tests/test-values.yaml || (echo "tests/test-values.yaml not found" && exit 1)
+          test -f tests/test-values-with-airflow.yaml || (echo "tests/test-values-with-airflow.yaml not found" && exit 1)
+          test -f tests/test.sh || (echo "tests/test.sh not found" && exit 1)
+          test -f tests/quick-test.sh || (echo "tests/quick-test.sh not found" && exit 1)
+          test -f tests/TEST_README.md || (echo "tests/TEST_README.md not found" && exit 1)
+
+          echo "✅ All required files and directories found"
+
+      - name: Validate chart metadata
+        run: |
+          # Check Chart.yaml has required fields
+          helm lint . --strict
+          
+          # Validate chart version format
+          CHART_VERSION=$(grep '^version:' Chart.yaml | awk '{print $2}')
+          if [[ ! $CHART_VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "❌ Invalid chart version format: $CHART_VERSION"
+            exit 1
+          fi
+          echo "✅ Chart version format is valid: $CHART_VERSION"
+
+      - name: Validate templates
+        run: |
+          # Test template rendering with different values
+          helm template test-release . -f tests/test-values.yaml > /dev/null
+          helm template test-release . -f tests/test-values-with-airflow.yaml > /dev/null
+          echo "✅ All templates render successfully"
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./helm-charts/cornflow
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.18.3
+
+      - name: Run Helm security scan
+        run: |
+          # Check for common security issues in values
+          echo "Checking for security issues in values files..."
+          
+          # Check for hardcoded secrets in test values
+          if grep -q "password\|secret\|key" tests/test-values.yaml | grep -v "test-"; then
+            echo "⚠️  Warning: Potential secrets found in test-values.yaml"
+          fi
+          
+          if grep -q "password\|secret\|key" tests/test-values-with-airflow.yaml | grep -v "test-"; then
+            echo "⚠️  Warning: Potential secrets found in test-values-with-airflow.yaml"
+          fi
+          
+          echo "✅ Security scan completed"
