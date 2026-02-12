@@ -25,9 +25,9 @@ jobs:
         run: |
           cd cornflow-server
           python -m pip install --upgrade pip
-          # Instalamos setuptools y wheel explícitamente antes que el resto
           python -m pip install setuptools wheel 
           python -m pip install -r requirements-dev.txt
+          python -m pip install sphinxcontrib-redoc
       - name: Building docs
         run: |
           cd docs && make html && cd ..
