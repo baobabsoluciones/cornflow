@@ -14,19 +14,19 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
         with:
-          # Semantic version range syntax or exact version of a Python version
-          python-version: "3.11"
+          python-version: "3.12"
           architecture: "x64"
-      # Standard drop-in approach that should work for most people.
       - name: Install dependencies
         run: |
           cd cornflow-server
           python -m pip install --upgrade pip
+          # Instalamos setuptools y wheel explícitamente antes que el resto
+          python -m pip install setuptools wheel 
           python -m pip install -r requirements-dev.txt
       - name: Building docs
         run: |
