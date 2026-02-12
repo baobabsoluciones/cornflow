@@ -1,3 +1,87 @@
+version 1.3.0
+--------------
+
+- released: 2026-02-12
+- description: new version of cornflow with new features and bug fixes.
+- changelog:
+    - added new method names that are clearer and more generic.
+    - added new exception classes for better error handling.
+
+Cornflow Client Updates (Python Library)
+=========================================
+
+1. New Method Names Available
+------------------------------
+
+If you use the Cornflow Python client (``cornflow-client``), we've added new method names that are clearer and more generic:
+
++---------------------------+------------------------------+----------------------------------+
+| What You Used Before      | What You Can Use Now         | Status                           |
++===========================+==============================+==================================+
+| ``get_dag_info()``        | ``get_workflow_info()``      | ✅ Both work (old shows warning) |
++---------------------------+------------------------------+----------------------------------+
+| ``run_dag()``             | ``run_workflow()``           | ✅ Both work (old shows warning) |
++---------------------------+------------------------------+----------------------------------+
+| ``get_dag_run_status()``  | ``get_run_status()``         | ✅ Both work (old shows warning) |
++---------------------------+------------------------------+----------------------------------+
+
+**Example of the change:**
+
+.. code-block:: python
+
+   # Old way (still works but shows warning)
+   client.run_dag(execution_id="123", dag_name="solve_model_dag")
+
+   # New way (recommended)
+   client.run_workflow(execution_id="123", workflow_name="solve_model_dag")
+
+**What you need to do:**
+
+- **Optional:** Update to the new method names when convenient
+- **Required eventually:** The old names will be removed in a future major version (2.0.0)
+- For now, both work - you'll just see deprecation warnings with the old names
+
+2. Changed Exception Classes
+----------------------------
+
+**Exception Classes:**
+
++--------------------------------------------------------+--------------------------------------------------------+-------------------+
+| Old Import                                             | New Import                                             | Status            |
++========================================================+========================================================+===================+
+| ``from cornflow_client.constants import AirflowError`` | Still works (no change needed)                         | ✅ Still available |
++--------------------------------------------------------+--------------------------------------------------------+-------------------+
+| N/A                                                    | ``from cornflow_client.constants import DatabricksError`` | ✨ New class      |
++--------------------------------------------------------+--------------------------------------------------------+-------------------+
+| N/A                                                    | ``from cornflow_client.constants import OrchError``    | ✨ New base class |
++--------------------------------------------------------+--------------------------------------------------------+-------------------+
+
+**Example:**
+
+.. code-block:: python
+
+   # If you were catching AirflowError
+   from cornflow_client.constants import AirflowError
+
+   try:
+       client.run_workflow(...)
+   except AirflowError as e:
+       print(f"Execution failed: {e}")
+
+   # New: You can also catch the base class for both backends
+   from cornflow_client.constants import OrchError
+
+   try:
+       client.run_workflow(...)
+   except OrchError as e:  # Catches both AirflowError and DatabricksError
+       print(f"Execution failed: {e}")
+
+**What you need to do:**
+
+- **Optional:** Consider catching ``OrchError`` instead of ``AirflowError`` if you want to handle both backends
+- ``AirflowError`` still works and is not deprecated
+- ``DatabricksError`` is available if you need backend-specific error handling
+
 version 1.2.6
 --------------
 
