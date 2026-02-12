@@ -2,7 +2,7 @@
 Base code for the experiment template.
 """
 
-import warnings
+import logging as log
 from abc import ABC, abstractmethod
 from typing import List, Dict, Union
 
@@ -14,10 +14,11 @@ from cornflow_client.constants import (
     BadSolutionChecks,
 )
 from .instance import InstanceCore
+from .instance_solution import CheckCore
 from .solution import SolutionCore
 
 
-class ExperimentCore(ABC):
+class ExperimentCore(CheckCore, ABC):
     """
     The solver template.
     """
@@ -74,17 +75,8 @@ class ExperimentCore(ABC):
         """
         Method that executes the ExperimentCore.check() method and validates the result against the schema_checks
         """
-        try:
-            checks = self.check()
-            if checks is None:
-                checks = self.check_solution()
-        except NotImplementedError:
-            warnings.warn(
-                "The check_solution() method is deprecated. Please use check() instead. "
-                "Support for check_solution() will be removed on cornflow-client 2.0.0",
-                DeprecationWarning,
-            )
-            checks = self.check_solution()
+        # Check method always exists since it is implemented in the ExperimentCore class
+        checks = self.check()
         validator = Draft7Validator(self.schema_checks)
         if not validator.is_valid(checks):
             raise BadSolutionChecks(
@@ -117,43 +109,6 @@ class ExperimentCore(ABC):
           type.
         """
         return self.launch_all_checks()
-
-    def get_check_methods(self) -> list:
-        """
-        Finds all class methods starting with check_ and returns them in a list.
-
-        :return: A list of check methods.
-        """
-        check_methods = [
-            m
-            for m in dir(self)
-            if m.startswith("check_")
-            and callable(getattr(self, m))
-            and m != "check_schema"
-            and m != "check_solution"
-        ]
-        return check_methods
-
-    def launch_all_checks(self) -> Dict[str, Union[List, Dict]]:
-        """
-        Launch every check method and return a dict with the check method name as key
-        and the list/dict of errors / warnings as value.
-
-        It will only return those checks that return a non-empty list/dict.
-        """
-        check_methods = {m: getattr(self, m)() for m in self.get_check_methods()}
-        failed_checks = {}
-        for k, v in check_methods.items():
-            if v is None:
-                continue
-
-            try:
-                if len(v) > 0:
-                    failed_checks[k.split("check_")[1]] = v
-            except TypeError:
-                failed_checks[k.split("check_")[1]] = v
-
-        return dict(failed_checks)
 
     @property
     @abstractmethod
@@ -202,29 +157,26 @@ class ExperimentCore(ABC):
             )
             solver = default_solver
 
+        # Map the parameters in config to the solver and library. Parameters in solver_config are not mapped.
         if remove_unknown:
+            # If remove_unknown is True, remove the unknown parameters from the config. Parameters in solver_config are not removed.
             conf = {
                 mapping[k, lib, solver]: v
                 for k, v in config.items()
                 if (k, lib, solver) in mapping
             }
-            if config.get("solver_config"):
-                conf.update(
-                    {
-                        mapping.get((k, lib, solver), k): v
-                        for k, v in config["solver_config"].items()
-                    }
-                )
         else:
             conf = {mapping.get((k, lib, solver), k): v for k, v in config.items()}
             conf.pop("solver", None)
             conf.pop("solver_config", None)
-            if config.get("solver_config"):
-                conf.update(
-                    {
-                        mapping.get((k, lib, solver), k): v
-                        for k, v in config["solver_config"].items()
-                    }
-                )
+
+        # Map the parameters in solver_config to the solver and library
+        if config.get("solver_config"):
+            conf.update(
+                {
+                    mapping.get((k, lib, solver), k): v
+                    for k, v in config["solver_config"].items()
+                }
+            )
 
         return conf

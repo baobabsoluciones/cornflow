@@ -24,63 +24,57 @@
 # The following variables are supported:
 #
 # Feel free to modify this file to suit your needs.
-version: '3.8'
+version: "3.8"
 
-x-airflow-common:
-  &airflow-common
+x-airflow-common: &airflow-common
   # In order to add custom dependencies or upgrade provider packages you can use your extended image.
   # Comment the image line and uncomment the "build" and "context" lines below, Then run `docker-compose build` to build the images.
-    image: baobabsoluciones/airflow:release-v1.2.3
-    platform: linux/amd64
-    #build: 
-      #context: ./cornflow-server/airflow_config
-    environment:
-      &airflow-common-env
-      AIRFLOW_USER: admin
-      AIRFLOW_PWD: admin
-      AIRFLOW_DB_HOST: airflow_db
-      AIRFLOW_DB_PORT: 5432
-      AIRFLOW_DB_USER: airflow
-      AIRFLOW_DB_PASSWORD: airflow
-      AIRFLOW_DB: airflow
-      AIRFLOW__WEBSERVER__INSTANCE_NAME: CornflowEnv
-      AIRFLOW__WEBSERVER__NAVBAR_COLOR: '#0693e3' 
-    volumes:
-      - ./cornflow-dags/DAG:/usr/local/airflow/dags
-      - ./cornflow-dags/requirements.txt:/requirements.txt
-      - ./cornflow-server/airflow_config/logs:/usr/local/airflow/logs
-      - ./cornflow-server/airflow_config/plugins:/usr/local/airflow/plugins
-      - ./cornflow-server/airflow_config/airflow_local_settings.py:/usr/local/airflow/config/airflow_local_settings.py
-    depends_on:
-      &airflow-common-depends-on
-      airflow_db:
-        condition: service_healthy
+  image: baobabsoluciones/airflow:release-v1.2.6
+  platform: linux/amd64
+  #build:
+  #context: ./cornflow-server/airflow_config
+  environment: &airflow-common-env
+    AIRFLOW_USER: admin
+    AIRFLOW_PWD: admin
+    AIRFLOW_DB_HOST: airflow_db
+    AIRFLOW_DB_PORT: 5432
+    AIRFLOW_DB_USER: airflow
+    AIRFLOW_DB_PASSWORD: airflow
+    AIRFLOW_DB: airflow
+    AIRFLOW__WEBSERVER__INSTANCE_NAME: CornflowEnv
+    AIRFLOW__WEBSERVER__NAVBAR_COLOR: "#0693e3"
+  volumes:
+    - ./cornflow-dags/DAG:/usr/local/airflow/dags
+    - ./cornflow-dags/requirements.txt:/requirements.txt
+    - ./cornflow-server/airflow_config/logs:/usr/local/airflow/logs
+    - ./cornflow-server/airflow_config/plugins:/usr/local/airflow/plugins
+    - ./cornflow-server/airflow_config/airflow_local_settings.py:/usr/local/airflow/config/airflow_local_settings.py
+  depends_on: &airflow-common-depends-on
+    airflow_db:
+      condition: service_healthy
 
-x-cornflow-common:
-  &cornflow-common
+x-cornflow-common: &cornflow-common
   # In order to add custom dependencies or upgrade provider packages you can use your extended image.
   # Comment the image line and uncomment the "build" and "context" lines below, Then run `docker-compose build` to build the images.
-    image: baobabsoluciones/cornflow:release-v1.2.3
-    platform: linux/amd64
-    #build: 
-      #context: ./cornflow-server
-    environment:
-      &cornflow-common-env
-      CORNFLOW_ADMIN_USER: cornflow_admin
-      CORNFLOW_ADMIN_PWD: Cornflow_admin1234
-      CORNFLOW_SERVICE_USER: service_user
-      CORNFLOW_SERVICE_PWD: Service_user1234
-      CORNFLOW_DB_HOST: cornflow_db
-      CORNFLOW_DB_PORT: 5432
-      CORNFLOW_DB_USER: cornflow
-      CORNFLOW_DB_PASSWORD: cornflow
-      CORNFLOW_DB: cornflow
-    depends_on:
-      &cornflow-common-depends-on
-      cornflow_db:
-        condition: service_healthy
-      webserver:
-        condition: service_healthy
+  image: baobabsoluciones/cornflow:release-v1.2.6
+  platform: linux/amd64
+  #build:
+  #context: ./cornflow-server
+  environment: &cornflow-common-env
+    CORNFLOW_ADMIN_USER: cornflow_admin
+    CORNFLOW_ADMIN_PWD: Cornflow_admin1234
+    CORNFLOW_SERVICE_USER: service_user
+    CORNFLOW_SERVICE_PWD: Service_user1234
+    CORNFLOW_DB_HOST: cornflow_db
+    CORNFLOW_DB_PORT: 5432
+    CORNFLOW_DB_USER: cornflow
+    CORNFLOW_DB_PASSWORD: cornflow
+    CORNFLOW_DB: cornflow
+  depends_on: &cornflow-common-depends-on
+    cornflow_db:
+      condition: service_healthy
+    webserver:
+      condition: service_healthy
 
 services:
   cornflow:
@@ -112,7 +106,7 @@ services:
     restart: always
     volumes:
       - postgres_cf_data:/var/lib/postgresql/data/
-  
+
   airflow_db:
     image: postgres:15.4
     environment:

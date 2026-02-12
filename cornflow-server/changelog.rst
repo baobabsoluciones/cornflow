@@ -1,3 +1,31 @@
+version 1.2.6
+--------------
+
+- released: 2025-10-31
+- description: bump version code to stay up to date with cornflow-client.
+- changelog:
+    - updated cornflow-client to version 1.2.6
+
+version 1.2.5
+--------------
+
+- released: 2025-10-09
+- description:
+- changelog:
+    - updated cornflow-client to version 1.2.5
+    - fixed OpenID authentication error with Microsoft.
+    - added new fields to return on execution endpoint GET call.
+
+version 1.2.4
+--------------
+
+- released: 2025-07-08
+- description: new version of cornflow with new features and bug fixes.
+- changelog:
+    - added new authenticated option for signup endpoint.
+    - signup endpoint requires authentication of admin to create new users.
+    - changed requests version to 2.32.4 due to security issues.
+
 version 1.2.3
 --------------
 

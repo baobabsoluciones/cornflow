@@ -85,6 +85,39 @@ class TestCore(TestCase):
 
         self.config = SuperDict(msg=False, timeLimit=1, solver="default", seconds=10)
 
+    @property
+    def error_check_schema(self):
+        """Common schema for error check testing used across multiple test methods."""
+        return get_empty_schema(
+            properties=dict(
+                test_check=dict(
+                    type="array",
+                    objects=dict(
+                        type="object",
+                        properties=dict(
+                            error_type=dict(type="string"),
+                            error_message=dict(type="string"),
+                        ),
+                    ),
+                ),
+                working_check=dict(
+                    type="array",
+                    objects=dict(type="object"),
+                ),
+            )
+        )
+
+    @property
+    def error_test_cases(self):
+        """Common test cases for error handling used across multiple test methods."""
+        return [
+            (RuntimeError, "Runtime error occurred"),
+            (AttributeError, "Attribute not found"),
+            (ValueError, "Invalid value provided"),
+            (TypeError, "Type mismatch error"),
+            (KeyError, "Missing key in dictionary"),
+        ]
+
     def tearDown(self):
         pass
 
@@ -293,3 +326,116 @@ class TestCore(TestCase):
                 "b_equal_c": [{"b": 2, "c": 1}],
             },
         )
+
+    def test_solution_check_method_exception_handling(self):
+        """Test that when a check_* method raises an exception, a generic error message is added."""
+
+        class DummySolution(SolutionCore):
+            schema = get_empty_schema(properties=dict(sleep=dict(type="number")))
+
+        class ErrorCheckSolver(ExperimentCore):
+            schema_checks = self.error_check_schema
+
+            def __init__(
+                self,
+                instance,
+                solution=None,
+                error_class=RuntimeError,
+                error_message="Error",
+            ):
+                super().__init__(instance, solution)
+                self.error_class = error_class
+                self.error_message = error_message
+
+            def solve(self, options):
+                self.solution = DummySolution({"sleep": 1})
+                return dict(status=STATUS_OPTIMAL, status_sol=SOLUTION_STATUS_FEASIBLE)
+
+            def check_test_check(self):
+                # Simulate different types of unexpected errors in a check method
+                raise self.error_class(self.error_message)
+
+            def check_working_check(self):
+                # This check should work correctly and return empty list (no errors)
+                return []
+
+            def get_objective(self):
+                return 0
+
+        class ErrorApp(self.app.__class__):
+            solvers = dict(default=ErrorCheckSolver)
+            solution = DummySolution
+
+        error_app = ErrorApp()
+
+        for error_class, error_message in self.error_test_cases:
+            with self.subTest(error_type=error_class.__name__):
+                # Create instance and solution for the solver
+                instance = error_app.instance.from_dict({"seconds": 1})
+                solution = error_app.solution.from_dict({"sleep": 1})
+                error_solver = ErrorCheckSolver(
+                    instance, solution, error_class, error_message
+                )
+
+                # Should NOT raise an exception, but return the checks with generic error
+                checks = error_solver.launch_all_checks()
+
+                # Verify the generic error message is in the checks for the failing check
+                self.assertIn("test_check", checks)
+                self.assertEqual(
+                    checks["test_check"],
+                    [
+                        {
+                            "error_type": "Check execution error",
+                            "error_message": "The execution of the check has failed, please contact support",
+                        }
+                    ],
+                )
+
+                # Verify that the working check is NOT in the failed checks (empty list means no errors)
+                self.assertNotIn("working_check", checks)
+
+    def test_instance_check_method_exception_handling(self):
+        """Test that when a check_* method of an instance raises an exception, a generic error message is added."""
+
+        class ErrorCheckInstance(InstanceCore):
+            schema = get_empty_schema(properties=dict(seconds=dict(type="number")))
+            schema_checks = self.error_check_schema
+
+            def __init__(self, data, error_class=RuntimeError, error_message="Error"):
+                super().__init__(data)
+                self.error_class = error_class
+                self.error_message = error_message
+
+            def check_test_check(self):
+                # Simulate different types of unexpected errors in a check method
+                raise self.error_class(self.error_message)
+
+            def check_working_check(self):
+                # This check should work correctly and return empty list (no errors)
+                return []
+
+        for error_class, error_message in self.error_test_cases:
+            with self.subTest(error_type=error_class.__name__):
+                # Create instance
+                error_instance = ErrorCheckInstance(
+                    {"seconds": 1}, error_class, error_message
+                )
+
+                # Should NOT raise an exception, but return the checks with generic error
+                checks = error_instance.launch_all_checks()
+
+                # Verify the generic error message is in the checks for the failing check
+                self.assertIn("test_check", checks)
+                self.assertEqual(
+                    checks["test_check"],
+                    [
+                        {
+                            "error_type": "Check execution error",
+                            "error_message": "The execution of the check has failed, please contact support",
+                        }
+                    ],
+                )
+
+                # Verify that the working check is NOT in the failed checks (empty list means no errors)
+                self.assertNotIn("working_check", checks)

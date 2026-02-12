@@ -36,6 +36,12 @@ from cornflow.shared.const import (
     ADMIN_ROLE,
     SERVICE_ROLE,
     PLANNER_ROLE,
+    DATABRICKS_BACKEND,
+    AIRFLOW_BACKEND,
+    SIGNUP_WITH_AUTH,
+    OID_PROVIDER_AZURE,
+    OID_OTHER,
+    USER_ACCESS_ALL_OBJECTS_NO,
 )
 from cornflow.shared import db
 from cryptography.fernet import Fernet
@@ -82,13 +88,14 @@ def init_cornflow_service():
                 config["cornflow_service_email"],
                 config["cornflow_service_pwd"],
             )
-            _sync_with_airflow(
-                config["airflow_url"],
-                config["airflow_user"],
-                config["airflow_pwd"],
-                config["open_deployment"],
-                external_app=False,
-            )
+            if config["cornflow_backend"] == AIRFLOW_BACKEND:
+                _sync_with_airflow(
+                    config["airflow_url"],
+                    config["airflow_user"],
+                    config["airflow_pwd"],
+                    config["open_deployment"],
+                    external_app=False,
+                )
         _start_application(external_application, environment)
 
     elif external_application == 1:
@@ -114,14 +121,14 @@ def init_cornflow_service():
                 config["cornflow_service_email"],
                 config["cornflow_service_pwd"],
             )
-
-            _sync_with_airflow(
-                config["airflow_url"],
-                config["airflow_user"],
-                config["airflow_pwd"],
-                config["open_deployment"],
-                external_app=True,
-            )
+            if config["cornflow_backend"] == AIRFLOW_BACKEND:
+                _sync_with_airflow(
+                    config["airflow_url"],
+                    config["airflow_user"],
+                    config["airflow_pwd"],
+                    config["open_deployment"],
+                    external_app=True,
+                )
         _start_application(external_application, environment, external_app_module)
 
     else:
@@ -135,14 +142,36 @@ def _setup_environment_variables():
     environment = os.getenv("FLASK_ENV", "development")
     os.environ["FLASK_ENV"] = environment
 
-    # Airflow details
-    airflow_user = os.getenv("AIRFLOW_USER", "admin")
-    airflow_pwd = os.getenv("AIRFLOW_PWD", "admin")
-    airflow_url = os.getenv("AIRFLOW_URL", "http://webserver:8080")
-    os.environ["AIRFLOW_USER"] = airflow_user
-    os.environ["AIRFLOW_PWD"] = airflow_pwd
-    os.environ["AIRFLOW_URL"] = airflow_url
-
+    ###################################
+    # Global defaults and back-compat #
+    ###################################
+    # cornflow backend selection
+    cornflow_backend = os.getenv("CORNFLOW_BACKEND", str(AIRFLOW_BACKEND))
+    os.environ["CORNFLOW_BACKEND"] = cornflow_backend
+    cornflow_backend = int(cornflow_backend)
+    # Airflow global default conn
+    if cornflow_backend == AIRFLOW_BACKEND:
+        airflow_user = os.getenv("AIRFLOW_USER", "admin")
+        airflow_pwd = os.getenv("AIRFLOW_PWD", "admin")
+        airflow_url = os.getenv("AIRFLOW_URL", "http://webserver:8080")
+        os.environ["AIRFLOW_USER"] = airflow_user
+        os.environ["AIRFLOW_PWD"] = airflow_pwd
+        os.environ["AIRFLOW_URL"] = airflow_url
+    elif cornflow_backend == DATABRICKS_BACKEND:
+        databricks_url = os.getenv("DATABRICKS_HOST")
+        databricks_auth_secret = os.getenv("DATABRICKS_CLIENT_SECRET")
+        databricks_token_endpoint = os.getenv("DATABRICKS_TOKEN_ENDPOINT")
+        databricks_ep_clusters = os.getenv("DATABRICKS_EP_CLUSTERS")
+        databricks_client_id = os.getenv("DATABRICKS_CLIENT_ID")
+        databricks_health_path = os.getenv("DATABRICKS_HEALTH_PATH")
+        os.environ["DATABRICKS_HEALTH_PATH"] = databricks_health_path
+        os.environ["DATABRICKS_HOST"] = databricks_url
+        os.environ["DATABRICKS_CLIENT_SECRET"] = databricks_auth_secret
+        os.environ["DATABRICKS_TOKEN_ENDPOINT"] = databricks_token_endpoint
+        os.environ["DATABRICKS_EP_CLUSTERS"] = databricks_ep_clusters
+        os.environ["DATABRICKS_CLIENT_ID"] = databricks_client_id
+    else:
+        raise Exception("Selected backend not among valid options")
     # Cornflow app config
     os.environ.setdefault("cornflow_url", "http://cornflow:5000")
     os.environ["FLASK_APP"] = "cornflow.app"
@@ -155,6 +184,15 @@ def _setup_environment_variables():
 
     # Platform auth config and service users
     auth = int(os.getenv("AUTH_TYPE", AUTH_DB))
+    if auth == AUTH_OID:
+        oid_provider_url = os.getenv("OID_PROVIDER")
+        if "microsoft" in oid_provider_url:
+            oid_provider_type = OID_PROVIDER_AZURE
+        else:
+            oid_provider_type = OID_OTHER
+        os.environ["OID_PROVIDER_TYPE"] = str(oid_provider_type)
+        os.environ["OID_PROVIDER"] = oid_provider_url
+
     cornflow_admin_user = os.getenv("CORNFLOW_ADMIN_USER", "cornflow_admin")
     cornflow_admin_email = os.getenv(
         "CORNFLOW_ADMIN_EMAIL", "cornflow_admin@cornflow.com"
@@ -171,9 +209,9 @@ def _setup_environment_variables():
     os.environ["CORNFLOW_LOGGING"] = cornflow_logging
     open_deployment = os.getenv("OPEN_DEPLOYMENT", 1)
     os.environ["OPEN_DEPLOYMENT"] = str(open_deployment)
-    signup_activated = os.getenv("SIGNUP_ACTIVATED", 1)
+    signup_activated = os.getenv("SIGNUP_ACTIVATED", SIGNUP_WITH_AUTH)
     os.environ["SIGNUP_ACTIVATED"] = str(signup_activated)
-    user_access_all_objects = os.getenv("USER_ACCESS_ALL_OBJECTS", 0)
+    user_access_all_objects = os.getenv("USER_ACCESS_ALL_OBJECTS", USER_ACCESS_ALL_OBJECTS_NO)
     os.environ["USER_ACCESS_ALL_OBJECTS"] = str(user_access_all_objects)
     default_role = int(os.getenv("DEFAULT_ROLE", PLANNER_ROLE))
     os.environ["DEFAULT_ROLE"] = str(default_role)
@@ -191,25 +229,42 @@ def _setup_environment_variables():
 
     external_application = int(os.getenv("EXTERNAL_APP", 0))
     external_app_module = os.getenv("EXTERNAL_APP_MODULE")
+    base_dict = {
+            "environment": environment,
+            "auth": auth,
+            "cornflow_db_conn": cornflow_db_conn,
+            "cornflow_admin_user": cornflow_admin_user,
+            "cornflow_admin_email": cornflow_admin_email,
+            "cornflow_admin_pwd": cornflow_admin_pwd,
+            "cornflow_service_user": cornflow_service_user,
+            "cornflow_service_email": cornflow_service_email,
+            "cornflow_service_pwd": cornflow_service_pwd,
+            "cornflow_logging": cornflow_logging,
+            "open_deployment": open_deployment,
+            "external_application": external_application,
+            "external_app_module": external_app_module,
+            "cornflow_backend": cornflow_backend,
+        }
+    if cornflow_backend == AIRFLOW_BACKEND:
+        base_dict["airflow_user"] = airflow_user
+        base_dict["airflow_pwd"] = airflow_pwd
+        base_dict["airflow_url"] = airflow_url
+    
+    elif cornflow_backend == DATABRICKS_BACKEND:
+        base_dict["databricks_url"] = databricks_url
+        base_dict["databricks_auth_secret"] = databricks_auth_secret
+        base_dict["databricks_token_endpoint"] = databricks_token_endpoint
+        base_dict["databricks_ep_clusters"] = databricks_ep_clusters
+        base_dict["databricks_client_id"] = databricks_client_id
+        base_dict["databricks_health_path"] = databricks_health_path
+        
+    else:
+        raise Exception("Selected backend not among valid options")
 
-    return {
-        "environment": environment,
-        "auth": auth,
-        "airflow_user": airflow_user,
-        "airflow_pwd": airflow_pwd,
-        "airflow_url": airflow_url,
-        "cornflow_db_conn": cornflow_db_conn,
-        "cornflow_admin_user": cornflow_admin_user,
-        "cornflow_admin_email": cornflow_admin_email,
-        "cornflow_admin_pwd": cornflow_admin_pwd,
-        "cornflow_service_user": cornflow_service_user,
-        "cornflow_service_email": cornflow_service_email,
-        "cornflow_service_pwd": cornflow_service_pwd,
-        "cornflow_logging": cornflow_logging,
-        "open_deployment": open_deployment,
-        "external_application": external_application,
-        "external_app_module": external_app_module,
-    }
+    if auth == AUTH_OID:
+        base_dict["oid_provider"] = oid_provider_url
+
+    return base_dict
 
 
 def _configure_logging(cornflow_logging):

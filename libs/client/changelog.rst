@@ -1,3 +1,29 @@
+version 1.2.6
+--------------
+
+- released: 2025-10-31
+- description: New check control
+- changelog:
+    - When a check has a coding error, it is now displayed in the instance/solution checks with the message: "The execution of the check has failed. Please contact support."
+
+version 1.2.5
+--------------
+
+- released: 2025-10-09
+- description: bump version code to stay up to date with cornflow-server.
+- changelog:
+    - updated cornflow-client to version 1.2.5
+
+
+version 1.2.4
+--------------
+
+- released: 2025-07-08
+- description: new version of cornflow with new features and bug fixes.
+- changelog:
+    - fixed error on parameter parsing for gurobi.
+    - changed requests version to 2.32.4 due to security issues.
+
 version 1.2.3
 --------------
 

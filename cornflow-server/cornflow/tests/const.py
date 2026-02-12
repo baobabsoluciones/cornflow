@@ -15,6 +15,7 @@ INSTANCE_URL = PREFIX + "/instance/"
 INSTANCE_MPS = _get_file("./data/test_mps.mps")
 INSTANCE_GC_20 = _get_file("./data/gc_20_7.json")
 INSTANCE_FILE_FAIL = _get_file("./unit/test_instances.py")
+EDIT_EXECUTION_SOLUTION = _get_file("./data/edit_execution_solution.json")
 
 EXECUTION_PATH = _get_file("./data/new_execution.json")
 CUSTOM_CONFIG_PATH = _get_file("./data/new_execution_custom_config.json")

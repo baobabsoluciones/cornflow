@@ -8,6 +8,7 @@ from cornflow.commands.auxiliar import (
 from cornflow.models import ViewModel, PermissionViewRoleModel
 from cornflow.shared import db
 from cornflow.shared.const import ALL_DEFAULT_ROLES, GET_ACTION
+import click
 from cornflow.shared.const import (
     BASE_PERMISSION_ASSIGNATION,
 )
@@ -53,12 +54,14 @@ def register_base_permissions_command(external_app: str = None, verbose: bool = 
     save_and_delete_permissions(permissions_to_register, permissions_to_delete)
 
     if len(permissions_to_register) > 0:
-        current_app.logger.info(f"Permissions registered: {permissions_to_register}")
+        current_app.logger.info(
+            f"Permissions registered: {len(permissions_to_register)}"
+        )
     else:
         current_app.logger.info("No new permissions to register")
 
     if len(permissions_to_delete) > 0:
-        current_app.logger.info(f"Permissions deleted: {permissions_to_delete}")
+        current_app.logger.info(f"Permissions deleted: {len(permissions_to_delete)}")
     else:
         current_app.logger.info("No permissions to delete")
 
@@ -233,7 +236,7 @@ def register_dag_permissions_command(
     from flask import current_app
     from sqlalchemy.exc import DBAPIError, IntegrityError
 
-    from cornflow.models import DeployedDAG, PermissionsDAG, UserModel
+    from cornflow.models import DeployedWorkflow, PermissionsDAG, UserModel
     from cornflow.shared import db
 
     if open_deployment is None:
@@ -251,9 +254,10 @@ def register_dag_permissions_command(
         current_app.logger.error(f"Unknown error on database commit: {e}")
 
     all_users = UserModel.get_all_users().all()
-    all_dags = DeployedDAG.get_all_objects().all()
+    all_dags = DeployedWorkflow.get_all_objects().all()
 
     if open_deployment == 1:
+
         permissions = [
             PermissionsDAG({"dag_id": dag.id, "user_id": user.id})
             for user in all_users
@@ -295,9 +299,11 @@ def register_dag_permissions_command(
             )
 
     if verbose:
+        click.echo(f"Workflow permissions registered")
         if len(permissions) > 1:
-            current_app.logger.info(f"DAG permissions registered: {permissions}")
+            current_app.logger.info(
+                f"Workflow permissions registered: {len(permissions)}"
+            )
         else:
-            current_app.logger.info("No new DAG permissions")
+            current_app.logger.info("No new Workflow permissions")
 
-    pass

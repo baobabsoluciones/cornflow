@@ -31,7 +31,7 @@ from cornflow.app import (
     register_views,
 )
 from cornflow.commands.dag import register_deployed_dags_command_test
-from cornflow.endpoints import resources, alarms_resources
+from cornflow.endpoints import alarms_resources, get_resources
 from cornflow.models import (
     ActionModel,
     PermissionViewRoleModel,
@@ -39,7 +39,7 @@ from cornflow.models import (
     ViewModel,
 )
 from cornflow.models import (
-    DeployedDAG,
+    DeployedWorkflow,
     PermissionsDAG,
     UserModel,
 )
@@ -98,6 +98,7 @@ class TestCommands(TestCase):
             "email": "testemail@test.org",
             "password": "Testpassword1!",
         }
+        resources = get_resources()
         self.resources = resources + alarms_resources
         self.runner = self.create_app().test_cli_runner()
         self.runner.invoke(register_roles, ["-v"])
@@ -356,7 +357,7 @@ class TestCommands(TestCase):
         - Presence of required DAGs
         """
         register_deployed_dags_command_test(verbose=True)
-        dags = DeployedDAG.get_all_objects()
+        dags = DeployedWorkflow.get_all_objects()
         for dag in ["solve_model_dag", "gc", "timer"]:
             self.assertIn(dag, [d.id for d in dags])
 
@@ -381,8 +382,8 @@ class TestCommands(TestCase):
         service_permissions = PermissionsDAG.get_user_dag_permissions(service.id)
         admin_permissions = PermissionsDAG.get_user_dag_permissions(admin.id)
 
-        self.assertEqual(3, len(service_permissions))
-        self.assertEqual(3, len(admin_permissions))
+        self.assertEqual(4, len(service_permissions))
+        self.assertEqual(4, len(admin_permissions))
 
     def test_dag_permissions_command_no_open(self):
         """
@@ -405,7 +406,7 @@ class TestCommands(TestCase):
         service_permissions = PermissionsDAG.get_user_dag_permissions(service.id)
         admin_permissions = PermissionsDAG.get_user_dag_permissions(admin.id)
 
-        self.assertEqual(3, len(service_permissions))
+        self.assertEqual(4, len(service_permissions))
         self.assertEqual(0, len(admin_permissions))
 
     def test_argument_parsing_correct(self):

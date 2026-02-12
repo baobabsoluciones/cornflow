@@ -43,7 +43,7 @@ class ExecutionSchema(Schema):
     name = fields.Str()
     description = fields.Str()
     schema = fields.Str(required=False)
-    dag_run_id = fields.Str(required=False, dump_only=True)
+    run_id = fields.Str(required=False, dump_only=True)
     config = fields.Nested(ConfigSchema, required=True)
     data = fields.Raw(dump_only=True)
     checks = fields.Raw(required=False, allow_none=True)
@@ -78,6 +78,7 @@ class ExecutionEditRequest(Schema):
     name = fields.Str()
     description = fields.Str()
     data = fields.Raw()
+    instance_id = fields.Str(required=False)
 
 
 class ExecutionDagRequest(Schema):
@@ -119,7 +120,19 @@ class ExecutionDetailsEndpointWithIndicatorsResponse(ExecutionDetailsEndpointRes
             return obj.user.username
         return None
 
+    def get_first_name(self, obj):
+        if hasattr(obj, "user") and obj.user is not None:
+            return obj.user.first_name
+        return None
+
+    def get_last_name(self, obj):
+        if hasattr(obj, "user") and obj.user is not None:
+            return obj.user.last_name
+        return None
+
     username = fields.Method("get_username")
+    first_name = fields.Method("get_first_name")
+    last_name = fields.Method("get_last_name")
 
 
 class ExecutionDetailsWithIndicatorsAndLogResponse(

@@ -10,7 +10,7 @@ from flask_apispec import marshal_with, doc
 
 # Import from internal modules
 from cornflow.endpoints.meta_resource import BaseMetaResource
-from cornflow.models import InstanceModel, ExecutionModel, CaseModel, DeployedDAG
+from cornflow.models import InstanceModel, ExecutionModel, CaseModel, DeployedWorkflow
 from cornflow.schemas.execution import ExecutionDetailsEndpointResponse
 from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.const import (
@@ -22,6 +22,7 @@ from cornflow.shared.const import (
     EXEC_STATE_ERROR_START,
     EXEC_STATE_NOT_RUN,
     EXECUTION_STATE_MESSAGE_DICT,
+    VIEWER_ROLE,
     PLANNER_ROLE,
     ADMIN_ROLE,
 )
@@ -68,7 +69,7 @@ def _run_airflow_data_check(
         )
 
     # Check if DAG is paused
-    schema_info = af_client.get_dag_info(schema)
+    schema_info = af_client.get_workflow_info(workflow_name=schema)
     info = schema_info.json()
     if info.get("is_paused", False):
         current_app.logger.error(DAG_PAUSED_MSG)
@@ -85,8 +86,8 @@ def _run_airflow_data_check(
 
     # Run the DAG
     try:
-        response = af_client.run_dag(
-            execution.id, dag_name=schema, checks_only=True, **run_dag_kwargs
+        response = af_client.run_workflow(
+            execution.id, workflow_name=schema, checks_only=True, **run_dag_kwargs
         )
     except AirflowError as err:
         error = f"{AIRFLOW_ERROR_MSG} {err}"
@@ -104,7 +105,7 @@ def _run_airflow_data_check(
 
     # Update execution on success
     af_data = response.json()
-    execution.dag_run_id = af_data.get("dag_run_id")
+    execution.run_id = af_data.get("dag_run_id")
     execution.update_state(EXEC_STATE_QUEUED)
 
 
@@ -309,7 +310,7 @@ class DataCheckCaseEndpoint(BaseMetaResource):
             if schema == "pulp":
                 validation_schema = "solve_model_dag"
 
-            data_jsonschema = DeployedDAG.get_one_schema(
+            data_jsonschema = DeployedWorkflow.get_one_schema(
                 config, validation_schema, INSTANCE_SCHEMA
             )
             validation_errors = json_schema_validate_as_string(
@@ -338,7 +339,7 @@ class DataCheckCaseEndpoint(BaseMetaResource):
 
             payload["data"] = case.solution
 
-            data_jsonschema = DeployedDAG.get_one_schema(
+            data_jsonschema = DeployedWorkflow.get_one_schema(
                 config, validation_schema, SOLUTION_SCHEMA
             )
             validation_errors = json_schema_validate_as_string(

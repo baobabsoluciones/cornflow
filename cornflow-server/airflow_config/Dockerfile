@@ -1,14 +1,14 @@
 # AIRFLOW VERSION 2.10.5
 # AUTHOR: cornflow@baobabsoluciones.es
-# DESCRIPTION: Airflow 2.10.5 image personalized for use with Cornflow (from baobabsoluciones/pysolver image)
-# baobab code version is 1.2.4
+# DESCRIPTION: Airflow 2.9.1 image personalized for use with Cornflow (from baobabsoluciones/pysolver image)
+# baobab code version is 1.2.6
 
 FROM baobabsoluciones/pysolver:1.1
 LABEL maintainer="cornflow@baobabsoluciones"
 
 # Never prompt the user for choices on installation/configuration of packages
-ENV DEBIAN_FRONTEND noninteractive
-ENV TERM linux
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TERM=linux
 
 # Airflow vars
 ARG AIRFLOW_VERSION=2.10.5

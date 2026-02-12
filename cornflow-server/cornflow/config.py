@@ -1,8 +1,17 @@
 import os
-from .shared.const import AUTH_DB, PLANNER_ROLE, AUTH_OID
+from cornflow.shared.const import (
+    AUTH_DB,
+    PLANNER_ROLE,
+    AUTH_OID,
+    SIGNUP_WITH_AUTH,
+    SIGNUP_WITH_NO_AUTH,
+    OID_OTHER,
+    AIRFLOW_BACKEND,
+    DATABRICKS_BACKEND,
+    USER_ACCESS_ALL_OBJECTS_NO,
+)
 from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
-
 
 class DefaultConfig(object):
     """
@@ -15,9 +24,7 @@ class DefaultConfig(object):
     SECRET_TOKEN_KEY = os.getenv("SECRET_KEY")
     SECRET_BI_KEY = os.getenv("SECRET_BI_KEY")
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///cornflow.db")
-    AIRFLOW_URL = os.getenv("AIRFLOW_URL")
-    AIRFLOW_USER = os.getenv("AIRFLOW_USER")
-    AIRFLOW_PWD = os.getenv("AIRFLOW_PWD")
+
     AUTH_TYPE = int(os.getenv("AUTH_TYPE", AUTH_DB))
     DEFAULT_ROLE = int(os.getenv("DEFAULT_ROLE", PLANNER_ROLE))
     CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*")
@@ -25,9 +32,24 @@ class DefaultConfig(object):
     DEBUG = True
     TESTING = True
     LOG_LEVEL = int(os.getenv("LOG_LEVEL", 20))
-    SIGNUP_ACTIVATED = int(os.getenv("SIGNUP_ACTIVATED", 1))
+    SIGNUP_ACTIVATED = int(os.getenv("SIGNUP_ACTIVATED", SIGNUP_WITH_AUTH))
     CORNFLOW_SERVICE_USER = os.getenv("CORNFLOW_SERVICE_USER", "service_user")
 
+    # To change the tasks backend used by cornflow to solve the optimization models
+    CORNFLOW_BACKEND = int(os.getenv("CORNFLOW_BACKEND", AIRFLOW_BACKEND))
+
+    # AIRFLOW config
+    AIRFLOW_URL = os.getenv("AIRFLOW_URL")
+    AIRFLOW_USER = os.getenv("AIRFLOW_USER")
+    AIRFLOW_PWD = os.getenv("AIRFLOW_PWD")
+
+    # DATABRICKS config
+    DATABRICKS_URL = os.getenv("DATABRICKS_HOST")
+    DATABRICKS_AUTH_SECRET = os.getenv("DATABRICKS_CLIENT_SECRET")
+    DATABRICKS_TOKEN_ENDPOINT = os.getenv("DATABRICKS_TOKEN_ENDPOINT")
+    DATABRICKS_EP_CLUSTERS = os.getenv("DATABRICKS_EP_CLUSTERS")
+    DATABRICKS_CLIENT_ID = os.getenv("DATABRICKS_CLIENT_ID")
+    DATABRICKS_HEALTH_PATH = os.getenv("DATABRICKS_HEALTH_PATH", "default path")
     # If service user is allowed to log with username and password
     SERVICE_USER_ALLOW_PASSWORD_LOGIN = int(
         os.getenv("SERVICE_USER_ALLOW_PASSWORD_LOGIN", 1)
@@ -37,7 +59,9 @@ class DefaultConfig(object):
     OPEN_DEPLOYMENT = os.getenv("OPEN_DEPLOYMENT", 1)
 
     # Planner users can access objects of other users (1) or not(0).
-    USER_ACCESS_ALL_OBJECTS = os.getenv("USER_ACCESS_ALL_OBJECTS", 0)
+    USER_ACCESS_ALL_OBJECTS = os.getenv(
+        "USER_ACCESS_ALL_OBJECTS", USER_ACCESS_ALL_OBJECTS_NO
+    )
 
     # LDAP configuration
     LDAP_HOST = os.getenv("LDAP_HOST", "ldap://openldap:389")
@@ -61,6 +85,7 @@ class DefaultConfig(object):
 
     # OpenID Connect configuration
     OID_PROVIDER = os.getenv("OID_PROVIDER")
+    OID_PROVIDER_TYPE = int(os.getenv("OID_PROVIDER_TYPE", OID_OTHER))
     OID_EXPECTED_AUDIENCE = os.getenv("OID_EXPECTED_AUDIENCE")
 
     # APISPEC:
@@ -119,12 +144,18 @@ class Testing(DefaultConfig):
     AIRFLOW_PWD = os.getenv("AIRFLOW_PWD", "admin")
     OPEN_DEPLOYMENT = 1
     LOG_LEVEL = int(os.getenv("LOG_LEVEL", 10))
+    SIGNUP_ACTIVATED = SIGNUP_WITH_NO_AUTH
+
+
+class TestingDatabricks(Testing):
+    CORNFLOW_BACKEND = DATABRICKS_BACKEND
 
 
 class TestingOpenAuth(Testing):
     """
     Configuration class for testing some edge cases with Open Auth login
     """
+
     AUTH_TYPE = AUTH_OID
     OID_PROVIDER = "https://test-provider.example.com"
     OID_EXPECTED_AUDIENCE = "test-audience-id"
@@ -157,5 +188,6 @@ app_config = {
     "testing": Testing,
     "production": Production,
     "testing-oauth": TestingOpenAuth,
-    "testing-root": TestingApplicationRoot
+    "testing-root": TestingApplicationRoot,
+    "testing-databricks": TestingDatabricks,
 }

@@ -243,11 +243,13 @@ class RosteringTestCase(BaseDAGTests.SolvingTests):
         self.assertIn(slot_length, [15, 30, 60], "Test requires standard slot length")
 
         # Add a schedule exception with minutes not divisible by the slot length
-        non_aligned_minute = 5  # This won't be divisible by 15, 30 or 60
+        # This won't be divisible by 15, 30 or 60
+        non_aligned_minute = 5
 
-        # Use a date that's in the future to avoid conflicts
-        # Create a date string in YYYY-MM-DD format for tomorrow
-        tomorrow = (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d")
+        # Use a date that's within the horizon of the test instance
+        # The test instance has horizon=1 and starts from 2021-09-06
+        # So we'll use 2021-09-07 (the next day within the horizon)
+        test_date = "2021-09-07"
 
         # Create a new schedule exception entry with non-aligned minutes
         if "schedule_exceptions" not in instance_data:
@@ -255,7 +257,7 @@ class RosteringTestCase(BaseDAGTests.SolvingTests):
 
         instance_data["schedule_exceptions"].append(
             {
-                "date": tomorrow,
+                "date": test_date,
                 "starting_hour": f"08:{non_aligned_minute:02d}",  # e.g., "08:05"
                 "ending_hour": "17:00",
             }
@@ -274,7 +276,7 @@ class RosteringTestCase(BaseDAGTests.SolvingTests):
         found_warning = False
         for warning in instance_checks["schedule_exceptions_timeslots"]:
             if (
-                warning["date"] == tomorrow
+                warning["date"] == test_date
                 and warning["hour"] == f"08:{non_aligned_minute:02d}"
             ):
                 found_warning = True

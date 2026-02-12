@@ -7,6 +7,8 @@ from sqlalchemy.exc import DBAPIError, IntegrityError
 
 from cornflow.endpoints import resources, alarms_resources
 
+from cornflow.endpoints import alarms_resources, get_resources
+
 # Imports from internal libraries
 from cornflow.models import ViewModel
 from cornflow.shared import db
@@ -182,6 +184,7 @@ def get_database_view():
 
 
 def get_resources_to_register(external_app):
+    resources = get_resources()
     if external_app is None:
         resources_to_register = resources
         if current_app.config["ALARMS_ENDPOINTS"]:
