@@ -9,7 +9,7 @@ with open("requirements.txt", "r") as fh:
 
 setuptools.setup(
     name="cornflow",
-    version="1.3.0rc8",
+    version="1.3.0",
     author="baobab soluciones",
     author_email="cornflow@baobabsoluciones.es",
     description="cornflow is an open source multi-solver optimization server with a REST API built using flask.",
@@ -24,7 +24,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
         "Development Status :: 5 - Production/Stable",
     ],
-    python_requires=">=3.9",
+    python_requires=">=3.10",
     entry_points={
         "console_scripts": [
             "cornflow = cornflow.cli:cli",
