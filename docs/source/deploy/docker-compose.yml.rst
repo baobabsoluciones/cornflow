@@ -6,11 +6,10 @@ To deploy cornflow on Docker Compose, you should fetch the `docker-compose.yml` 
 
     curl -LfO 'https://raw.githubusercontent.com/baobabsoluciones/corn/master/docker-compose.yml'
 
-Before starting cornflow for the first time, You need to prepare your environment, i.e. create the necessary files, directories and initialize the database.
+Before starting cornflow for the first time, ensure the ``cornflow-dags`` directory (with ``pyproject.toml`` and ``uv.lock``) is in place; the compose mounts ``./cornflow-dags`` to ``/app/cornflow-dags`` and the Airflow init script runs ``uv sync --no-dev`` there. The Airflow image must have ``uv`` installed.
 On Linux, the mounted volumes in the container use the native Linux filesystem user/group permissions, so you have to make sure the container and host computer have matching file permissions::
 
     mkdir -p ./airflow_config/dags
-    cp "yourpathtofilerequirements.txt" ./airflow_config/requirements.txt
 
 Running cornflow
 ********************

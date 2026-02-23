@@ -72,12 +72,12 @@ The airflow environment variables included in ``docker-compose.yml`` are::
     AIRFLOW_DB_PASSWORD - airflow database password
     AIRFLOW_DB - airflow database name
 
-The airflow deployment requires mounting two volumes linked to the directory created on the host::
+The airflow deployment requires mounting the cornflow-dags project and the DAG folder::
 
-    airflow_config/dags:/usr/local/airflow/dags - DAG folder inside of installation path.
-    airflow_config/requirements.txt:/requirements.txt - development packages required to install inside workers.
+    ./cornflow-dags:/app/cornflow-dags - Project with ``pyproject.toml`` and ``uv.lock``; the init script runs ``uv sync --no-dev`` here (the image must have ``uv`` installed).
+    ./cornflow-dags/DAG:/usr/local/airflow/dags - DAG folder inside the installation path.
 
-These volumes allow you to persist the DAG files and also link the development packages necessary for their execution.
+These volumes allow you to persist the DAG files and install cornflow-dags dependencies with uv at container startup.
 
 PostgreSQL docker image
 ***************************
