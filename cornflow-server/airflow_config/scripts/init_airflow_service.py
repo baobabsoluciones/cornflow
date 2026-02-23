@@ -61,9 +61,24 @@ if os.path.isfile("/usr/local/airflow/.ssh/id_rsa") and CUSTOM_SSH_HOST is not N
     os.system(CONFIG_SSH_KEY)
     os.system(COPY_TO_USER_DIR)
 
-# Install custom python package if requirements.txt is present
-if os.path.isfile("/requirements.txt"):
-    os.system("$(command -v pip) install --user -r /requirements.txt")
+# Install cornflow-dags dependencies with uv + pyproject.toml when present
+CORNFLOW_DAGS_DIR = "/app/cornflow-dags"
+if os.path.isfile(os.path.join(CORNFLOW_DAGS_DIR, "pyproject.toml")):
+    if os.system("command -v uv >/dev/null 2>&1") == 0:
+        rc = os.system(f"cd {CORNFLOW_DAGS_DIR} && uv sync --no-dev")
+        if rc == 0:
+            py_ver = f"{sys.version_info.major}.{sys.version_info.minor}"
+            venv_site = os.path.join(CORNFLOW_DAGS_DIR, ".venv", "lib", f"python{py_ver}", "site-packages")
+            if os.path.isdir(venv_site):
+                existing = os.environ.get("PYTHONPATH", "")
+                os.environ["PYTHONPATH"] = f"{venv_site}:{existing}" if existing else venv_site
+    else:
+        raise RuntimeError("cornflow-dags uses pyproject.toml but uv is not installed in the image")
+elif os.path.isfile("/requirements.txt"):
+    if os.system("command -v uv >/dev/null 2>&1") == 0:
+        os.system("uv pip install --user -r /requirements.txt")
+    else:
+        os.system("$(command -v pip) install --user -r /requirements.txt")
 
 # Make SQL connention
 if os.getenv("AIRFLOW__CORE__SQL_ALCHEMY_CONN") is None:
