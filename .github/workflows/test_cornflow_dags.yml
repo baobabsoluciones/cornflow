@@ -5,6 +5,8 @@ on:
     types: [opened, edited, synchronize, reopened]
     paths:
       - 'cornflow-dags/**'
+      - 'cornflow-dags/pyproject.toml'
+      - 'cornflow-dags/uv.lock'
       - '.github/workflows/test_cornflow_dags.yml'
       - '!cornflow-dags/README.rst'
   push:
@@ -12,6 +14,8 @@ on:
       - master
     paths:
       - 'cornflow-dags/**'
+      - 'cornflow-dags/pyproject.toml'
+      - 'cornflow-dags/uv.lock'
       - '.github/workflows/test_cornflow_dags.yml'
       - '!cornflow-dags/README.rst'
 
@@ -31,28 +35,33 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: latest
+          working-directory: ./cornflow-dags
+          enable-cache: true
       - name: Install cbc
         run: |
           sudo apt-get install -y coinor-cbc
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install -U -r requirements-dev.txt
+          uv sync --extra dev
           CLIENT_BRANCH="${{ github.head_ref || github.ref_name }}"
-          python -m pip uninstall cornflow-client -y
-          python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
+          uv pip uninstall cornflow-client -y
+          uv pip install "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
       - name: Install airflow
         run: |
           AIRFLOW_VERSION=2.9.1
           PYTHON_VERSION="$(python3 --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
           CLIENT_BRANCH="${{ github.head_ref || github.ref_name }}"
           CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
-          python -m pip install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
-          python -m pip install -U orloge pulp
-          python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
+          uv pip install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
+          uv pip install orloge pulp
+          uv pip install "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
           airflow db init
           airflow users create \
                 --username admin \
@@ -75,13 +84,13 @@ jobs:
           AIRFLOW_CONN_CF_URI: cornflow://airflow_test@admin.com:airflow_test_password@localhost:5000
       - name: Run unit tests
         run: |
-          coverage run --source=. --rcfile=./.coveragerc -m unittest discover -s ./tests/unit
-          coverage report -m
+          uv run coverage run -m unittest discover -s ./tests/unit
+          uv run coverage report -m
       - name: Run integration tests
         run: |
-          coverage run -a --source=. --rcfile=./.coveragerc -m unittest discover -s ./tests/integration
-          coverage report -m
-          coverage xml
+          uv run coverage run -a -m unittest discover -s ./tests/integration
+          uv run coverage report -m
+          uv run coverage xml
       - name: Upload coverage to codecov
         uses: codecov/codecov-action@v3
         with:
