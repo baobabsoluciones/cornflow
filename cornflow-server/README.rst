@@ -40,34 +40,40 @@ cornflow helps you formalize your problem by proposing development guidelines. I
 Installation instructions
 -------------------------------
 
-cornflow is tested with Ubuntu 20.04, python >= 3.8 and git.
+cornflow is tested with Ubuntu 20.04, Python >= 3.10 and git.
 
-Download the cornflow project and install requirements::
+**From PyPI (recommended):** Install with `uv`_::
 
-    python3 -m venv venv
-    venv/bin/pip3 install cornflow
+    uv pip install cornflow
 
-initialize the sqlite database::
+**From source (development):** Clone the repo, then from the ``cornflow-server`` directory::
 
-    source venv/bin/activate
+    uv sync --extra dev
+
+This creates a virtual environment (``.venv``) and installs the project and dev dependencies. Run commands inside that environment with::
+
+    uv run <command>
+
+Initialize the sqlite database::
+
     export FLASK_APP=cornflow.app
     export DATABASE_URL=sqlite:///cornflow.db
-    flask db upgrade
-    flask access_init
-    flask create_service_user  -u airflow -e airflow_test@admin.com -p airflow_test_password
-    flask create_admin_user  -u cornflow -e cornflow_admin@admin.com -p cornflow_admin_password
+    uv run flask db upgrade
+    uv run flask access_init
+    uv run flask create_service_user -u airflow -e airflow_test@admin.com -p airflow_test_password
+    uv run flask create_admin_user -u cornflow -e cornflow_admin@admin.com -p cornflow_admin_password
 
+Activate the virtual environment and run cornflow::
 
-activate the virtual environment and run cornflow::
-
-    source venv/bin/activate
     export FLASK_APP=cornflow.app
     export SECRET_KEY=THISNEEDSTOBECHANGED
     export DATABASE_URL=sqlite:///cornflow.db
     export AIRFLOW_URL=http://127.0.0.1:8080/
     export AIRFLOW_USER=airflow_user
     export AIRFLOW_PWD=airflow_pwd
-    flask run
+    uv run flask run
+
+.. _uv: https://docs.astral.sh/uv/
 
 **cornflow needs a running installation of Airflow to operate and more configuration**. Check `the installation docs <https://baobabsoluciones.github.io/cornflow/main/install.html>`_ for more details on installing airflow, configuring the application and initializing the database.
 
@@ -76,7 +82,7 @@ Using cornflow to solve a PuLP model
 
 We're going to test the cornflow server by using the `cornflow-client` and the `pulp` python package::
 
-    pip install cornflow-client pulp
+    uv pip install cornflow-client pulp
 
 Initialize the api client::
 
@@ -186,28 +192,28 @@ solve a graph coloring problem and get the solution::
 Running tests and coverage
 ------------------------------
 
-Then you have to run the following commands::
+Set the environment and run tests (from the ``cornflow-server`` directory, after ``uv sync --extra dev``)::
 
     export FLASK_ENV=testing
 
-Finally you can run all the tests with the following command::
+Run all tests::
 
-    python -m unittest discover -s cornflow.tests
+    uv run python -m unittest discover -s cornflow.tests
 
-If you want to only run the unit tests (without a local airflow webserver)::
+Unit tests only (without a local airflow webserver)::
 
-    python -m unittest discover -s cornflow.tests.unit
+    uv run python -m unittest discover -s cornflow.tests.unit
 
-If you want to only run the integration test with a local airflow webserver::
+Integration tests (with a local airflow webserver)::
 
-    python -m unittest discover -s cornflow.tests.integration
+    uv run python -m unittest discover -s cornflow.tests.integration
 
-After if you want to check the coverage report you need to run::
+Coverage (source and omit are read from ``pyproject.toml``)::
 
-    coverage run  --source=./cornflow/ -m unittest discover -s=./cornflow/tests/
-    coverage report -m
+    uv run coverage run -m unittest discover -s cornflow.tests
+    uv run coverage report -m
 
-or to get the html reports::
+HTML coverage report::
 
-    coverage html
+    uv run coverage html
 

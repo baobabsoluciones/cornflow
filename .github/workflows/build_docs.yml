@@ -16,21 +16,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
-    - uses: actions/setup-python@v2
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
       with:
-        # Semantic version range syntax or exact version of a Python version
         python-version: '3.12'
-        architecture: 'x64'
-    # Standard drop-in approach that should work for most people.
-    - name: Install dependencies
-      run: |
-        cd cornflow-server
-        python -m pip install --upgrade pip
-        python -m pip install -r requirements-dev.txt
-    - name: Building docs
-      run: |
-        cd docs && make html && cd ..
+    - name: Install uv
+      uses: astral-sh/setup-uv@v4
+      with:
+        version: latest
+    - name: Install documentation dependencies
+      working-directory: docs
+      run: uv sync
+    # Build documentation
+    - name: Build HTML docs
+      working-directory: docs
+      run: uv run make html
     # Great extra actions to compose with:
     # Publish built docs to gh-pages branch.
     # ===============================
