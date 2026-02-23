@@ -7,6 +7,11 @@ import os
 from datetime import datetime, timedelta
 from urllib.parse import urlparse, urljoin
 
+try:
+    import tomllib
+except ImportError:
+    import tomli as tomllib
+
 from cornflow_client import CornFlow, CornFlowApiError
 
 # TODO: convert everything to an object that encapsulates everything
@@ -49,22 +54,31 @@ def get_schemas_from_file(_dir, dag_name):
 
 def get_requirements(path):
     """
-    Read requirements.txt from a project and return a list of packages.
+    Read project dependencies from pyproject.toml or requirements.txt.
 
     :param path: The path of the project
-    :return: A list of required packages
+    :return: A list of required packages (dependency specifier strings)
     """
-    # TODO: check if in use
-    req_path = f"{path}/requirements.txt"
-
+    pyproject_path = os.path.join(path, "pyproject.toml")
     try:
-        with open(req_path, "r") as file:
-            req_list = file.read().splitlines()
-    except:
+        with open(pyproject_path, "rb") as f:
+            data = tomllib.load(f)
+        deps = data.get("project", {}).get("dependencies", [])
+        return list(deps) if deps else []
+    except FileNotFoundError:
+        pass
+    except Exception:
+        pass
+
+    req_path = os.path.join(path, "requirements.txt")
+    try:
+        with open(req_path, "r", encoding="utf-8") as file:
+            return [line.strip() for line in file if line.strip() and not line.lstrip().startswith("#")]
+    except FileNotFoundError:
         print("no requirement file in this path")
         return []
-
-    return req_list
+    except Exception:
+        return []
 
 
 def connect_to_cornflow(secrets):
