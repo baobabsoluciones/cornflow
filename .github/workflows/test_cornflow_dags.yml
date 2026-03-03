@@ -62,16 +62,16 @@ jobs:
           uv pip install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
           uv pip install orloge pulp
           uv pip install "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
-          airflow db init
-          airflow users create \
+          uv run airflow db init
+          uv run airflow users create \
                 --username admin \
                 --firstname admin \
                 --lastname admin \
                 --role Admin \
                 --password admin \
                 --email admin@example.org
-          airflow webserver -p 8080 &
-          airflow scheduler &
+          uv run airflow webserver -p 8080 &
+          uv run airflow scheduler &
           sleep 5s
         env:
           AIRFLOW__SCHEDULER__CATCHUP_BY_DEFAULT: 0
