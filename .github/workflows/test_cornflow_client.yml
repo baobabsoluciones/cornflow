@@ -76,9 +76,8 @@ jobs:
           enable-cache: true
       - name: Copy DAG files
         run: |
-          cd ..
-          mkdir -p cornflow-server/airflow_config/dags
-          cp -r cornflow-dags/DAG/* cornflow-server/airflow_config/dags/
+          mkdir -p "$GITHUB_WORKSPACE/cornflow-server/airflow_config/dags"
+          cp -r "$GITHUB_WORKSPACE/cornflow-dags/DAG/." "$GITHUB_WORKSPACE/cornflow-server/airflow_config/dags/"
       - name: Install dependencies
         run: uv sync --extra dev
       - name: Install airflow
