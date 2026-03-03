@@ -22,7 +22,6 @@ jobs:
       uses: astral-sh/setup-uv@v4
       with:
         version: latest
-        working-directory: ./cornflow-server
     - name: Build package
       run: uv build --sdist --wheel
       working-directory: ./cornflow-server

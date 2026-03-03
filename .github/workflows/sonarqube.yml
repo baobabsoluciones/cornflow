@@ -37,7 +37,6 @@ jobs:
         uses: astral-sh/setup-uv@v4
         with:
           version: latest
-          working-directory: ./cornflow-server
       - name: Copy DAG files
         run: |
           cd ..
@@ -174,7 +173,6 @@ jobs:
         uses: astral-sh/setup-uv@v4
         with:
           version: latest
-          working-directory: ./cornflow-dags
       - name: Install cbc
         run: |
           sudo apt-get install -y coinor-cbc
@@ -254,7 +252,6 @@ jobs:
         uses: astral-sh/setup-uv@v4
         with:
           version: latest
-          working-directory: ./libs/client
       - name: Copy DAG files
         run: |
           cd ..
