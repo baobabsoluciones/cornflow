@@ -133,6 +133,8 @@ jobs:
           set -e
           cd ../..
           cd cornflow-server
+          export AIRFLOW_HOME="${{ github.workspace }}/cornflow-server/airflow_config"
+          export AIRFLOW__CORE__DAGS_FOLDER="${{ github.workspace }}/cornflow-server/airflow_config/dags"
           echo "Waiting for Airflow API..."
           for i in $(seq 1 30); do
             if curl -sf -u admin:admin "http://127.0.0.1:8080/health" >/dev/null; then
@@ -141,21 +143,19 @@ jobs:
             fi
             sleep 5
           done
-          echo "Waiting for solve_model_dag to appear..."
+          echo "Waiting for solve_model_dag to appear in CLI..."
           for i in $(seq 1 30); do
-            if curl -sf -u admin:admin "http://127.0.0.1:8080/api/v1/dags?limit=200" | grep -q '"dag_id":"solve_model_dag"'; then
-              echo "solve_model_dag found"
+            if afvenv/bin/airflow dags list | awk 'NR>2 {print $1}' | grep -xq "solve_model_dag"; then
+              echo "solve_model_dag found (CLI)"
               exit 0
             fi
             sleep 10
           done
-          echo "solve_model_dag NOT found. Printing diagnostics..."
-          echo "API DAG list:"
-          curl -s -u admin:admin "http://127.0.0.1:8080/api/v1/dags?limit=200" | head -200 || true
-          echo "Airflow CLI dags list:"
-          afvenv/bin/airflow dags list || true
-          echo "Import errors:"
+          echo "solve_model_dag NOT found. Diagnostics:"
+          afvenv/bin/airflow dags list | head -200 || true
           afvenv/bin/airflow dags list-import-errors || true
+          echo "API DAG list (info only):"
+          curl -s -u admin:admin "http://127.0.0.1:8080/api/v1/dags?limit=200" | head -200 || true
           exit 1
         env:
           AIRFLOW_HOME: ${{ github.workspace }}/cornflow-server/airflow_config
