@@ -42,7 +42,7 @@ Installation instructions
 
 cornflow is tested with Ubuntu 20.04, Python >= 3.10 and git.
 
-**From PyPI (recommended):** Install with `uv`_::
+**From PyPI (recommended):** Install with `uv`_:
 
     uv pip install cornflow
 

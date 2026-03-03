@@ -120,7 +120,7 @@ jobs:
           source cfvenv/bin/activate
           uv sync --extra dev --python cfvenv/bin/python
           CLIENT_BRANCH="${{ github.head_ref || github.ref_name }}"
-          uv pip uninstall cornflow-client -y
+          uv pip uninstall cornflow-client
           uv pip install "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
           flask db upgrade -d cornflow/migrations/
           flask access_init

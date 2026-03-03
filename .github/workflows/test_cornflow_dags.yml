@@ -51,7 +51,7 @@ jobs:
         run: |
           uv sync --extra dev
           CLIENT_BRANCH="${{ github.head_ref || github.ref_name }}"
-          uv pip uninstall cornflow-client -y
+          uv pip uninstall cornflow-client
           uv pip install "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
       - name: Install airflow
         run: |

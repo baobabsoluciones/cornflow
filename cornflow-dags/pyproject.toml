@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cornflow-dags"
-version = "0.1.0"
+version = "1.3.0"
 description = "Public DAGs for cornflow server"
 authors = [
     { name = "baobab soluciones", email = "cornflow@baobabsoluciones.es" }
