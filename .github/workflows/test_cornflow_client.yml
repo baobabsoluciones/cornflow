@@ -89,11 +89,7 @@ jobs:
           uv pip install --python afvenv/bin/python "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
           uv pip install --python afvenv/bin/python orloge pulp
           uv pip install --python afvenv/bin/python "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
-          cd ../cornflow-dags
-          uv export --frozen -o /tmp/dags-requirements.txt
-          cd ../cornflow-server
-          uv pip install --python afvenv/bin/python -r /tmp/dags-requirements.txt
-          uv pip install --python afvenv/bin/python "$GITHUB_WORKSPACE/cornflow-dags"
+          uv pip install --python afvenv/bin/python -e "$GITHUB_WORKSPACE/cornflow-dags"
           afvenv/bin/airflow db init
           afvenv/bin/airflow users create -u admin -f admin -l admin -r Admin -p admin -e admin@example.org
           afvenv/bin/airflow webserver -p 8080 &
@@ -108,6 +104,14 @@ jobs:
           AIRFLOW__WEBSERVER__SECRET_KEY: e9adafa751fd35adfc1fdd3285019be15eea0758f76e38e1e37a1154fb36
           AIRFLOW__CORE__LOAD_EXAMPLES: 0
           AIRFLOW_CONN_CF_URI: http://airflow:Airflow_test_password1@localhost:5050
+      - name: Diagnose DAG import errors
+        run: |
+          cd ../..
+          cd cornflow-server
+          afvenv/bin/airflow dags list-import-errors || true
+        env:
+          AIRFLOW_HOME: ${{ github.workspace }}/cornflow-server/airflow_config
+          AIRFLOW__CORE__DAGS_FOLDER: ${{ github.workspace }}/cornflow-server/airflow_config/dags
       - name: Wait for Airflow DAGs
         run: |
           set -e
