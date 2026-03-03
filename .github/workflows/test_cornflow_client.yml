@@ -96,15 +96,31 @@ jobs:
           afvenv/bin/airflow users create -u admin -f admin -l admin -r Admin -p admin -e admin@example.org
           afvenv/bin/airflow webserver -p 8080 &
           afvenv/bin/airflow scheduler &
-          sleep 5s
+          sleep 30s
         env:
           AIRFLOW__SCHEDULER__CATCHUP_BY_DEFAULT: 0
-          AIRFLOW_HOME: '${GITHUB_WORKSPACE}/cornflow-server/airflow_config'
+          AIRFLOW_HOME: ${{ github.workspace }}/cornflow-server/airflow_config
+          AIRFLOW__CORE__DAGS_FOLDER: ${{ github.workspace }}/cornflow-server/airflow_config/dags
           AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 0
           AIRFLOW__API__AUTH_BACKEND: airflow.api.auth.backend.basic_auth
           AIRFLOW__WEBSERVER__SECRET_KEY: e9adafa751fd35adfc1fdd3285019be15eea0758f76e38e1e37a1154fb36
           AIRFLOW__CORE__LOAD_EXAMPLES: 0
           AIRFLOW_CONN_CF_URI: http://airflow:Airflow_test_password1@localhost:5050
+      - name: Wait for Airflow DAGs
+        run: |
+          for i in $(seq 1 18); do
+            dags=$(curl -sf -u admin:admin "http://127.0.0.1:8080/api/v1/dags?tags=model" 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); print(' '.join(x['dag_id'] for x in d.get('dags',[])))" 2>/dev/null || true)
+            if echo "${dags:-}" | grep -qw solve_model_dag; then
+              echo "solve_model_dag found in Airflow"
+              break
+            fi
+            echo "Waiting for DAGs... (attempt $i/18)"
+            sleep 10
+          done
+          if ! echo "${dags:-}" | grep -qw solve_model_dag; then
+            echo "solve_model_dag not found after 3 minutes"
+            exit 1
+          fi
       - name: Run cornflow
         run: |
           cd "$GITHUB_WORKSPACE/cornflow-server"
