@@ -20,6 +20,7 @@ classifiers = [
 ]
 requires-python = ">=3.10"
 dependencies = [
+    "click<=8.1.7",
     "cornflow-client>=1.2.0",
     "orloge<=0.17.2",
     "PuLP<=2.9.0",
