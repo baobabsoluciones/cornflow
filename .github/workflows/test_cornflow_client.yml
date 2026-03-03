@@ -91,6 +91,7 @@ jobs:
           uv pip install --python afvenv/bin/python "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
           uv pip install --python afvenv/bin/python orloge pulp
           uv pip install --python afvenv/bin/python "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
+          uv pip install --python afvenv/bin/python "$GITHUB_WORKSPACE/cornflow-dags"
           afvenv/bin/airflow db init
           afvenv/bin/airflow users create -u admin -f admin -l admin -r Admin -p admin -e admin@example.org
           afvenv/bin/airflow webserver -p 8080 &
