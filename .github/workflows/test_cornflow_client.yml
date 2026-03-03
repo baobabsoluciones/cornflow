@@ -93,15 +93,23 @@ jobs:
           afvenv/bin/airflow users create -u admin -f admin -l admin -r Admin -p admin -e admin@example.org
           afvenv/bin/airflow webserver -p 8080 &
           afvenv/bin/airflow scheduler &
-          sleep 5
+          sleep 20
         env:
           AIRFLOW__SCHEDULER__CATCHUP_BY_DEFAULT: 0
           AIRFLOW_HOME: ${{ github.workspace }}/cornflow-server/airflow_config
+          AIRFLOW__CORE__DAGS_FOLDER: ${{ github.workspace }}/cornflow-server/airflow_config/dags
           AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 0
           AIRFLOW__API__AUTH_BACKEND: airflow.api.auth.backend.basic_auth
           AIRFLOW__WEBSERVER__SECRET_KEY: e9adafa751fd35adfc1fdd3285019be15eea0758f76e38e1e37a1154fb36
           AIRFLOW__CORE__LOAD_EXAMPLES: 0
           AIRFLOW_CONN_CF_URI: http://airflow:Airflow_test_password1@localhost:5050
+      - name: Wait for Airflow DAGs
+        run: |
+          for i in $(seq 1 18); do
+            curl -sf -u admin:admin "http://127.0.0.1:8080/api/v1/dags?tags=model" | grep -q solve_model_dag && break
+            [ $i -eq 18 ] && exit 1
+            sleep 10
+          done
       - name: Run cornflow
         run: |
           cd ../..
