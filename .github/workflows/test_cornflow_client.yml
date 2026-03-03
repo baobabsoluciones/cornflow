@@ -89,19 +89,17 @@ jobs:
           cd ..
           cd cornflow-server
           uv venv afvenv
-          source afvenv/bin/activate
           AIRFLOW_VERSION=2.9.1
           PYTHON_VERSION="$(python3 --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
           CLIENT_BRANCH="${{ github.head_ref || github.ref_name }}"
           CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
-          uv pip install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
-          uv pip install orloge pulp
-          uv pip install "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
-          airflow db init
-          airflow users create -u admin -f admin -l admin -r Admin -p admin -e admin@example.org
-          airflow webserver -p 8080 &
-          airflow scheduler &
-          deactivate
+          uv pip install --python afvenv/bin/python "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
+          uv pip install --python afvenv/bin/python orloge pulp
+          uv pip install --python afvenv/bin/python "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
+          afvenv/bin/airflow db init
+          afvenv/bin/airflow users create -u admin -f admin -l admin -r Admin -p admin -e admin@example.org
+          afvenv/bin/airflow webserver -p 8080 &
+          afvenv/bin/airflow scheduler &
           sleep 5s
         env:
           AIRFLOW__SCHEDULER__CATCHUP_BY_DEFAULT: 0
@@ -116,21 +114,18 @@ jobs:
           cd ..
           cd ..
           cd cornflow-server
-          uv venv cfvenv
-          source cfvenv/bin/activate
-          uv sync --extra dev --python cfvenv/bin/python
+          uv sync --extra dev
           CLIENT_BRANCH="${{ github.head_ref || github.ref_name }}"
           uv pip uninstall cornflow-client
           uv pip install "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
-          flask db upgrade -d cornflow/migrations/
-          flask access_init
-          flask register_deployed_dags -r http://127.0.0.1:8080 -u admin -p admin
-          flask create_admin_user -u admin -e admin@cornflow.org -p Adminpassword1!
-          flask create_service_user -u airflow -e airflow@cornflow.org -p Airflow_test_password1
-          flask create_base_user -u user -e user@cornflow.org -p UserPassword1!
-          flask register_dag_permissions -o 1
-          flask run -p 5050 &
-          deactivate
+          uv run flask db upgrade -d cornflow/migrations/
+          uv run flask access_init
+          uv run flask register_deployed_dags -r http://127.0.0.1:8080 -u admin -p admin
+          uv run flask create_admin_user -u admin -e admin@cornflow.org -p Adminpassword1!
+          uv run flask create_service_user -u airflow -e airflow@cornflow.org -p Airflow_test_password1
+          uv run flask create_base_user -u user -e user@cornflow.org -p UserPassword1!
+          uv run flask register_dag_permissions -o 1
+          uv run flask run -p 5050 &
           sleep 5s
         env:
           FLASK_ENV: testing
