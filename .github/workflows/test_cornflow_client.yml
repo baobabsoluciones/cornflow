@@ -82,8 +82,7 @@ jobs:
         run: uv sync --extra dev
       - name: Install airflow
         run: |
-          cd ..
-          cd cornflow-server
+          cd "$GITHUB_WORKSPACE/cornflow-server"
           uv venv afvenv
           AIRFLOW_VERSION=2.9.1
           PYTHON_VERSION="$(python3 --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
@@ -107,8 +106,7 @@ jobs:
           AIRFLOW_CONN_CF_URI: http://airflow:Airflow_test_password1@localhost:5050
       - name: Run cornflow
         run: |
-          cd ..
-          cd cornflow-server
+          cd "$GITHUB_WORKSPACE/cornflow-server"
           uv sync --extra dev
           CLIENT_BRANCH="${{ github.head_ref || github.ref_name }}"
           uv pip uninstall cornflow-client
