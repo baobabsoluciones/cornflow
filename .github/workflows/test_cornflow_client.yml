@@ -75,6 +75,22 @@ jobs:
           cd ../..
           mkdir -p cornflow-server/airflow_config/dags
           cp -r cornflow-dags/DAG/* cornflow-server/airflow_config/dags/
+      - name: Create DAG stub files for Airflow discovery
+        run: |
+          cd ../..
+          DAGS_DIR="cornflow-server/airflow_config/dags"
+
+          echo "Creating stub DAG files for package-based DAGs..."
+
+          for pkg in solve_model_dag facility_location knapsack two_dimension_bin_packing rostering tsp vrp bar_cutting roadef graph_coloring; do
+            if [ -d "${DAGS_DIR}/${pkg}" ] && [ ! -f "${DAGS_DIR}/${pkg}.py" ]; then
+              echo "from ${pkg} import *" > "${DAGS_DIR}/${pkg}.py"
+              echo "Created stub for ${pkg}"
+            fi
+          done
+
+          echo "Current DAG directory contents:"
+          ls -la "${DAGS_DIR}" | head -200
       - name: Install dependencies
         run: uv sync --extra dev
       - name: Install airflow
@@ -123,7 +139,6 @@ jobs:
               echo "Airflow is healthy"
               break
             fi
-            [ $i -eq 30 ] && exit 1
             sleep 5
           done
           echo "Waiting for solve_model_dag to appear..."
@@ -135,7 +150,11 @@ jobs:
             sleep 10
           done
           echo "solve_model_dag NOT found. Printing diagnostics..."
+          echo "API DAG list:"
           curl -s -u admin:admin "http://127.0.0.1:8080/api/v1/dags?limit=200" | head -200 || true
+          echo "Airflow CLI dags list:"
+          afvenv/bin/airflow dags list || true
+          echo "Import errors:"
           afvenv/bin/airflow dags list-import-errors || true
           exit 1
         env:
