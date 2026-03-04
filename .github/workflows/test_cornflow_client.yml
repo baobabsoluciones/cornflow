@@ -80,28 +80,17 @@ jobs:
         run: |
           cd ../..
           DAGS_DIR="cornflow-server/airflow_config/dags"
-
-          echo "Creating stub DAG files for package-based DAGs..."
-
           for pkg in solve_model_dag facility_location knapsack two_dimension_bin_packing rostering tsp vrp bar_cutting roadef graph_coloring; do
             if [ -d "${DAGS_DIR}/${pkg}" ] && [ ! -f "${DAGS_DIR}/${pkg}.py" ]; then
               echo "from ${pkg} import *" > "${DAGS_DIR}/${pkg}.py"
-              echo "Created stub for ${pkg}"
             fi
           done
-
-          echo "Current DAG directory contents:"
-          ls -la "${DAGS_DIR}" | head -200
       - name: Install dependencies
         run: uv sync --extra dev
       - name: Install airflow
         run: |
-          # All Airflow commands share same AIRFLOW_HOME, DAGS_FOLDER, SQL_ALCHEMY_CONN so REST API sees serialized DAGs
           cd ../..
           cd cornflow-server
-          export AIRFLOW_HOME="${{ github.workspace }}/cornflow-server/airflow_config"
-          export AIRFLOW__CORE__DAGS_FOLDER="${AIRFLOW_HOME}/dags"
-          export AIRFLOW__DATABASE__SQL_ALCHEMY_CONN="sqlite:///${AIRFLOW_HOME}/airflow.db"
           uv venv afvenv --python "$(which python)"
           AIRFLOW_VERSION=2.9.1
           PYTHON_VERSION="$(afvenv/bin/python --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
@@ -114,9 +103,9 @@ jobs:
           afvenv/bin/airflow db init
           afvenv/bin/airflow users create -u admin -f admin -l admin -r Admin -p admin -e admin@example.org
           afvenv/bin/airflow dags reserialize
-          afvenv/bin/airflow scheduler > scheduler.log 2>&1 &
-          afvenv/bin/airflow webserver -p 8080 > webserver.log 2>&1 &
-          sleep 30
+          afvenv/bin/airflow webserver -p 8080 &
+          afvenv/bin/airflow scheduler &
+          sleep 45
         env:
           AIRFLOW__SCHEDULER__CATCHUP_BY_DEFAULT: 0
           AIRFLOW_HOME: ${{ github.workspace }}/cornflow-server/airflow_config
@@ -127,54 +116,17 @@ jobs:
           AIRFLOW__WEBSERVER__SECRET_KEY: e9adafa751fd35adfc1fdd3285019be15eea0758f76e38e1e37a1154fb36
           AIRFLOW__CORE__LOAD_EXAMPLES: 0
           AIRFLOW_CONN_CF_URI: http://airflow:Airflow_test_password1@localhost:5050
-      - name: Diagnose DAG import errors
-        run: |
-          cd ../..
-          cd cornflow-server
-          afvenv/bin/airflow dags list-import-errors || true
-        env:
-          AIRFLOW_HOME: ${{ github.workspace }}/cornflow-server/airflow_config
-          AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: sqlite:///${{ github.workspace }}/cornflow-server/airflow_config/airflow.db
-          AIRFLOW__CORE__DAGS_FOLDER: ${{ github.workspace }}/cornflow-server/airflow_config/dags
       - name: Wait for Airflow DAGs
         run: |
-          # Tests run only after solve_model_dag exists in REST API; reserialize in previous step writes DAGs to DB
-          set -e
-          cd ../..
-          cd cornflow-server
-          export AIRFLOW_HOME="${{ github.workspace }}/cornflow-server/airflow_config"
-          export AIRFLOW__CORE__DAGS_FOLDER="${AIRFLOW_HOME}/dags"
-          export AIRFLOW__DATABASE__SQL_ALCHEMY_CONN="sqlite:///${AIRFLOW_HOME}/airflow.db"
-          echo "AIRFLOW_HOME=$AIRFLOW_HOME"
-          echo "AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=$AIRFLOW__DATABASE__SQL_ALCHEMY_CONN"
-          echo "dags_folder=$(afvenv/bin/airflow config get-value core dags_folder 2>/dev/null || true)"
-          echo "Waiting for Airflow API /api/v1/health..."
-          for i in $(seq 1 30); do
-            if curl -sf -u admin:admin "http://127.0.0.1:8080/api/v1/health" >/dev/null; then
-              echo "Airflow API healthy"
-              break
-            fi
-            sleep 5
-          done
-          echo "Waiting for solve_model_dag in REST API..."
-          for i in $(seq 1 30); do
+          for i in $(seq 1 24); do
             if curl -sf -u admin:admin "http://127.0.0.1:8080/api/v1/dags/solve_model_dag" -o /dev/null -w "%{http_code}" | grep -q 200; then
-              echo "solve_model_dag found (REST API)"
+              echo "solve_model_dag available"
               exit 0
             fi
             sleep 10
           done
-          echo "solve_model_dag NOT found in API. Diagnostics:"
-          echo "--- API /api/v1/dags?limit=200 ---"
-          curl -s -u admin:admin "http://127.0.0.1:8080/api/v1/dags?limit=200" | head -200 || true
-          echo "--- tail scheduler.log ---"
-          tail -200 scheduler.log 2>/dev/null || true
-          echo "--- tail webserver.log ---"
-          tail -200 webserver.log 2>/dev/null || true
-          echo "--- airflow dags list ---"
-          afvenv/bin/airflow dags list | head -200 || true
-          echo "--- airflow dags list-import-errors ---"
-          afvenv/bin/airflow dags list-import-errors || true
+          echo "solve_model_dag not in API"
+          curl -s -u admin:admin "http://127.0.0.1:8080/api/v1/dags?limit=50" || true
           exit 1
         env:
           AIRFLOW_HOME: ${{ github.workspace }}/cornflow-server/airflow_config
