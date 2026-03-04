@@ -75,6 +75,7 @@ jobs:
           cd ../..
           mkdir -p cornflow-server/airflow_config/dags
           cp -r cornflow-dags/DAG/* cornflow-server/airflow_config/dags/
+          cp cornflow-dags/pyproject.toml cornflow-server/airflow_config/
       - name: Create DAG stub files for Airflow discovery
         run: |
           cd ../..

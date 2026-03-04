@@ -64,6 +64,7 @@ jobs:
         run: |
           cd ..
           cp -r cornflow-dags/DAG/* cornflow-server/airflow_config/dags/
+          cp cornflow-dags/pyproject.toml cornflow-server/airflow_config/
       - name: Install dependencies
         run: |
           docker run --volume $GITHUB_WORKSPACE/cornflow-server/airflow_config:/etc/ldap.dist/prepopulate \
