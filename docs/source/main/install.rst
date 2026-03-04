@@ -26,9 +26,8 @@ Then we create a virtual environment and install all the requirements::
 
   cd cornflow
   cd cornflow-server
-  python3 -m venv cenv
-  source cenv/bin/activate
-  pip install -r requirements-dev.txt
+  uv sync --extra dev
+  source .venv/bin/activate
 
 Before running cornflow we have to create some environment variables::
 
@@ -69,7 +68,6 @@ First if we have followed cornflow installation instructions we should exit the 
 Then we move the default DAGs that we have in the repo to the correct folder::
 
   cp -r cornflow-dags/DAG/* cornflow-server/airflow_config/dags/
-  cp cornflow-dags/requirements.txt cornflow-server/airflow_config/
   cd cornflow-server
 
 Now we create a virtual environment and install all the requirements::
@@ -79,11 +77,11 @@ Now we create a virtual environment and install all the requirements::
   AIRFLOW_VERSION=2.7.1
   PYTHON_VERSION="$(python3 --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
   CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
-  pip install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
-  pip install orloge pulp
-  pip install -r airflow_config/requirements.txt
-  pip install -e ../libs/client
-  pip install apache-airflow-providers-google
+  uv pip install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
+  uv pip install orloge pulp
+  uv pip install -e ../cornflow-dags
+  uv pip install -e ../libs/client
+  uv pip install apache-airflow-providers-google
   airflow db init
   airflow users create -u admin -p admin -f admin -l user -r Admin -e admin@airflow.org
   
@@ -164,7 +162,6 @@ and:
 Then we can run the following commands to start up the containers::
 
   cp -r cornflow/cornflow-dags/DAG/* cornflow/cornflow-server/airflow_config/dags/
-  cp cornflow/cornflow-dags/requirements.txt cornflow/cornflow-server/airflow_config/
   docker-compose up -d
 
 Then to stop the containers we can run::

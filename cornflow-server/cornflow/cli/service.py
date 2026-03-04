@@ -372,10 +372,18 @@ def _setup_external_app():
             "************************ NO SSH KEY TO REGISTER ************************"
         )
 
-    # Install requirements for the external app
-    pip_install_cmd = "$(command -v pip) install --user -r requirements.txt"
-    click.echo(f"Running: {pip_install_cmd}")
-    result = subprocess.run(pip_install_cmd, shell=True, capture_output=True, text=True)
+    # Install requirements for the external app (prefer uv if pyproject.toml exists)
+    if os.path.isfile(os.path.join(MAIN_WD, "pyproject.toml")):
+        install_cmd = "uv sync --extra dev"
+        click.echo(f"Running: {install_cmd}")
+        result = subprocess.run(install_cmd, shell=True, cwd=MAIN_WD, capture_output=True, text=True)
+    elif os.path.isfile(os.path.join(MAIN_WD, "requirements.txt")):
+        install_cmd = "uv pip install --user -r requirements.txt"
+        click.echo(f"Running: {install_cmd}")
+        result = subprocess.run(install_cmd, shell=True, cwd=MAIN_WD, capture_output=True, text=True)
+    else:
+        logger.info("No pyproject.toml or requirements.txt found for external app; skipping install")
+        result = subprocess.CompletedProcess(args=[], returncode=0, stdout="", stderr="")
     if result.returncode != 0:
         error(f"Error installing requirements: {result.stderr}")
     else:
@@ -383,8 +391,10 @@ def _setup_external_app():
     time.sleep(5)  # Consider if this sleep is truly necessary
     sys.path.append(MAIN_WD)
 
-    # Add .local path to sys.path so pip --user packages can be found
-    local_lib_path = os.path.expanduser("~/.local/lib/python3.12/site-packages")
+    venv_site = os.path.join(MAIN_WD, ".venv", "lib", f"python{sys.version_info.major}.{sys.version_info.minor}", "site-packages")
+    if os.path.isdir(venv_site) and venv_site not in sys.path:
+        sys.path.insert(0, venv_site)
+    local_lib_path = os.path.expanduser(f"~/.local/lib/python{sys.version_info.major}.{sys.version_info.minor}/site-packages")
     if local_lib_path not in sys.path:
         sys.path.insert(0, local_lib_path)
 

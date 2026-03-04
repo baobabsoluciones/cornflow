@@ -7,7 +7,6 @@ on:
       - 'libs/client/**'
       - '.github/workflows/test_cornflow_client.yml'
       - '!libs/client/README.rst'
-      - '!libs/client/setup.py'
   push:
     branches:
       - master
@@ -15,7 +14,6 @@ on:
       - 'libs/client/**'
       - '.github/workflows/test_cornflow_client.yml'
       - '!libs/client/README.rst'
-      - '!libs/client/setup.py'
 
 jobs:
   unit:
@@ -31,20 +29,22 @@ jobs:
         os: [ubuntu-latest, macOS-latest, windows-latest]
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: latest
+          enable-cache: true
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements-dev.txt
-          pip install .
+        run: uv sync --extra dev
       - name: Test
         run: |
-          coverage run --source=./cornflow_client/ --rcfile=./.coveragerc -m unittest discover -s cornflow_client/tests/unit
-          coverage report -m
+          uv run coverage run -m unittest discover -s cornflow_client/tests/unit
+          uv run coverage report -m
 
   integration:
     name: Run all test suites on cornflow-client
@@ -60,71 +60,95 @@ jobs:
         os: [ubuntu-latest]
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: latest
+          enable-cache: true
       - name: Copy DAG files
         run: |
-          cd ..
-          cd ..
+          cd ../..
+          mkdir -p cornflow-server/airflow_config/dags
           cp -r cornflow-dags/DAG/* cornflow-server/airflow_config/dags/
-          cp cornflow-dags/requirements.txt cornflow-server/airflow_config/
-      - name: Install dependencies
+          cp cornflow-dags/pyproject.toml cornflow-server/airflow_config/
+      - name: Create DAG stub files for Airflow discovery
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements-dev.txt
-          pip install .
+          cd ../..
+          DAGS_DIR="cornflow-server/airflow_config/dags"
+          for pkg in solve_model_dag facility_location knapsack two_dimension_bin_packing rostering tsp vrp bar_cutting roadef graph_coloring; do
+            if [ -d "${DAGS_DIR}/${pkg}" ] && [ ! -f "${DAGS_DIR}/${pkg}.py" ]; then
+              echo "from ${pkg} import *" > "${DAGS_DIR}/${pkg}.py"
+            fi
+          done
+      - name: Install dependencies
+        run: uv sync --extra dev
       - name: Install airflow
         run: |
-          cd ..
-          cd ..
+          cd ../..
           cd cornflow-server
-          python -m venv afvenv
-          source afvenv/bin/activate
+          uv venv afvenv --python "$(which python)"
           AIRFLOW_VERSION=2.9.1
-          PYTHON_VERSION="$(python3 --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
+          PYTHON_VERSION="$(afvenv/bin/python --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
           CLIENT_BRANCH="${{ github.head_ref || github.ref_name }}"
           CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
-          python -m pip install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
-          python -m pip install -U orloge pulp
-          python -m pip install -U -r airflow_config/requirements.txt
-          python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
-          airflow db init
-          airflow users create -u admin -f admin -l admin -r Admin -p admin -e admin@example.org
-          airflow webserver -p 8080 &
-          airflow scheduler &
-          deactivate
-          sleep 5s
+          uv pip install --python afvenv/bin/python "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
+          uv pip install --python afvenv/bin/python orloge pulp
+          uv pip install --python afvenv/bin/python "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
+          uv pip install --python afvenv/bin/python -e "$GITHUB_WORKSPACE/cornflow-dags"
+          afvenv/bin/airflow db init
+          afvenv/bin/airflow users create -u admin -f admin -l admin -r Admin -p admin -e admin@example.org
+          afvenv/bin/airflow dags reserialize
+          afvenv/bin/airflow webserver -p 8080 &
+          afvenv/bin/airflow scheduler &
+          sleep 45
         env:
           AIRFLOW__SCHEDULER__CATCHUP_BY_DEFAULT: 0
-          AIRFLOW_HOME: '${GITHUB_WORKSPACE}/cornflow-server/airflow_config'
+          AIRFLOW_HOME: ${{ github.workspace }}/cornflow-server/airflow_config
+          AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: sqlite:///${{ github.workspace }}/cornflow-server/airflow_config/airflow.db
+          AIRFLOW__CORE__DAGS_FOLDER: ${{ github.workspace }}/cornflow-server/airflow_config/dags
           AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 0
           AIRFLOW__API__AUTH_BACKEND: airflow.api.auth.backend.basic_auth
           AIRFLOW__WEBSERVER__SECRET_KEY: e9adafa751fd35adfc1fdd3285019be15eea0758f76e38e1e37a1154fb36
           AIRFLOW__CORE__LOAD_EXAMPLES: 0
           AIRFLOW_CONN_CF_URI: http://airflow:Airflow_test_password1@localhost:5050
+      - name: Wait for Airflow DAGs
+        run: |
+          for i in $(seq 1 24); do
+            if curl -sf -u admin:admin "http://127.0.0.1:8080/api/v1/dags/solve_model_dag" -o /dev/null -w "%{http_code}" | grep -q 200; then
+              echo "solve_model_dag available"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "solve_model_dag not in API"
+          curl -s -u admin:admin "http://127.0.0.1:8080/api/v1/dags?limit=50" || true
+          exit 1
+        env:
+          AIRFLOW_HOME: ${{ github.workspace }}/cornflow-server/airflow_config
+          AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: sqlite:///${{ github.workspace }}/cornflow-server/airflow_config/airflow.db
+          AIRFLOW__CORE__DAGS_FOLDER: ${{ github.workspace }}/cornflow-server/airflow_config/dags
       - name: Run cornflow
         run: |
-          cd ..
-          cd ..
+          cd ../..
           cd cornflow-server
-          python -m venv cfvenv
-          source cfvenv/bin/activate
-          python -m pip install -U -r requirements.txt
+          uv sync --extra dev
           CLIENT_BRANCH="${{ github.head_ref || github.ref_name }}"
-          python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
-          flask db upgrade -d cornflow/migrations/
-          flask access_init
-          flask register_deployed_dags -r http://127.0.0.1:8080 -u admin -p admin
-          flask create_admin_user -u admin -e admin@cornflow.org -p Adminpassword1!
-          flask create_service_user -u airflow -e airflow@cornflow.org -p Airflow_test_password1
-          flask create_base_user -u user -e user@cornflow.org -p UserPassword1!
-          flask register_dag_permissions -o 1
-          flask run -p 5050 &
-          deactivate
-          sleep 5s
+          uv pip uninstall cornflow-client
+          uv pip install "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
+          uv run flask db upgrade -d cornflow/migrations/
+          uv run flask access_init
+          uv run flask register_deployed_dags -r http://127.0.0.1:8080 -u admin -p admin
+          uv run flask create_admin_user -u admin -e admin@cornflow.org -p Adminpassword1!
+          uv run flask create_service_user -u airflow -e airflow@cornflow.org -p Airflow_test_password1
+          uv run flask create_base_user -u user -e user@cornflow.org -p UserPassword1!
+          uv run flask register_dag_permissions -o 1
+          uv run flask run -p 5050 &
+          sleep 5
         env:
           FLASK_ENV: testing
           FLASK_APP: cornflow.app
@@ -139,13 +163,13 @@ jobs:
           SIGNUP_ACTIVATED: 1
       - name: Run unit tests
         run: |
-          coverage run --source=./cornflow_client/ --rcfile=./.coveragerc -m unittest discover -s cornflow_client/tests/unit
-          coverage report -m
+          uv run coverage run -m unittest discover -s cornflow_client/tests/unit
+          uv run coverage report -m
       - name: Run integration tests
         run: |
-          coverage run -a --source=./cornflow_client/ --rcfile=./.coveragerc -m unittest discover -s cornflow_client/tests/integration
-          coverage report -m
-          coverage xml
+          uv run coverage run -a -m unittest discover -s cornflow_client/tests/integration
+          uv run coverage report -m
+          uv run coverage xml
       - name: Upload coverage to codecov
         uses: codecov/codecov-action@v3
         with:

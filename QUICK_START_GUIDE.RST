@@ -74,13 +74,14 @@ From then, you can install the **cornflow-client** package, required to use corn
 
 .. code-block:: console
   
-    python -m pip install cornflow-client
+    uv pip install cornflow-client
     
-For cornflow-server, you will also need the dependencies in requirements.txt:
+For cornflow-server, install from source with:
 
 .. code-block:: console
 
-    python -m pip install -r cornflow-server/requirements-dev.txt
+    cd cornflow-server
+    uv sync --extra dev
 
 .. raw:: html
 
@@ -96,17 +97,17 @@ To run cornflow-server, you need Linux or Windows with WSL installed.
   <details open>
     <summary>Apache-Airflow</summary>
 
-cornflow-server needs a running airflow server to operate. Once your virtual environment is activated, you can install airflow with pip: 
+cornflow-server needs a running airflow server to operate. Once your virtual environment is activated, you can install airflow with uv: 
 
 .. code-block:: shell
 
-  pip install "apache-airflow==2.1.0" --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-2.1.0/constraints-${YOUR_PYTHON_VERSION}.txt"
+  uv pip install "apache-airflow==2.1.0" --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-2.1.0/constraints-${YOUR_PYTHON_VERSION}.txt"
 
 You will then need to install the defaults workers dependencies, to initialize the database and to create an admin user. From the :code:`/cornflow-server` repository, run:
 
 .. code-block:: shell
 
-  pip install orloge cornflow_client pulp
+  uv pip install orloge cornflow_client pulp
   export AIRFLOW_HOME="$PWD/airflow_config"
   airflow db init
   airflow users create \

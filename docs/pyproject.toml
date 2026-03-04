@@ -1,0 +1,18 @@
+[project]
+name = "cornflow-docs"
+version = "1.3.0"
+description = "Cornflow documentation build"
+requires-python = ">=3.10,<3.13"
+dependencies = [
+    "setuptools>=60,<75",
+    "sphinx",
+    "shibuya",
+    "sphinxcontrib-redoc",
+    "sphinx_design",
+    "cornflow",
+    "cornflow-client",
+]
+
+[tool.uv.sources]
+cornflow = { path = "../cornflow-server" }
+cornflow-client = { path = "../libs/client" }

@@ -1,21 +1,27 @@
+import re
+
 from cornflow.endpoints import LicensesEndpoint
 from cornflow.tests.const import LICENSES_URL, _get_file
 from cornflow.tests.custom_test_case import CustomTestCase
 
 
+def _parse_dependency_name(spec):
+    spec = spec.split(";")[0].strip().strip('"')
+    return re.split(r"\[|==|>=|<=|>|<|~=|!=", spec)[0].lower()
+
+
 class TestLicensesListEndpoint(CustomTestCase):
     @staticmethod
     def read_requirements():
-        with open(_get_file("../../requirements.txt")) as req:
-            content = req.read()
-            requirements = content.split("\n")
-
-        requirements = [
-            r.split("=")[0].split(">")[0].split("<")[0].split("@")[0].lower()
-            for r in requirements
-            if r != "" and not r.startswith("#")
-        ]
-        return requirements
+        pyproject_path = _get_file("../../pyproject.toml")
+        try:
+            import tomllib
+        except ImportError:
+            import tomli as tomllib
+        with open(pyproject_path, "rb") as f:
+            data = tomllib.load(f)
+        deps = data.get("project", {}).get("dependencies", [])
+        return [_parse_dependency_name(d) for d in deps]
 
     def setUp(self):
         super().setUp()
