@@ -13,7 +13,7 @@ def _parse_dependency_name(spec):
 class TestLicensesListEndpoint(CustomTestCase):
     @staticmethod
     def read_requirements():
-        pyproject_path = _get_file("../../../pyproject.toml")
+        pyproject_path = _get_file("../../pyproject.toml")
         try:
             import tomllib
         except ImportError:
