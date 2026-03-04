@@ -506,7 +506,7 @@ class RawCornFlow(object):
 
     @ask_token
     @prepare_encoding
-    def write_case_checks(self, case_id, encoding=None, **kwargs):
+    def write_case_checks_kpis(self, case_id, encoding=None, **kwargs):
         """"""
         return self.put_api_for_id(
             "dag/case/", id=case_id, encoding=encoding, payload=kwargs

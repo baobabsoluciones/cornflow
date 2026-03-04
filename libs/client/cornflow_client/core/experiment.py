@@ -84,6 +84,26 @@ class ExperimentCore(CheckCore, ABC):
             )
         return checks
 
+    def kpis(self) -> dict:
+        """
+        Method that generates KPIs for the solution and validates the result against the schema_kpis
+        """
+        # generate_kpis method always exists since it is implemented in the ExperimentCore class
+        print("Generating KPIs...")
+        kpis = self.generate_kpis()
+        print("KPIs results: ")
+        from pprint import pprint
+
+        pprint(kpis)
+        print("Validating KPIs...")
+        validator = Draft7Validator(self.schema_kpis)
+        if not validator.is_valid(kpis):
+            raise BadSolutionChecks(
+                f"The solution KPIs do not match the schema: {[e for e in validator.iter_errors(kpis)]}"
+            )
+        print("KPIs are valid.")
+        return kpis
+
     def check(self) -> Dict[str, Union[List, Dict]]:
         """
         Method that runs all the checks for the solution.
@@ -116,6 +136,42 @@ class ExperimentCore(CheckCore, ABC):
         """
         A dictionary representation of the json-schema for the dictionary returned by
             the method ExperimentCore.check_solution()
+        """
+        raise NotImplementedError()
+
+    def _get_kpis_generation_methods(self) -> list:
+        """
+        Finds all class methods starting with kpis_ and returns them in a list.
+
+        :return: A list of KPIs methods.
+        """
+        return [
+            m for m in dir(self) if m.startswith("kpis_") and callable(getattr(self, m))
+        ]
+
+    def generate_kpis(self) -> Dict[str, Union[List, Dict]]:
+        """
+        Method that generates KPIs for the solution. By default, launches all methods
+        starting with kpis_ and returns the result in a dictionary.
+
+        This method can be overridden by the user to modify the behaviour of the KPI generation
+        if wanted.
+
+        :return: a dictionary of lists of dictionaries. Each list represents a table of KPIs.
+            Each of the elements inside represents one row of that particular table.
+        """
+        kpis = {}
+        for method in self._get_kpis_generation_methods():
+            kpis[method[5:]] = getattr(self, method)()
+        kpis = {k: v for k, v in kpis.items() if v is not None and len(v)}
+        return kpis
+
+    @property
+    @abstractmethod
+    def schema_kpis(self) -> dict:
+        """
+        A dictionary representation of the json-schema for the dictionary returned by
+            the method ExperimentCore.generate_kpis()
         """
         raise NotImplementedError()
 

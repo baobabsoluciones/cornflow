@@ -19,6 +19,9 @@ class Experiment(ExperimentCore):
     schema_checks = load_json(
         os.path.join(os.path.dirname(__file__), "../schemas/solution_checks.json")
     )
+    schema_kpis = load_json(
+        os.path.join(os.path.dirname(__file__), "../schemas/kpis.json")
+    )
 
     def __init__(self, instance: Instance, solution: Solution = None) -> None:
         ExperimentCore.__init__(self, instance=instance, solution=solution)
@@ -306,3 +309,34 @@ class Experiment(ExperimentCore):
                 for ts, employees in self.solution.get_ts_employee().items()
             ]
         )
+
+    def kpis_globals(self):
+        """
+        Returns a dictionary with global KPIs for the solution.
+        """
+        print("Calculating global KPIs...")
+        return self.get_indicators()
+
+    def kpis_mean_demand_per_employee(self):
+        """
+        Returns a list of dictionaries with the mean demand per employees for each time slot.
+        :return: [{"time_slot": "2021-09-06T07:00", "mean_demand": 2.5}, ...]
+        """
+        print("Calculating mean demand per employee for each time slot...")
+        demand = self.instance.get_demand()
+        return [
+            {"time_slot": ts, "mean_demand": demand[ts] / len(employees)}
+            for ts, employees in self.solution.get_ts_employee().items()
+        ]
+
+    def kpis_one_employee_timeslots(self):
+        """
+        Returns the time slots where only one employee is working.
+        :return: [{"time_slot": "2021-09-06T07:00"}, ...]
+        """
+        print("Calculating time slots where only one employee is working...")
+        return [
+            {"time_slot": ts}
+            for ts, employees in self.solution.get_ts_employee().items()
+            if len(employees) == 1
+        ]

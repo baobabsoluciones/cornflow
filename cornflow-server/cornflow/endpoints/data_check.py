@@ -87,7 +87,10 @@ def _run_airflow_data_check(
     # Run the DAG
     try:
         response = af_client.run_workflow(
-            execution.id, workflow_name=schema, checks_only=True, **run_dag_kwargs
+            execution.id,
+            workflow_name=schema,
+            checks_and_kpis_only=True,
+            **run_dag_kwargs,
         )
     except AirflowError as err:
         error = f"{AIRFLOW_ERROR_MSG} {err}"
@@ -109,7 +112,7 @@ def _run_airflow_data_check(
     execution.update_state(EXEC_STATE_QUEUED)
 
 
-class DataCheckExecutionEndpoint(BaseMetaResource):
+class DataCheckKPIsExecutionEndpoint(BaseMetaResource):
     """
     Endpoint used to execute the instance and solution checks on an execution
     """
@@ -222,7 +225,7 @@ class DataCheckInstanceEndpoint(BaseMetaResource):
                 + err,
             )
         payload = dict(
-            config=dict(checks_only=True),
+            config=dict(checks_and_kpis_only=True),
             instance_id=instance.id,
             name=f"data_check_instance_{instance.name}",
             schema=instance.schema,
@@ -250,7 +253,7 @@ class DataCheckInstanceEndpoint(BaseMetaResource):
         return execution, 201
 
 
-class DataCheckCaseEndpoint(BaseMetaResource):
+class DataCheckCaseKPIsEndpoint(BaseMetaResource):
     """
     Endpoint used to execute the instance and solution checks on an execution
     """
@@ -327,7 +330,7 @@ class DataCheckCaseEndpoint(BaseMetaResource):
             instance, _ = self.post_list(data=instance_payload)
 
         payload = dict(
-            config=dict(checks_only=True),
+            config=dict(checks_and_kpis_only=True),
             instance_id=instance.id,
             name=f"data_check_case_{case.name}",
             schema=schema,

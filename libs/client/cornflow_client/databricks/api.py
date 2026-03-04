@@ -2,12 +2,17 @@
 Python class to implement the Databricks client wrapper
 """
 
+# Full imports
 import requests
-from flask import current_app
-from cornflow_client.constants import config_orchestrator
+import warnings
 
-from cornflow_client.constants import DatabricksError
+# Partial imports
+from flask import current_app
+
+# Imports from modules
 from cornflow_client.constants import (
+    config_orchestrator,
+    DatabricksError,
     DATABRICKS_TERMINATE_STATE,
     DATABRICKS_FINISH_TO_STATE_MAP,
 )
@@ -79,18 +84,28 @@ class Databricks:
         self,
         execution_id,
         workflow_name=config_orchestrator["databricks"]["def_schema"],
-        checks_only=False,
+        checks_only=None,
+        checks_and_kpis_only=False,
         case_id=None,
     ):
         """
         Run a job in Databricks
         """
+        if checks_only is not None:
+            warnings.warn(
+                "The parameter checks_only is deprecated and will be removed in future versions. "
+                "Please use 'checks_and_kpis_only' instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            checks_and_kpis_only = checks_only
+
         url = f"{self.url}/api/2.1/jobs/run-now/"
         #   Entender cómo se usa checks_only
         payload = dict(
             job_id=workflow_name,
             job_parameters=dict(
-                checks_only=checks_only,
+                checks_and_kpis_only=checks_and_kpis_only,
                 execution_id=execution_id,
             ),
         )

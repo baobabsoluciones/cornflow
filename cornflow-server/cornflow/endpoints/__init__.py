@@ -27,9 +27,9 @@ from .dag import (
     DeployedDagDetailEndpoint,
 )
 from .data_check import (
-    DataCheckExecutionEndpoint,
+    DataCheckKPIsExecutionEndpoint,
     DataCheckInstanceEndpoint,
-    DataCheckCaseEndpoint,
+    DataCheckCaseKPIsEndpoint,
 )
 from .example_data import ExampleDataListEndpoint, ExampleDataDetailEndpoint
 from .execution import (
@@ -73,18 +73,18 @@ resources = [
         resource=InstanceFileEndpoint, urls="/instancefile/", endpoint="instance-file"
     ),
     dict(
-        resource=DataCheckExecutionEndpoint,
-        urls="/data-check/execution/<string:idx>/",
+        resource=DataCheckKPIsExecutionEndpoint,
+        urls="/data-check-kpis/execution/<string:idx>/",
         endpoint="data-check-execution",
     ),
     dict(
         resource=DataCheckInstanceEndpoint,
-        urls="/data-check/instance/<string:idx>/",
+        urls="/data-check-kpis/instance/<string:idx>/",
         endpoint="data-check-instance",
     ),
     dict(
-        resource=DataCheckCaseEndpoint,
-        urls="/data-check/case/<int:idx>/",
+        resource=DataCheckCaseKPIsEndpoint,
+        urls="/data-check-kpis/case/<int:idx>/",
         endpoint="data-check-case",
     ),
     dict(

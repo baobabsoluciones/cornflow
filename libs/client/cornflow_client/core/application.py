@@ -80,6 +80,24 @@ class ApplicationCore(ABC):
         return None
 
     @property
+    def default_args_checks_kpis(self) -> Union[Dict, None]:
+        """
+        Optional property
+
+        :return: the default args for the DAG for checks and kpis generation
+        """
+        return None
+
+    @property
+    def extra_args_checks_kpis(self) -> Union[Dict, None]:
+        """
+        Optional property
+
+        :return: dictionary with optional arguments for the DAG for checks and kpis generation
+        """
+        return None
+
+    @property
     @abstractmethod
     def instance(self) -> Type[InstanceCore]:
         """
@@ -261,17 +279,23 @@ class ApplicationCore(ABC):
 
         final_sol_dict = algo.solution.to_dict()
         solution_checks = None
+        kpis = None
 
         # Perform data checks only if a valid solution dict was obtained
         # and the solver implements data_checks
         # Checks for non-None and non-empty dict
         if final_sol_dict:
-            solution_checks = algo.data_checks()
+            solution_checks = SuperDict(algo.data_checks()).vfilter(lambda v: len(v))
 
-        return final_sol_dict, solution_checks
+            # Generate KPIs only if there are no solution checks
+            #   (i.e., no issues found in the solution)
+            if not solution_checks:
+                kpis = algo.kpis()
+
+        return final_sol_dict, solution_checks, kpis
 
     def _format_log_and_solution(self, algo, output, solver_name, elapsed_time):
-        """Formats logs, validates and checks the solution."""
+        """Formats logs, validates and checks the solution, generates the kpis"""
 
         # 1. Build initial log dictionary
         log_json = self._build_base_log_json(output, solver_name, elapsed_time)
@@ -287,11 +311,14 @@ class ApplicationCore(ABC):
         # 4. Validate and check solution if feasible/optimal
         final_sol_dict = None
         solution_checks = None
+        kpis = None
         if final_sol_code > 0:
             # Raises BadSolution if schema validation fails
-            final_sol_dict, solution_checks = self._validate_and_check_solution(algo)
+            final_sol_dict, solution_checks, kpis = self._validate_and_check_solution(
+                algo
+            )
 
-        return final_sol_dict, solution_checks, log_txt, log_json
+        return final_sol_dict, solution_checks, kpis, log_txt, log_json
 
     def solve(
         self, data: dict, config: dict, solution_data: dict = None
@@ -335,24 +362,24 @@ class ApplicationCore(ABC):
         )
 
         # 5. Format log and process solution
-        sol_final, solution_checks, log_txt, log_json = self._format_log_and_solution(
-            algo, output, solver_name, elapsed_time
+        sol_final, solution_checks, kpis, log_txt, log_json = (
+            self._format_log_and_solution(algo, output, solver_name, elapsed_time)
         )
 
         # Ensure solution is an empty dict if None for type consistency
         if sol_final is None:
             sol_final = dict()
 
-        return sol_final, solution_checks, instance_checks, log_txt, log_json
+        return sol_final, solution_checks, instance_checks, kpis, log_txt, log_json
 
-    def check(
+    def check_generate_kpis(
         self, instance_data: dict, solution_data: dict = None
-    ) -> Tuple[Dict, Dict, Dict]:
+    ) -> Tuple[Dict, Dict, Dict, Dict]:
         """
-        Checks the instance and solution data
+        Checks the instance and solution data and generates KPIs
         :param instance_data: json data of the instance
         :param solution_data: json data of the solution
-        :return: instance checks, solution checks, log
+        :return: instance checks, solution checks, kpis, log
         """
         solver = self.get_default_solver_name()
         solver_class = self.get_solver(name=solver)
@@ -366,10 +393,17 @@ class ApplicationCore(ABC):
             sol = self.solution.from_dict(solution_data)
             algo = solver_class(inst, sol)
             start = timer()
-            solution_checks = algo.data_checks()
+            solution_checks = SuperDict(algo.data_checks()).vfilter(lambda v: len(v))
+            kpis = None
+
+            # Generate KPIs only if there are no solution checks
+            #   (i.e., no issues found in the solution)
+            if not solution_checks:
+                kpis = algo.kpis()
         else:
             start = timer()
             solution_checks = None
+            kpis = None
 
         log = dict(
             time=timer() - start,
@@ -379,7 +413,7 @@ class ApplicationCore(ABC):
             sol_code=SOLUTION_STATUS_FEASIBLE,
         )
 
-        return instance_checks, solution_checks, log
+        return instance_checks, solution_checks, kpis, log
 
     def get_solver(self, name: str = "default") -> Union[Type[ExperimentCore], None]:
         """

@@ -19,8 +19,8 @@ from requests.auth import HTTPBasicAuth
 from requests.exceptions import ConnectionError, HTTPError
 
 # Imports from modules
-from cornflow_client.constants import AirflowError
-from cornflow_client.constants import config_orchestrator
+from cornflow_client.airflow.dag_utilities import get_workflow_name_check_kpis
+from cornflow_client.constants import AirflowError, config_orchestrator
 
 
 class Airflow(object):
@@ -113,7 +113,8 @@ class Airflow(object):
         self,
         execution_id,
         workflow_name=config_orchestrator["airflow"]["def_schema"],
-        checks_only=False,
+        checks_only=None,
+        checks_and_kpis_only=False,
         case_id=None,
     ):
         """
@@ -121,18 +122,34 @@ class Airflow(object):
 
         :param execution_id: The ID of the execution
         :param workflow_name: The name of the DAG
-        :param checks_only: Whether to run the checks only
+        :param checks_and_kpis_only: Whether to run the checks and KPIs only
         :param case_id: The ID of the case
         :return: The response
         """
-        conf = dict(exec_id=execution_id, checks_only=checks_only)
+        if checks_only is not None:
+            warnings.warn(
+                "The parameter checks_only is deprecated and will be removed in future versions. "
+                "Please use 'checks_and_kpis_only' instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            checks_and_kpis_only = checks_only
+
+        conf = dict(exec_id=execution_id, checks_and_kpis_only=checks_and_kpis_only)
+        if checks_and_kpis_only:
+            workflow_name = get_workflow_name_check_kpis(workflow_name)
         if case_id is not None:
             conf["case_id"] = case_id
         payload = dict(conf=conf)
         return self.consume_dag_run(workflow_name, payload=payload, method="POST")
 
     def run_dag(
-        self, execution_id, dag_name="solve_model_dag", checks_only=False, case_id=None
+        self,
+        execution_id,
+        dag_name="solve_model_dag",
+        checks_only=None,
+        checks_and_kpis_only=False,
+        case_id=None,
     ):
         """
         Run workflow.
@@ -141,7 +158,8 @@ class Airflow(object):
 
         :param execution_id: The ID of the execution
         :param dag_name: The name of the DAG
-        :param checks_only: Whether to run the checks only
+        :param checks_only: Whether to run the checks only. Deprecated.
+        :param checks_and_kpis_only: Whether to run the checks and KPIs only
         :param case_id: The ID of the case
         :return: The response
         """
@@ -155,6 +173,7 @@ class Airflow(object):
             execution_id,
             workflow_name=dag_name,
             checks_only=checks_only,
+            checks_and_kpis_only=checks_and_kpis_only,
             case_id=case_id,
         )
 

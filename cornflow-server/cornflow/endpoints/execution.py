@@ -149,6 +149,7 @@ class ExecutionEndpoint(OrchestratorMixin):
             execution
             for execution in executions
             if not execution.config.get("checks_only", False)
+            and not execution.config.get("checks_and_kpis_only", False)
         ]
 
         running_executions = [
