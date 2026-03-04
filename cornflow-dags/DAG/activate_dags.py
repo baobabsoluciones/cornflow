@@ -58,7 +58,7 @@ def create_check_kpis_dag(app):
     if app.default_args_checks_kpis is not None:
         default_args_checks_kpis = app.default_args_checks_kpis
     else:
-        default_args_checks_kpis = utils.default_args_checks_kpis
+        default_args_checks_kpis = utils.default_args
 
     kwargs_checks_kpis = {}
     if app.extra_args_checks_kpis is not None:

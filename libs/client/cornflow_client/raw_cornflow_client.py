@@ -384,7 +384,7 @@ class RawCornFlow(object):
     @log_call
     @ask_token
     @prepare_encoding
-    def create_execution_data_check(
+    def create_execution_data_check_kpis(
         self,
         execution_id,
         encoding=None,
@@ -397,7 +397,7 @@ class RawCornFlow(object):
         :param str encoding: the type of encoding used in the call. Defaults to 'br'
         :param bool run: if the execution should be run or not
         """
-        api = "data-check/execution/"
+        api = "data-check-kpis/execution/"
         post_url = ""
         if not run:
             post_url = "?run=0"
@@ -427,7 +427,7 @@ class RawCornFlow(object):
         :param str encoding: the type of encoding used in the call. Defaults to 'br'
         :param bool run: if the execution should be run or not
         """
-        api = "data-check/instance/"
+        api = "data-check-kpis/instance/"
         post_url = ""
         if not run:
             post_url = "?run=0"
@@ -444,7 +444,7 @@ class RawCornFlow(object):
     @log_call
     @ask_token
     @prepare_encoding
-    def create_case_data_check(
+    def create_case_data_check_kpis(
         self,
         case_id,
         encoding=None,
@@ -457,7 +457,7 @@ class RawCornFlow(object):
         :param str encoding: the type of encoding used in the call. Defaults to 'br'
         :param bool run: if the execution should be run or not
         """
-        api = "data-check/case/"
+        api = "data-check-kpis/case/"
         post_url = ""
         if not run:
             post_url = "?run=0"
