@@ -160,13 +160,12 @@ class ExperimentCore(CheckCore, ABC):
         return kpis
 
     @property
-    @abstractmethod
     def schema_kpis(self) -> dict:
         """
         A dictionary representation of the json-schema for the dictionary returned by
             the method ExperimentCore.generate_kpis()
         """
-        raise NotImplementedError()
+        return {}
 
     @staticmethod
     def get_solver_config(
