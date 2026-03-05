@@ -27,7 +27,9 @@ class CornFlow:
         self.write_instance_checks = self.expect_status(
             self.raw.write_instance_checks, 200
         )
-        self.write_case_checks_kpis = self.expect_status(self.raw.write_case_checks_kpis, 200)
+        self.write_case_checks_kpis = self.expect_status(
+            self.raw.write_case_checks_kpis, 200
+        )
         self.stop_execution = self.expect_status(self.raw.stop_execution, 200)
         self.manual_execution = self.expect_status(self.raw.manual_execution, 201)
         self.get_results = self.expect_status(self.raw.get_results, 200)

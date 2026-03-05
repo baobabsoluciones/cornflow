@@ -390,7 +390,9 @@ class ExecutionRelaunchEndpoint(OrchestratorMixin):
                 + err,
             )
 
-        execution.update({"checks": None})
+        execution.update(
+            {"checks": None, "kpis": None, "last_run_checks_and_kpis": False}
+        )
 
         # If the execution is still running or queued, raise an error
         if execution.state == 0 or execution.state == -7:
@@ -577,7 +579,9 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
             )
 
         self.orch_client.set_dag_run_to_fail(
-            dag_name=execution.schema, run_id=execution.run_id
+            dag_name=execution.schema,
+            run_id=execution.run_id,
+            checks_and_kpis_workflow=execution.last_run_checks_and_kpis,
         )
         # We should check if the execution has been stopped
         execution.update_state(EXEC_STATE_STOPPED)
@@ -653,7 +657,11 @@ class ExecutionStatusEndpoint(OrchestratorMixin):
                 + error,
             )
         try:
-            state = self.orch_client.get_run_status(schema, run_id)
+            state = self.orch_client.get_run_status(
+                schema,
+                run_id,
+                checks_and_kpis_workflow=execution.last_run_checks_and_kpis,
+            )
         except self.orch_error as err:
             error = self.orch_const["name"] + f" responded with an error: {err}"
             _raise_af_error(
