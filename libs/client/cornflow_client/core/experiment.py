@@ -89,19 +89,12 @@ class ExperimentCore(CheckCore, ABC):
         Method that generates KPIs for the solution and validates the result against the schema_kpis
         """
         # generate_kpis method always exists since it is implemented in the ExperimentCore class
-        print("Generating KPIs...")
         kpis = self.generate_kpis()
-        print("KPIs results: ")
-        from pprint import pprint
-
-        pprint(kpis)
-        print("Validating KPIs...")
         validator = Draft7Validator(self.schema_kpis)
         if not validator.is_valid(kpis):
             raise BadSolutionChecks(
                 f"The solution KPIs do not match the schema: {[e for e in validator.iter_errors(kpis)]}"
             )
-        print("KPIs are valid.")
         return kpis
 
     def check(self) -> Dict[str, Union[List, Dict]]:

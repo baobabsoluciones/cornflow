@@ -372,8 +372,6 @@ class ExecutionRelaunchEndpoint(OrchestratorMixin):
         :rtype: Tuple(dict, integer)
         """
         config = current_app.config
-        if "schema" not in kwargs:
-            kwargs["schema"] = self.orch_const["def_schema"]
 
         self.put_detail(
             data=dict(config=kwargs["config"]), user=self.get_user(), idx=idx
@@ -389,6 +387,7 @@ class ExecutionRelaunchEndpoint(OrchestratorMixin):
                 log_txt=f"Error while user {self.get_user()} tries to relaunch execution {idx}. "
                 + err,
             )
+        schema = execution.schema
 
         execution.update(
             {"checks": None, "kpis": None, "last_run_checks_and_kpis": False}
@@ -407,7 +406,7 @@ class ExecutionRelaunchEndpoint(OrchestratorMixin):
 
         # Validate config before running the dag
         config_schema = DeployedWorkflow.get_one_schema(
-            config, kwargs["schema"], CONFIG_SCHEMA
+            config, schema, CONFIG_SCHEMA
         )
         config_errors = json_schema_validate_as_string(config_schema, kwargs["config"])
         if config_errors:
@@ -416,7 +415,6 @@ class ExecutionRelaunchEndpoint(OrchestratorMixin):
                 log_txt=f"Error while user {self.get_user()} tries to relaunch execution {idx}. "
                 f"Configuration data does not match the jsonschema.",
             )
-        schema = execution.schema
 
         # Check if orchestrator is alive
         if not self.orch_client.is_alive(config=current_app.config):
