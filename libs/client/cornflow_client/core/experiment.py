@@ -2,9 +2,9 @@
 Base code for the experiment template.
 """
 
-import logging as log
 from abc import ABC, abstractmethod
 from typing import List, Dict, Union, Tuple
+import logging as log
 
 from jsonschema import Draft7Validator
 
@@ -12,6 +12,7 @@ from cornflow_client.constants import (
     PARAMETER_SOLVER_TRANSLATING_MAPPING,
     SOLVER_CONVERTER,
     BadSolutionChecks,
+    BadKPIs,
 )
 from .instance import InstanceCore
 from .instance_solution import CheckCore
@@ -92,7 +93,7 @@ class ExperimentCore(CheckCore, ABC):
         kpis = self.generate_kpis()
         validator = Draft7Validator(self.schema_kpis)
         if not validator.is_valid(kpis):
-            raise BadSolutionChecks(
+            raise BadKPIs(
                 f"The solution KPIs do not match the schema: {[e for e in validator.iter_errors(kpis)]}"
             )
         return kpis
@@ -172,7 +173,19 @@ class ExperimentCore(CheckCore, ABC):
         """
         kpis = {}
         for method in self._get_kpis_generation_methods():
-            kpis[method[5:]] = getattr(self, method)()
+            try:
+                kpis[method[5:]] = getattr(self, method)()
+            except Exception:
+                # If a check fails, add a generic error message
+                kpis[method[5:]] = [
+                    {
+                        "error_type": "KPI generation error",
+                        "error_message": "The generation of the KPI has failed, please contact support",
+                    }
+                ]
+                log.warning(
+                    f"The execution of the check {method} has failed, please contact support"
+                )
         kpis = {k: v for k, v in kpis.items() if v is not None and len(v)}
         return kpis
 

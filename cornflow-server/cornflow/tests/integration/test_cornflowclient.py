@@ -475,7 +475,9 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
     def test_check_execution(self):
         execution = self.create_instance_and_execution()
         time.sleep(20)
-        data_check_execution = self.client.create_execution_data_check(execution["id"])
+        data_check_execution = self.client.create_execution_data_check_kpis(
+            execution["id"]
+        )
         self.assertEqual(data_check_execution["id"], execution["id"])
         status = self.client.get_status(data_check_execution["id"])
         self.assertTrue(
@@ -491,7 +493,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
             payload = json.load(f)
         payload.pop("solution")
         case = self.client.create_case(**payload)
-        data_check_execution = self.client.create_case_data_check(case["id"])
+        data_check_execution = self.client.create_case_data_check_kpis(case["id"])
         status = self.client.get_status(data_check_execution["id"])
         self.assertTrue(
             status["state"] == EXEC_STATE_RUNNING

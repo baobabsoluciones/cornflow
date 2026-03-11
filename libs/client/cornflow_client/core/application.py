@@ -324,7 +324,9 @@ class ApplicationCore(ABC):
 
     def solve(
         self, data: dict, config: dict, solution_data: dict = None
-    ) -> Tuple[Dict, Union[Dict, None], Union[Dict, None], str, Dict]:
+    ) -> Tuple[
+        Dict, Union[Dict, None], Union[Dict, None], Union[Dict, None], str, Dict
+    ]:
         """
         Solves the problem instance using the specified configuration.
 
@@ -356,7 +358,7 @@ class ApplicationCore(ABC):
                 sol_code=SOLUTION_STATUS_INFEASIBLE,
             )
             # Ensure solution dict is empty, not None, consistent with successful returns
-            return dict(), None, instance_checks, "", log_json
+            return dict(), None, instance_checks, None, "", log_json
 
         # 4. Execute solver
         algo, output, solver_name, elapsed_time = self._execute_solver(

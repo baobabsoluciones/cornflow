@@ -340,3 +340,20 @@ class Experiment(ExperimentCore):
             for ts, employees in self.solution.get_ts_employee().items()
             if len(employees) == 1
         ]
+
+    @staticmethod
+    def check_kpis(kpis):
+        """
+        Runs checks on the solution, using the KPIs data.
+        """
+        globals_kpis = kpis["globals"]
+        # Checks that the percentage of time slots where only one employee is working is not too high
+        only_one_employee_percentage = globals_kpis["only_one_employee_percentage"]
+        if only_one_employee_percentage > 80:
+            return {
+                "only_one_employee_percentage": {
+                    "percentage": only_one_employee_percentage,
+                    "message": "The percentage of time slots where only one employee is working is too high. Consider assigning more employees to those time slots.",
+                }
+            }
+        return dict()

@@ -405,9 +405,7 @@ class ExecutionRelaunchEndpoint(OrchestratorMixin):
             }, 201
 
         # Validate config before running the dag
-        config_schema = DeployedWorkflow.get_one_schema(
-            config, schema, CONFIG_SCHEMA
-        )
+        config_schema = DeployedWorkflow.get_one_schema(config, schema, CONFIG_SCHEMA)
         config_errors = json_schema_validate_as_string(config_schema, kwargs["config"])
         if config_errors:
             raise InvalidData(
