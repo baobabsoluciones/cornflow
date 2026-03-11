@@ -4,7 +4,7 @@ Base code for the experiment template.
 
 import logging as log
 from abc import ABC, abstractmethod
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Tuple
 
 from jsonschema import Draft7Validator
 
@@ -97,6 +97,19 @@ class ExperimentCore(CheckCore, ABC):
             )
         return kpis
 
+    def kpis_checks(self, kpis) -> dict:
+        """
+        Method that checks the solution with the KPIs and validates the result against the schema_checks.
+        """
+        # Validate the solution with the KPIs
+        kpis_checks = self.check_kpis(kpis)
+        validator = Draft7Validator(self.schema_checks)
+        if not validator.is_valid(kpis_checks):
+            raise BadSolutionChecks(
+                f"The kpis checks do not match the schema: {[e for e in validator.iter_errors(kpis_checks)]}"
+            )
+        return kpis_checks
+
     def check(self) -> Dict[str, Union[List, Dict]]:
         """
         Method that runs all the checks for the solution.
@@ -139,7 +152,11 @@ class ExperimentCore(CheckCore, ABC):
         :return: A list of KPIs methods.
         """
         return [
-            m for m in dir(self) if m.startswith("kpis_") and callable(getattr(self, m))
+            m
+            for m in dir(self)
+            if m.startswith("kpis_")
+            and callable(getattr(self, m))
+            and m != "kpis_checks"
         ]
 
     def generate_kpis(self) -> Dict[str, Union[List, Dict]]:
@@ -164,6 +181,16 @@ class ExperimentCore(CheckCore, ABC):
         """
         A dictionary representation of the json-schema for the dictionary returned by
             the method ExperimentCore.generate_kpis()
+        """
+        return {}
+
+    def check_kpis(self, kpis: dict) -> dict:
+        """
+        Method that checks the solution with the KPIs. By default, it does not perform any check.
+        This method can be overridden by the user to modify the behavior of the KPI checks
+        if wanted.
+        :return: a dictionary of lists of dictionaries. Each list represents a table of KPI checks.
+        Each of the elements inside represents one row of that particular table.
         """
         return {}
 

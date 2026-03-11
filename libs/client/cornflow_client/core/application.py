@@ -291,6 +291,8 @@ class ApplicationCore(ABC):
             #   (i.e., no issues found in the solution)
             if not solution_checks:
                 kpis = algo.kpis()
+                kpis_checks = algo.kpis_checks(kpis)
+                solution_checks.update(kpis_checks)
 
         return final_sol_dict, solution_checks, kpis
 
@@ -398,8 +400,11 @@ class ApplicationCore(ABC):
 
             # Generate KPIs only if there are no solution checks
             #   (i.e., no issues found in the solution)
+            # Then, run the checks on the KPIs.
             if not solution_checks:
                 kpis = algo.kpis()
+                kpis_checks = algo.kpis_checks(kpis)
+                solution_checks.update(kpis_checks)
         else:
             start = timer()
             solution_checks = None
