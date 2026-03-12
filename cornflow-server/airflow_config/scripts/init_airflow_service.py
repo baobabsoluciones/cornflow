@@ -65,6 +65,30 @@ if os.path.isfile("/usr/local/airflow/.ssh/id_rsa") and CUSTOM_SSH_HOST is not N
 if os.path.isfile("/requirements.txt"):
     os.system("$(command -v pip) install --user -r /requirements.txt")
 
+# Create virtual environments from /requirements/*.txt if the directory exists.
+# Each .txt file produces a venv named after the file (e.g. myapp_venv.txt -> myapp_venv).
+# Dependencies are also installed in the base env so Airflow can parse the DAG modules.
+CORNFLOW_VENVS_DIR = os.getenv("CORNFLOW_VENVS_DIR", os.path.join(os.getenv("AIRFLOW_HOME", "/usr/local/airflow"), "venvs"))
+
+if os.path.isdir("/requirements"):
+    import glob
+
+    os.makedirs(CORNFLOW_VENVS_DIR, exist_ok=True)
+    for req_file in sorted(glob.glob("/requirements/*.txt")):
+        venv_name = os.path.splitext(os.path.basename(req_file))[0]
+        venv_path = os.path.join(CORNFLOW_VENVS_DIR, venv_name)
+        venv_pip = os.path.join(venv_path, "bin", "pip")
+
+        print(f"Installing '{venv_name}' deps in base env for DAG parsing")
+        os.system(f"$(command -v pip) install --user -r {req_file}")
+
+        print(f"Creating venv '{venv_name}' at {venv_path}")
+        os.system(f"python -m venv {venv_path}")
+        os.system(f"{venv_pip} install --upgrade pip")
+        os.system(f"{venv_pip} install cornflow-client")
+        os.system(f"{venv_pip} install -r {req_file}")
+        print(f"Venv '{venv_name}' ready")
+
 # Make SQL connention
 if os.getenv("AIRFLOW__CORE__SQL_ALCHEMY_CONN") is None:
     # Default values corresponding to the default compose files
@@ -167,7 +191,10 @@ def airflowsvc(afsvc):
         os.system("airflow webserver")
     if afsvc == "worker":
         time.sleep(10)
-        os.system(f"airflow celery {afsvc}")
+        import socket
+
+        hostname = os.getenv("AIRFLOW__CELERY__WORKER_HOSTNAME", f"worker@{socket.gethostname()}")
+        os.system(f"airflow celery {afsvc} -H {hostname}")
     if afsvc == "scheduler":
         time.sleep(10)
         os.system(f"airflow {afsvc}")
