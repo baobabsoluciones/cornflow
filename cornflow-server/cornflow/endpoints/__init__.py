@@ -75,16 +75,31 @@ resources = [
     dict(
         resource=DataCheckKPIsExecutionEndpoint,
         urls="/data-check-kpis/execution/<string:idx>/",
+        endpoint="data-check-kpis-execution",
+    ),
+    dict(
+        resource=DataCheckKPIsExecutionEndpoint,
+        urls="/data-check/execution/<string:idx>/",
         endpoint="data-check-execution",
     ),
     dict(
         resource=DataCheckInstanceEndpoint,
         urls="/data-check-kpis/instance/<string:idx>/",
+        endpoint="data-check-kpis-instance",
+    ),
+    dict(
+        resource=DataCheckInstanceEndpoint,
+        urls="/data-check/instance/<string:idx>/",
         endpoint="data-check-instance",
     ),
     dict(
         resource=DataCheckCaseKPIsEndpoint,
         urls="/data-check-kpis/case/<int:idx>/",
+        endpoint="data-check-kpis-case",
+    ),
+    dict(
+        resource=DataCheckCaseKPIsEndpoint,
+        urls="/data-check/case/<int:idx>/",
         endpoint="data-check-case",
     ),
     dict(
