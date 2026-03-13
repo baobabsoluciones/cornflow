@@ -4,6 +4,7 @@ External endpoints to launch the solution check on an execution
 
 # Import from libraries
 from cornflow_client.airflow.api import Airflow
+from cornflow_client.airflow.dag_utilities import get_workflow_name_check_kpis
 from cornflow_client.constants import INSTANCE_SCHEMA, SOLUTION_SCHEMA
 from flask import request, current_app
 from flask_apispec import marshal_with, doc
@@ -69,7 +70,8 @@ def _run_airflow_data_check(
         )
 
     # Check if DAG is paused
-    schema_info = af_client.get_workflow_info(workflow_name=schema)
+    workflow_name = get_workflow_name_check_kpis(schema)
+    schema_info = af_client.get_workflow_info(workflow_name=workflow_name)
     info = schema_info.json()
     if info.get("is_paused", False):
         current_app.logger.error(DAG_PAUSED_MSG)
