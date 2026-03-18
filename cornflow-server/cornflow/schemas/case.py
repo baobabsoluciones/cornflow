@@ -21,6 +21,7 @@ class CaseRawRequest(Schema):
     checks = fields.Raw(required=False)
     solution = fields.Raw(allow_none=True, dump_default=None)
     solution_checks = fields.Raw(required=False, allow_none=True)
+    kpis = fields.Raw(required=False, allow_none=True)
 
 
 class CaseListResponse(BaseDataEndpointResponse):
@@ -54,6 +55,7 @@ class CaseBase(CaseListAllWithIndicators):
     checks = fields.Raw(required=False)
     solution = fields.Raw(required=False)
     solution_checks = fields.Raw(required=False)
+    kpis = fields.Raw(required=False, allow_none=True)
 
 
 class CaseSchema(Schema):
@@ -106,6 +108,7 @@ class QueryCaseCompare(Schema):
     solution = fields.Boolean(required=False, dump_default=1)
 
 
-class CaseCheckRequest(Schema):
+class CaseChecksKPIsRequest(Schema):
     checks = fields.Raw()
     solution_checks = fields.Raw()
+    kpis = fields.Raw()

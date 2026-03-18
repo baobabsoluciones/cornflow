@@ -302,6 +302,10 @@ class BadSolutionChecks(Exception):
     pass
 
 
+class BadKPIs(Exception):
+    pass
+
+
 config_orchestrator = {
     "airflow": {
         "name": "Airflow",
