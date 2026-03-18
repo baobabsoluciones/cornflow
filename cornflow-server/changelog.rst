@@ -1,3 +1,11 @@
+version 1.3.3
+--------------
+
+- released: 2026-03-18
+- description: Security release
+- changelog:
+    - updated some requirements
+
 version 1.3.1
 --------------
 
