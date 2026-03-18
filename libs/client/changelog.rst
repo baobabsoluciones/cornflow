@@ -1,3 +1,11 @@
+version 1.3.2
+--------------
+- released: 2026-03-18
+- description: Security release
+- changelog:
+    - fixed versions in requirements (cornflow server)
+
+
 version 1.3.1
 --------------
 
