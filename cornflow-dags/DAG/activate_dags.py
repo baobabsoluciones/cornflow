@@ -1,13 +1,20 @@
+import os
+
 import cornflow_client.airflow.dag_utilities as utils
 from airflow import DAG
-from airflow.operators.python import PythonOperator
+from airflow.operators.python import PythonOperator, ExternalPythonOperator
 from airflow.secrets.environment_variables import EnvironmentVariablesBackend
 
 from update_all_schemas import get_new_apps
 
+VENVS_BASE_DIR = os.getenv("CORNFLOW_VENVS_DIR", "/usr/local/airflow/venvs")
+
 
 def create_dag(app):
     def solve(**kwargs):
+        import cornflow_client.airflow.dag_utilities as utils
+        from airflow.secrets.environment_variables import EnvironmentVariablesBackend
+
         return utils.cf_solve_app(app, EnvironmentVariablesBackend(), **kwargs)
 
     if app.default_args is not None:
@@ -29,14 +36,21 @@ def create_dag(app):
     )
     with dag:
         notify = getattr(app, "notify", True)
-        if not notify:
-            PythonOperator(task_id=app.name, python_callable=solve)
+        venv_name = getattr(app, "venv", None)
+
+        operator_kwargs = {
+            "task_id": app.name,
+            "python_callable": solve,
+        }
+
+        if notify:
+            operator_kwargs["on_failure_callback"] = utils.callback_email
+
+        if venv_name:
+            venv_python = os.path.join(VENVS_BASE_DIR, venv_name, "bin", "python")
+            ExternalPythonOperator(python=venv_python, **operator_kwargs)
         else:
-            PythonOperator(
-                task_id=app.name,
-                python_callable=solve,
-                on_failure_callback=utils.callback_email,
-            )
+            PythonOperator(**operator_kwargs)
 
     return dag
 
