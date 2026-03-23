@@ -32,6 +32,7 @@ class ExperimentCore(CheckCore, ABC):
         # instance is read-only
         self._instance = instance
         self.solution = solution
+        self.kpis = None
 
     @property
     def instance(self) -> InstanceCore:
@@ -85,25 +86,26 @@ class ExperimentCore(CheckCore, ABC):
             )
         return checks
 
-    def kpis(self) -> dict:
+    def get_kpis(self) -> dict:
         """
         Method that generates KPIs for the solution and validates the result against the schema_kpis
         """
         # generate_kpis method always exists since it is implemented in the ExperimentCore class
-        kpis = self.generate_kpis()
+        self.kpis = self.generate_kpis()
+        export_kpis = self.kpis_to_dict()
         validator = Draft7Validator(self.schema_kpis)
-        if not validator.is_valid(kpis):
+        if not validator.is_valid(export_kpis):
             raise BadKPIs(
-                f"The solution KPIs do not match the schema: {[e for e in validator.iter_errors(kpis)]}"
+                f"The solution KPIs do not match the schema: {[e for e in validator.iter_errors(export_kpis)]}"
             )
-        return kpis
+        return export_kpis
 
-    def kpis_checks(self, kpis) -> dict:
+    def kpis_checks(self) -> dict:
         """
         Method that checks the solution with the KPIs and validates the result against the schema_checks.
         """
         # Validate the solution with the KPIs
-        kpis_checks = self.check_kpis(kpis)
+        kpis_checks = self.check_kpis()
         validator = Draft7Validator(self.schema_checks)
         if not validator.is_valid(kpis_checks):
             raise BadSolutionChecks(
@@ -157,7 +159,7 @@ class ExperimentCore(CheckCore, ABC):
             for m in dir(self)
             if m.startswith("kpis_")
             and callable(getattr(self, m))
-            and m != "kpis_checks"
+            and m not in ["kpis_checks", "kpis_to_dict"]
         ]
 
     def generate_kpis(self) -> Dict[str, Union[List, Dict]]:
@@ -197,7 +199,7 @@ class ExperimentCore(CheckCore, ABC):
         """
         return {}
 
-    def check_kpis(self, kpis: dict) -> dict:
+    def check_kpis(self) -> dict:
         """
         Method that checks the solution with the KPIs. By default, it does not perform any check.
         This method can be overridden by the user to modify the behavior of the KPI checks
@@ -206,6 +208,15 @@ class ExperimentCore(CheckCore, ABC):
         Each of the elements inside represents one row of that particular table.
         """
         return {}
+
+    def kpis_to_dict(self) -> dict:
+        """
+        Method that transforms the KPIs generated in self.kpis into a dictionary. By default, it returns self.kpis.
+        This method can be overridden by the user to modify the behavior of the KPI transformation
+        if wanted.
+        :return: a dictionary with the KPIs. The format of the dictionary should be validated against self.schema_kpis
+        """
+        return self.kpis
 
     @staticmethod
     def get_solver_config(

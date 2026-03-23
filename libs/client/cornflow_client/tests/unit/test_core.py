@@ -302,8 +302,8 @@ class TestCore(TestCase):
             def get_objective(self):
                 return 0
 
-            def check_kpis(self, kpis):
-                return dict(something=kpis["cost"])
+            def check_kpis(self):
+                return dict(something=self.kpis["cost"])
 
         class BadKpiApp(self.app.__class__):
             solvers = dict(default=BadKpiSolver)
@@ -410,13 +410,30 @@ class TestCore(TestCase):
                 super().__init__(data)
 
             def kpis_a_plus_b(self):
-                return [{"value": self.instance.data["a"] + self.instance.data["b"]}]
+                return [
+                    {
+                        "value": self.instance.data["a"] + self.instance.data["b"],
+                        "unused_columns": "This column should be removed",
+                    }
+                ]
 
             def kpis_a_plus_c(self):
                 return [{"value": self.instance.data["a"] + self.instance.data["c"]}]
 
-            def check_kpis(self, kpis):
-                if kpis["a_plus_b"][0]["value"] > kpis["a_plus_c"][0]["value"]:
+            def kpis_to_dict(self):
+                return {
+                    **self.kpis,
+                    "a_plus_b": [
+                        {k: v for k, v in kpi.items() if k != "unused_columns"}
+                        for kpi in self.kpis["a_plus_b"]
+                    ],
+                }
+
+            def check_kpis(self):
+                if (
+                    self.kpis["a_plus_b"][0]["value"]
+                    > self.kpis["a_plus_c"][0]["value"]
+                ):
                     return {
                         "invalid_kpi_1": [
                             {"message": "a_plus_b is greater than a_plus_c"}
@@ -434,7 +451,7 @@ class TestCore(TestCase):
         experiment = ExperimentWithKpis(instance)
 
         self.assertEqual(len(experiment._get_kpis_generation_methods()), 2)
-        kpis = experiment.kpis()
+        kpis = experiment.get_kpis()
         self.assertEqual(
             kpis,
             {
@@ -442,7 +459,7 @@ class TestCore(TestCase):
                 "a_plus_c": [{"value": 1}],
             },
         )
-        kpis_checks = experiment.check_kpis(kpis)
+        kpis_checks = experiment.check_kpis()
         self.assertEqual(
             kpis_checks,
             {"invalid_kpi_1": [{"message": "a_plus_b is greater than a_plus_c"}]},
@@ -612,7 +629,7 @@ class TestCore(TestCase):
                 )
 
                 # Should NOT raise an exception, but return the kpi with generic error
-                kpis = error_solver.kpis()
+                kpis = error_solver.get_kpis()
 
                 # Verify the generic error message is in the kpis for the failing method
                 self.assertIn("test_kpis", kpis)
