@@ -2,9 +2,9 @@
 Base code for the experiment template.
 """
 
-import logging as log
 from abc import ABC, abstractmethod
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Tuple
+import logging as log
 
 from jsonschema import Draft7Validator
 
@@ -12,6 +12,7 @@ from cornflow_client.constants import (
     PARAMETER_SOLVER_TRANSLATING_MAPPING,
     SOLVER_CONVERTER,
     BadSolutionChecks,
+    BadKPIs,
 )
 from .instance import InstanceCore
 from .instance_solution import CheckCore
@@ -31,6 +32,7 @@ class ExperimentCore(CheckCore, ABC):
         # instance is read-only
         self._instance = instance
         self.solution = solution
+        self.kpis = None
 
     @property
     def instance(self) -> InstanceCore:
@@ -84,6 +86,33 @@ class ExperimentCore(CheckCore, ABC):
             )
         return checks
 
+    def get_kpis(self) -> dict:
+        """
+        Method that generates KPIs for the solution and validates the result against the schema_kpis
+        """
+        # generate_kpis method always exists since it is implemented in the ExperimentCore class
+        self.kpis = self.generate_kpis()
+        export_kpis = self.kpis_to_dict()
+        validator = Draft7Validator(self.schema_kpis)
+        if not validator.is_valid(export_kpis):
+            raise BadKPIs(
+                f"The solution KPIs do not match the schema: {[e for e in validator.iter_errors(export_kpis)]}"
+            )
+        return export_kpis
+
+    def kpis_checks(self) -> dict:
+        """
+        Method that checks the solution with the KPIs and validates the result against the schema_checks.
+        """
+        # Validate the solution with the KPIs
+        kpis_checks = self.check_kpis()
+        validator = Draft7Validator(self.schema_checks)
+        if not validator.is_valid(kpis_checks):
+            raise BadSolutionChecks(
+                f"The kpis checks do not match the schema: {[e for e in validator.iter_errors(kpis_checks)]}"
+            )
+        return kpis_checks
+
     def check(self) -> Dict[str, Union[List, Dict]]:
         """
         Method that runs all the checks for the solution.
@@ -118,6 +147,76 @@ class ExperimentCore(CheckCore, ABC):
             the method ExperimentCore.check_solution()
         """
         raise NotImplementedError()
+
+    def _get_kpis_generation_methods(self) -> list:
+        """
+        Finds all class methods starting with kpis_ and returns them in a list.
+
+        :return: A list of KPIs methods.
+        """
+        return [
+            m
+            for m in dir(self)
+            if m.startswith("kpis_")
+            and callable(getattr(self, m))
+            and m not in ["kpis_checks", "kpis_to_dict"]
+        ]
+
+    def generate_kpis(self) -> Dict[str, Union[List, Dict]]:
+        """
+        Method that generates KPIs for the solution. By default, launches all methods
+        starting with kpis_ and returns the result in a dictionary.
+
+        This method can be overridden by the user to modify the behaviour of the KPI generation
+        if wanted.
+
+        :return: a dictionary of lists of dictionaries. Each list represents a table of KPIs.
+            Each of the elements inside represents one row of that particular table.
+        """
+        kpis = {}
+        for method in self._get_kpis_generation_methods():
+            try:
+                kpis[method[5:]] = getattr(self, method)()
+            except Exception:
+                # If a check fails, add a generic error message
+                kpis[method[5:]] = [
+                    {
+                        "error_type": "KPI generation error",
+                        "error_message": "The generation of the KPI has failed, please contact support",
+                    }
+                ]
+                log.warning(
+                    f"The execution of the check {method} has failed, please contact support"
+                )
+        kpis = {k: v for k, v in kpis.items() if v is not None and len(v)}
+        return kpis
+
+    @property
+    def schema_kpis(self) -> dict:
+        """
+        A dictionary representation of the json-schema for the dictionary returned by
+            the method ExperimentCore.generate_kpis()
+        """
+        return {}
+
+    def check_kpis(self) -> dict:
+        """
+        Method that checks the solution with the KPIs. By default, it does not perform any check.
+        This method can be overridden by the user to modify the behavior of the KPI checks
+        if wanted.
+        :return: a dictionary of lists of dictionaries. Each list represents a table of KPI checks.
+        Each of the elements inside represents one row of that particular table.
+        """
+        return {}
+
+    def kpis_to_dict(self) -> dict:
+        """
+        Method that transforms the KPIs generated in self.kpis into a dictionary. By default, it returns self.kpis.
+        This method can be overridden by the user to modify the behavior of the KPI transformation
+        if wanted.
+        :return: a dictionary with the KPIs. The format of the dictionary should be validated against self.schema_kpis
+        """
+        return self.kpis
 
     @staticmethod
     def get_solver_config(

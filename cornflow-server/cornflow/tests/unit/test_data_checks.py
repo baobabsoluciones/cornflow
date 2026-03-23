@@ -190,7 +190,7 @@ class TestDataChecksInstanceEndpoint(CustomTestCase):
         self.assertEqual(row.id, response["id"])
 
         self.assertEqual(row.instance_id, self.instance_id)
-        self.assertTrue(row.config.get("checks_only"))
+        self.assertTrue(row.config.get("checks_and_kpis_only"))
 
     @patch("cornflow.endpoints.data_check.Airflow")
     def test_new_data_check_execution_run(self, af_client_class):
@@ -220,7 +220,7 @@ class TestDataChecksInstanceEndpoint(CustomTestCase):
         self.assertEqual(row.id, response["id"])
 
         self.assertEqual(row.instance_id, self.instance_id)
-        self.assertTrue(row.config.get("checks_only"))
+        self.assertTrue(row.config.get("checks_and_kpis_only"))
 
 
 class TestDataChecksCaseEndpoint(CustomTestCase):
@@ -277,7 +277,7 @@ class TestDataChecksCaseEndpoint(CustomTestCase):
 
         row = self.model.query.get(response["id"])
         self.assertEqual(row.id, response["id"])
-        self.assertTrue(row.config.get("checks_only"))
+        self.assertTrue(row.config.get("checks_and_kpis_only"))
 
     @patch("cornflow.endpoints.data_check.Airflow")
     def test_new_data_check_execution_run(self, af_client_class):
@@ -305,4 +305,4 @@ class TestDataChecksCaseEndpoint(CustomTestCase):
 
         row = self.model.query.get(response["id"])
         self.assertEqual(row.id, response["id"])
-        self.assertTrue(row.config.get("checks_only"))
+        self.assertTrue(row.config.get("checks_and_kpis_only"))

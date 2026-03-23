@@ -164,6 +164,7 @@ class CaseFromInstanceExecutionEndpoint(BaseMetaResource):
             data = get_instance_data(execution.instance_id)
             data["solution"] = execution.data
             data["solution_checks"] = execution.checks
+            data["kpis"] = execution.kpis
             return data
 
         if instance_id is not None:
@@ -202,6 +203,7 @@ class CaseCopyEndpoint(BaseMetaResource):
             "schema",
             "solution",
             "solution_checks",
+            "kpis",
             "path",
         ]
         self.fields_to_modify = ["name"]

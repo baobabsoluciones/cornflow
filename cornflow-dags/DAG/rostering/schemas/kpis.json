@@ -1,0 +1,94 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "type": "object",
+  "properties": {
+    "mean_demand_per_employee": {
+      "type": "array",
+      "title": "Mean demand per employee",
+      "description": "Table with the mean demand per employee for each time slot",
+      "show": true,
+      "filterable": true,
+      "sortable": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "time_slot": {
+            "type": "string",
+            "title": "Time slot",
+            "description": "The time slot",
+            "sortable": true,
+            "filterable": true
+          },
+          "mean_demand": {
+            "type": "number",
+            "title": "Mean demand",
+            "description": "Mean demand attended by employees in this time slot"
+          },
+          "required": [
+            "time_slot",
+            "mean_demand"
+          ]
+        }
+      }
+    },
+    "one_employee_timeslots": {
+      "type": "array",
+      "title": "Timeslots with only one employee",
+      "description": "Table with the time slots with only one employee working",
+      "show": true,
+      "filterable": true,
+      "sortable": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "time_slot": {
+            "type": "string",
+            "title": "Time slot",
+            "description": "The time slot with only one employee working",
+            "sortable": true,
+            "filterable": true
+          }
+        },
+        "required": [
+          "time_slot"
+        ]
+      }
+    },
+    "globals": {
+      "type": "object",
+      "title": "Globals KPIs",
+      "description": "Globals KPIs of solution",
+      "show": true,
+      "properties": {
+        "objective_function": {
+          "type": "number",
+          "title": "OF",
+          "description": "Objective function"
+        },
+        "only_one_employee_percentage": {
+          "type": "number",
+          "title": "One employee %",
+          "description": "Percentage of time slots with only one employee"
+        },
+        "mean_demand": {
+          "type": "number",
+          "title": "Mean demand",
+          "description": "Mean demand attended by employees"
+        },
+        "max_demand": {
+          "type": "number",
+          "title": "Max demand",
+          "description": "Max demand attended by employees"
+        },
+        "min_demand": {
+          "type": "number",
+          "title": "Min demand",
+          "description": "Min demand attended by employees"
+        }
+      },
+      "required": []
+    }
+  },
+  "required": [
+  ]
+}

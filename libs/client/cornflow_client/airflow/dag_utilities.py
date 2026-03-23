@@ -156,10 +156,11 @@ def get_schema(dag_name):
 
 
 def cf_solve_app(app, secrets, **kwargs):
-    if kwargs["dag_run"].conf.get("checks_only"):
-        return cf_check(app.check, app.name, secrets, **kwargs)
-    else:
-        return cf_solve(app.solve, app.name, secrets, **kwargs)
+    return cf_solve(app.solve, app.name, secrets, **kwargs)
+
+
+def cf_check_generate_kpis_app(app, secrets, **kwargs):
+    return cf_check_generate_kpis(app.check_generate_kpis, app.name, secrets, **kwargs)
 
 
 def cf_solve(fun, dag_name, secrets, **kwargs):
@@ -184,7 +185,7 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
         config = execution_data["config"]
         inst_id = execution_data["id"]
 
-        solution, sol_checks, inst_checks, log, log_json = fun(
+        solution, sol_checks, inst_checks, kpis, log, log_json = fun(
             data, config, solution_data
         )
 
@@ -217,6 +218,8 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
 
         if sol_checks is not None:
             payload["checks"] = sol_checks
+        if kpis is not None:
+            payload["kpis"] = kpis
 
         try_to_write_solution(client, exec_id, payload)
 
@@ -243,10 +246,11 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
         raise AirflowDagException(f"There was an error during the solving: {e}")
 
 
-def cf_check(fun, dag_name, secrets, **kwargs):
+def cf_check_generate_kpis(fun_check_generate_kpis, dag_name, secrets, **kwargs):
     """
     Connect to cornflow, ask for data, check the solution data and write the checks in cornflow
-    :param fun: The function to use to check the data
+    :param fun_check_generate_kpis: The function to use to check the data and generate the kpis.
+    :param dag_name: the name of the dag, to later search the output schema
     :param secrets: Environment variables
     :param kwargs: other kwargs passed to the dag task.
     :return:
@@ -264,9 +268,14 @@ def cf_check(fun, dag_name, secrets, **kwargs):
         inst_id = execution_data["id"]
         solution_data = execution_data["solution_data"]
 
-        inst_checks, sol_checks, log_json = fun(instance_data, solution_data)
+        inst_checks, sol_checks, kpis, log_json = fun_check_generate_kpis(
+            instance_data, solution_data
+        )
 
-        if config.get("checks_only"):
+        if config.get("checks_and_kpis_only"):
+            # This execution was automatically created by cornflow to check
+            #   the kpis of an instance or a case. It was not created by the user,
+            #   so we can overwrite its logs.
             payload = dict(
                 state=1,
                 log_json=log_json,
@@ -276,6 +285,8 @@ def cf_check(fun, dag_name, secrets, **kwargs):
                 inst_id=inst_id,
             )
         else:
+            # This execution was created by the user so we cannot overwrite
+            #    the logs.
             payload = dict(
                 inst_checks=inst_checks,
                 inst_id=inst_id,
@@ -284,16 +295,21 @@ def cf_check(fun, dag_name, secrets, **kwargs):
 
         if sol_checks is not None:
             payload["checks"] = sol_checks
+        if kpis is not None:
+            payload["kpis"] = kpis
 
         try_to_write_solution(client, exec_id, payload)
 
         case_id = kwargs["dag_run"].conf.get("case_id")
         if case_id is not None:
-            checks_payload = dict(checks=payload["inst_checks"])
+            payload = dict(checks=payload["inst_checks"])
             if sol_checks is not None:
-                checks_payload["solution_checks"] = sol_checks
+                payload["solution_checks"] = sol_checks
+            if kpis is not None:
+                payload["kpis"] = kpis
             try:
-                client.write_case_checks(case_id=case_id, **checks_payload)
+                # ToDo: we want to write the case KPIs too
+                client.write_case_checks_kpis(case_id=case_id, **payload)
             except CornFlowApiError:
                 try_to_save_error(client, exec_id, -6)
                 if config.get("msg", True):
@@ -353,3 +369,7 @@ class NoSolverException(Exception):
 
 class AirflowDagException(Exception):
     pass
+
+
+def get_workflow_name_check_kpis(workflow_name):
+    return f"{workflow_name}_check_kpis"

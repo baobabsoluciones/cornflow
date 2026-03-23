@@ -20,6 +20,7 @@ from cornflow_client.constants import (
     BadSolution,
     BadInstanceChecks,
     BadSolutionChecks,
+    BadKPIs,
 )
 
 
@@ -135,6 +136,7 @@ class TestCore(TestCase):
                     solution_data,
                     solution_check,
                     inst_check,
+                    kpis,
                     log,
                     log_dict,
                 ) = self.app.solve(data, self.config, data_out)
@@ -144,6 +146,7 @@ class TestCore(TestCase):
                     solution_data,
                     solution_check,
                     inst_check,
+                    kpis,
                     log,
                     log_dict,
                 ) = self.app.solve(data, self.config)
@@ -250,6 +253,65 @@ class TestCore(TestCase):
         bad_app = BadCheckApp()
         self.assertRaises(BadSolutionChecks, bad_app.solve, {}, self.config)
 
+    def test_bad_kpis(self):
+
+        class DummySolution(SolutionCore):
+            schema = get_empty_schema(properties=dict(sleep=dict(type="number")))
+
+        class BadKpiSolver(ExperimentCore):
+            schema_checks = get_empty_schema()
+            schema_kpis = get_empty_schema(properties=dict(cost=dict(type="string")))
+
+            def solve(self, options):
+                self.solution = DummySolution({"sleep": 1})
+
+                return dict(status=STATUS_OPTIMAL, status_sol=SOLUTION_STATUS_FEASIBLE)
+
+            def kpis_cost(self):
+                return [123]
+
+            def get_objective(self):
+                return 0
+
+        class BadKpiApp(self.app.__class__):
+            solvers = dict(default=BadKpiSolver)
+            solution = DummySolution
+
+        bad_app = BadKpiApp()
+        self.assertRaises(BadKPIs, bad_app.solve, {}, self.config)
+
+    def test_bad_kpis_checks(self):
+
+        class DummySolution(SolutionCore):
+            schema = get_empty_schema(properties=dict(sleep=dict(type="number")))
+
+        class BadKpiSolver(ExperimentCore):
+            schema_checks = get_empty_schema(
+                properties=dict(something=dict(type="string"))
+            )
+            schema_kpis = get_empty_schema(properties=dict(cost=dict(type="array")))
+
+            def solve(self, options):
+                self.solution = DummySolution({"sleep": 1})
+
+                return dict(status=STATUS_OPTIMAL, status_sol=SOLUTION_STATUS_FEASIBLE)
+
+            def kpis_cost(self):
+                return [123]
+
+            def get_objective(self):
+                return 0
+
+            def check_kpis(self):
+                return dict(something=self.kpis["cost"])
+
+        class BadKpiApp(self.app.__class__):
+            solvers = dict(default=BadKpiSolver)
+            solution = DummySolution
+
+        bad_app = BadKpiApp()
+        self.assertRaises(BadSolutionChecks, bad_app.solve, {}, self.config)
+
     def test_bad_solution_after_solve(self):
         # Create a dummy solution class with a strict schema
         class StrictSolution(SolutionCore):
@@ -325,6 +387,82 @@ class TestCore(TestCase):
                 "a_not_equal_c": [{"a": 1, "c": 1}],
                 "b_equal_c": [{"b": 2, "c": 1}],
             },
+        )
+
+    def test_automatic_kpis(self):
+
+        class SimpleInstance(InstanceCore):
+
+            schema = get_empty_schema()
+            schema_checks = get_empty_schema()
+
+            def __init__(self, data):
+                super().__init__(data)
+
+        class ExperimentWithKpis(ExperimentCore):
+
+            schema_checks = get_empty_schema()
+            schema_kpis = get_empty_schema(
+                properties=dict(check=dict(type="array", objects=dict(type="number")))
+            )
+
+            def __init__(self, data):
+                super().__init__(data)
+
+            def kpis_a_plus_b(self):
+                return [
+                    {
+                        "value": self.instance.data["a"] + self.instance.data["b"],
+                        "unused_columns": "This column should be removed",
+                    }
+                ]
+
+            def kpis_a_plus_c(self):
+                return [{"value": self.instance.data["a"] + self.instance.data["c"]}]
+
+            def kpis_to_dict(self):
+                return {
+                    **self.kpis,
+                    "a_plus_b": [
+                        {k: v for k, v in kpi.items() if k != "unused_columns"}
+                        for kpi in self.kpis["a_plus_b"]
+                    ],
+                }
+
+            def check_kpis(self):
+                if (
+                    self.kpis["a_plus_b"][0]["value"]
+                    > self.kpis["a_plus_c"][0]["value"]
+                ):
+                    return {
+                        "invalid_kpi_1": [
+                            {"message": "a_plus_b is greater than a_plus_c"}
+                        ]
+                    }
+                return {}
+
+            def get_objective(self):
+                return 0
+
+            def solve(self, options):
+                return dict(status=STATUS_OPTIMAL, status_sol=SOLUTION_STATUS_FEASIBLE)
+
+        instance = SimpleInstance({"a": 1, "b": 1, "c": 0})
+        experiment = ExperimentWithKpis(instance)
+
+        self.assertEqual(len(experiment._get_kpis_generation_methods()), 2)
+        kpis = experiment.get_kpis()
+        self.assertEqual(
+            kpis,
+            {
+                "a_plus_b": [{"value": 2}],
+                "a_plus_c": [{"value": 1}],
+            },
+        )
+        kpis_checks = experiment.check_kpis()
+        self.assertEqual(
+            kpis_checks,
+            {"invalid_kpi_1": [{"message": "a_plus_b is greater than a_plus_c"}]},
         )
 
     def test_solution_check_method_exception_handling(self):
@@ -439,3 +577,71 @@ class TestCore(TestCase):
 
                 # Verify that the working check is NOT in the failed checks (empty list means no errors)
                 self.assertNotIn("working_check", checks)
+
+    def test_kpi_generation_exception_handling(self):
+        """Test that when a kpis_* method raises an exception, a generic error message is added."""
+
+        class DummySolution(SolutionCore):
+            schema = get_empty_schema(properties=dict(sleep=dict(type="number")))
+
+        class ErrorKpiSolver(ExperimentCore):
+            schema_checks = self.error_check_schema
+
+            def __init__(
+                self,
+                instance,
+                solution=None,
+                error_class=RuntimeError,
+                error_message="Error",
+            ):
+                super().__init__(instance, solution)
+                self.error_class = error_class
+                self.error_message = error_message
+
+            def solve(self, options):
+                self.solution = DummySolution({"sleep": 1})
+                return dict(status=STATUS_OPTIMAL, status_sol=SOLUTION_STATUS_FEASIBLE)
+
+            def kpis_test_kpis(self):
+                # Simulate different types of unexpected errors in a kpi method
+                raise self.error_class(self.error_message)
+
+            def kpis_working_kpi(self):
+                # This kpi should work correctly and return empty list (no errors)
+                return []
+
+            def get_objective(self):
+                return 0
+
+        class ErrorApp(self.app.__class__):
+            solvers = dict(default=ErrorKpiSolver)
+            solution = DummySolution
+
+        error_app = ErrorApp()
+
+        for error_class, error_message in self.error_test_cases:
+            with self.subTest(error_type=error_class.__name__):
+                # Create instance and solution for the solver
+                instance = error_app.instance.from_dict({"seconds": 1})
+                solution = error_app.solution.from_dict({"sleep": 1})
+                error_solver = ErrorKpiSolver(
+                    instance, solution, error_class, error_message
+                )
+
+                # Should NOT raise an exception, but return the kpi with generic error
+                kpis = error_solver.get_kpis()
+
+                # Verify the generic error message is in the kpis for the failing method
+                self.assertIn("test_kpis", kpis)
+                self.assertEqual(
+                    kpis["test_kpis"],
+                    [
+                        {
+                            "error_type": "KPI generation error",
+                            "error_message": "The generation of the KPI has failed, please contact support",
+                        }
+                    ],
+                )
+
+                # Verify that the working kpi is NOT in the failed kpis (empty list means no errors)
+                self.assertNotIn("working_kpis", kpis)

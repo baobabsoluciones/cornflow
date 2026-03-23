@@ -141,4 +141,4 @@ class PuLP(ApplicationCore):
         except FileNotFoundError:
             pass
 
-        return solution, {}, {}, log, log_dict
+        return solution, {}, {}, {}, log, log_dict

@@ -30,7 +30,7 @@ class RosteringTestCase(BaseDAGTests.SolvingTests):
             )
         )
 
-        _, _, instance_checks, _, _ = app.solve(instance_data, self.config, None)
+        _, _, instance_checks, _, _, _ = app.solve(instance_data, self.config, None)
 
         self.assertEqual(instance_checks, {"timeslot_length": 120})
 
@@ -76,7 +76,7 @@ class RosteringTestCase(BaseDAGTests.SolvingTests):
             instance_data["contracts"].append(new_contract)
 
         # Run the solver
-        _, _, instance_checks, _, _ = app.solve(instance_data, self.config, None)
+        _, _, instance_checks, _, _, _ = app.solve(instance_data, self.config, None)
 
         # Verify the results
         self.assertIn("incoherent_foreign_keys", instance_checks)
@@ -127,7 +127,7 @@ class RosteringTestCase(BaseDAGTests.SolvingTests):
         instance_data["employees"].append(new_employee)
 
         # Run the solver
-        _, _, instance_checks, _, _ = app.solve(instance_data, self.config, None)
+        _, _, instance_checks, _, _, _ = app.solve(instance_data, self.config, None)
 
         # Verify the results
         self.assertIn("missing_data", instance_checks)
@@ -197,7 +197,7 @@ class RosteringTestCase(BaseDAGTests.SolvingTests):
         self.config.update(dict(solver="mip.PULP_CBC_CMD", rel_gap=0.02))
 
         # Run the solver
-        _, _, instance_checks, _, _ = app.solve(instance_data, self.config, None)
+        _, _, instance_checks, _, _, _ = app.solve(instance_data, self.config, None)
 
         # Verify the results
         self.assertIn("weekly_schedule_timeslots", instance_checks)
@@ -266,7 +266,7 @@ class RosteringTestCase(BaseDAGTests.SolvingTests):
         self.config.update(dict(solver="mip.PULP_CBC_CMD", rel_gap=0.02))
 
         # Run the solver
-        _, _, instance_checks, _, _ = app.solve(instance_data, self.config, None)
+        _, _, instance_checks, _, _, _ = app.solve(instance_data, self.config, None)
 
         # Verify the results
         self.assertIn("schedule_exceptions_timeslots", instance_checks)
@@ -323,7 +323,7 @@ class RosteringTestCase(BaseDAGTests.SolvingTests):
             self.config.update(dict(solver="mip.PULP_CBC_CMD", rel_gap=0.02))
 
             # Run the solver
-            _, _, instance_checks, _, _ = app.solve(instance_data, self.config, None)
+            _, _, instance_checks, _, _, _ = app.solve(instance_data, self.config, None)
 
             # Verify the results
             self.assertIn("shift_hours_timeslots", instance_checks)
@@ -407,7 +407,7 @@ class RosteringTestCase(BaseDAGTests.SolvingTests):
         self.config.update(dict(solver="mip.PULP_CBC_CMD", rel_gap=0.02))
 
         # Run the solver
-        _, _, instance_checks, _, _ = app.solve(instance_data, self.config, None)
+        _, _, instance_checks, _, _, _ = app.solve(instance_data, self.config, None)
 
         # Verify the results
         self.assertIn("employee_preferences_timeslots", instance_checks)
@@ -475,7 +475,7 @@ class RosteringTestCase(BaseDAGTests.SolvingTests):
         self.config.update(dict(solver="mip.PULP_CBC_CMD", rel_gap=0.02))
 
         # Run the solver
-        _, _, instance_checks, _, _ = app.solve(instance_data, self.config, None)
+        _, _, instance_checks, _, _, _ = app.solve(instance_data, self.config, None)
 
         # Verify the results
         self.assertIn("fixed_worktable_timeslots", instance_checks)
@@ -535,7 +535,7 @@ class RosteringTestCase(BaseDAGTests.SolvingTests):
         self.config.update(dict(solver="mip.PULP_CBC_CMD", rel_gap=0.02))
 
         # Run the solver
-        _, _, instance_checks, _, _ = app.solve(instance_data, self.config, None)
+        _, _, instance_checks, _, _, _ = app.solve(instance_data, self.config, None)
 
         # Verify the results
         self.assertIn("penalties", instance_checks)

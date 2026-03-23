@@ -16,6 +16,15 @@ INSTANCE_MPS = _get_file("./data/test_mps.mps")
 INSTANCE_GC_20 = _get_file("./data/gc_20_7.json")
 INSTANCE_FILE_FAIL = _get_file("./unit/test_instances.py")
 EDIT_EXECUTION_SOLUTION = _get_file("./data/edit_execution_solution.json")
+INSTANCE_PATH_1_ROSTERING = _get_file("./data/rostering/test_instance_1.json")
+SOLUTION_PATH_1_ROSTERING = _get_file("./data/rostering/test_solution_1.json")
+INSTANCE_PATH_2_ROSTERING = _get_file(
+    "./data/rostering/test_instance_bad_timeslot_length.json"
+)
+INSTANCE_PATH_3_ROSTERING = _get_file("./data/rostering/test_instance_3.json")
+SOLUTION_PATH_3_ROSTERING = _get_file("./data/rostering/test_solution_3.json")
+INSTANCE_PATH_4_ROSTERING = _get_file("./data/rostering/test_instance_4.json")
+SOLUTION_PATH_4_ROSTERING = _get_file("./data/rostering/test_solution_4.json")
 
 EXECUTION_PATH = _get_file("./data/new_execution.json")
 CUSTOM_CONFIG_PATH = _get_file("./data/new_execution_custom_config.json")
@@ -25,9 +34,9 @@ EXECUTIONS_LIST = [EXECUTION_PATH, _get_file("./data/new_execution_2.json")]
 EXECUTION_URL = PREFIX + "/execution/"
 EXECUTION_URL_NORUN = EXECUTION_URL + "?run=0"
 DAG_URL = PREFIX + "/dag/"
-DATA_CHECK_EXECUTION_URL = PREFIX + "/data-check/execution/"
-DATA_CHECK_INSTANCE_URL = PREFIX + "/data-check/instance/"
-DATA_CHECK_CASE_URL = PREFIX + "/data-check/case/"
+DATA_CHECK_EXECUTION_URL = PREFIX + "/data-check-kpis/execution/"
+DATA_CHECK_INSTANCE_URL = PREFIX + "/data-check-kpis/instance/"
+DATA_CHECK_CASE_URL = PREFIX + "/data-check-kpis/case/"
 
 CASE_PATH = _get_file("./data/new_case_raw.json")
 CASES_LIST = [CASE_PATH, _get_file("./data/new_case_raw_2.json")]
