@@ -136,6 +136,7 @@ venv/
 
 *.pyc
 __pycache__/
+*.pid
 
 instance/
 

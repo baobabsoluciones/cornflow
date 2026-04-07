@@ -10,7 +10,7 @@ from flask_apispec import use_kwargs, doc, marshal_with
 
 # Import from internal modules
 from cornflow.endpoints.meta_resource import BaseMetaResource
-from cornflow.models import DeployedWorkflow, ExecutionModel, InstanceModel, CaseModel
+from cornflow.models import DeployedWorkflow, ExecutionModel, InstanceModel, CaseModel, PermissionsDAG
 from cornflow.schemas import DeployedDAGSchema, DeployedDAGEditSchema
 from cornflow.schemas.case import CaseCheckRequest
 from cornflow.schemas.instance import InstanceCheckRequest
@@ -262,7 +262,17 @@ class DeployedDAGEndpoint(BaseMetaResource):
     @marshal_with(DeployedDAGSchema)
     @use_kwargs(DeployedDAGSchema)
     def post(self, **kwargs):
-        return self.post_list(kwargs)
+        response, status = self.post_list(kwargs)
+        if status == 201:
+            try:
+                dag_id = response.id
+                user_id = self.get_user_id()
+                current_app.logger.info(f"Asignando permiso inicial: Usuario {user_id} -> DAG {dag_id}")
+                PermissionsDAG({"dag_id": dag_id, "user_id": user_id}).save()
+            except Exception as e:
+                current_app.logger.error(f"Error al guardar permiso en POST: {str(e)}")
+
+        return response, status
 
 
 class DeployedDagDetailEndpoint(BaseMetaResource):

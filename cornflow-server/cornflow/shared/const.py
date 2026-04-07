@@ -8,7 +8,7 @@ DATABRICKS_BACKEND = 2
 PULSE_BACKEND = 3
 
 
-CORNFLOW_VERSION = "1.3.0rc4"
+CORNFLOW_VERSION = "1.3.0"
 INTERNAL_TOKEN_ISSUER = "cornflow"
 
 # endpoints responses for health check

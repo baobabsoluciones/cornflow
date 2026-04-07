@@ -75,6 +75,10 @@ x-cornflow-common: &cornflow-common
     CORNFLOW_DB_USER: cornflow
     CORNFLOW_DB_PASSWORD: cornflow
     CORNFLOW_DB: cornflow
+    OPEN_DEPLOYMENT: 0
+  volumes:
+    - ./cornflow-server:/usr/src/app
+    - ./libs:/usr/src/libs
   depends_on: &cornflow-common-depends-on
     cornflow_db:
       condition: service_healthy

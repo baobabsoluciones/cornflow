@@ -35,7 +35,7 @@ class Pulse:
         Checks if the Pulse API is alive.
         """
         
-        health_endpoint = "/health"
+        health_endpoint = "/pulse/health"
         try:
             url = f"{self.url}{health_endpoint}"
             response = self.request_headers_auth(method="GET", url=url, status=200)
@@ -50,7 +50,7 @@ class Pulse:
         Get information about a schema in Pulse.
         Corresponds to GET /schemas/<schema_id>
         """
-        url = f"{self.url}/schemas/{workflow_name}"
+        url = f"{self.url}/pulse/schemas/{workflow_name}"
         try:
             response = self.request_headers_auth(method=method, url=url, status=200)
             return response
@@ -73,7 +73,7 @@ class Pulse:
         if case_id:
             current_app.logger.info(f"Pulse client received case_id {case_id}, but it is not currently used.")
 
-        url = f"{self.url}/instances"
+        url = f"{self.url}/pulse/instances"
         
         payload = dict( 
             schema_id=workflow_name,
@@ -89,7 +89,7 @@ class Pulse:
         Corresponds to GET /instances/<instance_id>
         """
         try:
-            url = f"{self.url}/instances/{run_id}"
+            url = f"{self.url}/pulse/instances/{run_id}"
             response = self.request_headers_auth(method="GET", url=url, status=200)
             info = response.json()
           
