@@ -262,7 +262,13 @@ class DeployedDAGEndpoint(BaseMetaResource):
     @marshal_with(DeployedDAGSchema)
     @use_kwargs(DeployedDAGSchema)
     def post(self, **kwargs):
-        return self.post_list(kwargs)
+        response = self.post_list(kwargs)
+        # New workflows must get permission rows for existing users (e.g. admin created
+        # at init before DAGs existed). Same logic as register_dag_permissions on boot.
+        from cornflow.commands.permissions import register_dag_permissions_command
+
+        register_dag_permissions_command(verbose=False)
+        return response
 
 
 class DeployedDagDetailEndpoint(BaseMetaResource):

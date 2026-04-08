@@ -7,7 +7,7 @@ This module contains tests for DAG (Directed Acyclic Graph) functionality, inclu
 - Manual and automated DAG operations
 - Service and planner user permissions
 - DAG deployment and registration
-- Permission cascade deletion
+- Permission cascade deletion and backfill for existing users on new deployed workflows
 - DAG configuration and data handling
 
 The tests verify both successful operations and proper error handling
@@ -263,7 +263,7 @@ class TestDeployedDAG(TestCase):
     This class tests deployed DAG operations including:
 
     - DAG deployment and registration
-    - Permission management
+    - Permission management (including permission rows for existing users when a workflow is POSTed after them)
     - Cascade deletion
     - User role interactions
     """
@@ -412,6 +412,10 @@ class TestDeployedDAG(TestCase):
         )
 
     def test_post_endpoint(self):
+        self.assertFalse(
+            PermissionsDAG.check_if_has_permissions(self.admin["id"], "test_dag"),
+            "workflow must not exist in permission_dag before POST",
+        )
         payload = {
             "description": None,
             "id": "test_dag",
@@ -433,6 +437,10 @@ class TestDeployedDAG(TestCase):
 
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json, payload)
+        self.assertTrue(
+            PermissionsDAG.check_if_has_permissions(self.admin["id"], "test_dag"),
+            "existing users must get permission rows when a new workflow is registered via POST",
+        )
 
         response = self.client.get(
             DEPLOYED_DAG_URL,
