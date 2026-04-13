@@ -76,9 +76,9 @@ def update_dag_registry(**kwargs):
                         solution_checks_schema=app.get_solver(
                             app.get_default_solver_name()
                         ).schema_checks,
-                        kpis_schema=app.solvers[
+                        kpis_schema=app.get_solver(
                             app.get_default_solver_name()
-                        ].schema_kpis,
+                        ).schema_kpis,
                         config_schema=app.schema,
                     ),
                     encoding="br",

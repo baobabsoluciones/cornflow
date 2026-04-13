@@ -23,6 +23,7 @@ class ExperimentCore(CheckCore, ABC):
     """
     The solver template.
     """
+
     schema_kpis = {}
 
     def __init__(
