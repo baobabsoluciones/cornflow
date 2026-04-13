@@ -49,6 +49,7 @@ def register_deployed_dags_command(
                 "instance_checks_schema": schemas[dag["dag_id"]]["instance_checks"],
                 "solution_checks_schema": schemas[dag["dag_id"]]["solution_checks"],
                 "config_schema": schemas[dag["dag_id"]]["config"],
+                "kpis_schema": schemas[dag["dag_id"]]["kpis"],
             }
         )
         for dag in dag_list
@@ -92,6 +93,7 @@ def register_deployed_dags_command_test(dags: list = None, verbose: bool = False
                 "solution_schema": get_pulp_jsonschema(),
                 "instance_checks_schema": dict(),
                 "solution_checks_schema": dict(),
+                "kpis_schema": dict(),
                 "config_schema": get_empty_schema(solvers=["cbc", "PULP_CBC_CMD"]),
             }
         )
@@ -104,6 +106,7 @@ def register_deployed_dags_command_test(dags: list = None, verbose: bool = False
                 "solution_schema": dict(),
                 "instance_checks_schema": dict(),
                 "solution_checks_schema": dict(),
+                "kpis_schema": dict(),
                 "config_schema": dict(),
             }
         )
