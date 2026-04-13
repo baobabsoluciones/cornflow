@@ -23,6 +23,7 @@ class ExperimentCore(CheckCore, ABC):
     """
     The solver template.
     """
+    schema_kpis = {}
 
     def __init__(
         self,
@@ -190,14 +191,6 @@ class ExperimentCore(CheckCore, ABC):
                 )
         kpis = {k: v for k, v in kpis.items() if v is not None and len(v)}
         return kpis
-
-    @property
-    def schema_kpis(self) -> dict:
-        """
-        A dictionary representation of the json-schema for the dictionary returned by
-            the method ExperimentCore.generate_kpis()
-        """
-        return {}
 
     def check_kpis(self) -> dict:
         """
