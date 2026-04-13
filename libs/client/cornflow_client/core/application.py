@@ -450,4 +450,5 @@ class ApplicationCore(ABC):
             config=self.schema,
             instance_checks=self.instance.schema_checks,
             solution_checks=list(self.solvers.values())[0].schema_checks,
+            kpis=list(self.solvers.values())[0].schema_kpis,
         )

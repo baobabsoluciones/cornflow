@@ -722,6 +722,7 @@ class TestRawCornflowClientService(TestCase):
             solution_schema=dict(),
             solution_checks_schema=dict(),
             config_schema=dict(),
+            kpis_schema=dict(),
         )
         self.assertEqual(response.status_code, 201)
         response = response.json()

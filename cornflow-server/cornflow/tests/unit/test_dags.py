@@ -386,6 +386,7 @@ class TestDeployedDAG(TestCase):
                 "config_schema": get_empty_schema(solvers=["cbc", "PULP_CBC_CMD"]),
                 "instance_checks_schema": {},
                 "solution_checks_schema": {},
+                "kpis_schema": {},
             },
         )
         self.assertEqual(response.json[1]["id"], "gc")
@@ -420,6 +421,7 @@ class TestDeployedDAG(TestCase):
             "instance_checks_schema": {},
             "solution_checks_schema": {},
             "config_schema": {},
+            "kpis_schema": {},
         }
         response = self.client.post(
             DEPLOYED_DAG_URL,

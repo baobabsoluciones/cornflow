@@ -24,6 +24,7 @@ from cornflow.tests.const import (
     INSTANCE_PATH,
     EXECUTION_PATH,
     CASE_PATH,
+    EXECUTION_URL,
     EXECUTION_URL_NORUN,
     DATA_CHECK_EXECUTION_URL,
     DATA_CHECK_INSTANCE_URL,
@@ -133,6 +134,14 @@ class TestDataChecksExecutionEndpoint(CustomTestCase):
         self.assertEqual(row.id, response["id"])
         self.assertEqual(row.id, exec_to_check_id)
 
+        response = self.client.get(
+            EXECUTION_URL,
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json), 0)
+
 
 class TestDataChecksInstanceEndpoint(CustomTestCase):
     """
@@ -175,6 +184,7 @@ class TestDataChecksInstanceEndpoint(CustomTestCase):
         - Correct response status
         - Instance ID association
         - Configuration settings
+        - New execution is not returned by get_all_executions
         """
         url = DATA_CHECK_INSTANCE_URL + self.instance_id + "/?run=0"
         response = self.client.post(
@@ -191,6 +201,7 @@ class TestDataChecksInstanceEndpoint(CustomTestCase):
 
         self.assertEqual(row.instance_id, self.instance_id)
         self.assertTrue(row.config.get("checks_and_kpis_only"))
+        self.assertTrue(row.checks_and_kpis_only)
 
     @patch("cornflow.endpoints.data_check.Airflow")
     def test_new_data_check_execution_run(self, af_client_class):
@@ -221,6 +232,15 @@ class TestDataChecksInstanceEndpoint(CustomTestCase):
 
         self.assertEqual(row.instance_id, self.instance_id)
         self.assertTrue(row.config.get("checks_and_kpis_only"))
+        self.assertTrue(row.checks_and_kpis_only)
+
+        response = self.client.get(
+            EXECUTION_URL,
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json), 0)
 
 
 class TestDataChecksCaseEndpoint(CustomTestCase):
@@ -264,6 +284,7 @@ class TestDataChecksCaseEndpoint(CustomTestCase):
         - Correct response status
         - Configuration settings
         - Response validation
+        - New execution is not returned by get_all_executions
         """
         url = DATA_CHECK_CASE_URL + str(self.case_id) + "/?run=0"
         response = self.client.post(
@@ -278,6 +299,7 @@ class TestDataChecksCaseEndpoint(CustomTestCase):
         row = self.model.query.get(response["id"])
         self.assertEqual(row.id, response["id"])
         self.assertTrue(row.config.get("checks_and_kpis_only"))
+        self.assertTrue(row.checks_and_kpis_only)
 
     @patch("cornflow.endpoints.data_check.Airflow")
     def test_new_data_check_execution_run(self, af_client_class):
@@ -306,3 +328,4 @@ class TestDataChecksCaseEndpoint(CustomTestCase):
         row = self.model.query.get(response["id"])
         self.assertEqual(row.id, response["id"])
         self.assertTrue(row.config.get("checks_and_kpis_only"))
+        self.assertTrue(row.checks_and_kpis_only)

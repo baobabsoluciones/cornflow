@@ -232,6 +232,7 @@ class DataCheckInstanceEndpoint(BaseMetaResource):
             instance_id=instance.id,
             name=f"data_check_instance_{instance.name}",
             schema=instance.schema,
+            checks_and_kpis_only=True,
         )
         schema = instance.schema
 
@@ -337,6 +338,7 @@ class DataCheckCaseKPIsEndpoint(BaseMetaResource):
             instance_id=instance.id,
             name=f"data_check_case_{case.name}",
             schema=schema,
+            checks_and_kpis_only=True,
         )
         if case.solution is not None:
             validation_schema = schema

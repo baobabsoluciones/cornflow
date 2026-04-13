@@ -652,6 +652,7 @@ class TestCornflowClientService(TestCase):
             solution_schema=dict(),
             solution_checks_schema=dict(),
             config_schema=dict(),
+            kpis_schema=dict(),
         )
 
         items = ["id", "description"]

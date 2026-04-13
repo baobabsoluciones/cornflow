@@ -3,8 +3,10 @@ Model for the executions
 """
 
 # Import from libraries
+from flask import current_app
 import hashlib
 from sqlalchemy.dialects.postgresql import JSON, TEXT
+from sqlalchemy import desc
 
 # Imports from internal modules
 from cornflow.models.base_data_model import BaseDataModel
@@ -70,6 +72,7 @@ class ExecutionModel(BaseDataModel):
     )
     kpis = db.Column(JSON, nullable=True)
     last_run_checks_and_kpis = db.Column(db.Boolean, nullable=True)
+    checks_and_kpis_only = db.Column(db.Boolean, nullable=True)
 
     def __init__(self, data):
         super().__init__(data)
@@ -92,6 +95,7 @@ class ExecutionModel(BaseDataModel):
         self.log_json = data.get("log_json")
         self.kpis = data.get("kpis")
         self.last_run_checks_and_kpis = data.get("last_run_checks_and_kpis", False)
+        self.checks_and_kpis_only = data.get("checks_and_kpis_only", False)
 
     def update(self, data):
         """
@@ -141,6 +145,52 @@ class ExecutionModel(BaseDataModel):
         """
         self.log_text = txt
         super().update({})
+
+    @classmethod
+    def get_all_objects(
+        cls,
+        user,
+        schema=None,
+        creation_date_gte=None,
+        creation_date_lte=None,
+        checks_and_kpis=False,
+        offset=0,
+        limit=10
+    ):
+        """
+        Query to get all objects from a user
+        :param UserModel user: User object.
+        :param string schema: data_schema to filter (dag)
+        :param string creation_date_gte: created_at needs to be larger or equal to this
+        :param string creation_date_lte: created_at needs to be smaller or equal to this
+        :param int offset: query offset for pagination
+        :param bool checks_and_kpis: include checks and kpis executions
+        :param int limit: query size limit
+        :return: The objects
+        :rtype: list(:class:`BaseDataModel`)
+        """
+        query = cls.query.filter(cls.deleted_at == None)
+        user_access = int(current_app.config["USER_ACCESS_ALL_OBJECTS"])
+        if (
+            user is not None
+            and not user.is_admin()
+            and not user.is_service_user()
+            and user_access == 0
+        ):
+            query = query.filter(cls.user_id == user.id)
+
+        if schema:
+            query = query.filter(cls.schema == schema)
+        if creation_date_gte:
+            query = query.filter(cls.created_at >= creation_date_gte)
+        if creation_date_lte:
+            query = query.filter(cls.created_at <= creation_date_lte)
+        if not checks_and_kpis:
+            query = query.filter_by(checks_and_kpis_only=False)
+        # if airflow they also return total_entries = query.count(), for some reason
+
+        return query.order_by(desc(cls.created_at)).offset(offset).limit(limit).all()
+
 
     def __repr__(self):
         """
