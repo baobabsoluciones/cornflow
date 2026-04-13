@@ -155,7 +155,7 @@ class ExecutionModel(BaseDataModel):
         creation_date_lte=None,
         checks_and_kpis=False,
         offset=0,
-        limit=10
+        limit=10,
     ):
         """
         Query to get all objects from a user
@@ -190,7 +190,6 @@ class ExecutionModel(BaseDataModel):
         # if airflow they also return total_entries = query.count(), for some reason
 
         return query.order_by(desc(cls.created_at)).offset(offset).limit(limit).all()
-
 
     def __repr__(self):
         """

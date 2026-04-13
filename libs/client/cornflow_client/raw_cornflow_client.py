@@ -871,6 +871,7 @@ class RawCornFlow(object):
         solution_schema: dict,
         solution_checks_schema: dict,
         config_schema: dict,
+        kpis_schema: dict = None,
         description: str = None,
         encoding=None,
     ):
@@ -883,6 +884,7 @@ class RawCornFlow(object):
             solution_schema=solution_schema,
             instance_checks_schema=instance_checks_schema,
             solution_checks_schema=solution_checks_schema,
+            kpis_schema=kpis_schema,
             config_schema=config_schema,
         )
         return self.create_api("dag/deployed/", json=payload, encoding=encoding)
