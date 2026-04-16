@@ -253,10 +253,28 @@ class TestUserRolesListEndpoint(CustomTestCase):
             self.assertEqual(200, response.status_code)
             self.assertCountEqual(self.payload, response.json)
 
+        for role in (VIEWER_ROLE, PLANNER_ROLE):
+            self.token = self.create_user_with_role(role)
+            user = UserModel.get_one_object(username=f"testuser{role}")
+            response = self.client.get(
+                self.url,
+                follow_redirects=True,
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {self.token}",
+                },
+            )
+            self.assertEqual(200, response.status_code)
+            self.assertEqual(1, len(response.json))
+            self.assertEqual(user.id, response.json[0]["user_id"])
+            self.assertEqual(role, response.json[0]["role_id"])
 
     def test_get_user_roles_not_authorized_user(self):
+        roles_with_get_access = frozenset(
+            self.roles_with_access + [VIEWER_ROLE, PLANNER_ROLE]
+        )
         for role in ROLES_MAP:
-            if role not in self.roles_with_access:
+            if role not in roles_with_get_access:
                 self.token = self.create_user_with_role(role)
                 response = self.client.get(
                     self.url,

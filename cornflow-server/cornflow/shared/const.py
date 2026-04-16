@@ -150,6 +150,8 @@ BASE_PERMISSION_ASSIGNATION = [
 
 EXTRA_PERMISSION_ASSIGNATION = [
     (VIEWER_ROLE, PUT_ACTION, "user-detail"),
+    (VIEWER_ROLE, GET_ACTION, "user-roles"),
+    (PLANNER_ROLE, GET_ACTION, "user-roles"),
 ]
 
 # Costants for messages that are given back on exceptions
