@@ -283,6 +283,16 @@ class DeployedDagDetailEndpoint(BaseMetaResource):
         self.data_model = DeployedWorkflow
 
     @doc(
+        description="Get a specific deployed DAG by ID",
+        tags=["DeployedDAGs"],
+    )
+    @authenticate(auth_class=Auth())
+    @marshal_with(DeployedDAGSchema)
+    def get(self, idx):
+        """Get a specific deployed DAG by its ID."""
+        return self.get_detail(idx=idx)
+
+    @doc(
         description="Endpoint to update the schemas of a deployed DAG",
         tags=["DAGs"],
     )
