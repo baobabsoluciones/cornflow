@@ -17,6 +17,7 @@ from cornflow.models import (
     UserModel,
     UserRoleModel,
 )
+from cornflow.shared import db
 from cornflow.shared.const import (
     ADMIN_ROLE,
     PLANNER_ROLE,
@@ -265,9 +266,12 @@ class TestUserRolesListEndpoint(CustomTestCase):
                 },
             )
             self.assertEqual(200, response.status_code)
-            self.assertEqual(1, len(response.json))
-            self.assertEqual(user.id, response.json[0]["user_id"])
-            self.assertEqual(role, response.json[0]["role_id"])
+            self.assertTrue(
+                any(
+                    r["user_id"] == user.id and r["role_id"] == role
+                    for r in response.json
+                )
+            )
 
     def test_get_user_roles_not_authorized_user(self):
         roles_with_get_access = frozenset(
@@ -276,6 +280,11 @@ class TestUserRolesListEndpoint(CustomTestCase):
         for role in ROLES_MAP:
             if role not in roles_with_get_access:
                 self.token = self.create_user_with_role(role)
+                user = UserModel.get_one_object(username=f"testuser{role}")
+                UserRoleModel.query.filter_by(
+                    user_id=user.id, role_id=PLANNER_ROLE
+                ).delete(synchronize_session=False)
+                db.session.commit()
                 response = self.client.get(
                     self.url,
                     follow_redirects=True,
