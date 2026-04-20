@@ -216,7 +216,7 @@ class ApplicationCore(ABC):
         solution_checks = SuperDict(exp.data_checks())
         warnings_tables = (
             SuperDict.from_dict(exp.schema_checks)
-            .get("properties", {})
+            .get("properties", SuperDict())
             .vfilter(lambda v: v.get("is_warning", False))
             .keys()
         )
