@@ -1,0 +1,69 @@
+# Minimal values for testing the Cornflow chart
+# This file contains only the essential configuration for a basic test
+
+# Disable Airflow to simplify the test
+airflow:
+  enabled: false
+
+# Minimal Cornflow configuration
+cornflow:
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+  env:
+    # Basic database configuration
+    DEFAULT_POSTGRES: "1"
+    CORNFLOW_DB_PORT: "5432"
+    CORNFLOW_DB_USER: "cornflow"
+    CORNFLOW_DB_PASSWORD: "cornflow"
+    CORNFLOW_DB: "cornflow"
+    
+    # Basic application configuration
+    APPLICATION_ROOT: "/"
+    EXTERNAL_APP: "0"
+    SERVICE_NAME: "Cornflow"
+    SECRET_KEY: "test-secret-key-for-testing-only"
+    SECRET_BI_KEY: "test-bi-secret-key-for-testing-only"
+    AUTH_TYPE: "1"
+    DEFAULT_ROLE: "2"
+    CORS_ORIGINS: "*"
+    LOG_LEVEL: "20"
+    SIGNUP_ACTIVATED: "1"
+    SERVICE_USER_ALLOW_PASSWORD_LOGIN: "1"
+    OPEN_DEPLOYMENT: "1"
+    USER_ACCESS_ALL_OBJECTS: "0"
+    TOKEN_DURATION: "24"
+    PWD_ROTATION_TIME: "120"
+    
+    # Flask configuration
+    FLASK_ENV: "development"
+    
+    # Service and admin users
+    CORNFLOW_SERVICE_USER: "service_user"
+    CORNFLOW_SERVICE_PWD: "Service_user1234"
+    CORNFLOW_ADMIN_USER: "cornflow_admin"
+    CORNFLOW_ADMIN_PWD: "Cornflow_admin1234"
+
+# Minimal PostgreSQL configuration
+postgresql:
+  enabled: true
+  auth:
+    postgresPassword: "postgres"
+    username: "cornflow"
+    password: "cornflow"
+    database: "cornflow"
+  primary:
+    persistence:
+      enabled: true
+      size: 1Gi
+
+# Basic service configuration
+service:
+  type: ClusterIP
+  port: 5000
+
