@@ -6,7 +6,8 @@ Model for the executions
 from flask import current_app
 import hashlib
 from sqlalchemy.dialects.postgresql import JSON, TEXT
-from sqlalchemy import desc
+from sqlalchemy import desc, or_
+from sqlalchemy.sql.expression import false
 
 # Imports from internal modules
 from cornflow.models.base_data_model import BaseDataModel
@@ -186,7 +187,12 @@ class ExecutionModel(BaseDataModel):
         if creation_date_lte:
             query = query.filter(cls.created_at <= creation_date_lte)
         if not checks_and_kpis:
-            query = query.filter_by(checks_and_kpis_only=False)
+            query = query.filter(
+                or_(
+                    cls.checks_and_kpis_only == false(),
+                    cls.checks_and_kpis_only.is_(None),
+                )
+            )
         # if airflow they also return total_entries = query.count(), for some reason
 
         return query.order_by(desc(cls.created_at)).offset(offset).limit(limit).all()
