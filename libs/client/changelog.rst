@@ -1,3 +1,12 @@
+version 1.3.4
+--------------
+
+- released: 2026-04-20
+- description: Each user can get their role
+- changelog:
+    - Each user can get their role
+
+
 version 1.3.3
 --------------
 
