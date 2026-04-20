@@ -182,7 +182,7 @@ class TestSchemaEndpoint(CustomTestCase):
         self.assertEqual(schemas["instance"], self.schema)
         self.assertEqual(schemas["solution"], self.schema)
         self.assertEqual(schemas["config"], self.config)
-        self.assertEqual(schemas["config"], {})
+        self.assertEqual(schemas["kpis"], {})
 
 
 class TestNewSchemaEndpointOpen(CustomTestCase):
