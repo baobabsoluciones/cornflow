@@ -186,7 +186,8 @@ class ApplicationCore(ABC):
                 )
         return inst, sol
 
-    def _check_instance_errors(self, inst):
+    @staticmethod
+    def _check_instance_errors(inst):
         """Performs instance data checks and identifies critical errors."""
         instance_checks = SuperDict(inst.data_checks())
         warnings_tables = (
@@ -208,6 +209,30 @@ class ApplicationCore(ABC):
                 break
 
         return instance_checks, has_errors
+
+    @staticmethod
+    def _check_solution_errors(exp):
+        """Performs solution checks and identifies critical errors."""
+        solution_checks = SuperDict(exp.data_checks())
+        warnings_tables = (
+            SuperDict.from_dict(exp.schema_checks)["properties"]
+            .vfilter(lambda v: v.get("is_warning", False))
+            .keys()
+        )
+        solution_errors = solution_checks.kfilter(lambda k: k not in warnings_tables)
+
+        has_errors = False
+        for error_table in solution_errors.values():
+            # Check if the error table/value indicates an error
+            if isinstance(error_table, (list, dict)) and len(error_table) > 0:
+                has_errors = True
+                break
+            # Check for non-empty scalar values considered errors
+            elif error_table and not isinstance(error_table, (list, dict)):
+                has_errors = True
+                break
+
+        return solution_checks, has_errors
 
     def _execute_solver(self, inst, sol, config):
         """Instantiates and runs the solver, returning output and timing."""
@@ -285,11 +310,11 @@ class ApplicationCore(ABC):
         # and the solver implements data_checks
         # Checks for non-None and non-empty dict
         if final_sol_dict:
-            solution_checks = SuperDict(algo.data_checks()).vfilter(lambda v: len(v))
+            solution_checks, solution_has_errors = self._check_solution_errors(algo)
 
             # Generate KPIs only if there are no solution checks
             #   (i.e., no issues found in the solution)
-            if not solution_checks:
+            if not solution_has_errors:
                 kpis = algo.get_kpis()
                 kpis_checks = algo.kpis_checks()
                 solution_checks.update(kpis_checks)
@@ -391,19 +416,19 @@ class ApplicationCore(ABC):
             raise NoSolverException("No solver is available")
         inst = self.instance.from_dict(instance_data)
 
-        instance_checks = inst.data_checks()
+        instance_checks, instance_has_errors = self._check_instance_errors(inst)
 
         if solution_data is not None:
             sol = self.solution.from_dict(solution_data)
             algo = solver_class(inst, sol)
             start = timer()
-            solution_checks = SuperDict(algo.data_checks()).vfilter(lambda v: len(v))
+            solution_checks, solution_has_errors = self._check_solution_errors(algo)
             kpis = None
 
             # Generate KPIs only if there are no solution checks
             #   (i.e., no issues found in the solution)
             # Then, run the checks on the KPIs.
-            if not solution_checks:
+            if not instance_has_errors and not solution_has_errors:
                 kpis = algo.get_kpis()
                 kpis_checks = algo.kpis_checks()
                 solution_checks.update(kpis_checks)

@@ -8,8 +8,7 @@ from .solution_log import LogSchema, BasicLogSchema
 
 
 class QueryFiltersExecution(QueryFilters):
-    pass
-    # status = fields.Int(required=False)
+    checks_and_kpis = fields.Boolean(required=False)
 
 
 class ConfigSchema(Schema):

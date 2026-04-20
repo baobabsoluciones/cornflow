@@ -1,5 +1,6 @@
 import logging
 import time
+from typing import Dict, Union, List
 from unittest import TestCase
 
 from jsonschema import Draft7Validator
@@ -464,6 +465,122 @@ class TestCore(TestCase):
             kpis_checks,
             {"invalid_kpi_1": [{"message": "a_plus_b is greater than a_plus_c"}]},
         )
+
+    def test_kpis_solution_errors(self):
+
+        class SimpleInstance(InstanceCore):
+
+            schema = get_empty_schema()
+            schema_checks = get_empty_schema()
+
+            def __init__(self, data):
+                super().__init__(data)
+
+        class SimpleSolution(SolutionCore):
+            schema = get_empty_schema()
+
+        class ExperimentWithKpis(ExperimentCore):
+
+            schema_checks = get_empty_schema(properties=dict(sol_check_1=dict()))
+            schema_kpis = get_empty_schema(
+                properties=dict(check=dict(type="array", objects=dict(type="number")))
+            )
+
+            def __init__(self, data, sol_data):
+                super().__init__(data, sol_data)
+
+            def check(self) -> Dict[str, Union[List, Dict]]:
+                return {"sol_check_1": [{"this is an error": 1}]}
+
+            def kpis_a_plus_b(self):
+                return [
+                    {
+                        "value": self.instance.data["a"] + self.instance.data["b"],
+                        "unused_columns": "This column should be removed",
+                    }
+                ]
+
+            def kpis_a_plus_c(self):
+                return [{"value": self.instance.data["a"] + self.instance.data["c"]}]
+
+            def get_objective(self):
+                return 0
+
+            def solve(self, options):
+                return dict(status=STATUS_OPTIMAL, status_sol=SOLUTION_STATUS_FEASIBLE)
+
+        class WarningsApp(self.app.__class__):
+            solvers = dict(default=ExperimentWithKpis)
+            instance = SimpleInstance
+            solution = SimpleSolution
+
+        warnings_app = WarningsApp()
+
+        inst_checks, sol_checks, kpis, log = warnings_app.check_generate_kpis(
+            {"a": 1, "b": 1, "c": 0}, {"d": 1}
+        )
+
+        self.assertEqual(sol_checks, {"sol_check_1": [{"this is an error": 1}]})
+        self.assertIsNone(kpis)
+
+    def test_kpis_solution_warnings(self):
+
+        class SimpleInstance(InstanceCore):
+
+            schema = get_empty_schema()
+            schema_checks = get_empty_schema()
+
+            def __init__(self, data):
+                super().__init__(data)
+
+        class SimpleSolution(SolutionCore):
+            schema = get_empty_schema()
+
+        class ExperimentWithKpis(ExperimentCore):
+
+            schema_checks = get_empty_schema(
+                properties=dict(sol_check_1=dict(is_warning=True))
+            )
+            schema_kpis = get_empty_schema(
+                properties=dict(check=dict(type="array", objects=dict(type="number")))
+            )
+
+            def __init__(self, data, sol_data):
+                super().__init__(data, sol_data)
+
+            def check(self) -> Dict[str, Union[List, Dict]]:
+                return {"sol_check_1": [{"this is a warning": 1}]}
+
+            def kpis_a_plus_b(self):
+                return [
+                    {
+                        "value": self.instance.data["a"] + self.instance.data["b"],
+                        "unused_columns": "This column should be removed",
+                    }
+                ]
+
+            def kpis_a_plus_c(self):
+                return [{"value": self.instance.data["a"] + self.instance.data["c"]}]
+
+            def get_objective(self):
+                return 0
+
+            def solve(self, options):
+                return dict(status=STATUS_OPTIMAL, status_sol=SOLUTION_STATUS_FEASIBLE)
+
+        class WarningsApp(self.app.__class__):
+            solvers = dict(default=ExperimentWithKpis)
+            instance = SimpleInstance
+            solution = SimpleSolution
+
+        warnings_app = WarningsApp()
+
+        inst_checks, sol_checks, kpis, log = warnings_app.check_generate_kpis(
+            {"a": 1, "b": 1, "c": 0}, {"d": 1}
+        )
+
+        self.assertEqual(sol_checks, {"sol_check_1": [{"this is a warning": 1}]})
+        self.assertIsNotNone(kpis)
 
     def test_solution_check_method_exception_handling(self):
         """Test that when a check_* method raises an exception, a generic error message is added."""

@@ -142,8 +142,9 @@ class ExecutionEndpoint(OrchestratorMixin):
           created by the authenticated user) and a integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
+        checks_and_kpis = kwargs.pop("checks_and_kpis", False)
         executions = self.get_list(
-            user=self.get_user(), checks_and_kpis=False, **kwargs
+            user=self.get_user(), checks_and_kpis=checks_and_kpis, **kwargs
         )
         current_app.logger.info(f"User {self.get_user()} gets list of executions")
 

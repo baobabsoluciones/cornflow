@@ -203,6 +203,14 @@ class TestDataChecksInstanceEndpoint(CustomTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json), 0)
 
+        response = self.client.get(
+            f"{EXECUTION_URL}?checks_and_kpis=true",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json), 1)
+
     @patch("cornflow.endpoints.data_check.Airflow")
     def test_new_data_check_execution_run(self, af_client_class):
         """
@@ -300,6 +308,14 @@ class TestDataChecksCaseEndpoint(CustomTestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json), 0)
+
+        response = self.client.get(
+            f"{EXECUTION_URL}?checks_and_kpis=true",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json), 1)
 
     @patch("cornflow.endpoints.data_check.Airflow")
     def test_new_data_check_execution_run(self, af_client_class):
