@@ -167,6 +167,7 @@ class TestSchemaEndpoint(CustomTestCase):
             "solution",
             "name",
             "instance",
+            "kpis",
         ]
         schemas = self.get_one_row(
             self.url + "{}/".format(self.schema_name),
@@ -177,9 +178,11 @@ class TestSchemaEndpoint(CustomTestCase):
         )
         self.assertIn("instance", schemas)
         self.assertIn("solution", schemas)
+        self.assertIn("kpis", schemas)
         self.assertEqual(schemas["instance"], self.schema)
         self.assertEqual(schemas["solution"], self.schema)
         self.assertEqual(schemas["config"], self.config)
+        self.assertEqual(schemas["kpis"], {})
 
 
 class TestNewSchemaEndpointOpen(CustomTestCase):
@@ -189,7 +192,10 @@ class TestNewSchemaEndpointOpen(CustomTestCase):
 
     def test_get_all_schemas(self):
         schemas = self.get_one_row(self.url, {}, 200, False, keys_to_check=["name"])
-        dags = [{"name": dag} for dag in ["solve_model_dag", "gc", "timer", "979073949072767"]]
+        dags = [
+            {"name": dag}
+            for dag in ["solve_model_dag", "gc", "timer", "979073949072767"]
+        ]
 
         self.assertEqual(dags, schemas)
 

@@ -183,7 +183,7 @@ class TestCornflowClientUser(TestCase):
         statuses = self.check_execution_statuses(exec_to_check["id"])
 
         exec_to_check_id = exec_to_check["id"]
-        execution = self.client.create_execution_data_check(exec_to_check_id)
+        execution = self.client.create_execution_data_check_kpis(exec_to_check_id)
         self.assertEqual(STATUS_QUEUED, execution["state"])
         return execution
 
@@ -202,7 +202,7 @@ class TestCornflowClientUser(TestCase):
         self.assertEqual(STATUS_QUEUED, execution["state"])
         config = execution.get("config")
         self.assertIsInstance(config, dict)
-        self.assertTrue(config.get("checks_only"))
+        self.assertTrue(config.get("checks_and_kpis_only"))
         self.assertEqual(execution.get("schema"), "solve_model_dag")
         self.assertEqual(execution.get("instance_id"), inst_to_check_id)
         return execution
@@ -652,6 +652,7 @@ class TestCornflowClientService(TestCase):
             solution_schema=dict(),
             solution_checks_schema=dict(),
             config_schema=dict(),
+            kpis_schema=dict(),
         )
 
         items = ["id", "description"]

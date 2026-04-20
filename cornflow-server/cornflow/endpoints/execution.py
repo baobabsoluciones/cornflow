@@ -142,7 +142,10 @@ class ExecutionEndpoint(OrchestratorMixin):
           created by the authenticated user) and a integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        executions = self.get_list(user=self.get_user(), **kwargs)
+        checks_and_kpis = kwargs.pop("checks_and_kpis", False)
+        executions = self.get_list(
+            user=self.get_user(), checks_and_kpis=checks_and_kpis, **kwargs
+        )
         current_app.logger.info(f"User {self.get_user()} gets list of executions")
 
         executions = [
@@ -371,8 +374,6 @@ class ExecutionRelaunchEndpoint(OrchestratorMixin):
         :rtype: Tuple(dict, integer)
         """
         config = current_app.config
-        if "schema" not in kwargs:
-            kwargs["schema"] = self.orch_const["def_schema"]
 
         self.put_detail(
             data=dict(config=kwargs["config"]), user=self.get_user(), idx=idx
@@ -388,8 +389,11 @@ class ExecutionRelaunchEndpoint(OrchestratorMixin):
                 log_txt=f"Error while user {self.get_user()} tries to relaunch execution {idx}. "
                 + err,
             )
+        schema = execution.schema
 
-        execution.update({"checks": None})
+        execution.update(
+            {"checks": None, "kpis": None, "last_run_checks_and_kpis": False}
+        )
 
         # If the execution is still running or queued, raise an error
         if execution.state == 0 or execution.state == -7:
@@ -403,9 +407,7 @@ class ExecutionRelaunchEndpoint(OrchestratorMixin):
             }, 201
 
         # Validate config before running the dag
-        config_schema = DeployedWorkflow.get_one_schema(
-            config, kwargs["schema"], CONFIG_SCHEMA
-        )
+        config_schema = DeployedWorkflow.get_one_schema(config, schema, CONFIG_SCHEMA)
         config_errors = json_schema_validate_as_string(config_schema, kwargs["config"])
         if config_errors:
             raise InvalidData(
@@ -413,7 +415,6 @@ class ExecutionRelaunchEndpoint(OrchestratorMixin):
                 log_txt=f"Error while user {self.get_user()} tries to relaunch execution {idx}. "
                 f"Configuration data does not match the jsonschema.",
             )
-        schema = execution.schema
 
         # Check if orchestrator is alive
         if not self.orch_client.is_alive(config=current_app.config):
@@ -576,7 +577,9 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
             )
 
         self.orch_client.set_dag_run_to_fail(
-            dag_name=execution.schema, run_id=execution.run_id
+            dag_name=execution.schema,
+            run_id=execution.run_id,
+            checks_and_kpis_workflow=execution.last_run_checks_and_kpis,
         )
         # We should check if the execution has been stopped
         execution.update_state(EXEC_STATE_STOPPED)
@@ -652,7 +655,11 @@ class ExecutionStatusEndpoint(OrchestratorMixin):
                 + error,
             )
         try:
-            state = self.orch_client.get_run_status(schema, run_id)
+            state = self.orch_client.get_run_status(
+                schema,
+                run_id,
+                checks_and_kpis_workflow=execution.last_run_checks_and_kpis,
+            )
         except self.orch_error as err:
             error = self.orch_const["name"] + f" responded with an error: {err}"
             _raise_af_error(

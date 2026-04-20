@@ -8,8 +8,7 @@ from .solution_log import LogSchema, BasicLogSchema
 
 
 class QueryFiltersExecution(QueryFilters):
-    pass
-    # status = fields.Int(required=False)
+    checks_and_kpis = fields.Boolean(required=False)
 
 
 class ConfigSchema(Schema):
@@ -34,6 +33,7 @@ class ConfigSchema(Schema):
 
 class ConfigSchemaResponse(ConfigSchema):
     checks_only = fields.Boolean(required=False)
+    checks_and_kpis_only = fields.Boolean(required=False)
 
 
 class ExecutionSchema(Schema):
@@ -47,6 +47,7 @@ class ExecutionSchema(Schema):
     config = fields.Nested(ConfigSchema, required=True)
     data = fields.Raw(dump_only=True)
     checks = fields.Raw(required=False, allow_none=True)
+    kpis = fields.Raw(required=False, allow_none=True)
     log_text = fields.Str(dump_only=True)
     log_json = fields.Nested(LogSchema, dump_only=True)
     state = fields.Int(
@@ -88,6 +89,7 @@ class ExecutionDagRequest(Schema):
     log_json = fields.Nested(LogSchema, required=False)
     state = fields.Int(required=False)
     checks = fields.Raw(required=False)
+    kpis = fields.Raw(required=False, allow_none=True)
     solution_schema = fields.Str(required=False, allow_none=True)
 
 
@@ -156,6 +158,7 @@ class ExecutionStatusEndpointUpdate(Schema):
 class ExecutionDataEndpointResponse(ExecutionDetailsEndpointResponse):
     data = fields.Raw()
     checks = fields.Raw()
+    kpis = fields.Raw()
     log = fields.Nested(BasicLogSchema, attribute="log_json")
 
 

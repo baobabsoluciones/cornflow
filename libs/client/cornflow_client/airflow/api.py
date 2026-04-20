@@ -19,8 +19,8 @@ from requests.auth import HTTPBasicAuth
 from requests.exceptions import ConnectionError, HTTPError
 
 # Imports from modules
-from cornflow_client.constants import AirflowError
-from cornflow_client.constants import config_orchestrator
+from cornflow_client.airflow.dag_utilities import get_workflow_name_check_kpis
+from cornflow_client.constants import AirflowError, config_orchestrator
 
 
 class Airflow(object):
@@ -113,7 +113,8 @@ class Airflow(object):
         self,
         execution_id,
         workflow_name=config_orchestrator["airflow"]["def_schema"],
-        checks_only=False,
+        checks_only=None,
+        checks_and_kpis_only=False,
         case_id=None,
     ):
         """
@@ -121,18 +122,34 @@ class Airflow(object):
 
         :param execution_id: The ID of the execution
         :param workflow_name: The name of the DAG
-        :param checks_only: Whether to run the checks only
+        :param checks_and_kpis_only: Whether to run the checks and KPIs only
         :param case_id: The ID of the case
         :return: The response
         """
-        conf = dict(exec_id=execution_id, checks_only=checks_only)
+        if checks_only is not None:
+            warnings.warn(
+                "The parameter checks_only is deprecated and will be removed in future versions. "
+                "Please use 'checks_and_kpis_only' instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            checks_and_kpis_only = checks_only
+
+        conf = dict(exec_id=execution_id, checks_and_kpis_only=checks_and_kpis_only)
+        if checks_and_kpis_only:
+            workflow_name = get_workflow_name_check_kpis(workflow_name)
         if case_id is not None:
             conf["case_id"] = case_id
         payload = dict(conf=conf)
         return self.consume_dag_run(workflow_name, payload=payload, method="POST")
 
     def run_dag(
-        self, execution_id, dag_name="solve_model_dag", checks_only=False, case_id=None
+        self,
+        execution_id,
+        dag_name="solve_model_dag",
+        checks_only=None,
+        checks_and_kpis_only=False,
+        case_id=None,
     ):
         """
         Run workflow.
@@ -141,7 +158,8 @@ class Airflow(object):
 
         :param execution_id: The ID of the execution
         :param dag_name: The name of the DAG
-        :param checks_only: Whether to run the checks only
+        :param checks_only: Whether to run the checks only. Deprecated.
+        :param checks_and_kpis_only: Whether to run the checks and KPIs only
         :param case_id: The ID of the case
         :return: The response
         """
@@ -155,6 +173,7 @@ class Airflow(object):
             execution_id,
             workflow_name=dag_name,
             checks_only=checks_only,
+            checks_and_kpis_only=checks_and_kpis_only,
             case_id=case_id,
         )
 
@@ -176,19 +195,22 @@ class Airflow(object):
         """
         return self.consume_dag_run(dag_name, payload={}, method="POST")
 
-    def get_run_status(self, schema, run_id):
+    def get_run_status(self, schema, run_id, checks_and_kpis_workflow=False):
         """
         Get the status of a DAG run.
 
         :param schema: The name of the DAG
         :param run_id: The ID of the DAG run
+        :param checks_and_kpis_workflow: Whether to run the checks and KPIs DAG
         :return: The status of the DAG run
         """
+        if checks_and_kpis_workflow:
+            schema = get_workflow_name_check_kpis(schema)
         return self.consume_dag_run(
             schema, payload=None, dag_run_id=run_id, method="GET"
         )
 
-    def get_dag_run_status(self, dag_name, dag_run_id):
+    def get_dag_run_status(self, dag_name, dag_run_id, checks_and_kpis_workflow=False):
         """
         Get the status of a DAG run.
 
@@ -204,9 +226,11 @@ class Airflow(object):
             DeprecationWarning,
             stacklevel=2,
         )
-        return self.get_run_status(dag_name, dag_run_id)
+        return self.get_run_status(dag_name, dag_run_id, checks_and_kpis_workflow)
 
-    def set_dag_run_to_fail(self, dag_name, run_id, new_status="failed"):
+    def set_dag_run_to_fail(
+        self, dag_name, run_id, new_status="failed", checks_and_kpis_workflow=False
+    ):
         """
         Set the status of a DAG run to failed.
 
@@ -215,6 +239,8 @@ class Airflow(object):
         :param new_status: The new status of the DAG run
         :return: The response
         """
+        if checks_and_kpis_workflow:
+            dag_name = get_workflow_name_check_kpis(dag_name)
         # here, two calls have to be done:
         # first we get information on the dag_run
         dag_run = self.consume_dag_run(
@@ -235,23 +261,31 @@ class Airflow(object):
         )
         return self.set_dag_run_state(dag_name, payload=payload)
 
-    def get_all_dag_runs(self, dag_name):
+    def get_all_dag_runs(self, dag_name, checks_and_kpis_workflow=False):
         """
         Get all the DAG runs.
 
         :param dag_name: The name of the DAG
+        :param checks_and_kpis_workflow: Whether to run the checks and KPIs DAG
         :return: The response
         """
+        if checks_and_kpis_workflow:
+            dag_name = get_workflow_name_check_kpis(dag_name)
         return self.consume_dag_run(dag_name=dag_name, payload=None, method="GET")
 
-    def get_workflow_info(self, workflow_name, method="GET"):
+    def get_workflow_info(
+        self, workflow_name, method="GET", checks_and_kpis_workflow=False
+    ):
         """
         Get the information of a DAG.
 
         :param workflow_name: The name of the DAG
         :param method: The method to use to get the information
+        :param checks_and_kpis_workflow: Whether to get the information of the checks and KPIs DAG
         :return: The information of the DAG
         """
+        if checks_and_kpis_workflow:
+            workflow_name = get_workflow_name_check_kpis(workflow_name)
         # TODO: cleanup method input arguments
         url = f"{self.url}/dags/{workflow_name}"
         schema_info = self.request_headers_auth(method=method, url=url)
@@ -259,7 +293,7 @@ class Airflow(object):
             raise AirflowError("DAG not available")
         return schema_info
 
-    def get_dag_info(self, dag_name, method="GET"):
+    def get_dag_info(self, dag_name, method="GET", checks_and_kpis_workflow=False):
         """
         Get the information of a DAG.
 
@@ -267,6 +301,7 @@ class Airflow(object):
 
         :param dag_name: The name of the DAG
         :param method: The method to use to get the information
+        :param checks_and_kpis_workflow: Whether to get the information of the checks and KPIs DAG
         :return: The information of the DAG
         """
         warnings.warn(
@@ -275,7 +310,7 @@ class Airflow(object):
             DeprecationWarning,
             stacklevel=2,
         )
-        return self.get_workflow_info(dag_name, method)
+        return self.get_workflow_info(dag_name, method, checks_and_kpis_workflow)
 
     def get_one_variable(self, variable):
         """

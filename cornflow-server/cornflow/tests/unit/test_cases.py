@@ -985,6 +985,7 @@ class TestCaseDataEndpoint(CustomTestCase):
             "name",
             "checks",
             "created_at",
+            "kpis",
         ]
         self.get_one_row(
             self.url + str(self.payload["id"]) + "/data/",
