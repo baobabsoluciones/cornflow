@@ -139,6 +139,7 @@ dependencies = [
     { name = "pulp" },
     { name = "pytups" },
     { name = "requests" },
+    { name = "tomli", marker = "python_full_version < '3.11'" },
 ]
 
 [package.optional-dependencies]
@@ -155,16 +156,17 @@ excel = [
 [package.metadata]
 requires-dist = [
     { name = "coverage", extras = ["toml"], marker = "extra == 'dev'", specifier = ">=7.0" },
-    { name = "genson", specifier = "<=1.2.2" },
-    { name = "jsonschema", specifier = "<=4.21.1" },
-    { name = "marshmallow", specifier = "<=3.20.2" },
+    { name = "genson", specifier = "==1.2.2" },
+    { name = "jsonschema", specifier = "==4.21.1" },
+    { name = "marshmallow", specifier = "==3.26.2" },
     { name = "openpyxl", marker = "extra == 'dev'" },
     { name = "openpyxl", marker = "extra == 'excel'" },
-    { name = "ortools", specifier = "<=9.8.3296" },
+    { name = "ortools", specifier = "==9.8.3296" },
     { name = "pandas", marker = "extra == 'excel'" },
-    { name = "pulp", specifier = "<=2.9.0" },
-    { name = "pytups", specifier = "<=0.86.2" },
-    { name = "requests", specifier = "<=2.32.4" },
+    { name = "pulp", specifier = "==2.9.0" },
+    { name = "pytups", specifier = "==0.86.2" },
+    { name = "requests", specifier = "==2.32.4" },
+    { name = "tomli", marker = "python_full_version < '3.11'", specifier = ">=2.0" },
 ]
 provides-extras = ["dev", "excel"]
 
@@ -339,14 +341,14 @@ wheels = [
 
 [[package]]
 name = "marshmallow"
-version = "3.20.2"
+version = "3.26.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "packaging" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/03/81/763717b3448e5d3a3906f27ab2ffedc9a495e8077946f54b8033967d29fd/marshmallow-3.20.2.tar.gz", hash = "sha256:4c1daff273513dc5eb24b219a8035559dc573c8f322558ef85f5438ddd1236dd", size = 185043, upload-time = "2024-01-09T21:43:21.005Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/55/79/de6c16cc902f4fc372236926b0ce2ab7845268dcc30fb2fbb7f71b418631/marshmallow-3.26.2.tar.gz", hash = "sha256:bbe2adb5a03e6e3571b573f42527c6fe926e17467833660bebd11593ab8dfd57", size = 222095, upload-time = "2025-12-22T06:53:53.309Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/57/e9/4368d49d3b462da16a3bac976487764a84dd85cef97232c7bd61f5bdedf3/marshmallow-3.20.2-py3-none-any.whl", hash = "sha256:c21d4b98fee747c130e6bc8f45c4b3199ea66bc00c12ee1f639f0aeca034d5e9", size = 49449, upload-time = "2024-01-09T21:43:18.093Z" },
+    { url = "https://files.pythonhosted.org/packages/be/2f/5108cb3ee4ba6501748c4908b908e55f42a5b66245b4cfe0c99326e1ef6e/marshmallow-3.26.2-py3-none-any.whl", hash = "sha256:013fa8a3c4c276c24d26d84ce934dc964e2aa794345a0f8c7e5a7191482c8a73", size = 50964, upload-time = "2025-12-22T06:53:51.801Z" },
 ]
 
 [[package]]
