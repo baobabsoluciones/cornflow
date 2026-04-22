@@ -149,7 +149,6 @@ jobs:
           uv run flask db upgrade -d cornflow/migrations/
           uv run flask access_init
           
-          # REGISTRO: Ahora que sabemos que Airflow tiene el DAG, lo registramos
           uv run flask register_deployed_dags -r http://127.0.0.1:8080 -u admin -p admin
           
           # Crear usuarios y permisos
@@ -157,10 +156,6 @@ jobs:
           uv run flask create_service_user -u airflow -e airflow@cornflow.org -p Airflow_test_password1
           uv run flask create_base_user -u user -e user@cornflow.org -p UserPassword1!
           uv run flask register_dag_permissions -o 1
-
-          # VERIFICACIÓN: Si esto imprime 0, los tests fallarán
-          echo "Number of DAGs in Cornflow DB:"
-          uv run python -c "from cornflow.app import create_app; from cornflow.models import DeployedWorkflow; import sys; app=create_app('testing'); ctx=app.app_context(); ctx.push(); count=DeployedWorkflow.query.count(); print(count); sys.exit(0 if count > 0 else 1)"
           
           # Arrancar servidor Cornflow
           uv run flask run -p 5050 &
@@ -168,6 +163,7 @@ jobs:
         env:
           FLASK_ENV: testing
           FLASK_APP: cornflow.app
+          DATABASE_URL: sqlite:///${{ github.workspace }}/cornflow-server/cornflow_test.db
           AIRFLOW_URL: http://127.0.0.1:8080
           AIRFLOW_USER: admin
           AIRFLOW_PWD: admin
