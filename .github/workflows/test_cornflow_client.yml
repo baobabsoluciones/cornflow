@@ -151,18 +151,35 @@ jobs:
           cd ../..
           cd cornflow-server
           uv sync --extra dev
-          CLIENT_BRANCH="${{ github.head_ref || github.ref_name }}"
+          
+          # Desinstalar e instalar la versión de la rama actual para asegurar compatibilidad
           uv pip uninstall cornflow-client
-          uv pip install "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
+          uv pip install "git+https://github.com/baobabsoluciones/cornflow@${{ github.head_ref || github.ref_name }}#subdirectory=libs/client"
+          
           uv run flask db upgrade -d cornflow/migrations/
           uv run flask access_init
+          
+          echo "Waiting for Airflow to parse solve_model_dag..."
+          for i in $(seq 1 30); do
+            if curl -sf -u admin:admin "http://127.0.0.1:8080/api/v1/dags/solve_model_dag" > /dev/null; then
+              echo "Airflow confirmed DAG solve_model_dag is ready."
+              break
+            fi
+            echo "Waiting for DAG discovery... ($i/30)"
+            sleep 5
+          done
+
           uv run flask register_deployed_dags -r http://127.0.0.1:8080 -u admin -p admin
+          
+          # Crear usuarios y permisos
           uv run flask create_admin_user -u admin -e admin@cornflow.org -p Adminpassword1!
           uv run flask create_service_user -u airflow -e airflow@cornflow.org -p Airflow_test_password1
           uv run flask create_base_user -u user -e user@cornflow.org -p UserPassword1!
           uv run flask register_dag_permissions -o 1
+          
+          # Arrancar servidor Cornflow
           uv run flask run -p 5050 &
-          sleep 5
+          sleep 10
         env:
           FLASK_ENV: testing
           FLASK_APP: cornflow.app
