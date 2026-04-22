@@ -87,6 +87,7 @@ jobs:
           uv pip install orloge pulp
           uv pip uninstall cornflow-client
           uv pip install "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
+          uv pip install -e "$GITHUB_WORKSPACE/cornflow-dags"
           airflow db init
           airflow users create \
                 --username admin \
