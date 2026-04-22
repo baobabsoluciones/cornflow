@@ -103,8 +103,8 @@ jobs:
           afvenv/bin/airflow db init
           afvenv/bin/airflow users create -u admin -f admin -l admin -r Admin -p admin -e admin@example.org
           afvenv/bin/airflow dags reserialize
-          nohup afvenv/bin/airflow webserver -p 8080 > airflow-webserver.log 2>&1 &
-          nohup afvenv/bin/airflow scheduler > airflow-scheduler.log 2>&1 &
+          afvenv/bin/airflow webserver -p 8080 &
+          afvenv/bin/airflow scheduler &
           sleep 45
         env:
           AIRFLOW__SCHEDULER__CATCHUP_BY_DEFAULT: 0
@@ -118,6 +118,21 @@ jobs:
           AIRFLOW_CONN_CF_URI: http://airflow:Airflow_test_password1@localhost:5050
       - name: Wait for Airflow DAGs
         run: |
+          HEALTHY=0
+          for i in $(seq 1 24); do
+            HEALTH_JSON="$(curl -s -u admin:admin "http://127.0.0.1:8080/api/v1/health" || true)"
+            if echo "$HEALTH_JSON" | python -c "import json,sys; d=json.load(sys.stdin); ok=d.get('metadatabase',{}).get('status')=='healthy' and d.get('scheduler',{}).get('status')=='healthy'; sys.exit(0 if ok else 1)"; then
+              HEALTHY=1
+              break
+            fi
+            sleep 5
+          done
+          if [ "$HEALTHY" -ne 1 ]; then
+            echo "Airflow health never became healthy"
+            curl -s -u admin:admin "http://127.0.0.1:8080/api/v1/health" || true
+            exit 1
+          fi
+
           for i in $(seq 1 24); do
             if curl -sf -u admin:admin "http://127.0.0.1:8080/api/v1/dags/solve_model_dag" -o /dev/null -w "%{http_code}" | grep -q 200; then
               echo "solve_model_dag available"
@@ -137,20 +152,6 @@ jobs:
           cd ../..
           cd cornflow-server
           uv sync --extra dev
-          DAG_READY=0
-          for i in $(seq 1 24); do
-            if curl -sf -u admin:admin "http://127.0.0.1:8080/api/v1/dags/solve_model_dag" -o /dev/null -w "%{http_code}" | grep -q 200; then
-              DAG_READY=1
-              break
-            fi
-            sleep 5
-          done
-          if [ "$DAG_READY" -ne 1 ]; then
-            curl -s -u admin:admin "http://127.0.0.1:8080/api/v1/dags?limit=50" || true
-            tail -200 airflow-webserver.log 2>/dev/null || true
-            tail -200 airflow-scheduler.log 2>/dev/null || true
-            exit 1
-          fi
           CLIENT_BRANCH="${{ github.head_ref || github.ref_name }}"
           uv pip uninstall cornflow-client
           uv pip install "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
