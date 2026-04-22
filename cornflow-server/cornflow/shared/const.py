@@ -7,7 +7,7 @@ AIRFLOW_BACKEND = 1
 DATABRICKS_BACKEND = 2
 
 
-CORNFLOW_VERSION = "1.3.0"
+CORNFLOW_VERSION = "1.3.1rc2"
 INTERNAL_TOKEN_ISSUER = "cornflow"
 
 # endpoints responses for health check
@@ -150,6 +150,9 @@ BASE_PERMISSION_ASSIGNATION = [
 
 EXTRA_PERMISSION_ASSIGNATION = [
     (VIEWER_ROLE, PUT_ACTION, "user-detail"),
+    (VIEWER_ROLE, GET_ACTION, "user-roles"),
+    (PLANNER_ROLE, GET_ACTION, "user-roles"),
+    (SERVICE_ROLE, GET_ACTION, "user-roles"),
 ]
 
 # Costants for messages that are given back on exceptions

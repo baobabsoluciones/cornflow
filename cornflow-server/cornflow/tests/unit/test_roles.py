@@ -21,6 +21,7 @@ from cornflow.shared.const import (
     ADMIN_ROLE,
     PLANNER_ROLE,
     ROLES_MAP,
+    SERVICE_ROLE,
     VIEWER_ROLE,
 )
 from cornflow.tests.const import ROLES_URL, USER_ROLE_URL
@@ -253,20 +254,24 @@ class TestUserRolesListEndpoint(CustomTestCase):
             self.assertEqual(200, response.status_code)
             self.assertCountEqual(self.payload, response.json)
 
-
-    def test_get_user_roles_not_authorized_user(self):
-        for role in ROLES_MAP:
-            if role not in self.roles_with_access:
-                self.token = self.create_user_with_role(role)
-                response = self.client.get(
-                    self.url,
-                    follow_redirects=True,
-                    headers={
-                        "Content-Type": "application/json",
-                        "Authorization": f"Bearer {self.token}",
-                    },
+        for role in (VIEWER_ROLE, PLANNER_ROLE, SERVICE_ROLE):
+            self.token = self.create_user_with_role(role)
+            user = UserModel.get_one_object(username=f"testuser{role}")
+            response = self.client.get(
+                self.url,
+                follow_redirects=True,
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {self.token}",
+                },
+            )
+            self.assertEqual(200, response.status_code)
+            self.assertTrue(
+                any(
+                    r["user_id"] == user.id and r["role_id"] == role
+                    for r in response.json
                 )
-                self.assertEqual(403, response.status_code)
+            )
 
     def test_post_role_assignment_authorized_user(self):
         for role in self.roles_with_access:
