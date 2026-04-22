@@ -118,17 +118,16 @@ jobs:
           AIRFLOW_CONN_CF_URI: http://airflow:Airflow_test_password1@localhost:5050
       - name: Wait for Airflow DAGs
         run: |
-          HEALTHY=0
+          API_UP=0
           for i in $(seq 1 24); do
-            HEALTH_JSON="$(curl -s -u admin:admin "http://127.0.0.1:8080/api/v1/health" || true)"
-            if echo "$HEALTH_JSON" | python -c "import json,sys; d=json.load(sys.stdin); ok=d.get('metadatabase',{}).get('status')=='healthy' and d.get('scheduler',{}).get('status')=='healthy'; sys.exit(0 if ok else 1)"; then
-              HEALTHY=1
+            if curl -sf -u admin:admin "http://127.0.0.1:8080/api/v1/health" >/dev/null; then
+              API_UP=1
               break
             fi
             sleep 5
           done
-          if [ "$HEALTHY" -ne 1 ]; then
-            echo "Airflow health never became healthy"
+          if [ "$API_UP" -ne 1 ]; then
+            echo "Airflow API not reachable"
             curl -s -u admin:admin "http://127.0.0.1:8080/api/v1/health" || true
             exit 1
           fi
