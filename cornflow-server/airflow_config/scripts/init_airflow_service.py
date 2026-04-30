@@ -61,9 +61,9 @@ if os.path.isfile("/usr/local/airflow/.ssh/id_rsa") and CUSTOM_SSH_HOST is not N
     os.system(CONFIG_SSH_KEY)
     os.system(COPY_TO_USER_DIR)
 
-# Install custom python package if requirements.txt is present
-if os.path.isfile("/requirements.txt"):
-    os.system("$(command -v pip) install --user -r /requirements.txt")
+# Install cornflow-dags from pyproject.toml (same path as before: copied to / in image), using uv
+if os.path.isfile("/pyproject.toml"):
+    os.system("$(command -v uv) pip install --user -e /")
 
 # Make SQL connention
 if os.getenv("AIRFLOW__CORE__SQL_ALCHEMY_CONN") is None:

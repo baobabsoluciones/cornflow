@@ -310,7 +310,7 @@ In this example we put everything inside the ``__init__.py`` (except the json-sc
 Requirements
 ------------------
 
-The repository contains a file called requirements.txt. You will need to update this file with the name of the additional libraries that your code needs to run.
+The repository uses ``pyproject.toml`` and ``uv.lock`` for dependencies. Add any additional libraries your code needs to the ``[project].dependencies`` section in ``pyproject.toml``.
 
 
 Pull request

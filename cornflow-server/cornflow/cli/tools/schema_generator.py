@@ -4,12 +4,11 @@ import re
 import sys
 import json
 import importlib.util
-from distutils.dir_util import copy_tree
+import shutil
 from unittest.mock import MagicMock
 
 import click
 from flask_sqlalchemy import SQLAlchemy
-import shutil
 from pytups import TupList, SuperDict
 from sqlalchemy.dialects.postgresql import TEXT, JSON
 from sqlalchemy.sql.sqltypes import Integer
@@ -28,9 +27,7 @@ class SchemaGenerator:
         self.table_model = dict()
 
     def main(self):
-        os.mkdir(self.tmp_path)
-
-        copy_tree(self.path, self.tmp_path)
+        shutil.copytree(self.path, self.tmp_path)
 
         files = (
             TupList(os.listdir(self.tmp_path))

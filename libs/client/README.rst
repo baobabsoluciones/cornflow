@@ -6,14 +6,20 @@ The aim of this repository is to have a client to use to connect to a deployed c
 Requirements
 ~~~~~~~~~~~~
 
-* python >= 3.8
+* Python >= 3.10
 
 Install cornflow-client
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-To install the package do::
+From PyPI::
 
-    python3 -m pip install cornflow-client
+    uv pip install cornflow-client
+
+From source (development): from the ``libs/client`` directory::
+
+    uv sync --extra dev
+
+This creates a virtual environment (``.venv``) and installs the project. Run commands with ``uv run <command>``. See `uv documentation <https://docs.astral.sh/uv/>`_.
 
 Use cornflow-client
 ~~~~~~~~~~~~~~~~~~~~
