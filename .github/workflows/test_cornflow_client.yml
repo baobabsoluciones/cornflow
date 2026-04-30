@@ -187,8 +187,8 @@ jobs:
           SIGNUP_ACTIVATED: 1
       - name: Wait for DAG registration in Cornflow
         run: |
-          cd ../..
-          python - <<'PY'
+          cd ../../cornflow-server
+          uv run python - <<'PY'
           import time
           import requests
 
