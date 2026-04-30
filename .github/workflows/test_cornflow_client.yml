@@ -121,17 +121,26 @@ jobs:
           AIRFLOW_CONN_CF_URI: http://airflow:Airflow_test_password1@localhost:5050
       - name: Wait for Airflow DAGs
         run: |
-          # Esperar a que el API responda 200 para el DAG específico
-          for i in $(seq 1 30); do
+          # Esperar a que el DAG exista y aparezca con tag=model
+          for i in $(seq 1 45); do
+            DAG_OK=0
+            MODEL_OK=0
             if curl -sf -u admin:admin "http://127.0.0.1:8080/api/v1/dags/solve_model_dag" > /dev/null; then
-              echo "SUCCESS: solve_model_dag is loaded in Airflow"
+              DAG_OK=1
+            fi
+            if curl -sf -u admin:admin "http://127.0.0.1:8080/api/v1/dags?tags=model" | grep -q '"dag_id":"solve_model_dag"'; then
+              MODEL_OK=1
+            fi
+            if [ "$DAG_OK" -eq 1 ] && [ "$MODEL_OK" -eq 1 ]; then
+              echo "SUCCESS: solve_model_dag is loaded in Airflow and tagged as model"
               exit 0
             fi
-            echo "Waiting for Airflow to parse DAGs... ($i/30)"
+            echo "Waiting for Airflow DAG + model tag... ($i/45)"
             sleep 10
           done
-          echo "ERROR: Airflow never loaded the DAGs"
+          echo "ERROR: Airflow never exposed solve_model_dag as model"
           curl -u admin:admin "http://127.0.0.1:8080/api/v1/dags"
+          curl -u admin:admin "http://127.0.0.1:8080/api/v1/dags?tags=model"
           exit 1
         env:
           AIRFLOW_HOME: ${{ github.workspace }}/cornflow-server/airflow_config
@@ -148,8 +157,16 @@ jobs:
           
           uv run flask db upgrade -d cornflow/migrations/
           uv run flask access_init
-          
-          uv run flask register_deployed_dags -r http://127.0.0.1:8080 -u admin -p admin
+
+          # Re-serializar justo antes del registro en Cornflow
+          afvenv/bin/airflow dags reserialize
+
+          # Reintentar el registro por posibles carreras en el parseo inicial
+          for i in $(seq 1 5); do
+            uv run flask register_deployed_dags -r http://127.0.0.1:8080 -u admin -p admin && break
+            echo "register_deployed_dags retry $i/5"
+            sleep 10
+          done
           
           # Crear usuarios y permisos
           uv run flask create_admin_user -u admin -e admin@cornflow.org -p Adminpassword1!
@@ -173,6 +190,52 @@ jobs:
           LOG_LEVEL: 10
           CORNFLOW_SERVICE_USER: airflow
           SIGNUP_ACTIVATED: 1
+      - name: Wait for DAG registration in Cornflow
+        run: |
+          cd ../..
+          python - <<'PY'
+          import time
+          import requests
+
+          base = "http://127.0.0.1:5050"
+          token = None
+          for _ in range(40):
+              try:
+                  response = requests.post(
+                      f"{base}/login/",
+                      json={"username": "airflow", "password": "Airflow_test_password1"},
+                      timeout=10,
+                  )
+                  if response.status_code == 200:
+                      token = response.json().get("token")
+                      if token:
+                          break
+              except requests.RequestException:
+                  pass
+              time.sleep(3)
+
+          if not token:
+              raise SystemExit("Could not login as airflow user in Cornflow")
+
+          headers = {"Authorization": f"Bearer {token}"}
+          for _ in range(60):
+              try:
+                  response = requests.get(
+                      f"{base}/dag/deployed/",
+                      headers=headers,
+                      timeout=10,
+                  )
+                  if response.status_code == 200:
+                      dags = [item.get("id") for item in response.json()]
+                      if "solve_model_dag" in dags:
+                          print("solve_model_dag is registered in Cornflow")
+                          raise SystemExit(0)
+              except requests.RequestException:
+                  pass
+              time.sleep(3)
+
+          raise SystemExit("solve_model_dag is still missing in Cornflow deployed DAGs")
+          PY
       - name: Run unit tests
         run: |
           uv run coverage run -m unittest discover -s cornflow_client/tests/unit
