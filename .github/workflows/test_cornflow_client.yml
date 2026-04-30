@@ -106,7 +106,7 @@ jobs:
           
           afvenv/bin/airflow db init
           afvenv/bin/airflow users create -u admin -f admin -l admin -r Admin -p admin -e admin@example.org
-          afvenv/bin/airflow dags reserialize
+          ./afvenv/bin/airflow dags reserialize
           afvenv/bin/airflow webserver -p 8080 &
           afvenv/bin/airflow scheduler &
         env:
@@ -152,7 +152,7 @@ jobs:
           uv run flask access_init
 
           # Re-serializar justo antes del registro en Cornflow
-          afvenv/bin/airflow dags reserialize
+          ./afvenv/bin/airflow dags reserialize
 
           # Reintentar el registro por posibles carreras en el parseo inicial
           for i in $(seq 1 5); do
@@ -174,6 +174,8 @@ jobs:
           FLASK_ENV: testing
           FLASK_APP: cornflow.app
           DATABASE_URL: sqlite:///${{ github.workspace }}/cornflow-server/cornflow_test.db
+          AIRFLOW_HOME: ${{ github.workspace }}/cornflow-server/airflow_config
+          AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: sqlite:///${{ github.workspace }}/cornflow-server/airflow_config/airflow.db
           AIRFLOW_URL: http://127.0.0.1:8080
           AIRFLOW_USER: admin
           AIRFLOW_PWD: admin
