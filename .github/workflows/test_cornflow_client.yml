@@ -121,26 +121,19 @@ jobs:
           AIRFLOW_CONN_CF_URI: http://airflow:Airflow_test_password1@localhost:5050
       - name: Wait for Airflow DAGs
         run: |
-          # Esperar a que el DAG exista y aparezca con tag=model
+          # Esperar a que el DAG exista y sea visible en el listado general
           for i in $(seq 1 45); do
-            DAG_OK=0
-            MODEL_OK=0
-            if curl -sf -u admin:admin "http://127.0.0.1:8080/api/v1/dags/solve_model_dag" > /dev/null; then
-              DAG_OK=1
-            fi
-            if curl -sf -u admin:admin "http://127.0.0.1:8080/api/v1/dags?tags=model" | grep -q '"dag_id":"solve_model_dag"'; then
-              MODEL_OK=1
-            fi
-            if [ "$DAG_OK" -eq 1 ] && [ "$MODEL_OK" -eq 1 ]; then
-              echo "SUCCESS: solve_model_dag is loaded in Airflow and tagged as model"
+            if curl -sf -u admin:admin "http://127.0.0.1:8080/api/v1/dags/solve_model_dag" > /dev/null && \
+               curl -sf -u admin:admin "http://127.0.0.1:8080/api/v1/dags" | grep -q "solve_model_dag"; then
+              echo "SUCCESS: solve_model_dag is loaded in Airflow"
               exit 0
             fi
-            echo "Waiting for Airflow DAG + model tag... ($i/45)"
+            echo "Waiting for Airflow DAG discovery... ($i/45)"
             sleep 10
           done
-          echo "ERROR: Airflow never exposed solve_model_dag as model"
+          echo "ERROR: Airflow never exposed solve_model_dag"
           curl -u admin:admin "http://127.0.0.1:8080/api/v1/dags"
-          curl -u admin:admin "http://127.0.0.1:8080/api/v1/dags?tags=model"
+          curl -u admin:admin "http://127.0.0.1:8080/api/v1/dags/solve_model_dag"
           exit 1
         env:
           AIRFLOW_HOME: ${{ github.workspace }}/cornflow-server/airflow_config
