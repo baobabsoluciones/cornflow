@@ -12,7 +12,6 @@ from unittest import TestCase
 import pulp as pl
 
 from cornflow_client import CornFlow
-from cornflow_client.airflow.api import Airflow
 from cornflow_client.constants import STATUS_OPTIMAL, STATUS_NOT_SOLVED, STATUS_QUEUED
 from cornflow_client.schema.tools import get_pulp_jsonschema
 from cornflow_client.tests.const import PUBLIC_DAGS, PULP_EXAMPLE
@@ -32,29 +31,8 @@ def _get_file(relative_path):
     return os.path.join(path_to_tests_dir, relative_path)
 
 
-def _ensure_solve_model_dag_available():
-    af_client = Airflow(url="http://127.0.0.1:8080", user="admin", pwd="admin")
-    af_client.update_dag_registry()
-    af_client.update_schemas()
-
-    admin_client = CornFlow(url="http://127.0.0.1:5050/")
-    admin_client.login("admin", "Adminpassword1!")
-    for _ in range(30):
-        response = admin_client.raw.get_deployed_dags()
-        if response.status_code == 200:
-            deployed_dags = [v["id"] for v in response.json()]
-            if "solve_model_dag" in deployed_dags:
-                return
-        time.sleep(2)
-    raise AssertionError("solve_model_dag is not available in cornflow")
-
-
 # Testing suit classes
 class TestCornflowClientUser(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        _ensure_solve_model_dag_available()
-
     def setUp(self):
         self.client = CornFlow(url="http://127.0.0.1:5050/")
         login_result = self.client.login("user", "UserPassword1!")
@@ -568,10 +546,6 @@ class TestCornflowClientUser(TestCase):
 
 
 class TestCornflowClientAdmin(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        _ensure_solve_model_dag_available()
-
     def setUp(self):
         self.client = CornFlow(url="http://127.0.0.1:5050/")
         login_result = self.client.login("admin", "Adminpassword1!")
@@ -601,10 +575,6 @@ class TestCornflowClientAdmin(TestCase):
 
 
 class TestCornflowClientService(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        _ensure_solve_model_dag_available()
-
     def setUp(self):
         self.client = CornFlow(url="http://127.0.0.1:5050/")
         login_result = self.client.login("airflow", "Airflow_test_password1")
