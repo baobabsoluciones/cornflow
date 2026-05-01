@@ -27,12 +27,10 @@
 version: "3.8"
 
 x-airflow-common: &airflow-common
-  # In order to add custom dependencies or upgrade provider packages you can use your extended image.
-  # Comment the image line and uncomment the "build" and "context" lines below, Then run `docker-compose build` to build the images.
-  image: baobabsoluciones/airflow:release-v1.3.0
+  build:
+    context: ./cornflow-server/airflow_config
+  image: cornflow-airflow:local
   platform: linux/amd64
-  #build:
-  #context: ./cornflow-server/airflow_config
   environment: &airflow-common-env
     AIRFLOW_USER: admin
     AIRFLOW_PWD: admin
@@ -45,12 +43,23 @@ x-airflow-common: &airflow-common
     EXECUTOR: Celery
     AIRFLOW__WEBSERVER__INSTANCE_NAME: CornflowEnv
     AIRFLOW__WEBSERVER__NAVBAR_COLOR: "#0693e3"
+    CORNFLOW_VENVS_DIR: /usr/local/airflow/venvs
   volumes:
-    - ./cornflow-dags/DAG:/usr/local/airflow/dags
-    - ./cornflow-dags/requirements.txt:/requirements.txt
+    # Internal DAG scripts
+    - ./cornflow-dags/DAG/activate_dags.py:/usr/local/airflow/dags/activate_dags.py
+    - ./cornflow-dags/DAG/update_all_schemas.py:/usr/local/airflow/dags/update_all_schemas.py
+    - ./cornflow-dags/DAG/update_dag_registry.py:/usr/local/airflow/dags/update_dag_registry.py
+    # Model repos as grouping folders (recursive import discovers apps inside)
+    - ./cornflow-dags/ie_planificacion_docente:/usr/local/airflow/dags/ie_planificacion_docente
+    - ./cornflow-dags/ie_planificacion_examenes:/usr/local/airflow/dags/ie_planificacion_examenes
+    # Per-venv requirements: init script creates a venv per .txt file
+    # and also installs each into the base env for DAG parsing
+    - ./cornflow-dags/requirements:/requirements
+    # Logs, plugins, settings
     - ./cornflow-server/airflow_config/logs:/usr/local/airflow/logs
     - ./cornflow-server/airflow_config/plugins:/usr/local/airflow/plugins
     - ./cornflow-server/airflow_config/airflow_local_settings.py:/usr/local/airflow/config/airflow_local_settings.py
+    
   depends_on: &airflow-common-depends-on
     redis:
       condition: service_healthy
@@ -58,12 +67,9 @@ x-airflow-common: &airflow-common
       condition: service_healthy
 
 x-cornflow-common: &cornflow-common
-  # In order to add custom dependencies or upgrade provider packages you can use your extended image.
-  # Comment the image line and uncomment the "build" and "context" lines below, Then run `docker-compose build` to build the images.
-  image: baobabsoluciones/cornflow:release-v1.3.0
+  build:
+    context: ./cornflow-server
   platform: linux/amd64
-  #build:
-  #context: ./cornflow-server
   environment: &cornflow-common-env
     CORNFLOW_ADMIN_USER: cornflow_admin
     CORNFLOW_ADMIN_PWD: Cornflow_admin1234
@@ -77,8 +83,7 @@ x-cornflow-common: &cornflow-common
   depends_on: &cornflow-common-depends-on
     cornflow_db:
       condition: service_healthy
-    webserver:
-      condition: service_healthy
+
 
 services:
   cornflow:
@@ -165,7 +170,6 @@ services:
     profiles:
       - flower
     ports:
-      - "5555:5555"
       - "5555:5555"
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:5555/"]

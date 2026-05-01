@@ -27,6 +27,9 @@ default_args = {
 schemas = ["instance", "solution", "config"]
 
 
+_SKIP_PREFIXES = (".", "__", "scripts", "documentation", "tests", "activate_dags")
+
+
 def get_new_apps() -> List[ApplicationCore]:
     # we need to run this to be sure to import modules
     import_dags()
@@ -34,41 +37,44 @@ def get_new_apps() -> List[ApplicationCore]:
     return [app_class() for app_class in new_apps]
 
 
-def import_dags():
-    sys.path.append(os.path.dirname(__file__))
-    _dir = os.path.dirname(__file__)
-    print(f"looking for apps in dir={_dir}")
-    files = os.listdir(_dir)
-    print(f"Files are: {files}")
-    # we go file by file and try to import it if matches the filters
-    # TODO: here we should implement a .dagignore file to avoid files that could be on the folder
-    for dag_module in files:
-        filename, ext = os.path.splitext(dag_module)
+def _import_from_directory(directory):
+    """Import all .py files and python packages found in a directory."""
+    for item in os.listdir(directory):
+        filename, ext = os.path.splitext(item)
 
         if ext not in [".py", ""]:
             continue
 
-        if filename.startswith(
-            (
-                ".",
-                "__",
-                "scripts",
-                "documentation",
-                "tests",
-                "activate_dags",
-            )
-        ):
+        if filename.startswith(_SKIP_PREFIXES):
             continue
 
         try:
-            _import_file(filename)
+            il.import_module(filename)
             print(f"Imported {filename}")
         except Exception as e:
-            raise e
+            print(f"WARNING: Could not import {filename}: {e}")
 
 
-def _import_file(filename):
-    return il.import_module(filename)
+def import_dags():
+    _dir = os.path.dirname(__file__)
+    sys.path.append(_dir)
+    print(f"looking for apps in dir={_dir}")
+
+    _import_from_directory(_dir)
+
+    # Second level: look inside subdirectories that are NOT python packages
+    # themselves. This supports grouping folders like DAG/client_a/app1/.
+    for entry in os.listdir(_dir):
+        entry_path = os.path.join(_dir, entry)
+        if not os.path.isdir(entry_path):
+            continue
+        if entry.startswith(_SKIP_PREFIXES):
+            continue
+        if os.path.isfile(os.path.join(entry_path, "__init__.py")):
+            continue
+        sys.path.append(entry_path)
+        print(f"looking for apps in subdir={entry_path}")
+        _import_from_directory(entry_path)
 
 
 def get_schemas_dag_file(_module):

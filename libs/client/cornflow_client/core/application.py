@@ -80,6 +80,15 @@ class ApplicationCore(ABC):
         return None
 
     @property
+    def venv(self) -> Union[str, None]:
+        """
+        Optional property
+
+        :return: the name of the virtual environment to use for this app.
+        """
+        return None
+
+    @property
     @abstractmethod
     def instance(self) -> Type[InstanceCore]:
         """
