@@ -143,6 +143,12 @@ def create_app(env_name="development", dataconn=None):
             NotFound(), {app.config["APPLICATION_ROOT"]: app.wsgi_app}
         )
 
+    from flask import request, current_app
+
+    @app.before_request
+    def print_request_info():
+        current_app.logger.info(f"Request made to {request.endpoint}")
+
     return app
 
 
