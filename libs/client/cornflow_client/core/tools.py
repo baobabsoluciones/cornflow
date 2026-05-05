@@ -59,6 +59,7 @@ def to_excel_memory_file(data: dict) -> Optional[io.BytesIO]:
             truncated_name = table_name
             if len(table_name) > max_length:
                 truncated_name = table_name[:max_length]
+            truncated_name_w_suffix = truncated_name
             if truncated_name in used_table_names:
                 current_suffix = used_table_names[truncated_name] + 1
                 truncated_name_w_suffix = (
