@@ -320,7 +320,7 @@ class ApplicationCore(ABC):
                 kpis_checks = algo.kpis_checks()
                 solution_checks.update(kpis_checks)
 
-        return final_sol_dict, solution_checks, kpis
+        return final_sol_dict, solution_checks, solution_has_errors, kpis
 
     def _format_log_and_solution(self, algo, output, solver_name, elapsed_time):
         """Formats logs, validates and checks the solution, generates the kpis"""
@@ -339,14 +339,22 @@ class ApplicationCore(ABC):
         # 4. Validate and check solution if feasible/optimal
         final_sol_dict = None
         solution_checks = None
+        solution_has_errors = None
         kpis = None
         if final_sol_code > 0:
             # Raises BadSolution if schema validation fails
-            final_sol_dict, solution_checks, kpis = self._validate_and_check_solution(
-                algo
+            final_sol_dict, solution_checks, solution_has_errors, kpis = (
+                self._validate_and_check_solution(algo)
             )
 
-        return final_sol_dict, solution_checks, kpis, log_txt, log_json
+        return (
+            final_sol_dict,
+            solution_checks,
+            solution_has_errors,
+            kpis,
+            log_txt,
+            log_json,
+        )
 
     def solve(
         self, data: dict, config: dict, solution_data: dict = None
@@ -371,9 +379,9 @@ class ApplicationCore(ABC):
         inst, sol_initial = self._prepare_instance_and_solution(data, solution_data)
 
         # 3. Check instance for critical errors
-        instance_checks, has_errors = self._check_instance_errors(inst)
+        instance_checks, instance_has_errors = self._check_instance_errors(inst)
 
-        if has_errors:
+        if instance_has_errors:
             # Return early if instance has critical errors
             solver_name = config.get("solver", self.get_default_solver_name())
             log_json = dict(
@@ -392,15 +400,28 @@ class ApplicationCore(ABC):
         )
 
         # 5. Format log and process solution
-        sol_final, solution_checks, kpis, log_txt, log_json = (
+        sol_final, solution_checks, solution_has_errors, kpis, log_txt, log_json = (
             self._format_log_and_solution(algo, output, solver_name, elapsed_time)
+        )
+
+        execution_zip_file, zip_file_status = algo._get_zip_file(
+            instance_checks, instance_has_errors, solution_checks, solution_has_errors
         )
 
         # Ensure solution is an empty dict if None for type consistency
         if sol_final is None:
             sol_final = dict()
 
-        return sol_final, solution_checks, instance_checks, kpis, log_txt, log_json
+        return (
+            sol_final,
+            solution_checks,
+            instance_checks,
+            kpis,
+            execution_zip_file,
+            zip_file_status,
+            log_txt,
+            log_json,
+        )
 
     def check_generate_kpis(
         self, instance_data: dict, solution_data: dict = None
@@ -419,6 +440,7 @@ class ApplicationCore(ABC):
 
         instance_checks, instance_has_errors = self._check_instance_errors(inst)
 
+        solution_has_errors = None
         if solution_data is not None:
             sol = self.solution.from_dict(solution_data)
             algo = solver_class(inst, sol)
@@ -438,6 +460,10 @@ class ApplicationCore(ABC):
             solution_checks = None
             kpis = None
 
+        execution_zip_file, zip_file_status = algo._get_zip_file(
+            instance_checks, instance_has_errors, solution_checks, solution_has_errors
+        )
+
         log = dict(
             time=timer() - start,
             solver=solver,
@@ -446,7 +472,14 @@ class ApplicationCore(ABC):
             sol_code=SOLUTION_STATUS_FEASIBLE,
         )
 
-        return instance_checks, solution_checks, kpis, log
+        return (
+            instance_checks,
+            solution_checks,
+            kpis,
+            execution_zip_file,
+            zip_file_status,
+            log,
+        )
 
     def get_solver(self, name: str = "default") -> Union[Type[ExperimentCore], None]:
         """

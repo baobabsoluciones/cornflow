@@ -12,7 +12,13 @@ from sqlalchemy.sql.expression import false
 # Imports from internal modules
 from cornflow.models.base_data_model import BaseDataModel
 from cornflow.shared import db
-from cornflow.shared.const import DEFAULT_EXECUTION_CODE, EXECUTION_STATE_MESSAGE_DICT
+from cornflow.shared.const import (
+    DEFAULT_EXECUTION_CODE,
+    EXECUTION_STATE_MESSAGE_DICT,
+    EXECUTION_FILES_STATUS_NOT_GENERATED,
+    EXECUTION_FILES_STATUS_OK,
+    EXECUTION_FILES_STATUS_NOT_UP_TO_DATE,
+)
 
 
 class ExecutionModel(BaseDataModel):
@@ -74,6 +80,9 @@ class ExecutionModel(BaseDataModel):
     kpis = db.Column(JSON, nullable=True)
     last_run_checks_and_kpis = db.Column(db.Boolean, nullable=True)
     checks_and_kpis_only = db.Column(db.Boolean, nullable=True)
+    execution_files_status = db.Column(
+        db.SmallInteger, default=EXECUTION_FILES_STATUS_NOT_GENERATED, nullable=False
+    )
 
     def __init__(self, data):
         super().__init__(data)
@@ -97,6 +106,9 @@ class ExecutionModel(BaseDataModel):
         self.kpis = data.get("kpis")
         self.last_run_checks_and_kpis = data.get("last_run_checks_and_kpis", False)
         self.checks_and_kpis_only = data.get("checks_and_kpis_only", False)
+        self.execution_files_status = data.get(
+            "execution_files_status", EXECUTION_FILES_STATUS_NOT_GENERATED
+        )
 
     def update(self, data):
         """
@@ -106,10 +118,12 @@ class ExecutionModel(BaseDataModel):
         :return: None
         :rtype: None
         """
-        # Delete the checks and KPIs if the data has been modified since they are probably not valid anymore
+        # Delete the checks and KPIs if the data has been modified since they are probably not valid anymore.
         if "data" in data.keys():
             self.checks = None
             self.kpis = None
+            if self.execution_files_status == EXECUTION_FILES_STATUS_OK:
+                self.execution_files_status = EXECUTION_FILES_STATUS_NOT_UP_TO_DATE
         super().update(data)
 
     def update_config(self, config: dict):

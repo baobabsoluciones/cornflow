@@ -512,6 +512,18 @@ class RawCornFlow(object):
             "dag/case/", id=case_id, encoding=encoding, payload=kwargs
         )
 
+    @ask_token
+    @prepare_encoding
+    def write_execution_files(
+        self, execution_id, execution_files_status, execution_file
+    ):
+        return self.post_api_for_id(
+            "execution/files/",
+            id=execution_id,
+            data={"execution_files_status": execution_files_status},
+            files={"execution_file": execution_file},
+        )
+
     @log_call
     @ask_token
     @prepare_encoding

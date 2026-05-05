@@ -8,6 +8,10 @@ from datetime import datetime, timedelta
 from urllib.parse import urlparse, urljoin
 
 from cornflow_client import CornFlow, CornFlowApiError
+from cornflow_client.constants import (
+    EXECUTION_FILES_STATUS_ERROR,
+    EXECUTION_FILES_STATUS_NOT_GENERATED,
+)
 
 # TODO: convert everything to an object that encapsulates everything
 #  to make it clear and avoid all the arguments.
@@ -147,6 +151,22 @@ def try_to_write_solution(client, exec_id, payload):
             raise AirflowDagException("The writing of the instance checks failed")
 
 
+def try_to_write_file(client, exec_id, payload):
+    """
+    Tries to write the generated execution files into cornflow.
+    If it fails, tries to write again that it failed.
+    If it fails at least once: raises an exception.
+    """
+    try:
+        client.write_execution_files(execution_id=exec_id, **payload)
+    except CornFlowApiError:
+        client.write_execution_files(
+            execution_id=exec_id, execution_files_status=EXECUTION_FILES_STATUS_ERROR
+        )
+        # attempt to update the execution with a failed status.
+        raise AirflowDagException("The writing of the files failed")
+
+
 def get_schema(dag_name):
     # TODO: check if in use
     _file = os.path.join(os.path.dirname(__file__), f"{dag_name}_output.json")
@@ -185,9 +205,16 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
         config = execution_data["config"]
         inst_id = execution_data["id"]
 
-        solution, sol_checks, inst_checks, kpis, log, log_json = fun(
-            data, config, solution_data
-        )
+        (
+            solution,
+            sol_checks,
+            inst_checks,
+            kpis,
+            execution_zip_file,
+            zip_file_status,
+            log,
+            log_json,
+        ) = fun(data, config, solution_data)
 
         # We connect again to cornflow in case that more than 24 hours
         # have passed from the first time we connect
@@ -201,6 +228,15 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
             inst_checks=inst_checks,
             inst_id=inst_id,
         )
+
+        if zip_file_status != EXECUTION_FILES_STATUS_NOT_GENERATED:
+            file_payload = {
+                "execution_files_status": zip_file_status,
+                "execution_file": execution_zip_file,
+            }
+
+            try_to_write_file(client, exec_id, file_payload)
+
         if not solution:
             # No solution found: we just send everything to cornflow.
             if config.get("msg", True):
@@ -268,8 +304,8 @@ def cf_check_generate_kpis(fun_check_generate_kpis, dag_name, secrets, **kwargs)
         inst_id = execution_data["id"]
         solution_data = execution_data["solution_data"]
 
-        inst_checks, sol_checks, kpis, log_json = fun_check_generate_kpis(
-            instance_data, solution_data
+        inst_checks, sol_checks, kpis, execution_zip_file, zip_file_status, log_json = (
+            fun_check_generate_kpis(instance_data, solution_data)
         )
 
         if config.get("checks_and_kpis_only"):
@@ -299,6 +335,12 @@ def cf_check_generate_kpis(fun_check_generate_kpis, dag_name, secrets, **kwargs)
             payload["kpis"] = kpis
 
         try_to_write_solution(client, exec_id, payload)
+        if zip_file_status != EXECUTION_FILES_STATUS_NOT_GENERATED:
+            file_payload = {
+                "execution_files_status": zip_file_status,
+                "execution_file": execution_zip_file,
+            }
+            try_to_write_file(client, exec_id, file_payload)
 
         case_id = kwargs["dag_run"].conf.get("case_id")
         if case_id is not None:

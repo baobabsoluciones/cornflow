@@ -2,7 +2,15 @@
 from marshmallow import fields, Schema, validate
 
 # Imports from internal modules
-from cornflow.shared.const import MIN_EXECUTION_STATUS_CODE, MAX_EXECUTION_STATUS_CODE
+from cornflow.shared.const import (
+    MIN_EXECUTION_STATUS_CODE,
+    MAX_EXECUTION_STATUS_CODE,
+    EXECUTION_FILES_STATUS_NOT_GENERATED,
+    EXECUTION_FILES_STATUS_ERROR,
+    EXECUTION_FILES_STATUS_DELETED,
+    EXECUTION_FILES_STATUS_NOT_UP_TO_DATE,
+    EXECUTION_FILES_STATUS_OK,
+)
 from .common import QueryFilters, BaseDataEndpointResponse
 from .solution_log import LogSchema, BasicLogSchema
 
@@ -165,3 +173,17 @@ class ExecutionDataEndpointResponse(ExecutionDetailsEndpointResponse):
 class ExecutionLogEndpointResponse(ExecutionDetailsEndpointWithIndicatorsResponse):
     log = fields.Nested(LogSchema, attribute="log_json")
     log_text = fields.Str(attribute="log_text")
+
+
+class ExecutionFilesPostRequest(Schema):
+    execution_files_status = fields.Integer(
+        required=True,
+        validate=lambda v: v
+        in [
+            EXECUTION_FILES_STATUS_NOT_GENERATED,
+            EXECUTION_FILES_STATUS_ERROR,
+            EXECUTION_FILES_STATUS_DELETED,
+            EXECUTION_FILES_STATUS_NOT_UP_TO_DATE,
+            EXECUTION_FILES_STATUS_OK,
+        ],
+    )

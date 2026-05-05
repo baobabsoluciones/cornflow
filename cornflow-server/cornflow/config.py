@@ -13,6 +13,7 @@ from cornflow.shared.const import (
 from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
 
+
 class DefaultConfig(object):
     """
     Default configuration class
@@ -109,6 +110,16 @@ class DefaultConfig(object):
 
     # Alarms endpoints
     ALARMS_ENDPOINTS = os.getenv("CF_ALARMS_ENDPOINT", 0)
+
+    # Execution files
+    EXECUTION_FILES = int(os.getenv("EXECUTION_FILES"))
+    execution_files_path = os.path.join(os.getcwd(), "execution_files")
+    EXECUTION_FILES_PATH = os.getenv("EXECUTION_FILES_PATH", execution_files_path)
+    # Cleanup frequency (in days). By default, execution files that are older than 30 days will be deleted.
+    #    If 0: no executions files will ever be deleted.
+    EXECUTION_FILES_CLEANUP_FREQUENCY = int(
+        os.getenv("EXECUTION_FILES_CLEANUP_FREQUENCY"), 30
+    )
 
     # Token duration in hours
     TOKEN_DURATION = os.getenv("TOKEN_DURATION", 24)

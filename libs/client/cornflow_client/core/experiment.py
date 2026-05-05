@@ -3,20 +3,27 @@ Base code for the experiment template.
 """
 
 from abc import ABC, abstractmethod
-from typing import List, Dict, Union, Tuple
-import logging as log
-
 from jsonschema import Draft7Validator
+from typing import List, Dict, Union, Tuple, Optional
+import io
+import logging as log
+import os
+import shutil
+import zipfile
 
 from cornflow_client.constants import (
     PARAMETER_SOLVER_TRANSLATING_MAPPING,
     SOLVER_CONVERTER,
     BadSolutionChecks,
     BadKPIs,
+    EXECUTION_FILES_STATUS_NOT_GENERATED,
+    EXECUTION_FILES_STATUS_ERROR,
+    EXECUTION_FILES_STATUS_OK,
 )
 from .instance import InstanceCore
 from .instance_solution import CheckCore
 from .solution import SolutionCore
+from .tools import to_excel_memory_file
 
 
 class ExperimentCore(CheckCore, ABC):
@@ -211,6 +218,118 @@ class ExperimentCore(CheckCore, ABC):
         :return: a dictionary with the KPIs. The format of the dictionary should be validated against self.schema_kpis
         """
         return self.kpis
+
+    def generate_output_files(
+        self, instance_checks, instance_has_errors, solution_checks, solution_has_errors
+    ) -> Optional[Dict[str, Union[str, io.BytesIO]]]:
+        """
+        Method that generates the output files.
+        This method can be overriden by the user.
+        :return: a dictionary, where:
+        - the keys are the names of the files or directories
+        - the values are either:
+            * an io.BytesIO instance
+            * a string representing an absolute path to a file or directory.
+        If the values are paths, the files or directories will be deleted after generating the zip file.
+        """
+        return None
+
+    @staticmethod
+    def _clean_output_files(output_files):
+        """
+        Removes output files after generating the zip file.
+        """
+        for item in output_files:
+            try:
+                if not isinstance(item, str):
+                    # Item is a bytesIO object
+                    continue
+                if not os.path.exists(item):
+                    # Path was not found
+                    continue
+                if os.path.isdir(item):
+                    # Path is a directory
+                    shutil.rmtree(item)
+                else:
+                    # Path is a file
+                    os.remove(item)
+            except:
+                print(f"File/Directory {item} could not be deleted")
+                continue
+
+    def _get_default_output_files(self, instance_checks, solution_checks):
+        """
+        Method that generates the default output files:
+            - Instance data Excel
+            - Solution data Excel
+            - Checks Excel
+            - Solution checks Excel
+            - KPIs Excel
+        """
+        default_files = {}
+        for excel_name, data in [
+            ("instance", self.instance.to_dict()),
+            ("solution", self.solution.to_dict()),
+            ("checks", instance_checks),
+            ("solution_checks", solution_checks),
+            ("kpis", self.instance.kpis),
+        ]:
+            if data is None:
+                continue
+            default_files[f"{excel_name}.xlsx"] = to_excel_memory_file(data)
+        return default_files
+
+    @staticmethod
+    def _generate_zip_file(output_items):
+        """
+        Method that generates a zip file for the execution files.
+        :return: a zip file as a BytesIO object.
+        """
+        memory_file = io.BytesIO()
+
+        with zipfile.ZipFile(memory_file, "w", zipfile.ZIP_DEFLATED) as zf:
+            for item_path_in_zip, item in output_items.items():
+                if isinstance(item, str):
+                    # Path
+                    zf.write(item, item_path_in_zip)
+                elif isinstance(item, io.BytesIO):
+                    # File stream
+                    zf.writestr(item_path_in_zip, item.getvalue())
+                else:
+                    raise Exception(
+                        "Only paths and BytesIO objects are accepted for output files"
+                    )
+
+        memory_file.seek(0)
+        return memory_file
+
+    def _get_zip_file(
+        self, instance_checks, instance_has_errors, solution_checks, solution_has_errors
+    ):
+        """
+        Method that generates a zip file for the execution files.
+        :return: a zip file, and a status indicating whether the generation went correctly.
+        """
+        try:
+            output_files = self.generate_output_files(
+                instance_checks,
+                instance_has_errors,
+                solution_checks,
+                solution_has_errors,
+            )
+            if output_files is None:
+                return None, EXECUTION_FILES_STATUS_NOT_GENERATED
+            output_files = {
+                **output_files,
+                **self._get_default_output_files(instance_checks, solution_checks),
+            }
+            zip_file = self._generate_zip_file(output_files)
+            self._clean_output_files(output_files)
+            zip_file_status = EXECUTION_FILES_STATUS_OK
+        except:
+            zip_file = None
+            zip_file_status = EXECUTION_FILES_STATUS_ERROR
+        return zip_file, zip_file_status
 
     @staticmethod
     def get_solver_config(
