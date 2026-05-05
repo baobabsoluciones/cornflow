@@ -51,11 +51,24 @@ def to_excel_memory_file(data: dict) -> Optional[io.BytesIO]:
         return None
     # Save Excel
     memory_file = io.BytesIO()
+    used_table_names = {}
+    max_length = 31
     with pd.ExcelWriter(memory_file) as writer:
-        for warning_name, table_data in data.items():
-            # Order columns: mensaje at the end
+        for table_name, table_data in data.items():
+            # Handle the case where sheet names are too long.
+            truncated_name = table_name
+            if len(table_name) > max_length:
+                truncated_name = table_name[:max_length]
+            if truncated_name in used_table_names:
+                current_suffix = used_table_names[truncated_name] + 1
+                truncated_name_w_suffix = (
+                    f"{truncated_name[:max_length - 3]}_{current_suffix}"
+                )
+            used_table_names[truncated_name] = 0
+            truncated_name = truncated_name_w_suffix
+
             df = pd.DataFrame(table_data)
-            df.to_excel(writer, sheet_name=warning_name, index=False)
+            df.to_excel(writer, sheet_name=truncated_name, index=False)
 
     memory_file.seek(0)
     memory_file = format_excel_file(memory_file)
