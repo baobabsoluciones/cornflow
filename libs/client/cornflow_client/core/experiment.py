@@ -1,7 +1,6 @@
 """
 Base code for the experiment template.
 """
-
 from abc import ABC, abstractmethod
 from jsonschema import Draft7Validator
 from typing import List, Dict, Union, Tuple, Optional
@@ -9,6 +8,7 @@ import io
 import logging as log
 import os
 import shutil
+import traceback
 import zipfile
 
 from cornflow_client.constants import (
@@ -327,6 +327,7 @@ class ExperimentCore(CheckCore, ABC):
             self._clean_output_files(output_files)
             zip_file_status = EXECUTION_FILES_STATUS_OK
         except:
+            print(f"Error generating zipfile: {traceback.format_exc()}")
             zip_file = None
             zip_file_status = EXECUTION_FILES_STATUS_ERROR
         return zip_file, zip_file_status
