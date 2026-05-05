@@ -291,6 +291,8 @@ class ExperimentCore(CheckCore, ABC):
 
         with zipfile.ZipFile(memory_file, "w", zipfile.ZIP_DEFLATED) as zf:
             for item_path_in_zip, item in output_items.items():
+                if item_path_in_zip.startswith("/") or item_path_in_zip.startswith("\\"):
+                    item_path_in_zip = item_path_in_zip[1:]
                 if isinstance(item, str):
                     # Path
                     zf.write(item, item_path_in_zip)
