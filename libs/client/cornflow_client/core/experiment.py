@@ -230,6 +230,7 @@ class ExperimentCore(CheckCore, ABC):
         - the keys are the names of the files or directories
         - the values are either:
             * an io.BytesIO instance
+            * an io.StringIO instance
             * a string representing an absolute path to a file or directory.
         If the values are paths, the files or directories will be deleted after generating the zip file.
         """
@@ -293,7 +294,7 @@ class ExperimentCore(CheckCore, ABC):
                 if isinstance(item, str):
                     # Path
                     zf.write(item, item_path_in_zip)
-                elif isinstance(item, io.BytesIO):
+                elif isinstance(item, io.BytesIO) or isinstance(item, io.StringIO):
                     # File stream
                     zf.writestr(item_path_in_zip, item.getvalue())
                 else:
