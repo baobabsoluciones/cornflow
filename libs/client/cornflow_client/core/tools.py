@@ -55,8 +55,7 @@ def to_excel_memory_file(data: dict) -> Optional[io.BytesIO]:
         for warning_name, table_data in data.items():
             # Order columns: mensaje at the end
             df = pd.DataFrame(table_data)
-            columns = [col for col in df.columns if col != "mensaje"] + ["mensaje"]
-            df.to_excel(writer, sheet_name=warning_name, index=False, columns=columns)
+            df.to_excel(writer, sheet_name=warning_name, index=False)
 
     memory_file.seek(0)
     memory_file = format_excel_file(memory_file)
