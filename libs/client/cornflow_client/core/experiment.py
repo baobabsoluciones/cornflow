@@ -1,6 +1,7 @@
 """
 Base code for the experiment template.
 """
+
 from abc import ABC, abstractmethod
 from jsonschema import Draft7Validator
 from typing import List, Dict, Union, Tuple, Optional
@@ -272,7 +273,7 @@ class ExperimentCore(CheckCore, ABC):
             ("solution", self.solution.to_dict()),
             ("checks", instance_checks),
             ("solution_checks", solution_checks),
-            ("kpis", self.instance.kpis),
+            ("kpis", self.kpis),
         ]:
             if data is None:
                 continue
