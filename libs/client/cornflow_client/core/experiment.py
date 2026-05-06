@@ -241,10 +241,10 @@ class ExperimentCore(CheckCore, ABC):
         """
         Removes output files after generating the zip file.
         """
-        for item in output_files:
+        for _, item in output_files.items():
             try:
                 if not isinstance(item, str):
-                    # Item is a bytesIO object
+                    # Item is a bytesIO or stringIO object
                     continue
                 if not os.path.exists(item):
                     # Path was not found
@@ -281,8 +281,25 @@ class ExperimentCore(CheckCore, ABC):
             default_files[f"{excel_name}.xlsx"] = to_excel_memory_file(data)
         return default_files
 
-    @staticmethod
-    def _generate_zip_file(output_items):
+    @classmethod
+    def _add_folder_to_zip(cls, zip_file, dir_path_in_zip, dir_path):
+        """
+        Recursively add the folder contents to the zip file.
+        """
+        for item in os.listdir(dir_path):
+            full_path = os.path.join(dir_path, item)
+            if os.path.isfile(full_path):
+                # File
+                file_path_in_zip = os.path.join(dir_path_in_zip, item)
+                zip_file.write(full_path, file_path_in_zip)
+            else:
+                # Subdirectory
+                subdirectory_path = os.path.join(dir_path, item)
+                subdir_path_in_zip = os.path.join(dir_path_in_zip, item)
+                cls._add_folder_to_zip(zip_file, subdir_path_in_zip, subdirectory_path)
+
+    @classmethod
+    def _generate_zip_file(cls, output_items):
         """
         Method that generates a zip file for the execution files.
         :return: a zip file as a BytesIO object.
@@ -291,10 +308,15 @@ class ExperimentCore(CheckCore, ABC):
 
         with zipfile.ZipFile(memory_file, "w", zipfile.ZIP_DEFLATED) as zf:
             for item_path_in_zip, item in output_items.items():
-                if item_path_in_zip.startswith("/") or item_path_in_zip.startswith("\\"):
+                if item_path_in_zip.startswith("/") or item_path_in_zip.startswith(
+                    "\\"
+                ):
                     item_path_in_zip = item_path_in_zip[1:]
-                if isinstance(item, str):
-                    # Path
+                if isinstance(item, str) and os.path.isdir(item):
+                    # Directory path
+                    cls._add_folder_to_zip(zf, item_path_in_zip, item)
+                elif isinstance(item, str):
+                    # File path
                     zf.write(item, item_path_in_zip)
                 elif isinstance(item, io.BytesIO) or isinstance(item, io.StringIO):
                     # File stream
