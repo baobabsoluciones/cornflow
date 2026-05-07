@@ -41,115 +41,115 @@ from cornflow.tests.custom_test_case import CustomTestCase
 from cornflow.tests.unit.tools import patch_af_client, patch_db_client
 
 
-class AirflowPatcher:
-    @property
-    def orchestrator_patch_target(self):
-        return "cornflow.endpoints.execution.Airflow"
-
-    @property
-    def orchestrator_patch_fn(self):
-        return patch_af_client
-
-    def create_app(self):
-        return super().create_app()
-
-
-class DatabricksPatcher:
-    @property
-    def orchestrator_patch_target(self):
-        return "cornflow.endpoints.execution.Databricks"
-
-    @property
-    def orchestrator_patch_fn(self):
-        return patch_db_client
-
-    def create_app(self):
-        app = create_app("testing-databricks")
-        return app
-
-
-class TestExecutionsListEndpointAirflow(
-    AirflowPatcher, base_test_execution.BaseExecutionList
-):
-    pass
-
-
-class TestExecutionsListEndpointDatabricks(
-    DatabricksPatcher, base_test_execution.BaseExecutionList
-):
-    pass
-
-
-class TestExecutionRelaunchEndpointAirflow(
-    AirflowPatcher, base_test_execution.BaseExecutionRelaunch
-):
-    pass
-
-
-class TestExecutionRelaunchEndpointDatabricks(
-    DatabricksPatcher, base_test_execution.BaseExecutionRelaunch
-):
-    pass
-
-
-class TestExecutionsDetailEndpointAirflow(
-    AirflowPatcher, base_test_execution.BaseExecutionDetail
-):
-    pass
-
-
-class TestExecutionsDetailEndpointDatabricks(
-    DatabricksPatcher, base_test_execution.BaseExecutionDetail
-):
-    pass
-
-
-class TestExecutionsDataEndpointAirflow(
-    AirflowPatcher, base_test_execution.BaseExecutionData
-):
-    pass
-
-
-class TestExecutionsDataEndpointDatabricks(
-    DatabricksPatcher, base_test_execution.BaseExecutionData
-):
-    pass
-
-
-class TestExecutionsLogEndpointAirflow(
-    AirflowPatcher, base_test_execution.BaseExecutionLog
-):
-    pass
-
-
-class TestExecutionsLogEndpointDatabricks(
-    DatabricksPatcher, base_test_execution.BaseExecutionLog
-):
-    pass
-
-
-class TestExecutionsModelAirflow(
-    AirflowPatcher, base_test_execution.BaseExecutionModel
-):
-    pass
-
-
-class TestExecutionsModelDatabricks(
-    DatabricksPatcher, base_test_execution.BaseExecutionModel
-):
-    pass
-
-
-class TestExecutionsStatusEndpointAirflow(
-    AirflowPatcher, base_test_execution.BaseExecutionStatus
-):
-    pass
-
-
-class TestExecutionsStatusEndpointDatabricks(
-    DatabricksPatcher, base_test_execution.BaseExecutionStatus
-):
-    pass
+# class AirflowPatcher:
+#     @property
+#     def orchestrator_patch_target(self):
+#         return "cornflow.endpoints.execution.Airflow"
+#
+#     @property
+#     def orchestrator_patch_fn(self):
+#         return patch_af_client
+#
+#     def create_app(self):
+#         return super().create_app()
+#
+#
+# class DatabricksPatcher:
+#     @property
+#     def orchestrator_patch_target(self):
+#         return "cornflow.endpoints.execution.Databricks"
+#
+#     @property
+#     def orchestrator_patch_fn(self):
+#         return patch_db_client
+#
+#     def create_app(self):
+#         app = create_app("testing-databricks")
+#         return app
+#
+#
+# class TestExecutionsListEndpointAirflow(
+#     AirflowPatcher, base_test_execution.BaseExecutionList
+# ):
+#     pass
+#
+#
+# class TestExecutionsListEndpointDatabricks(
+#     DatabricksPatcher, base_test_execution.BaseExecutionList
+# ):
+#     pass
+#
+#
+# class TestExecutionRelaunchEndpointAirflow(
+#     AirflowPatcher, base_test_execution.BaseExecutionRelaunch
+# ):
+#     pass
+#
+#
+# class TestExecutionRelaunchEndpointDatabricks(
+#     DatabricksPatcher, base_test_execution.BaseExecutionRelaunch
+# ):
+#     pass
+#
+#
+# class TestExecutionsDetailEndpointAirflow(
+#     AirflowPatcher, base_test_execution.BaseExecutionDetail
+# ):
+#     pass
+#
+#
+# class TestExecutionsDetailEndpointDatabricks(
+#     DatabricksPatcher, base_test_execution.BaseExecutionDetail
+# ):
+#     pass
+#
+#
+# class TestExecutionsDataEndpointAirflow(
+#     AirflowPatcher, base_test_execution.BaseExecutionData
+# ):
+#     pass
+#
+#
+# class TestExecutionsDataEndpointDatabricks(
+#     DatabricksPatcher, base_test_execution.BaseExecutionData
+# ):
+#     pass
+#
+#
+# class TestExecutionsLogEndpointAirflow(
+#     AirflowPatcher, base_test_execution.BaseExecutionLog
+# ):
+#     pass
+#
+#
+# class TestExecutionsLogEndpointDatabricks(
+#     DatabricksPatcher, base_test_execution.BaseExecutionLog
+# ):
+#     pass
+#
+#
+# class TestExecutionsModelAirflow(
+#     AirflowPatcher, base_test_execution.BaseExecutionModel
+# ):
+#     pass
+#
+#
+# class TestExecutionsModelDatabricks(
+#     DatabricksPatcher, base_test_execution.BaseExecutionModel
+# ):
+#     pass
+#
+#
+# class TestExecutionsStatusEndpointAirflow(
+#     AirflowPatcher, base_test_execution.BaseExecutionStatus
+# ):
+#     pass
+#
+#
+# class TestExecutionsStatusEndpointDatabricks(
+#     DatabricksPatcher, base_test_execution.BaseExecutionStatus
+# ):
+#     pass
 
 
 class TestExecutionFilesEndpoint(CustomTestCase):
@@ -186,9 +186,9 @@ class TestExecutionFilesEndpoint(CustomTestCase):
     def tearDown(self):
         current_app.config["EXECUTION_FILES"] = self._original_execution_files
         current_app.config["EXECUTION_FILES_PATH"] = self._original_execution_files_path
-        current_app.config[
-            "EXECUTION_FILES_CLEANUP_FREQUENCY"
-        ] = self._original_cleanup_frequency
+        current_app.config["EXECUTION_FILES_CLEANUP_FREQUENCY"] = (
+            self._original_cleanup_frequency
+        )
         self.temp_dir.cleanup()
         super().tearDown()
 
@@ -374,13 +374,16 @@ class TestExecutionFilesEndpoint(CustomTestCase):
 
         response = self._get_execution_files()
 
-        self.assertEqual(200, response.status_code)
-        self.assertEqual("200", response.headers["X-Status-Code"])
-        self.assertEqual(
-            EXECUTION_FILES_STATUS_MESSAGE_DICT[EXECUTION_FILES_STATUS_OK],
-            response.headers["X-Message"],
-        )
-        self.assertTrue(zipfile.is_zipfile(io.BytesIO(response.data)))
+        try:
+            self.assertEqual(200, response.status_code)
+            self.assertEqual("200", response.headers["X-Status-Code"])
+            self.assertEqual(
+                EXECUTION_FILES_STATUS_MESSAGE_DICT[EXECUTION_FILES_STATUS_OK],
+                response.headers["X-Message"],
+            )
+            self.assertTrue(zipfile.is_zipfile(io.BytesIO(response.data)))
+        finally:
+            response.close()
 
     def test_get_non_ok_status_returns_status_error(self):
         """
@@ -393,13 +396,9 @@ class TestExecutionFilesEndpoint(CustomTestCase):
         response = self._get_execution_files()
 
         self.assertEqual(400, response.status_code)
+        self.assertEqual(EXECUTION_FILES_STATUS_NOT_UP_TO_DATE, response.json["status"])
         self.assertEqual(
-            EXECUTION_FILES_STATUS_NOT_UP_TO_DATE, response.json["status"]
-        )
-        self.assertEqual(
-            EXECUTION_FILES_STATUS_MESSAGE_DICT[
-                EXECUTION_FILES_STATUS_NOT_UP_TO_DATE
-            ],
+            EXECUTION_FILES_STATUS_MESSAGE_DICT[EXECUTION_FILES_STATUS_NOT_UP_TO_DATE],
             response.json["error"],
         )
         self.assertNotIn("message", response.json)

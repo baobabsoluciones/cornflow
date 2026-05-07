@@ -112,13 +112,13 @@ class DefaultConfig(object):
     ALARMS_ENDPOINTS = os.getenv("CF_ALARMS_ENDPOINT", 0)
 
     # Execution files
-    EXECUTION_FILES = int(os.getenv("EXECUTION_FILES"))
+    EXECUTION_FILES = int(os.getenv("EXECUTION_FILES", 0))
     execution_files_path = os.path.join(os.getcwd(), "execution_files")
     EXECUTION_FILES_PATH = os.getenv("EXECUTION_FILES_PATH", execution_files_path)
-    # Cleanup frequency (in days). By default, execution files that are older than 30 days will be deleted.
+    # Cleanup frequency (in days). By default, execution files that are older than 90 days will be deleted.
     #    If 0: no executions files will ever be deleted.
     EXECUTION_FILES_CLEANUP_FREQUENCY = int(
-        os.getenv("EXECUTION_FILES_CLEANUP_FREQUENCY"), 30
+        os.getenv("EXECUTION_FILES_CLEANUP_FREQUENCY", 90)
     )
 
     # Token duration in hours

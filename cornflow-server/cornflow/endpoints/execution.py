@@ -3,6 +3,7 @@ External endpoints to manage the executions: create new ones, list all of them, 
 or check the status of an ongoing one
 These endpoints hve different access url, but manage the same data entities
 """
+
 # Imports from external libraries
 from datetime import datetime, timedelta, timezone
 from flask import request, current_app, make_response, send_file
@@ -65,7 +66,7 @@ from cornflow.shared.exceptions import (
     ObjectDoesNotExist,
     InvalidData,
     EndpointNotImplemented,
-    InvalidUsage
+    InvalidUsage,
 )
 from cornflow.shared.validators import (
     json_schema_validate_as_string,
@@ -873,9 +874,13 @@ class ExecutionFilesEndpoint(ExecutionFilesEndpointMixin):
 
         file = request.files.get("execution_file")
         if file is None:
-            raise InvalidUsage("Execution file status was 'OK' but not file was provided.")
+            raise InvalidUsage(
+                "Execution file status was 'OK' but not file was provided."
+            )
 
-        if not file.filename.lower().endswith(".zip") or not zipfile.is_zipfile(file.stream):
+        if not file.filename.lower().endswith(".zip") or not zipfile.is_zipfile(
+            file.stream
+        ):
             raise InvalidUsage("The execution file must be a valid .zip file")
 
         file.stream.seek(0)
@@ -919,13 +924,16 @@ class ExecutionFilesCleanupEndpoint(ExecutionFilesEndpointMixin):
             )
             today = datetime.now(timezone.utc)
             if execution is None or (
-                execution.updated_at <= today - timedelta(days=cleanup_frequency)
+                execution.updated_at.replace(tzinfo=timezone.utc)
+                <= today - timedelta(days=cleanup_frequency)
             ):
                 try:
                     os.remove(full_file_path)
                     nb_deleted_files += 1
                     if execution is not None:
-                        execution.update({"execution_files_status": EXECUTION_FILES_STATUS_DELETED})
+                        execution.update(
+                            {"execution_files_status": EXECUTION_FILES_STATUS_DELETED}
+                        )
                 except Exception as err:
                     current_app.logger.error(
                         f"Error deleting execution file {file}: {err}"
