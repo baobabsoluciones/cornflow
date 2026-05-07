@@ -3,7 +3,6 @@ External endpoints to manage the executions: create new ones, list all of them, 
 or check the status of an ongoing one
 These endpoints hve different access url, but manage the same data entities
 """
-
 # Imports from external libraries
 from datetime import datetime, timedelta, timezone
 from flask import request, current_app, make_response, send_file
@@ -11,6 +10,7 @@ from flask_apispec import marshal_with, use_kwargs, doc
 
 import os
 import time
+import zipfile
 
 # Import from cornflow-client
 from cornflow_client.airflow.api import Airflow
@@ -65,6 +65,7 @@ from cornflow.shared.exceptions import (
     ObjectDoesNotExist,
     InvalidData,
     EndpointNotImplemented,
+    InvalidUsage
 )
 from cornflow.shared.validators import (
     json_schema_validate_as_string,
@@ -764,7 +765,7 @@ class ExecutionLogEndpoint(ExecutionDetailsEndpointBase):
         return self.get_detail(user=self.get_user(), idx=idx)
 
 
-class ExecutionFilesEndpoint(ExecutionDetailsEndpointBase):
+class ExecutionFilesEndpointMixin(ExecutionDetailsEndpointBase):
     """
     Endpoint used to handle the execution files.
     """
@@ -794,9 +795,11 @@ class ExecutionFilesEndpoint(ExecutionDetailsEndpointBase):
             current_app.config["EXECUTION_FILES_PATH"], f"{execution_idx}.zip"
         )
 
+
+class ExecutionFilesEndpoint(ExecutionFilesEndpointMixin):
     @doc(description="Get execution files", tags=["Executions"], inherit=False)
     @authenticate(auth_class=Auth())
-    @check_execution_files_active
+    @ExecutionFilesEndpointMixin.check_execution_files_active
     def get(self, idx):
         """
         Get the execution files for a specific execution.
@@ -813,7 +816,7 @@ class ExecutionFilesEndpoint(ExecutionDetailsEndpointBase):
         if execution_files_status != EXECUTION_FILES_STATUS_OK:
             return {
                 "status": execution_files_status,
-                "message": EXECUTION_FILES_STATUS_MESSAGE_DICT[execution_files_status],
+                "error": EXECUTION_FILES_STATUS_MESSAGE_DICT[execution_files_status],
             }, 400
 
         zip_file_path = self._get_execution_files_path(idx)
@@ -821,19 +824,16 @@ class ExecutionFilesEndpoint(ExecutionDetailsEndpointBase):
             # Files were not found. We try indicating to the front to re-generate them.
             execution.update({"execution_files_status": EXECUTION_FILES_STATUS_DELETED})
             return {
-                "status": execution_files_status,
-                "message": EXECUTION_FILES_STATUS_MESSAGE_DICT[
+                "status": EXECUTION_FILES_STATUS_DELETED,
+                "error": EXECUTION_FILES_STATUS_MESSAGE_DICT[
                     EXECUTION_FILES_STATUS_DELETED
                 ],
             }, 400
 
-        # Load file and generate response
-        with open(zip_file_path, "rb") as f:
-            zip_file = f.read()
-
+        # Generate response
         response = make_response(
             send_file(
-                zip_file,
+                zip_file_path,
                 mimetype="application/zip",
                 as_attachment=True,
                 download_name=f'{execution.name}_{time.strftime("%Y%m%d-%H%M%S")}.zip',
@@ -847,15 +847,18 @@ class ExecutionFilesEndpoint(ExecutionDetailsEndpointBase):
 
     @doc(description="Save an execution's files", tags=["Executions"], inherit=False)
     @authenticate(auth_class=Auth())
-    @check_execution_files_active
-    @use_kwargs(ExecutionFilesPostRequest, location="json")
-    def post(self, idx, **kwargs):
+    @ExecutionFilesEndpointMixin.check_execution_files_active
+    def post(self, idx):
         """
         Save the execution files for a specific execution.
         :param str idx: ID of the execution.
         :param kwargs: dict with status
         """
-        execution_files_status = kwargs["execution_files_status"]
+        # Check request data format
+        request_data = request.values.to_dict()
+        request_data = ExecutionFilesPostRequest().load(request_data)
+
+        execution_files_status = request_data["execution_files_status"]
 
         execution = self.data_model.get_one_object(user=self.get_user(), idx=idx)
         if execution is None:
@@ -868,22 +871,30 @@ class ExecutionFilesEndpoint(ExecutionDetailsEndpointBase):
             execution.update({"execution_files_status": execution_files_status})
             return {"message": "Execution files status saved correctly"}, 200
 
-        # ToDo: check if file doesn't exist in request
-        file = request.files["execution_ssfile"]
+        file = request.files.get("execution_file")
+        if file is None:
+            raise InvalidUsage("Execution file status was 'OK' but not file was provided.")
+
+        if not file.filename.lower().endswith(".zip") or not zipfile.is_zipfile(file.stream):
+            raise InvalidUsage("The execution file must be a valid .zip file")
+
+        file.stream.seek(0)
 
         zip_file_path = self._get_execution_files_path(idx)
 
         if not os.path.exists(current_app.config["EXECUTION_FILES_PATH"]):
             os.makedirs(current_app.config["EXECUTION_FILES_PATH"])
 
-        with open(zip_file_path, "wb") as fd:
-            fd.write(file)
+        file.save(zip_file_path)
+        execution.update({"execution_files_status": execution_files_status})
 
         return {"message": "Execution files saved correctly"}, 200
 
+
+class ExecutionFilesCleanupEndpoint(ExecutionFilesEndpointMixin):
     @doc(description="Clean old executions files", tags=["Executions"], inherit=False)
     @authenticate(auth_class=Auth())
-    @check_execution_files_active
+    @ExecutionFilesEndpointMixin.check_execution_files_active
     def delete(self):
         """
         Clean old execution files.
@@ -913,11 +924,12 @@ class ExecutionFilesEndpoint(ExecutionDetailsEndpointBase):
                 try:
                     os.remove(full_file_path)
                     nb_deleted_files += 1
+                    if execution is not None:
+                        execution.update({"execution_files_status": EXECUTION_FILES_STATUS_DELETED})
                 except Exception as err:
                     current_app.logger.error(
                         f"Error deleting execution file {file}: {err}"
                     )
-
         return {"message": f"{nb_deleted_files} files were deleted."}, 200
 
 

@@ -68,6 +68,12 @@ def to_excel_memory_file(data: dict) -> Optional[io.BytesIO]:
             used_table_names[truncated_name] = 0
             truncated_name = truncated_name_w_suffix
 
+            # If table is a configuration table {param_1: 1, param_2: 5},
+            #   transform it to a list of dicts name/value: [{'name': 'param_1', 'value': 1}, ...]
+            if isinstance(table_data, dict):
+                table_data = [{"name": k, "value": v} for k, v in table_data.items()]
+
+            # Export
             df = pd.DataFrame(table_data)
             df.to_excel(writer, sheet_name=truncated_name, index=False)
 

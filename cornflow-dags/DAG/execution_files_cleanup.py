@@ -9,7 +9,6 @@ from time import sleep
 from urllib.parse import urljoin
 import requests
 
-
 default_args = {
     "owner": "baobab",
     "depends_on_past": False,
@@ -46,9 +45,9 @@ def execution_files_cleanup():
         )
 
     response = requests.delete(
-        urljoin(client.url, f"/execution/files/"),
+        urljoin(client.url, f"/execution/files/cleanup/"),
         headers={
-            "Authorization": "access_token " + client.token,
+            "Authorization": "Bearer " + client.token,
             "Content-Encoding": "br",
         },
     )

@@ -33,6 +33,8 @@ EXECUTION_SOLUTION_PATH = _get_file("./data/new_execution_solution.json")
 EXECUTIONS_LIST = [EXECUTION_PATH, _get_file("./data/new_execution_2.json")]
 EXECUTION_URL = PREFIX + "/execution/"
 EXECUTION_URL_NORUN = EXECUTION_URL + "?run=0"
+EXECUTION_FILES_URL = PREFIX + "/execution/files/"
+EXECUTION_FILES_CLEANUP_URL = PREFIX + "/execution/files/cleanup/"
 DAG_URL = PREFIX + "/dag/"
 DATA_CHECK_EXECUTION_URL = PREFIX + "/data-check-kpis/execution/"
 DATA_CHECK_INSTANCE_URL = PREFIX + "/data-check-kpis/instance/"

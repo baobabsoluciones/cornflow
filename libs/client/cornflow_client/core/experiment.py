@@ -278,6 +278,7 @@ class ExperimentCore(CheckCore, ABC):
         ]:
             if data is None:
                 continue
+            data = {k: v for k, v in data.items() if len(v)}
             default_files[f"{excel_name}.xlsx"] = to_excel_memory_file(data)
         return default_files
 
