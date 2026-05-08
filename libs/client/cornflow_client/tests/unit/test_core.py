@@ -22,6 +22,7 @@ from cornflow_client.constants import (
     BadInstanceChecks,
     BadSolutionChecks,
     BadKPIs,
+    EXECUTION_FILES_STATUS_NOT_GENERATED,
 )
 
 
@@ -138,6 +139,8 @@ class TestCore(TestCase):
                     solution_check,
                     inst_check,
                     kpis,
+                    execution_zip_file,
+                    zip_file_status,
                     log,
                     log_dict,
                 ) = self.app.solve(data, self.config, data_out)
@@ -148,9 +151,14 @@ class TestCore(TestCase):
                     solution_check,
                     inst_check,
                     kpis,
+                    execution_zip_file,
+                    zip_file_status,
                     log,
                     log_dict,
                 ) = self.app.solve(data, self.config)
+
+            self.assertIsNone(execution_zip_file)
+            self.assertEqual(EXECUTION_FILES_STATUS_NOT_GENERATED, zip_file_status)
 
             instance = self.app.instance.from_dict(data)
 
@@ -516,12 +524,14 @@ class TestCore(TestCase):
 
         warnings_app = WarningsApp()
 
-        inst_checks, sol_checks, kpis, log = warnings_app.check_generate_kpis(
-            {"a": 1, "b": 1, "c": 0}, {"d": 1}
+        inst_checks, sol_checks, kpis, execution_zip_file, zip_file_status, log = (
+            warnings_app.check_generate_kpis({"a": 1, "b": 1, "c": 0}, {"d": 1})
         )
 
         self.assertEqual(sol_checks, {"sol_check_1": [{"this is an error": 1}]})
         self.assertIsNone(kpis)
+        self.assertIsNone(execution_zip_file)
+        self.assertEqual(EXECUTION_FILES_STATUS_NOT_GENERATED, zip_file_status)
 
     def test_kpis_solution_warnings(self):
 
@@ -575,12 +585,14 @@ class TestCore(TestCase):
 
         warnings_app = WarningsApp()
 
-        inst_checks, sol_checks, kpis, log = warnings_app.check_generate_kpis(
-            {"a": 1, "b": 1, "c": 0}, {"d": 1}
+        inst_checks, sol_checks, kpis, execution_zip_file, zip_file_status, log = (
+            warnings_app.check_generate_kpis({"a": 1, "b": 1, "c": 0}, {"d": 1})
         )
 
         self.assertEqual(sol_checks, {"sol_check_1": [{"this is a warning": 1}]})
         self.assertIsNotNone(kpis)
+        self.assertIsNone(execution_zip_file)
+        self.assertEqual(EXECUTION_FILES_STATUS_NOT_GENERATED, zip_file_status)
 
     def test_solution_check_method_exception_handling(self):
         """Test that when a check_* method raises an exception, a generic error message is added."""

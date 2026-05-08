@@ -21,6 +21,7 @@ from cornflow_client.constants import (
     BadConfiguration,
     BadSolution,
     BadInstance,
+    EXECUTION_FILES_STATUS_NOT_GENERATED,
 )
 from .experiment import ExperimentCore
 
@@ -392,7 +393,16 @@ class ApplicationCore(ABC):
                 sol_code=SOLUTION_STATUS_INFEASIBLE,
             )
             # Ensure solution dict is empty, not None, consistent with successful returns
-            return dict(), None, instance_checks, None, "", log_json
+            return (
+                dict(),
+                None,
+                instance_checks,
+                None,
+                None,
+                EXECUTION_FILES_STATUS_NOT_GENERATED,
+                "",
+                log_json,
+            )
 
         # 4. Execute solver
         algo, output, solver_name, elapsed_time = self._execute_solver(
@@ -456,6 +466,7 @@ class ApplicationCore(ABC):
                 kpis_checks = algo.kpis_checks()
                 solution_checks.update(kpis_checks)
         else:
+            algo = solver_class(inst, None)
             start = timer()
             solution_checks = None
             kpis = None

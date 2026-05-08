@@ -279,6 +279,8 @@ class ExperimentCore(CheckCore, ABC):
             if data is None:
                 continue
             data = {k: v for k, v in data.items() if len(v)}
+            if not len(data):
+                continue
             default_files[f"{excel_name}.xlsx"] = to_excel_memory_file(data)
         return default_files
 
@@ -323,8 +325,9 @@ class ExperimentCore(CheckCore, ABC):
                     # File stream
                     zf.writestr(item_path_in_zip, item.getvalue())
                 else:
+                    print(item_path_in_zip, item)
                     raise Exception(
-                        "Only paths and BytesIO objects are accepted for output files"
+                        "Only paths, BytesIO and StringIO objects are accepted for output files"
                     )
 
         memory_file.seek(0)

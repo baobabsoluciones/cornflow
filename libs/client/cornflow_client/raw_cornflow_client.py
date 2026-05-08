@@ -511,7 +511,6 @@ class RawCornFlow(object):
         )
 
     @ask_token
-    @prepare_encoding
     def write_execution_files(
         self, execution_id, execution_files_status, execution_file=None
     ):

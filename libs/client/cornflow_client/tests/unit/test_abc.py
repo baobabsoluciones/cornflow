@@ -59,22 +59,24 @@ class TestABC(unittest.TestCase):
         self.assertRaises(BadInstance, must_fail)
 
     def test_check_data(self):
-        inst_check, sol_check, kpis, log = GoodApp().check_generate_kpis(
-            dict(number=""), dict()
+        inst_check, sol_check, kpis, execution_zip_file, zip_file_status, log = (
+            GoodApp().check_generate_kpis(dict(number=""), dict())
         )
         self.assertIsInstance(inst_check, dict)
         self.assertIsInstance(sol_check, dict)
         self.assertIsInstance(kpis, dict)
+        self.assertIsNone(execution_zip_file)
         self.assertIsInstance(log, dict)
         self.assertEqual(log.get("status"), "Optimal")
 
     def test_check_data_no_solution(self):
-        inst_check, sol_check, kpis, log = GoodApp().check_generate_kpis(
-            dict(number="")
+        inst_check, sol_check, kpis, execution_zip_file, zip_file_status, log = (
+            GoodApp().check_generate_kpis(dict(number=""))
         )
         self.assertIsInstance(inst_check, dict)
         self.assertIsNone(sol_check)
         self.assertIsNone(kpis)
+        self.assertIsNone(execution_zip_file)
         self.assertIsInstance(log, dict)
         self.assertEqual(log.get("status"), "Optimal")
 
