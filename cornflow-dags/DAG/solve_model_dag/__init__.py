@@ -19,6 +19,8 @@ import pulp as pl
 import orloge as ol
 import os
 
+from libs.client.cornflow_client.constants import EXECUTION_FILES_STATUS_NOT_GENERATED
+
 config = get_pulp_jsonschema("solver_config.json")
 
 config["properties"]["solver"]["enum"] = pl.listSolvers()
@@ -140,5 +142,5 @@ class PuLP(ApplicationCore):
             os.remove(log_path)
         except FileNotFoundError:
             pass
-
-        return solution, {}, {}, {}, log, log_dict
+        
+        return solution, {}, {}, {}, None, EXECUTION_FILES_STATUS_NOT_GENERATED, log, log_dict
