@@ -1,7 +1,7 @@
 cornflow-client @ git+https://github.com/baobabsoluciones/cornflow@feature/execution_files#subdirectory=libs/client
 orloge==0.17.2
 PuLP==2.9.0
-pandas==2.2.0
+pandas>=2.3.3,<3.0.0
 hackathonbaobab2020[solvers]
 pytups==0.86.2
 ortools==9.8.3296
