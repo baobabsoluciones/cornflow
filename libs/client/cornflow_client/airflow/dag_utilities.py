@@ -229,19 +229,19 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
             inst_id=inst_id,
         )
 
-        if zip_file_status != EXECUTION_FILES_STATUS_NOT_GENERATED:
-            file_payload = {
-                "execution_files_status": zip_file_status,
-                "execution_file": execution_zip_file,
-            }
-
-            try_to_write_file(client, exec_id, file_payload)
-
         if not solution:
             # No solution found: we just send everything to cornflow.
             if config.get("msg", True):
                 print("No solution found: we save what we have.")
             try_to_write_solution(client, exec_id, payload)
+
+            if zip_file_status != EXECUTION_FILES_STATUS_NOT_GENERATED:
+                file_payload = {
+                    "execution_files_status": zip_file_status,
+                    "execution_file": execution_zip_file,
+                }
+
+                try_to_write_file(client, exec_id, file_payload)
             return "Solution was not saved"
         # There is a solution:
         # we first need to validate the schema.
@@ -258,6 +258,14 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
             payload["kpis"] = kpis
 
         try_to_write_solution(client, exec_id, payload)
+
+        if zip_file_status != EXECUTION_FILES_STATUS_NOT_GENERATED:
+            file_payload = {
+                "execution_files_status": zip_file_status,
+                "execution_file": execution_zip_file,
+            }
+
+            try_to_write_file(client, exec_id, file_payload)
 
         # The validation went correctly: can save the solution without problem
         return "Solution saved"

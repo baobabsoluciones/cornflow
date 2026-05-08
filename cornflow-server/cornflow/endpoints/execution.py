@@ -806,6 +806,9 @@ class ExecutionFilesEndpoint(ExecutionFilesEndpointMixin):
         Get the execution files for a specific execution.
         :param str idx: ID of the execution.
         """
+        current_app.logger.info(
+            f"User {self.get_user()} gets execution files for execution {idx}"
+        )
         execution = self.data_model.get_one_object(user=self.get_user(), idx=idx)
         if execution is None:
             raise ObjectDoesNotExist(
@@ -855,6 +858,10 @@ class ExecutionFilesEndpoint(ExecutionFilesEndpointMixin):
         :param str idx: ID of the execution.
         :param kwargs: dict with status
         """
+        current_app.logger.info(
+            f"User {self.get_user()} creates execution files for execution {idx}"
+        )
+
         # Check request data format
         request_data = request.values.to_dict()
         request_data = ExecutionFilesPostRequest().load(request_data)
@@ -904,6 +911,8 @@ class ExecutionFilesCleanupEndpoint(ExecutionFilesEndpointMixin):
         """
         Clean old execution files.
         """
+        current_app.logger.info(f"User {self.get_user()} runs execution files cleanup")
+
         execution_files_path = current_app.config["EXECUTION_FILES_PATH"]
         cleanup_frequency = current_app.config["EXECUTION_FILES_CLEANUP_FREQUENCY"]
         if cleanup_frequency == 0:

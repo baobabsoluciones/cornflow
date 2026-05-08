@@ -12,7 +12,7 @@ from cornflow_client.constants import (
     SOLUTION_STATUS_FEASIBLE,
     SOLUTION_STATUS_INFEASIBLE,
     PULP_STATUS_MAPPING,
-    EXECUTION_FILES_STATUS_NOT_GENERATED
+    EXECUTION_FILES_STATUS_NOT_GENERATED,
 )
 import cornflow_client.airflow.dag_utilities as utils
 
