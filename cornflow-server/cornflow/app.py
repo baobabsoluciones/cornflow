@@ -143,6 +143,10 @@ def create_app(env_name="development", dataconn=None):
             NotFound(), {app.config["APPLICATION_ROOT"]: app.wsgi_app}
         )
 
+    from importlib.metadata import entry_points
+    for ep in entry_points(group="cornflow.plugins"):
+        ep.load()().init_app(app)
+
     return app
 
 
