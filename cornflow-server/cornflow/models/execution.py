@@ -193,7 +193,6 @@ class ExecutionModel(BaseDataModel):
                     cls.checks_and_kpis_only.is_(None),
                 )
             )
-        # if airflow they also return total_entries = query.count(), for some reason
 
         return query.order_by(desc(cls.created_at)).offset(offset).limit(limit).all()
 

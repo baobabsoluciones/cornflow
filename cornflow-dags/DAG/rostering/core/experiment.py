@@ -314,7 +314,6 @@ class Experiment(ExperimentCore):
         """
         Returns a dictionary with global KPIs for the solution.
         """
-        print("Calculating global KPIs...")
         return self.get_indicators()
 
     def kpis_mean_demand_per_employee(self):
@@ -322,7 +321,6 @@ class Experiment(ExperimentCore):
         Returns a list of dictionaries with the mean demand per employees for each time slot.
         :return: [{"time_slot": "2021-09-06T07:00", "mean_demand": 2.5}, ...]
         """
-        print("Calculating mean demand per employee for each time slot...")
         demand = self.instance.get_demand()
         return [
             {"time_slot": ts, "mean_demand": demand[ts] / len(employees)}
@@ -334,7 +332,6 @@ class Experiment(ExperimentCore):
         Returns the time slots where only one employee is working.
         :return: [{"time_slot": "2021-09-06T07:00"}, ...]
         """
-        print("Calculating time slots where only one employee is working...")
         return [
             {"time_slot": ts}
             for ts, employees in self.solution.get_ts_employee().items()
