@@ -51,7 +51,8 @@ def execution_files_cleanup():
             "Content-Encoding": "br",
         },
     )
-    if response.status_code != 200:
+
+    if response.status_code not in [200, 501]:
         raise CornFlowApiError(
             f"Could not clean up the execution files: {response.json()}"
         )
