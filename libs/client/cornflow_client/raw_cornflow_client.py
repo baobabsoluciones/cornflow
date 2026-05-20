@@ -1,6 +1,4 @@
-"""
-
-"""
+""" """
 
 import logging as log
 import re
@@ -510,6 +508,25 @@ class RawCornFlow(object):
         """"""
         return self.put_api_for_id(
             "dag/case/", id=case_id, encoding=encoding, payload=kwargs
+        )
+
+    @ask_token
+    def write_execution_files(
+        self, execution_id, execution_files_status, execution_file=None
+    ):
+        if not execution_file:
+            return self.post_api_for_id(
+                "execution/files/",
+                id=execution_id,
+                data={"execution_files_status": execution_files_status},
+            )
+        return self.post_api_for_id(
+            "execution/files/",
+            id=execution_id,
+            data={"execution_files_status": execution_files_status},
+            files={
+                "execution_file": ("execution.zip", execution_file, "application/zip")
+            },
         )
 
     @log_call

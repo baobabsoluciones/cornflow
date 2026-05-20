@@ -39,6 +39,8 @@ from .execution import (
     ExecutionDataEndpoint,
     ExecutionLogEndpoint,
     ExecutionRelaunchEndpoint,
+    ExecutionFilesEndpoint,
+    ExecutionFilesCleanupEndpoint
 )
 from .health import HealthEndpoint
 from .instance import (
@@ -128,6 +130,8 @@ resources = [
         endpoint="execution-relaunch",
     ),
     dict(resource=ExecutionEndpoint, urls="/execution/", endpoint="execution"),
+    dict(resource=ExecutionFilesEndpoint, urls="/execution/files/<string:idx>/", endpoint="execution-files"),
+    dict(resource=ExecutionFilesCleanupEndpoint, urls="/execution/files/cleanup/", endpoint="execution-files-cleanup"),
     dict(resource=DAGDetailEndpoint, urls="/dag/<string:idx>/", endpoint="dag"),
     dict(resource=DAGEndpointManual, urls="/dag/", endpoint="dag-manual"),
     dict(
