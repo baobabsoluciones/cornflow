@@ -2,12 +2,17 @@
 Python class to implement the Databricks client wrapper
 """
 
+# Full imports
 import requests
-from flask import current_app
-from cornflow_client.constants import config_orchestrator
+import warnings
 
-from cornflow_client.constants import DatabricksError
+# Partial imports
+from flask import current_app
+
+# Imports from modules
 from cornflow_client.constants import (
+    config_orchestrator,
+    DatabricksError,
     DATABRICKS_TERMINATE_STATE,
     DATABRICKS_FINISH_TO_STATE_MAP,
 )
@@ -64,10 +69,14 @@ class Databricks:
             current_app.logger.error(f"Error: {err}")
             return False
 
-    def get_workflow_info(self, workflow_name, method="GET"):
+    def get_workflow_info(self, workflow_name, method="GET", **kwargs):
         """
         Get information about a job in Databricks
         https://docs.databricks.com/api/workspace/jobs/get
+
+        :param str workflow_name: The name of the job to get information about
+        :param str method: The HTTP method to use for the request. Defaults to "GET".
+        :param dict kwargs: For compatibility with the airflow API.
         """
         url = f"{self.url}/api/2.1/jobs/get/?job_id={workflow_name}"
         schema_info = self.request_headers_auth(method=method, url=url)
@@ -79,26 +88,39 @@ class Databricks:
         self,
         execution_id,
         workflow_name=config_orchestrator["databricks"]["def_schema"],
-        checks_only=False,
+        checks_only=None,
+        checks_and_kpis_only=False,
         case_id=None,
     ):
         """
         Run a job in Databricks
         """
+        if checks_only is not None:
+            warnings.warn(
+                "The parameter checks_only is deprecated and will be removed in future versions. "
+                "Please use 'checks_and_kpis_only' instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            checks_and_kpis_only = checks_only
+
         url = f"{self.url}/api/2.1/jobs/run-now/"
         #   Entender cómo se usa checks_only
         payload = dict(
             job_id=workflow_name,
             job_parameters=dict(
-                checks_only=checks_only,
+                checks_and_kpis_only=checks_and_kpis_only,
                 execution_id=execution_id,
             ),
         )
         return self.request_headers_auth(method="POST", url=url, json=payload)
 
-    def get_run_status(self, schema, run_id):
+    def get_run_status(self, schema, run_id, **kwargs):
         """
         Get the status of a run in Databricks
+        :param str schema: The schema of the execution
+        :param int run_id: The id of the run to check
+        :param dict kwargs: For compatibility with the airflow API.
         """
         print("asking for run id ", run_id)
         url = f"{self.url}/api/2.1/jobs/runs/get"

@@ -2,14 +2,21 @@
 from marshmallow import fields, Schema, validate
 
 # Imports from internal modules
-from cornflow.shared.const import MIN_EXECUTION_STATUS_CODE, MAX_EXECUTION_STATUS_CODE
+from cornflow.shared.const import (
+    MIN_EXECUTION_STATUS_CODE,
+    MAX_EXECUTION_STATUS_CODE,
+    EXECUTION_FILES_STATUS_NOT_GENERATED,
+    EXECUTION_FILES_STATUS_ERROR,
+    EXECUTION_FILES_STATUS_DELETED,
+    EXECUTION_FILES_STATUS_NOT_UP_TO_DATE,
+    EXECUTION_FILES_STATUS_OK,
+)
 from .common import QueryFilters, BaseDataEndpointResponse
 from .solution_log import LogSchema, BasicLogSchema
 
 
 class QueryFiltersExecution(QueryFilters):
-    pass
-    # status = fields.Int(required=False)
+    checks_and_kpis = fields.Boolean(required=False)
 
 
 class ConfigSchema(Schema):
@@ -34,6 +41,7 @@ class ConfigSchema(Schema):
 
 class ConfigSchemaResponse(ConfigSchema):
     checks_only = fields.Boolean(required=False)
+    checks_and_kpis_only = fields.Boolean(required=False)
 
 
 class ExecutionSchema(Schema):
@@ -47,6 +55,7 @@ class ExecutionSchema(Schema):
     config = fields.Nested(ConfigSchema, required=True)
     data = fields.Raw(dump_only=True)
     checks = fields.Raw(required=False, allow_none=True)
+    kpis = fields.Raw(required=False, allow_none=True)
     log_text = fields.Str(dump_only=True)
     log_json = fields.Nested(LogSchema, dump_only=True)
     state = fields.Int(
@@ -88,6 +97,7 @@ class ExecutionDagRequest(Schema):
     log_json = fields.Nested(LogSchema, required=False)
     state = fields.Int(required=False)
     checks = fields.Raw(required=False)
+    kpis = fields.Raw(required=False, allow_none=True)
     solution_schema = fields.Str(required=False, allow_none=True)
 
 
@@ -156,9 +166,24 @@ class ExecutionStatusEndpointUpdate(Schema):
 class ExecutionDataEndpointResponse(ExecutionDetailsEndpointResponse):
     data = fields.Raw()
     checks = fields.Raw()
+    kpis = fields.Raw()
     log = fields.Nested(BasicLogSchema, attribute="log_json")
 
 
 class ExecutionLogEndpointResponse(ExecutionDetailsEndpointWithIndicatorsResponse):
     log = fields.Nested(LogSchema, attribute="log_json")
     log_text = fields.Str(attribute="log_text")
+
+
+class ExecutionFilesPostRequest(Schema):
+    execution_files_status = fields.Integer(
+        required=True,
+        validate=lambda v: v
+        in [
+            EXECUTION_FILES_STATUS_NOT_GENERATED,
+            EXECUTION_FILES_STATUS_ERROR,
+            EXECUTION_FILES_STATUS_DELETED,
+            EXECUTION_FILES_STATUS_NOT_UP_TO_DATE,
+            EXECUTION_FILES_STATUS_OK,
+        ],
+    )

@@ -47,7 +47,7 @@ class TestExecutionsDetailEndpointMock(CustomTestCase):
             "user_id",
             "indicators",
             "username",
-            "updated_at"
+            "updated_at",
         }
         # we only check the following because this endpoint does not return data
         self.items_to_check = ["name", "description"]
@@ -55,6 +55,7 @@ class TestExecutionsDetailEndpointMock(CustomTestCase):
         with open(EXECUTION_PATH) as f:
             self.payload = json.load(f)
         self.payload["instance_id"] = fk_id
+
 
 class BaseExecutionList(BaseTestCases.ListFilters, ABC):
 
@@ -617,6 +618,7 @@ class BaseExecutionData(TestExecutionsDetailEndpointMock, ABC):
         self.keys_to_check = [
             "created_at",
             "checks",
+            "kpis",
             "instance_id",
             "schema",
             "data",

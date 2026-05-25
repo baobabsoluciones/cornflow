@@ -70,6 +70,7 @@ class SchemaDetailsEndpoint(BaseMetaResource):
                 "solution": deployed_dag.solution_schema,
                 "instance_checks": deployed_dag.instance_checks_schema,
                 "solution_checks": deployed_dag.solution_checks_schema,
+                "kpis": deployed_dag.kpis_schema,
                 "config": deployed_dag.config_schema,
                 "name": dag_name,
             }, 200
