@@ -40,60 +40,106 @@ def copy(dictionary):
     return pickle.loads(pickle.dumps(dictionary, -1))
 
 
-# Frontend formatting palette, shared by the inline formatter below.
+# Frontend formatting palettes, shared by the inline formatter below.
+# Keyed by style set: "master_tables" (blue header theme) and
+# "instance_solution" (gray banded-row theme).
 _FORMAT_STYLES = {
-    "header": {
-        "fill": PatternFill(
-            start_color="4A90E2", end_color="4A90E2", fill_type="solid"
-        ),
-        "font": Font(bold=True, color="FFFFFF"),
-        "border": Border(
-            left=Side(style="thin", color="FFFFFF"),
-            right=Side(style="thin", color="FFFFFF"),
-            top=Side(style="thin", color="FFFFFF"),
-            bottom=Side(style="thin", color="FFFFFF"),
-        ),
+    "master_tables": {
+        "header": {
+            "fill": PatternFill(
+                start_color="4A90E2", end_color="4A90E2", fill_type="solid"
+            ),
+            "font": Font(bold=True, color="FFFFFF"),
+            "border": Border(
+                left=Side(style="thin", color="FFFFFF"),
+                right=Side(style="thin", color="FFFFFF"),
+                top=Side(style="thin", color="FFFFFF"),
+                bottom=Side(style="thin", color="FFFFFF"),
+            ),
+        },
+        "even_row": {
+            "fill": PatternFill(
+                start_color="F8F9FA", end_color="F8F9FA", fill_type="solid"
+            ),
+            "font": Font(bold=False, color="000000"),
+            "border": Border(
+                left=Side(style="thin", color="E1E5E9"),
+                right=Side(style="thin", color="E1E5E9"),
+                top=Side(style="thin", color="E1E5E9"),
+                bottom=Side(style="thin", color="E1E5E9"),
+            ),
+        },
+        "odd_row": {
+            "fill": PatternFill(
+                start_color="FFFFFF", end_color="FFFFFF", fill_type="solid"
+            ),
+            "font": Font(bold=False, color="000000"),
+            "border": Border(
+                left=Side(style="thin", color="E1E5E9"),
+                right=Side(style="thin", color="E1E5E9"),
+                top=Side(style="thin", color="E1E5E9"),
+                bottom=Side(style="thin", color="E1E5E9"),
+            ),
+        },
     },
-    "even_row": {
-        "fill": PatternFill(
-            start_color="F8F9FA", end_color="F8F9FA", fill_type="solid"
-        ),
-        "font": Font(bold=False, color="000000"),
-        "border": Border(
-            left=Side(style="thin", color="E1E5E9"),
-            right=Side(style="thin", color="E1E5E9"),
-            top=Side(style="thin", color="E1E5E9"),
-            bottom=Side(style="thin", color="E1E5E9"),
-        ),
-    },
-    "odd_row": {
-        "fill": PatternFill(
-            start_color="FFFFFF", end_color="FFFFFF", fill_type="solid"
-        ),
-        "font": Font(bold=False, color="000000"),
-        "border": Border(
-            left=Side(style="thin", color="E1E5E9"),
-            right=Side(style="thin", color="E1E5E9"),
-            top=Side(style="thin", color="E1E5E9"),
-            bottom=Side(style="thin", color="E1E5E9"),
-        ),
+    "instance_solution": {
+        "header": {
+            "fill": PatternFill(
+                start_color="D3D3D3", end_color="D3D3D3", fill_type="solid"
+            ),
+            "font": Font(bold=True, color="000000"),
+            "border": Border(
+                left=Side(style="thin"),
+                right=Side(style="thin"),
+                top=Side(style="thin"),
+                bottom=Side(style="thin"),
+            ),
+        },
+        "even_row": {
+            "fill": PatternFill(
+                start_color="F2F2F2", end_color="F2F2F2", fill_type="solid"
+            ),
+            "font": Font(bold=False, color="000000"),
+            "border": Border(
+                left=Side(style="thin"),
+                right=Side(style="thin"),
+                top=Side(style="thin"),
+                bottom=Side(style="thin"),
+            ),
+        },
+        "odd_row": {
+            "fill": PatternFill(
+                start_color="FFFFFF", end_color="FFFFFF", fill_type="solid"
+            ),
+            "font": Font(bold=False, color="000000"),
+            "border": Border(
+                left=Side(style="thin"),
+                right=Side(style="thin"),
+                top=Side(style="thin"),
+                bottom=Side(style="thin"),
+            ),
+        },
     },
 }
 
 
-def _add_frontend_formatting(ws, n_rows, n_cols):
+def _add_frontend_formatting(ws, n_rows, n_cols, style_set="master_tables"):
     """
     Applies the frontend format to a worksheet.
+
+    :param style_set: which palette in _FORMAT_STYLES to use, either
+        "master_tables" (blue header) or "instance_solution" (gray banded).
     """
     if n_rows == 0 or n_cols == 0:
         return
+    styles = _FORMAT_STYLES[style_set]
     max_cell = f"{get_column_letter(n_cols)}{n_rows}"
     for key, formula in (
         ("header", ["ROW()=1"]),
         ("even_row", ["AND(MOD(ROW(),2)=0, ROW()<>1)"]),
         ("odd_row", ["AND(MOD(ROW(),2)=1, ROW()<>1)"]),
     ):
-        style = _FORMAT_STYLES[key]
+        style = styles[key]
         dxf = DifferentialStyle(
             fill=style["fill"], font=style["font"], border=style["border"]
         )
@@ -103,17 +149,23 @@ def _add_frontend_formatting(ws, n_rows, n_cols):
         )
 
 
-def to_excel_memory_file(data: dict) -> Optional[io.BytesIO]:
+def to_excel_memory_file(
+    data: dict, is_instance_solution: bool = True
+) -> Optional[io.BytesIO]:
     """
     Converts a json into a formatted Excel memory file.
     Uses openpyxl's write_only mode and applies the frontend formatting inline,
     in the same single pass that streams the rows.
 
     :param data: a json dictionary
+    :param is_instance_solution: if True, use the "instance_solution" style set
+        (gray banded rows); otherwise use the default "master_tables" style set
+        (blue header).
     :return: Formatted Excel file in memory as a BytesIO object
     """
     if not data:
         return None
+    style_set = "instance_solution" if is_instance_solution else "master_tables"
     wb = Workbook(write_only=True)
     used_table_names = {}
     max_length = 31
@@ -166,7 +218,12 @@ def to_excel_memory_file(data: dict) -> Optional[io.BytesIO]:
         for row in table_data:
             ws.append([row.get(header) for header in headers])
 
-        _add_frontend_formatting(ws, n_rows=len(table_data) + 1, n_cols=len(headers))
+        _add_frontend_formatting(
+            ws,
+            n_rows=len(table_data) + 1,
+            n_cols=len(headers),
+            style_set=style_set,
+        )
 
     memory_file = io.BytesIO()
     wb.save(memory_file)
