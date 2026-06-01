@@ -180,6 +180,12 @@ class TestExperimentExecutionFiles(unittest.TestCase):
                     }
                 ],
                 "an_empty_table": [],
+                "this_table_name_is_longer_than_thirty_one_characters": [
+                    {"info": "The table name will be truncated"}
+                ],
+                "this_table_name_is_longer_than_thirty_one_characters_and_has_the_same_abv": [
+                    {"info": "The table name will be truncated with the '_2' suffix"}
+                ],
             }
         )
         return ExecutionFilesExperiment(instance, solution, output_files=output_files)
@@ -394,6 +400,9 @@ class ApplicationExecutionFilesSolver(ExecutionFilesExperiment):
                 "this_table_name_is_longer_than_thirty_one_characters": [
                     {"info": "The table name will be truncated"}
                 ],
+                "this_table_name_is_longer_than_thirty_one_characters_and_has_the_same_abv": [
+                    {"info": "The table name will be truncated with the '_2' suffix"}
+                ],
             }
         )
         return {
@@ -419,8 +428,26 @@ class ExecutionFilesApplication(ApplicationCore):
 class TestApplicationExecutionFiles(unittest.TestCase):
     def setUp(self):
         self.app = ExecutionFilesApplication()
-        self.instance_data = {"items": [{"id": 1, "value": 2}]}
-        self.solution_data = {"assignments": [{"id": 1, "selected": 1}]}
+        self.instance_data = {
+            "items": [{"id": 1, "value": 2}],
+            "parameters": {"duration": 24},
+        }
+        self.solution_data = {
+            "assignments": [
+                {
+                    "id": 1,
+                    "selected": 1,
+                    "nested_dict": {"this should be converted to json": 456},
+                }
+            ],
+            "an_empty_table": [],
+            "this_table_name_is_longer_than_thirty_one_characters": [
+                {"info": "The table name will be truncated"}
+            ],
+            "this_table_name_is_longer_than_thirty_one_characters_and_has_the_same_abv": [
+                {"info": "The table name will be truncated with the '_2' suffix"}
+            ],
+        }
         self.config = {"solver": "default", "msg": False}
 
     def tearDown(self):
