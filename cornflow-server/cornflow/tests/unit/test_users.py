@@ -30,7 +30,13 @@ from cornflow.models import (
     UserRoleModel,
 )
 from cornflow.shared import db
-from cornflow.shared.const import ADMIN_ROLE, SERVICE_ROLE, PLANNER_ROLE, VIEWER_ROLE
+from cornflow.shared.const import (
+    ADMIN_ROLE,
+    DUMMY_ROLE,
+    SERVICE_ROLE,
+    PLANNER_ROLE,
+    VIEWER_ROLE,
+)
 from cornflow.tests.const import (
     CASE_PATH,
     CASE_URL,
@@ -89,6 +95,12 @@ class TestUserEndpoint(TestCase):
             password="Tpass_service_user1",
         )
 
+        self.dummy = dict(
+            username="aDummyUser",
+            email="dummy@test.com",
+            password="Testpassword1!",
+        )
+
         self.login_keys = ["username", "password"]
         self.items_to_check = ["email", "username", "id"]
         self.modifiable_items = [
@@ -106,6 +118,7 @@ class TestUserEndpoint(TestCase):
             self.admin,
             self.admin_2,
             self.service_user,
+            self.dummy,
         ]
 
         for u_data in self.payloads:
@@ -141,6 +154,17 @@ class TestUserEndpoint(TestCase):
                     {"user_id": u_data["id"], "role_id": SERVICE_ROLE}
                 )
                 user_role.save()
+
+            if "dummy" in u_data["email"]:
+                user_role = UserRoleModel(
+                    {"user_id": u_data["id"], "role_id": DUMMY_ROLE}
+                )
+                user_role.save()
+
+                UserRoleModel.query.filter_by(
+                    user_id=u_data["id"], role_id=PLANNER_ROLE
+                ).delete()
+                db.session.commit()
 
         db.session.commit()
         register_dag_permissions_command(verbose=False)
@@ -390,6 +414,74 @@ class TestUserEndpoint(TestCase):
 
         response = self.log_in(self.planner)
         self.assertEqual(False, response.json["change_password"])
+
+    def test_dummy_gets_own_user_detail(self):
+        # the dummy role can read its own user info
+        response = self.get_user(self.dummy, self.dummy)
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(self.dummy["id"], response.json["id"])
+
+    def test_dummy_cannot_get_other_user_detail(self):
+        # the dummy role can not read another user's info
+        response = self.get_user(self.dummy, self.planner)
+        self.assertEqual(400, response.status_code)
+        self.assertTrue("error" in response.json)
+
+    def test_dummy_edits_own_user_info(self):
+        # the dummy role can edit its own user info
+        payload = {"first_name": "Dummy", "last_name": "User"}
+        response = self.modify_info(self.dummy, self.dummy, payload)
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("Updated correctly", response.json["message"])
+
+        response = self.get_user(self.dummy, self.dummy)
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("Dummy", response.json["first_name"])
+
+    def test_dummy_cannot_edit_other_user_info(self):
+        # the dummy role can not edit another user's info
+        payload = {"first_name": "Nope"}
+        response = self.modify_info(self.dummy, self.planner, payload)
+        self.assertEqual(403, response.status_code)
+        self.assertTrue("error" in response.json)
+
+    def test_dummy_cannot_get_all_users(self):
+        # the dummy role can not list all the users
+        response = self.get_user(self.dummy)
+        self.assertEqual(403, response.status_code)
+        self.assertTrue("error" in response.json)
+
+    def test_dummy_cannot_delete_user(self):
+        # the dummy role has no delete permission, even on itself
+        response = self.delete_user(self.dummy, self.dummy)
+        self.assertEqual(403, response.status_code)
+
+    def test_dummy_cannot_get_instances(self):
+        # the dummy role can not access unrelated endpoints
+        token = self.log_in(self.dummy).json["token"]
+        response = self.client.get(
+            INSTANCE_URL,
+            follow_redirects=True,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token,
+            },
+        )
+        self.assertEqual(403, response.status_code)
+
+    def test_dummy_cannot_post_instance(self):
+        # permission is denied before any payload validation
+        token = self.log_in(self.dummy).json["token"]
+        response = self.client.post(
+            INSTANCE_URL,
+            data=json.dumps({}),
+            follow_redirects=True,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token,
+            },
+        )
+        self.assertEqual(403, response.status_code)
 
 
 class TestUserModel(TestCase):

@@ -19,6 +19,8 @@ from cornflow.models import (
 )
 from cornflow.shared.const import (
     ADMIN_ROLE,
+    ALL_DEFAULT_ROLES,
+    DUMMY_ROLE,
     PLANNER_ROLE,
     ROLES_MAP,
     SERVICE_ROLE,
@@ -82,7 +84,7 @@ class TestRolesListEndpoint(CustomTestCase):
         )
 
         self.assertEqual(200, response.status_code)
-        self.assertEqual(5, len(response.json))
+        self.assertEqual(6, len(response.json))
 
     def test_get_no_roles(self):
         for role in ROLES_MAP:
@@ -254,7 +256,7 @@ class TestUserRolesListEndpoint(CustomTestCase):
             self.assertEqual(200, response.status_code)
             self.assertCountEqual(self.payload, response.json)
 
-        for role in (VIEWER_ROLE, PLANNER_ROLE, SERVICE_ROLE):
+        for role in (VIEWER_ROLE, PLANNER_ROLE, SERVICE_ROLE, DUMMY_ROLE):
             self.token = self.create_user_with_role(role)
             user = UserModel.get_one_object(username=f"testuser{role}")
             response = self.client.get(
@@ -484,18 +486,24 @@ class TestRolesModelMethods(CustomTestCase):
         """
         Tests the get_all_objects method
         """
-        # We expect 4 roles to be present (from ROLES_MAP constant)
+        # We expect 5 roles to be present (from ROLES_MAP constant)
         instances = RoleModel.get_all_objects().all()
-        self.assertEqual(len(instances), 4)
+        self.assertEqual(len(instances), 5)
 
         # Check that all the roles from ROLES_MAP are present
         role_names = [role.name for role in instances]
         expected_names = list(ROLES_MAP.values())
         self.assertCountEqual(role_names, expected_names)
 
+        # The dummy role is registered with its ROLES_MAP name and is not a default role
+        dummy_role = RoleModel.get_one_object(idx=DUMMY_ROLE)
+        self.assertIsNotNone(dummy_role)
+        self.assertEqual(dummy_role.name, "dummy")
+        self.assertNotIn(DUMMY_ROLE, ALL_DEFAULT_ROLES)
+
         # Test offset parameter - should get all except the first role
         instances = RoleModel.get_all_objects(offset=1).all()
-        self.assertEqual(len(instances), 3)
+        self.assertEqual(len(instances), 4)
 
         # Get the names of all roles except the first one
         remaining_roles = [role.name for role in instances]
