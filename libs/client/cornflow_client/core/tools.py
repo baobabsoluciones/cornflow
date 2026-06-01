@@ -149,6 +149,12 @@ def _add_frontend_formatting(ws, n_rows, n_cols, style_set="master_tables"):
         )
 
 
+def _jsonify(value):
+    if isinstance(value, (str, float, int, bool)) or value is None:
+        return value
+    return json.dumps(value)
+
+
 def to_excel_memory_file(
     data: dict, is_instance_solution: bool = True
 ) -> Optional[io.BytesIO]:
@@ -221,7 +227,7 @@ def to_excel_memory_file(
         # Add the rows
         ws.append(headers)
         for row in table_data:
-            ws.append([json.dumps(row.get(header)) for header in headers])
+            ws.append([_jsonify(row.get(header)) for header in headers])
 
         _add_frontend_formatting(
             ws,
