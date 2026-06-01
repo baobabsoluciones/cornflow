@@ -221,7 +221,7 @@ def to_excel_memory_file(
         # Add the rows
         ws.append(headers)
         for row in table_data:
-            ws.append([row.get(header) for header in headers])
+            ws.append([json.dumps(row.get(header)) for header in headers])
 
         _add_frontend_formatting(
             ws,
