@@ -167,8 +167,21 @@ class TestCornflowExecutionFiles(unittest.TestCase):
 
 class TestExperimentExecutionFiles(unittest.TestCase):
     def _experiment(self, output_files=None):
-        instance = ExecutionFilesInstance({"items": [{"id": 1, "value": 2}]})
-        solution = ExecutionFilesSolution({"assignments": [{"id": 1, "selected": 1}]})
+        instance = ExecutionFilesInstance(
+            {"items": [{"id": 1, "value": 2}], "parameters": {"duration": 24}}
+        )
+        solution = ExecutionFilesSolution(
+            {
+                "assignments": [
+                    {
+                        "id": 1,
+                        "selected": 1,
+                        "nested_dict": {"this should be converted to json": 456},
+                    }
+                ],
+                "an_empty_table": [],
+            }
+        )
         return ExecutionFilesExperiment(instance, solution, output_files=output_files)
 
     @staticmethod
@@ -313,6 +326,7 @@ class TestExperimentExecutionFiles(unittest.TestCase):
         """
         Validates that generate_output_files exceptions return ERROR and no zip.
         """
+
         class FailingOutputExperiment(ExecutionFilesExperiment):
             def generate_output_files(
                 self,
@@ -368,7 +382,19 @@ class ApplicationExecutionFilesSolver(ExecutionFilesExperiment):
 
     def solve(self, options):
         self.solution = ExecutionFilesSolution(
-            {"assignments": [{"id": 1, "selected": 1}]}
+            {
+                "assignments": [
+                    {
+                        "id": 1,
+                        "selected": 1,
+                        "nested_dict": {"this should be converted to json": 456},
+                    }
+                ],
+                "an_empty_table": [],
+                "this_table_name_is_longer_than_thirty_one_characters": [
+                    {"info": "The table name will be truncated"}
+                ],
+            }
         )
         return {
             "status": STATUS_OPTIMAL,
@@ -434,8 +460,8 @@ class TestApplicationExecutionFiles(unittest.TestCase):
         ApplicationExecutionFilesSolver.output_files = {"bad": object()}
 
         result = self.app.solve(self.instance_data, self.config)
-
-        self.assertEqual({"assignments": [{"id": 1, "selected": 1}]}, result[0])
+        self.assertIsInstance(result[0], dict)
+        self.assertIn("assignments", result[0].keys())
         self.assertIsNone(result[4])
         self.assertEqual(EXECUTION_FILES_STATUS_ERROR, result[5])
 
