@@ -205,22 +205,22 @@ def to_excel_memory_file(
 
         # Build the headers
         headers = list(table_data[0].keys())
-        header_index = {h: i for i, h in enumerate(headers)}
         for row in table_data[1:]:
             for key in row:
-                if key not in header_index:
-                    header_index[key] = len(headers)
+                if key not in headers:
                     headers.append(key)
 
         # Measure max string width per column over the header + first 1000 data
         # rows, to set the column widths.
-        col_widths = [len(str(h)) for h in headers]
         WIDTH_SAMPLE = min(len(table_data), 1000)
-        for row in table_data[:WIDTH_SAMPLE]:
-            for header, c in header_index.items():
-                length = len(str(row.get(header)))
-                if length > col_widths[c]:
-                    col_widths[c] = length
+        col_widths = [
+            max(
+                len(str(h)),
+                *[len(str(row.get(h))) for row in table_data[:WIDTH_SAMPLE]],
+            )
+            for h in headers
+        ]
+
         for c, width in enumerate(col_widths):
             ws.column_dimensions[get_column_letter(c + 1)].width = max(width, 8) * 1.2
 
