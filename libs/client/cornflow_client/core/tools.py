@@ -192,6 +192,11 @@ def to_excel_memory_file(
         if len(table_data) == 0:
             continue
 
+        # Infer table format: if the items are primitives,
+        #   treat as a single "value" column; if dicts, use keys as columns.
+        if isinstance(table_data[0], (str, float, int, bool)):
+            table_data = [{"value": v} for v in table_data]
+
         # Build the headers
         headers = list(table_data[0].keys())
         header_index = {h: i for i, h in enumerate(headers)}
@@ -204,7 +209,7 @@ def to_excel_memory_file(
         # Measure max string width per column over the header + first 1000 data
         # rows, to set the column widths.
         col_widths = [len(str(h)) for h in headers]
-        WIDTH_SAMPLE = 1000
+        WIDTH_SAMPLE = min(len(table_data), 1000)
         for row in table_data[:WIDTH_SAMPLE]:
             for header, c in header_index.items():
                 length = len(str(row.get(header)))
