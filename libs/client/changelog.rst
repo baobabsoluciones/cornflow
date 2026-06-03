@@ -1,3 +1,44 @@
+version 1.3.5
+--------------
+- released: 2026-04-20
+- description: KPIs in data checks, execution output files and new role
+- changelog:
+    - KPIs in data checks
+        Executions and cases can now generate/re-generate and validate KPIs as part of the data-check flow. Solvers
+        can define a KPI schema for their solutions, and the result is validated against it. The rostering
+        example includes an implementation. New KPI-aware data-check endpoints are added alongside the
+        existing data-check endpoints, which remain available.
+
+    - Execution output files
+        Adds the ability to generate output files for executions. These files are produced as part of the
+        workflow run in Airflow, which follows the sequence:
+
+        instance checks → solve → solution checks → KPIs → output files
+
+        Each step gates the next:
+        - **Instance checks** run first. If they report critical errors, the solver is not run and **no
+          output files are generated**.
+        - The **solver** runs. If no solution is found, output files are still produced based on the
+          available data (instance checks).
+        - **Solution checks** run on the solution. **KPIs are only generated when the solution checks
+          report no errors**; if the solution has errors, KPIs are skipped.
+        - **Output files** are then generated from the instance checks, solution, solution checks, and
+          KPIs. Whether files are produced depends on the solver's `generate_output_files`
+          implementation — if it returns nothing, files are reported as not generated.
+
+        Each execution tracks the status of its files (not generated, ready/OK, out of date, deleted, or
+        error), each with an associated message. If file generation fails at any point, the status is set
+        to error. New endpoints let clients fetch these files and trigger regeneration, and a scheduled
+        cleanup job removes stale execution files from the backend. Database migrations are included for
+        the new fields.
+
+    - Roles
+        Adds a new "dummy" role with a limited set of permissions (read/update user detail, read user
+        roles).
+
+    -  Other changes
+        Expanded test coverage for the new features.
+
 version 1.3.4
 --------------
 
