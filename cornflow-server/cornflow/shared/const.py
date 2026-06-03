@@ -7,7 +7,7 @@ AIRFLOW_BACKEND = 1
 DATABRICKS_BACKEND = 2
 
 
-CORNFLOW_VERSION = "1.3.4"
+CORNFLOW_VERSION = "1.3.5rc4"
 INTERNAL_TOKEN_ISSUER = "cornflow"
 
 # endpoints responses for health check
@@ -99,6 +99,7 @@ DELETE_ACTION = 5
 
 ALL_DEFAULT_ACTIONS = [GET_ACTION, PATCH_ACTION, POST_ACTION, PUT_ACTION, DELETE_ACTION]
 
+DUMMY_ROLE = 0
 VIEWER_ROLE = 1
 PLANNER_ROLE = 2
 ADMIN_ROLE = 3
@@ -123,6 +124,7 @@ PERMISSION_METHOD_MAP = {
 }
 
 ROLES_MAP = {
+    DUMMY_ROLE: "dummy",
     PLANNER_ROLE: "planner",
     VIEWER_ROLE: "viewer",
     ADMIN_ROLE: "admin",
@@ -149,11 +151,32 @@ BASE_PERMISSION_ASSIGNATION = [
 ]
 
 EXTRA_PERMISSION_ASSIGNATION = [
+    (DUMMY_ROLE, GET_ACTION, "user-detail"),
+    (DUMMY_ROLE, PUT_ACTION, "user-detail"),
     (VIEWER_ROLE, PUT_ACTION, "user-detail"),
+    (DUMMY_ROLE, GET_ACTION, "user-roles"),
     (VIEWER_ROLE, GET_ACTION, "user-roles"),
     (PLANNER_ROLE, GET_ACTION, "user-roles"),
     (SERVICE_ROLE, GET_ACTION, "user-roles"),
+    (VIEWER_ROLE, GET_ACTION, "execution-files"),
+    (PLANNER_ROLE, GET_ACTION, "execution-files"),
+    (ADMIN_ROLE, GET_ACTION, "execution-files"),
 ]
+
+# are there execution files?
+EXECUTION_FILES_STATUS_NOT_GENERATED = 0
+EXECUTION_FILES_STATUS_ERROR = -1
+EXECUTION_FILES_STATUS_DELETED = -2
+EXECUTION_FILES_STATUS_NOT_UP_TO_DATE = -3
+EXECUTION_FILES_STATUS_OK = 1
+
+EXECUTION_FILES_STATUS_MESSAGE_DICT = {
+    EXECUTION_FILES_STATUS_NOT_GENERATED: "The output files were not generated for this execution",
+    EXECUTION_FILES_STATUS_ERROR: "The generation of the execution files failed. Please contact support.",
+    EXECUTION_FILES_STATUS_DELETED: "The requested files have been deleted. Please wait while they are generated again.",
+    EXECUTION_FILES_STATUS_NOT_UP_TO_DATE: "The requested files are not up-to-date. Please wait while they are generated again.",
+    EXECUTION_FILES_STATUS_OK: "The files were generated successfully.",
+}
 
 # Costants for messages that are given back on exceptions
 AIRFLOW_NOT_REACHABLE_MSG = "Airflow is not reachable"

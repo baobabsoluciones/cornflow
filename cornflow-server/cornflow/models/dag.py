@@ -7,6 +7,7 @@ from cornflow_client.constants import (
     SOLUTION_SCHEMA,
     INSTANCE_CHECKS_SCHEMA,
     SOLUTION_CHECKS_SCHEMA,
+    KPIS_SCHEMA,
 )
 from sqlalchemy.dialects.postgresql import TEXT, JSON
 
@@ -29,6 +30,7 @@ class DeployedWorkflow(TraceAttributesModel):
     config_schema = db.Column(JSON, nullable=True)
     instance_checks_schema = db.Column(JSON, nullable=True)
     solution_checks_schema = db.Column(JSON, nullable=True)
+    kpis_schema = db.Column(JSON, nullable=True)
 
     dag_permissions = db.relationship(
         "PermissionsDAG",
@@ -46,6 +48,7 @@ class DeployedWorkflow(TraceAttributesModel):
         self.instance_checks_schema = data.get("instance_checks_schema", None)
         self.solution_checks_schema = data.get("solution_checks_schema", None)
         self.config_schema = data.get("config_schema", None)
+        self.kpis_schema = data.get("kpis_schema", None)
 
     def __repr__(self):
         return f"<DAG {self.id}>"
@@ -70,7 +73,8 @@ class DeployedWorkflow(TraceAttributesModel):
             jsonschema = item.instance_checks_schema
         elif schema == SOLUTION_CHECKS_SCHEMA:
             jsonschema = item.solution_checks_schema
-        # schema == CONFIG_SCHEMA
+        elif schema == KPIS_SCHEMA:
+            jsonschema = item.kpis_schema
         else:
             jsonschema = item.config_schema
 
