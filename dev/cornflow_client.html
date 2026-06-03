@@ -6,7 +6,7 @@
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=ad592e98" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=44020203" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=9454f7d5" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,7 +18,8 @@
   --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
 }
 </style>
-    <meta property="og:type" content="website"/><meta property="og:title" content="cornflow-client"/>
+    
+  <meta property="og:type" content="website"/><meta property="og:title" content="cornflow-client"/>
     <meta name="twitter:card" content="summary"/>
   </head>
 <body><div class="sy-head">
@@ -131,13 +132,15 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.description"><code class="docutils literal notranslate">description</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.default_args"><code class="docutils literal notranslate">default_args</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.extra_args"><code class="docutils literal notranslate">extra_args</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.default_args_checks_kpis"><code class="docutils literal notranslate">default_args_checks_kpis</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.extra_args_checks_kpis"><code class="docutils literal notranslate">extra_args_checks_kpis</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.instance"><code class="docutils literal notranslate">instance</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.solution"><code class="docutils literal notranslate">solution</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.schema"><code class="docutils literal notranslate">schema</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.test_cases"><code class="docutils literal notranslate">test_cases</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.solvers"><code class="docutils literal notranslate">solvers</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.solve"><code class="docutils literal notranslate">solve()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.check"><code class="docutils literal notranslate">check()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.check_generate_kpis"><code class="docutils literal notranslate">check_generate_kpis()</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.get_solver"><code class="docutils literal notranslate">get_solver()</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.get_default_solver_name"><code class="docutils literal notranslate">get_default_solver_name()</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.core.application.ApplicationCore.get_schemas"><code class="docutils literal notranslate">get_schemas()</span></code></a></li>
@@ -213,9 +216,15 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.solve"><code class="docutils literal notranslate">solve()</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.get_objective"><code class="docutils literal notranslate">get_objective()</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.data_checks"><code class="docutils literal notranslate">data_checks()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.get_kpis"><code class="docutils literal notranslate">get_kpis()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.kpis_checks"><code class="docutils literal notranslate">kpis_checks()</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.check"><code class="docutils literal notranslate">check()</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.check_solution"><code class="docutils literal notranslate">check_solution()</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.schema_checks"><code class="docutils literal notranslate">schema_checks</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.generate_kpis"><code class="docutils literal notranslate">generate_kpis()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.check_kpis"><code class="docutils literal notranslate">check_kpis()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.kpis_to_dict"><code class="docutils literal notranslate">kpis_to_dict()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.generate_output_files"><code class="docutils literal notranslate">generate_output_files()</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.core.experiment.ExperimentCore.get_solver_config"><code class="docutils literal notranslate">get_solver_config()</span></code></a></li>
 </ul>
 </li>
@@ -302,6 +311,12 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#cornflow_client.constants.BadSolutionChecks.add_note"><code class="docutils literal notranslate">add_note()</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.constants.BadSolutionChecks.args"><code class="docutils literal notranslate">args</span></code></a></li>
 <li><a class="reference internal" href="#cornflow_client.constants.BadSolutionChecks.with_traceback"><code class="docutils literal notranslate">with_traceback()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#cornflow_client.constants.BadKPIs"><code class="docutils literal notranslate"><span class="pre">BadKPIs</span></code></a><ul>
+<li><a class="reference internal" href="#cornflow_client.constants.BadKPIs.add_note"><code class="docutils literal notranslate">add_note()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.constants.BadKPIs.args"><code class="docutils literal notranslate">args</span></code></a></li>
+<li><a class="reference internal" href="#cornflow_client.constants.BadKPIs.with_traceback"><code class="docutils literal notranslate">with_traceback()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -445,6 +460,28 @@ data-aria-dark="Switch to auto color mode">
 </dd></dl>
 
 <dl class="py property">
+<dt class="sig sig-object py" id="cornflow_client.core.application.ApplicationCore.default_args_checks_kpis">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">default_args_checks_kpis</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.default_args_checks_kpis" title="Link to this definition">¶</a></dt>
+<dd><p>Optional property</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the default args for the DAG for checks and kpis generation</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cornflow_client.core.application.ApplicationCore.extra_args_checks_kpis">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">extra_args_checks_kpis</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.extra_args_checks_kpis" title="Link to this definition">¶</a></dt>
+<dd><p>Optional property</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dictionary with optional arguments for the DAG for checks and kpis generation</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="cornflow_client.core.application.ApplicationCore.instance">
 <span class="property"><span class="k"><span class="pre">abstract</span></span><span class="w"> </span><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">instance</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cornflow_client.core.instance.InstanceCore" title="cornflow_client.core.instance.InstanceCore"><span class="pre">InstanceCore</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.instance" title="Link to this definition">¶</a></dt>
 <dd><p>Mandatory property</p>
@@ -514,7 +551,7 @@ if each element in the list is:</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.application.ApplicationCore.solve">
-<span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solution_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.solve" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solution_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.solve" title="Link to this definition">¶</a></dt>
 <dd><p>Solves the problem instance using the specified configuration.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -531,12 +568,12 @@ if each element in the list is:</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="cornflow_client.core.application.ApplicationCore.check">
-<span class="sig-name descname"><span class="pre">check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instance_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solution_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.check" title="Link to this definition">¶</a></dt>
-<dd><p>Checks the instance and solution data
+<dt class="sig sig-object py" id="cornflow_client.core.application.ApplicationCore.check_generate_kpis">
+<span class="sig-name descname"><span class="pre">check_generate_kpis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instance_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solution_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cornflow_client.core.application.ApplicationCore.check_generate_kpis" title="Link to this definition">¶</a></dt>
+<dd><p>Checks the instance and solution data and generates KPIs
 :param instance_data: json data of the instance
 :param solution_data: json data of the solution
-:return: instance checks, solution checks, log</p>
+:return: instance checks, solution checks, kpis, log</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1019,6 +1056,18 @@ For example: [{‘index’: 4, ‘value’: 5}, {‘index’: 7, ‘value’: 8}
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.core.experiment.ExperimentCore.get_kpis">
+<span class="sig-name descname"><span class="pre">get_kpis</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.get_kpis" title="Link to this definition">¶</a></dt>
+<dd><p>Method that generates KPIs for the solution and validates the result against the schema_kpis</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.core.experiment.ExperimentCore.kpis_checks">
+<span class="sig-name descname"><span class="pre">kpis_checks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.kpis_checks" title="Link to this definition">¶</a></dt>
+<dd><p>Method that checks the solution with the KPIs and validates the result against the schema_checks.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.core.experiment.ExperimentCore.check">
 <span class="sig-name descname"><span class="pre">check</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.check" title="Link to this definition">¶</a></dt>
 <dd><p>Method that runs all the checks for the solution.</p>
@@ -1055,6 +1104,58 @@ type.</p>
 <dt>A dictionary representation of the json-schema for the dictionary returned by</dt><dd><p>the method ExperimentCore.check_solution()</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.core.experiment.ExperimentCore.generate_kpis">
+<span class="sig-name descname"><span class="pre">generate_kpis</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.generate_kpis" title="Link to this definition">¶</a></dt>
+<dd><p>Method that generates KPIs for the solution. By default, launches all methods
+starting with <a href="#id2"><span class="problematic" id="id3">kpis_</span></a> and returns the result in a dictionary.</p>
+<p>This method can be overridden by the user to modify the behaviour of the KPI generation
+if wanted.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a dictionary of lists of dictionaries. Each list represents a table of KPIs.
+Each of the elements inside represents one row of that particular table.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.core.experiment.ExperimentCore.check_kpis">
+<span class="sig-name descname"><span class="pre">check_kpis</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.check_kpis" title="Link to this definition">¶</a></dt>
+<dd><p>Method that checks the solution with the KPIs. By default, it does not perform any check.
+This method can be overridden by the user to modify the behavior of the KPI checks
+if wanted.
+:return: a dictionary of lists of dictionaries. Each list represents a table of KPI checks.
+Each of the elements inside represents one row of that particular table.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.core.experiment.ExperimentCore.kpis_to_dict">
+<span class="sig-name descname"><span class="pre">kpis_to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.kpis_to_dict" title="Link to this definition">¶</a></dt>
+<dd><p>Method that transforms the KPIs generated in self.kpis into a dictionary. By default, it returns self.kpis.
+This method can be overridden by the user to modify the behavior of the KPI transformation
+if wanted.
+:return: a dictionary with the KPIs. The format of the dictionary should be validated against self.schema_kpis</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.core.experiment.ExperimentCore.generate_output_files">
+<span class="sig-name descname"><span class="pre">generate_output_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instance_checks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instance_has_errors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solution_checks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solution_has_errors</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">BytesIO</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#cornflow_client.core.experiment.ExperimentCore.generate_output_files" title="Link to this definition">¶</a></dt>
+<dd><p>Method that generates the output files.
+This method can be overriden by the user.
+:return: a dictionary, where:
+- the keys are the names of the files or directories
+- the values are either:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>an io.BytesIO instance</p></li>
+<li><p>an io.StringIO instance</p></li>
+<li><p>a string representing an absolute path to a file or directory.</p></li>
+</ul>
+</div></blockquote>
+<p>If the values are paths, the files or directories will be deleted after generating the zip file.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1492,6 +1593,31 @@ add a note to the exception</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="cornflow_client.constants.BadSolutionChecks.with_traceback">
 <span class="sig-name descname"><span class="pre">with_traceback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.BadSolutionChecks.with_traceback" title="Link to this definition">¶</a></dt>
+<dd><p>Exception.with_traceback(tb) –
+set self.__traceback__ to tb and return self.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="cornflow_client.constants.BadKPIs">
+<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cornflow_client.constants.</span></span><span class="sig-name descname"><span class="pre">BadKPIs</span></span><a class="headerlink" href="#cornflow_client.constants.BadKPIs" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.constants.BadKPIs.add_note">
+<span class="sig-name descname"><span class="pre">add_note</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.BadKPIs.add_note" title="Link to this definition">¶</a></dt>
+<dd><p>Exception.add_note(note) –
+add a note to the exception</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow_client.constants.BadKPIs.args">
+<span class="sig-name descname"><span class="pre">args</span></span><a class="headerlink" href="#cornflow_client.constants.BadKPIs.args" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow_client.constants.BadKPIs.with_traceback">
+<span class="sig-name descname"><span class="pre">with_traceback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cornflow_client.constants.BadKPIs.with_traceback" title="Link to this definition">¶</a></dt>
 <dd><p>Exception.with_traceback(tb) –
 set self.__traceback__ to tb and return self.</p>
 </dd></dl>
@@ -1948,5 +2074,5 @@ table3: {config1: a, config2: b},
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/design-tabs.js?v=f930bc37"></script>
-      <script src="../_static/shibuya.js?v=cac61aee"></script></body>
+      <script src="../_static/shibuya.js?v=50760d75"></script></body>
 </html>

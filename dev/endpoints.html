@@ -6,7 +6,7 @@
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=ad592e98" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=44020203" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=9454f7d5" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,7 +18,8 @@
   --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
 }
 </style>
-    <meta property="og:type" content="website"/><meta property="og:title" content="Main endpoints"/>
+    
+  <meta property="og:type" content="website"/><meta property="og:title" content="Main endpoints"/>
     <meta name="twitter:card" content="summary"/>
   </head>
 <body><div class="sy-head">
@@ -229,6 +230,22 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionLogEndpoint"><code class="docutils literal notranslate"><span class="pre">ExecutionLogEndpoint</span></code></a><ul>
 <li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionLogEndpoint.get"><code class="docutils literal notranslate">get()</span></code></a></li>
 <li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionLogEndpoint.methods"><code class="docutils literal notranslate">methods</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionFilesEndpointMixin"><code class="docutils literal notranslate"><span class="pre">ExecutionFilesEndpointMixin</span></code></a><ul>
+<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionFilesEndpointMixin.ROLES_WITH_ACCESS"><code class="docutils literal notranslate">ROLES_WITH_ACCESS</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionFilesEndpointMixin.check_execution_files_active"><code class="docutils literal notranslate">check_execution_files_active()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionFilesEndpoint"><code class="docutils literal notranslate"><span class="pre">ExecutionFilesEndpoint</span></code></a><ul>
+<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionFilesEndpoint.get"><code class="docutils literal notranslate">get()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionFilesEndpoint.post"><code class="docutils literal notranslate">post()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionFilesEndpoint.methods"><code class="docutils literal notranslate">methods</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionFilesCleanupEndpoint"><code class="docutils literal notranslate"><span class="pre">ExecutionFilesCleanupEndpoint</span></code></a><ul>
+<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionFilesCleanupEndpoint.delete"><code class="docutils literal notranslate">delete()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionFilesCleanupEndpoint.methods"><code class="docutils literal notranslate">methods</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#cornflow.endpoints.execution.map_run_state"><code class="docutils literal notranslate"><span class="pre">map_run_state()</span></code></a></li>
@@ -1031,6 +1048,69 @@ the data of the execution) and an integer with the HTTP status code.</p>
 
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="cornflow.endpoints.execution.ExecutionFilesEndpointMixin">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cornflow.endpoints.execution.</span></span><span class="sig-name descname"><span class="pre">ExecutionFilesEndpointMixin</span></span><a class="headerlink" href="#cornflow.endpoints.execution.ExecutionFilesEndpointMixin" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cornflow.endpoints.execution.ExecutionDetailsEndpointBase" title="cornflow.endpoints.execution.ExecutionDetailsEndpointBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExecutionDetailsEndpointBase</span></code></a></p>
+<p>Endpoint used to handle the execution files.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow.endpoints.execution.ExecutionFilesEndpointMixin.ROLES_WITH_ACCESS">
+<span class="sig-name descname"><span class="pre">ROLES_WITH_ACCESS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[4]</span></span><a class="headerlink" href="#cornflow.endpoints.execution.ExecutionFilesEndpointMixin.ROLES_WITH_ACCESS" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow.endpoints.execution.ExecutionFilesEndpointMixin.check_execution_files_active">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">check_execution_files_active</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.execution.ExecutionFilesEndpointMixin.check_execution_files_active" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cornflow.endpoints.execution.ExecutionFilesEndpoint">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cornflow.endpoints.execution.</span></span><span class="sig-name descname"><span class="pre">ExecutionFilesEndpoint</span></span><a class="headerlink" href="#cornflow.endpoints.execution.ExecutionFilesEndpoint" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cornflow.endpoints.execution.ExecutionFilesEndpointMixin" title="cornflow.endpoints.execution.ExecutionFilesEndpointMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExecutionFilesEndpointMixin</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow.endpoints.execution.ExecutionFilesEndpoint.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.execution.ExecutionFilesEndpoint.get" title="Link to this definition">¶</a></dt>
+<dd><p>If execution files are not enabled, return an Exception</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow.endpoints.execution.ExecutionFilesEndpoint.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.execution.ExecutionFilesEndpoint.post" title="Link to this definition">¶</a></dt>
+<dd><p>If execution files are not enabled, return an Exception</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow.endpoints.execution.ExecutionFilesEndpoint.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">Collection</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'GET',</span> <span class="pre">'POST'}</span></span><a class="headerlink" href="#cornflow.endpoints.execution.ExecutionFilesEndpoint.methods" title="Link to this definition">¶</a></dt>
+<dd><p>The methods this view is registered for. Uses the same default
+(<code class="docutils literal notranslate"><span class="pre">[&quot;GET&quot;,</span> <span class="pre">&quot;HEAD&quot;,</span> <span class="pre">&quot;OPTIONS&quot;]</span></code>) as <code class="docutils literal notranslate"><span class="pre">route</span></code> and
+<code class="docutils literal notranslate"><span class="pre">add_url_rule</span></code> by default.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cornflow.endpoints.execution.ExecutionFilesCleanupEndpoint">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cornflow.endpoints.execution.</span></span><span class="sig-name descname"><span class="pre">ExecutionFilesCleanupEndpoint</span></span><a class="headerlink" href="#cornflow.endpoints.execution.ExecutionFilesCleanupEndpoint" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cornflow.endpoints.execution.ExecutionFilesEndpointMixin" title="cornflow.endpoints.execution.ExecutionFilesEndpointMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExecutionFilesEndpointMixin</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cornflow.endpoints.execution.ExecutionFilesCleanupEndpoint.delete">
+<span class="sig-name descname"><span class="pre">delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.execution.ExecutionFilesCleanupEndpoint.delete" title="Link to this definition">¶</a></dt>
+<dd><p>If execution files are not enabled, return an Exception</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cornflow.endpoints.execution.ExecutionFilesCleanupEndpoint.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">Collection</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'DELETE'}</span></span><a class="headerlink" href="#cornflow.endpoints.execution.ExecutionFilesCleanupEndpoint.methods" title="Link to this definition">¶</a></dt>
+<dd><p>The methods this view is registered for. Uses the same default
+(<code class="docutils literal notranslate"><span class="pre">[&quot;GET&quot;,</span> <span class="pre">&quot;HEAD&quot;,</span> <span class="pre">&quot;OPTIONS&quot;]</span></code>) as <code class="docutils literal notranslate"><span class="pre">route</span></code> and
+<code class="docutils literal notranslate"><span class="pre">add_url_rule</span></code> by default.</p>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="cornflow.endpoints.execution.map_run_state">
 <span class="sig-prename descclassname"><span class="pre">cornflow.endpoints.execution.</span></span><span class="sig-name descname"><span class="pre">map_run_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orch_TYPE</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cornflow.endpoints.execution.map_run_state" title="Link to this definition">¶</a></dt>
@@ -1272,5 +1352,5 @@ Sends a temporary password and updates the database.
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/design-tabs.js?v=f930bc37"></script>
-      <script src="../_static/shibuya.js?v=cac61aee"></script></body>
+      <script src="../_static/shibuya.js?v=50760d75"></script></body>
 </html>

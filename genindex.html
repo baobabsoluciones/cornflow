@@ -6,7 +6,7 @@
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="_static/pygments.css?v=ad592e98" />
-    <link rel="stylesheet" type="text/css" href="_static/shibuya.css?v=44020203" />
+    <link rel="stylesheet" type="text/css" href="_static/shibuya.css?v=9454f7d5" />
     <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -65,6 +65,7 @@ data-aria-dark="Switch to auto color mode">
  | <a href="#G"><strong>G</strong></a>
  | <a href="#I"><strong>I</strong></a>
  | <a href="#J"><strong>J</strong></a>
+ | <a href="#K"><strong>K</strong></a>
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
@@ -93,6 +94,8 @@ data-aria-dark="Switch to auto color mode">
         <li><a href="dev/cornflow_client.html#cornflow_client.constants.BadInstance.add_note">(cornflow_client.constants.BadInstance method)</a>
 </li>
         <li><a href="dev/cornflow_client.html#cornflow_client.constants.BadInstanceChecks.add_note">(cornflow_client.constants.BadInstanceChecks method)</a>
+</li>
+        <li><a href="dev/cornflow_client.html#cornflow_client.constants.BadKPIs.add_note">(cornflow_client.constants.BadKPIs method)</a>
 </li>
         <li><a href="dev/cornflow_client.html#cornflow_client.constants.BadSolution.add_note">(cornflow_client.constants.BadSolution method)</a>
 </li>
@@ -132,6 +135,8 @@ data-aria-dark="Switch to auto color mode">
 </li>
         <li><a href="dev/cornflow_client.html#cornflow_client.constants.BadInstanceChecks.args">(cornflow_client.constants.BadInstanceChecks attribute)</a>
 </li>
+        <li><a href="dev/cornflow_client.html#cornflow_client.constants.BadKPIs.args">(cornflow_client.constants.BadKPIs attribute)</a>
+</li>
         <li><a href="dev/cornflow_client.html#cornflow_client.constants.BadSolution.args">(cornflow_client.constants.BadSolution attribute)</a>
 </li>
         <li><a href="dev/cornflow_client.html#cornflow_client.constants.BadSolutionChecks.args">(cornflow_client.constants.BadSolutionChecks attribute)</a>
@@ -163,6 +168,8 @@ data-aria-dark="Switch to auto color mode">
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dev/cornflow_client.html#cornflow_client.constants.BadKPIs">BadKPIs</a>
+</li>
       <li><a href="dev/cornflow_client.html#cornflow_client.constants.BadSolution">BadSolution</a>
 </li>
       <li><a href="dev/cornflow_client.html#cornflow_client.constants.BadSolutionChecks">BadSolutionChecks</a>
@@ -191,17 +198,21 @@ data-aria-dark="Switch to auto color mode">
 </li>
       <li><a href="dev/other_endpoints.html#cornflow.endpoints.case.CaseToInstance">CaseToInstance (class in cornflow.endpoints.case)</a>
 </li>
-      <li><a href="dev/cornflow_client.html#cornflow_client.core.application.ApplicationCore.check">check() (cornflow_client.core.application.ApplicationCore method)</a>
+      <li><a href="dev/cornflow_client.html#cornflow_client.core.experiment.ExperimentCore.check">check() (cornflow_client.core.experiment.ExperimentCore method)</a>
 
       <ul>
-        <li><a href="dev/cornflow_client.html#cornflow_client.core.experiment.ExperimentCore.check">(cornflow_client.core.experiment.ExperimentCore method)</a>
-</li>
         <li><a href="dev/cornflow_client.html#cornflow_client.core.instance.InstanceCore.check">(cornflow_client.core.instance.InstanceCore method)</a>
 </li>
       </ul></li>
+      <li><a href="dev/endpoints.html#cornflow.endpoints.execution.ExecutionFilesEndpointMixin.check_execution_files_active">check_execution_files_active() (cornflow.endpoints.execution.ExecutionFilesEndpointMixin static method)</a>
+</li>
       <li><a href="dev/cornflow_client.html#cornflow_client.schema.tools.check_fk">check_fk() (in module cornflow_client.schema.tools)</a>
 </li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.core.application.ApplicationCore.check_generate_kpis">check_generate_kpis() (cornflow_client.core.application.ApplicationCore method)</a>
+</li>
       <li><a href="dev/models.html#cornflow.models.UserModel.check_hash">check_hash() (cornflow.models.UserModel method)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.core.experiment.ExperimentCore.check_kpis">check_kpis() (cornflow_client.core.experiment.ExperimentCore method)</a>
 </li>
       <li><a href="dev/endpoints.html#cornflow.endpoints.login.check_last_password_change">check_last_password_change() (in module cornflow.endpoints.login)</a>
 </li>
@@ -259,6 +270,8 @@ data-aria-dark="Switch to auto color mode">
         <li><a href="dev/endpoints.html#module-cornflow.endpoints.signup">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     cornflow.endpoints.user
 
@@ -266,8 +279,6 @@ data-aria-dark="Switch to auto color mode">
         <li><a href="dev/endpoints.html#module-cornflow.endpoints.user">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     cornflow_client.constants
 
@@ -390,10 +401,14 @@ data-aria-dark="Switch to auto color mode">
 </li>
       <li><a href="dev/cornflow_client.html#cornflow_client.core.application.ApplicationCore.default_args">default_args (cornflow_client.core.application.ApplicationCore property)</a>
 </li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.core.application.ApplicationCore.default_args_checks_kpis">default_args_checks_kpis (cornflow_client.core.application.ApplicationCore property)</a>
+</li>
       <li><a href="dev/other_endpoints.html#cornflow.endpoints.case.CaseDetailsEndpoint.delete">delete() (cornflow.endpoints.case.CaseDetailsEndpoint method)</a>
 
       <ul>
         <li><a href="dev/endpoints.html#cornflow.endpoints.execution.ExecutionDetailsEndpoint.delete">(cornflow.endpoints.execution.ExecutionDetailsEndpoint method)</a>
+</li>
+        <li><a href="dev/endpoints.html#cornflow.endpoints.execution.ExecutionFilesCleanupEndpoint.delete">(cornflow.endpoints.execution.ExecutionFilesCleanupEndpoint method)</a>
 </li>
         <li><a href="dev/endpoints.html#cornflow.endpoints.instance.InstanceDetailsEndpoint.delete">(cornflow.endpoints.instance.InstanceDetailsEndpoint method)</a>
 </li>
@@ -436,10 +451,16 @@ data-aria-dark="Switch to auto color mode">
 </li>
       <li><a href="dev/endpoints.html#cornflow.endpoints.execution.ExecutionEndpoint">ExecutionEndpoint (class in cornflow.endpoints.execution)</a>
 </li>
-      <li><a href="dev/endpoints.html#cornflow.endpoints.execution.ExecutionLogEndpoint">ExecutionLogEndpoint (class in cornflow.endpoints.execution)</a>
+      <li><a href="dev/endpoints.html#cornflow.endpoints.execution.ExecutionFilesCleanupEndpoint">ExecutionFilesCleanupEndpoint (class in cornflow.endpoints.execution)</a>
+</li>
+      <li><a href="dev/endpoints.html#cornflow.endpoints.execution.ExecutionFilesEndpoint">ExecutionFilesEndpoint (class in cornflow.endpoints.execution)</a>
+</li>
+      <li><a href="dev/endpoints.html#cornflow.endpoints.execution.ExecutionFilesEndpointMixin">ExecutionFilesEndpointMixin (class in cornflow.endpoints.execution)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dev/endpoints.html#cornflow.endpoints.execution.ExecutionLogEndpoint">ExecutionLogEndpoint (class in cornflow.endpoints.execution)</a>
+</li>
       <li><a href="dev/models.html#cornflow.models.ExecutionModel">ExecutionModel (class in cornflow.models)</a>
 </li>
       <li><a href="dev/endpoints.html#cornflow.endpoints.execution.ExecutionRelaunchEndpoint">ExecutionRelaunchEndpoint (class in cornflow.endpoints.execution)</a>
@@ -451,6 +472,8 @@ data-aria-dark="Switch to auto color mode">
       <li><a href="dev/cornflow_client.html#cornflow_client.schema.manager.SchemaManager.export_schema_dict">export_schema_dict() (cornflow_client.schema.manager.SchemaManager method)</a>
 </li>
       <li><a href="dev/cornflow_client.html#cornflow_client.core.application.ApplicationCore.extra_args">extra_args (cornflow_client.core.application.ApplicationCore property)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.core.application.ApplicationCore.extra_args_checks_kpis">extra_args_checks_kpis (cornflow_client.core.application.ApplicationCore property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -480,6 +503,10 @@ data-aria-dark="Switch to auto color mode">
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dev/cornflow_client.html#cornflow_client.core.experiment.ExperimentCore.generate_kpis">generate_kpis() (cornflow_client.core.experiment.ExperimentCore method)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.core.experiment.ExperimentCore.generate_output_files">generate_output_files() (cornflow_client.core.experiment.ExperimentCore method)</a>
+</li>
       <li><a href="dev/models.html#cornflow.models.UserModel.generate_random_password">generate_random_password() (cornflow.models.UserModel static method)</a>
 </li>
       <li><a href="dev/cornflow_client.html#cornflow_client.core.instance_solution.InstanceSolutionCore.generate_schema">generate_schema() (cornflow_client.core.instance_solution.InstanceSolutionCore method)</a>
@@ -502,6 +529,8 @@ data-aria-dark="Switch to auto color mode">
         <li><a href="dev/endpoints.html#cornflow.endpoints.execution.ExecutionDetailsEndpoint.get">(cornflow.endpoints.execution.ExecutionDetailsEndpoint method)</a>
 </li>
         <li><a href="dev/endpoints.html#cornflow.endpoints.execution.ExecutionEndpoint.get">(cornflow.endpoints.execution.ExecutionEndpoint method)</a>
+</li>
+        <li><a href="dev/endpoints.html#cornflow.endpoints.execution.ExecutionFilesEndpoint.get">(cornflow.endpoints.execution.ExecutionFilesEndpoint method)</a>
 </li>
         <li><a href="dev/endpoints.html#cornflow.endpoints.execution.ExecutionLogEndpoint.get">(cornflow.endpoints.execution.ExecutionLogEndpoint method)</a>
 </li>
@@ -548,10 +577,10 @@ data-aria-dark="Switch to auto color mode">
 </li>
       <li><a href="dev/cornflow_client.html#cornflow_client.core.instance_solution.InstanceSolutionCore.get_datetimesec_string_from_ts">get_datetimesec_string_from_ts() (cornflow_client.core.instance_solution.InstanceSolutionCore static method)</a>
 </li>
-      <li><a href="dev/cornflow_client.html#cornflow_client.core.application.ApplicationCore.get_default_solver_name">get_default_solver_name() (cornflow_client.core.application.ApplicationCore method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dev/cornflow_client.html#cornflow_client.core.application.ApplicationCore.get_default_solver_name">get_default_solver_name() (cornflow_client.core.application.ApplicationCore method)</a>
+</li>
       <li><a href="dev/cornflow_client.html#cornflow_client.schema.dictSchema.DictSchema.get_empty_schema">get_empty_schema() (cornflow_client.schema.dictSchema.DictSchema static method)</a>
 
       <ul>
@@ -567,6 +596,8 @@ data-aria-dark="Switch to auto color mode">
       <li><a href="dev/cornflow_client.html#cornflow_client.core.instance_solution.InstanceSolutionCore.get_hour_from_ts">get_hour_from_ts() (cornflow_client.core.instance_solution.InstanceSolutionCore static method)</a>
 </li>
       <li><a href="dev/cornflow_client.html#cornflow_client.schema.manager.SchemaManager.get_jsonschema">get_jsonschema() (cornflow_client.schema.manager.SchemaManager method)</a>
+</li>
+      <li><a href="dev/cornflow_client.html#cornflow_client.core.experiment.ExperimentCore.get_kpis">get_kpis() (cornflow_client.core.experiment.ExperimentCore method)</a>
 </li>
       <li><a href="dev/cornflow_client.html#cornflow_client.core.instance_solution.InstanceSolutionCore.get_next_hour">get_next_hour() (cornflow_client.core.instance_solution.InstanceSolutionCore static method)</a>
 </li>
@@ -671,6 +702,18 @@ data-aria-dark="Switch to auto color mode">
   </ul></td>
 </tr></table>
 
+<h2 id="K">K</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dev/cornflow_client.html#cornflow_client.core.experiment.ExperimentCore.kpis_checks">kpis_checks() (cornflow_client.core.experiment.ExperimentCore method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dev/cornflow_client.html#cornflow_client.core.experiment.ExperimentCore.kpis_to_dict">kpis_to_dict() (cornflow_client.core.experiment.ExperimentCore method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -734,6 +777,10 @@ data-aria-dark="Switch to auto color mode">
         <li><a href="dev/endpoints.html#cornflow.endpoints.execution.ExecutionDetailsEndpoint.methods">(cornflow.endpoints.execution.ExecutionDetailsEndpoint attribute)</a>
 </li>
         <li><a href="dev/endpoints.html#cornflow.endpoints.execution.ExecutionEndpoint.methods">(cornflow.endpoints.execution.ExecutionEndpoint attribute)</a>
+</li>
+        <li><a href="dev/endpoints.html#cornflow.endpoints.execution.ExecutionFilesCleanupEndpoint.methods">(cornflow.endpoints.execution.ExecutionFilesCleanupEndpoint attribute)</a>
+</li>
+        <li><a href="dev/endpoints.html#cornflow.endpoints.execution.ExecutionFilesEndpoint.methods">(cornflow.endpoints.execution.ExecutionFilesEndpoint attribute)</a>
 </li>
         <li><a href="dev/endpoints.html#cornflow.endpoints.execution.ExecutionLogEndpoint.methods">(cornflow.endpoints.execution.ExecutionLogEndpoint attribute)</a>
 </li>
@@ -872,6 +919,8 @@ data-aria-dark="Switch to auto color mode">
 </li>
         <li><a href="dev/endpoints.html#cornflow.endpoints.execution.ExecutionEndpoint.post">(cornflow.endpoints.execution.ExecutionEndpoint method)</a>
 </li>
+        <li><a href="dev/endpoints.html#cornflow.endpoints.execution.ExecutionFilesEndpoint.post">(cornflow.endpoints.execution.ExecutionFilesEndpoint method)</a>
+</li>
         <li><a href="dev/endpoints.html#cornflow.endpoints.execution.ExecutionRelaunchEndpoint.post">(cornflow.endpoints.execution.ExecutionRelaunchEndpoint method)</a>
 </li>
         <li><a href="dev/endpoints.html#cornflow.endpoints.instance.InstanceEndpoint.post">(cornflow.endpoints.instance.InstanceEndpoint method)</a>
@@ -951,6 +1000,8 @@ data-aria-dark="Switch to auto color mode">
         <li><a href="dev/auxiliar_endpoints.html#cornflow.endpoints.dag.DeployedDagDetailEndpoint.ROLES_WITH_ACCESS">(cornflow.endpoints.dag.DeployedDagDetailEndpoint attribute)</a>
 </li>
         <li><a href="dev/auxiliar_endpoints.html#cornflow.endpoints.dag.DeployedDAGEndpoint.ROLES_WITH_ACCESS">(cornflow.endpoints.dag.DeployedDAGEndpoint attribute)</a>
+</li>
+        <li><a href="dev/endpoints.html#cornflow.endpoints.execution.ExecutionFilesEndpointMixin.ROLES_WITH_ACCESS">(cornflow.endpoints.execution.ExecutionFilesEndpointMixin attribute)</a>
 </li>
         <li><a href="dev/endpoints.html#cornflow.endpoints.signup.SignUpEndpoint.ROLES_WITH_ACCESS">(cornflow.endpoints.signup.SignUpEndpoint attribute)</a>
 </li>
@@ -1118,6 +1169,8 @@ data-aria-dark="Switch to auto color mode">
 </li>
         <li><a href="dev/cornflow_client.html#cornflow_client.constants.BadInstanceChecks.with_traceback">(cornflow_client.constants.BadInstanceChecks method)</a>
 </li>
+        <li><a href="dev/cornflow_client.html#cornflow_client.constants.BadKPIs.with_traceback">(cornflow_client.constants.BadKPIs method)</a>
+</li>
         <li><a href="dev/cornflow_client.html#cornflow_client.constants.BadSolution.with_traceback">(cornflow_client.constants.BadSolution method)</a>
 </li>
         <li><a href="dev/cornflow_client.html#cornflow_client.constants.BadSolutionChecks.with_traceback">(cornflow_client.constants.BadSolutionChecks method)</a>
@@ -1158,5 +1211,5 @@ data-aria-dark="Switch to auto color mode">
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="_static/design-tabs.js?v=f930bc37"></script>
-      <script src="_static/shibuya.js?v=cac61aee"></script></body>
+      <script src="_static/shibuya.js?v=50760d75"></script></body>
 </html>
