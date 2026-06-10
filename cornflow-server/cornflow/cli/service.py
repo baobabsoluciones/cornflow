@@ -419,7 +419,7 @@ def _register_ssh_host(host):
         add_host = f"ssh-keyscan {host} >> {MAIN_WD}/.ssh/known_hosts"
         config_ssh_host = f"echo Host {host} >> {MAIN_WD}/.ssh/config"
         config_ssh_key = (
-            'echo "   IdentityFile {MAIN_WD}/.ssh/id_rsa" >> {MAIN_WD}/.ssh/config'
+            f'echo "   IdentityFile {MAIN_WD}/.ssh/id_rsa" >> {MAIN_WD}/.ssh/config'
         )
         os.system(add_host)
         os.system(config_ssh_host)
