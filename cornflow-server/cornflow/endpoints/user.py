@@ -258,6 +258,13 @@ class RecoverPassword(BaseMetaResource):
         :rtype: Tuple(dict, integer)
         """
 
+        if not current_app.config.get("PASSWORD_RECOVERY_ENABLED"):
+            raise EndpointNotImplemented(
+                "Password recovery is disabled on this deployment.",
+                log_txt="Password recovery request rejected: feature is disabled "
+                "(PASSWORD_RECOVERY_ENABLED is not set).",
+            )
+
         sender = current_app.config["SERVICE_EMAIL_ADDRESS"]
         password = current_app.config["SERVICE_EMAIL_PASSWORD"]
         smtp_server = current_app.config["SERVICE_EMAIL_SERVER"]
