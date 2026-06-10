@@ -31,21 +31,16 @@ def check_password_pattern(password: str):
     # TODO: handle better None passwords that can be found when using ldap
     if password is None:
         return True, None
-    if len(password) < 5:
-        return False, "Password must contain at least 5 characters."
-    if password.islower() or password.isupper():
-        return False, "Password must contain uppercase and lowercase letters."
-    if len(list(filter(str.isdigit, password))) == 0:
-        return (
-            False,
-            "Password must contain at least one number and one special character.",
-        )
-
-    if len(list(filter(is_special_character, password))) == 0:
-        return (
-            False,
-            "Password must contain at least one number and one special character.",
-        )
+    if len(password) < 12:
+        return False, "Password must contain at least 12 characters."
+    if not any(char.islower() for char in password):
+        return False, "Password must contain at least one lowercase letter."
+    if not any(char.isupper() for char in password):
+        return False, "Password must contain at least one uppercase letter."
+    if not any(char.isdigit() for char in password):
+        return False, "Password must contain at least one number."
+    if not any(is_special_character(char) for char in password):
+        return False, "Password must contain at least one special character."
 
     return True, None
 
