@@ -44,7 +44,6 @@ from cornflow.shared.const import (
     USER_ACCESS_ALL_OBJECTS_NO,
 )
 from cornflow.shared import db
-from cryptography.fernet import Fernet
 from flask_migrate import Migrate, upgrade
 
 MAIN_WD = "/usr/src/app"
@@ -175,7 +174,13 @@ def _setup_environment_variables():
     # Cornflow app config
     os.environ.setdefault("cornflow_url", "http://cornflow:5000")
     os.environ["FLASK_APP"] = "cornflow.app"
-    os.environ["SECRET_KEY"] = os.getenv("FERNET_KEY", Fernet.generate_key().decode())
+    fernet_key = os.getenv("FERNET_KEY")
+    if not fernet_key:
+        sys.exit(
+            "FATAL: FERNET_KEY must be set. Refusing to start with an ephemeral "
+            "signing key, which would invalidate every issued token on restart."
+        )
+    os.environ["SECRET_KEY"] = fernet_key
 
     # Cornflow db defaults
     os.environ["DEFAULT_POSTGRES"] = "1"
