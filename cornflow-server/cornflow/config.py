@@ -30,8 +30,8 @@ class DefaultConfig(object):
     DEFAULT_ROLE = int(os.getenv("DEFAULT_ROLE", PLANNER_ROLE))
     CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*")
     SQLALCHEMY_TRACK_MODIFICATIONS = True
-    DEBUG = True
-    TESTING = True
+    DEBUG = False
+    TESTING = False
     LOG_LEVEL = int(os.getenv("LOG_LEVEL", 20))
     SIGNUP_ACTIVATED = int(os.getenv("SIGNUP_ACTIVATED", SIGNUP_WITH_AUTH))
     CORNFLOW_SERVICE_USER = os.getenv("CORNFLOW_SERVICE_USER", "service_user")
@@ -134,6 +134,7 @@ class Development(DefaultConfig):
     """
 
     ENV = "development"
+    DEBUG = True
 
 
 class Testing(DefaultConfig):

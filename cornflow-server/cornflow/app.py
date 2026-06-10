@@ -230,6 +230,6 @@ def register_dag_permissions(open_deployment, verbose):
 
 
 if __name__ == "__main__":
-    environment_name = os.getenv("FLASK_ENV", "development")
+    environment_name = os.getenv("FLASK_ENV", "production")
     flask_app = create_app(environment_name)
     flask_app.run()
