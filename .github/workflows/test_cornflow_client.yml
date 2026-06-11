@@ -103,12 +103,16 @@ jobs:
           # Instalar cliente y dags desde las carpetas locales del checkout
           uv pip install --python afvenv/bin/python -e ../libs/client
           uv pip install --python afvenv/bin/python -e ../cornflow-dags
-          
-          afvenv/bin/airflow db init
-          afvenv/bin/airflow users create -u admin -f admin -l admin -r Admin -p admin -e admin@example.org
-          ./afvenv/bin/airflow dags reserialize
-          afvenv/bin/airflow webserver -p 8080 &
-          afvenv/bin/airflow scheduler &
+
+          # Activar el venv: el SequentialExecutor del scheduler lanza
+          # subprocesos "airflow tasks run ..." que resuelven el binario por PATH
+          source afvenv/bin/activate
+
+          airflow db init
+          airflow users create -u admin -f admin -l admin -r Admin -p admin -e admin@example.org
+          airflow dags reserialize
+          airflow webserver -p 8080 &
+          airflow scheduler &
         env:
           AIRFLOW__SCHEDULER__CATCHUP_BY_DEFAULT: 0
           AIRFLOW_HOME: ${{ github.workspace }}/cornflow-server/airflow_config
@@ -154,12 +158,21 @@ jobs:
           # Re-serializar justo antes del registro en Cornflow
           ./afvenv/bin/airflow dags reserialize
 
-          # Reintentar el registro por posibles carreras en el parseo inicial
-          for i in $(seq 1 5); do
-            uv run flask register_deployed_dags -r http://127.0.0.1:8080 -u admin -p admin && break
-            echo "register_deployed_dags retry $i/5"
+          # Reintentar el registro: los schemas se publican como Variables de
+          # Airflow cuando el scheduler ejecuta update_all_schemas
+          registered=0
+          for i in $(seq 1 10); do
+            if uv run flask register_deployed_dags -r http://127.0.0.1:8080 -u admin -p admin; then
+              registered=1
+              break
+            fi
+            echo "register_deployed_dags retry $i/10"
             sleep 10
           done
+          if [ "$registered" -ne 1 ]; then
+            echo "ERROR: register_deployed_dags failed after 10 attempts"
+            exit 1
+          fi
           
           # Crear usuarios y permisos
           uv run flask create_admin_user -u admin -e admin@cornflow.org -p Adminpassword1!
@@ -176,6 +189,8 @@ jobs:
           DATABASE_URL: sqlite:///${{ github.workspace }}/cornflow-server/cornflow_test.db
           AIRFLOW_HOME: ${{ github.workspace }}/cornflow-server/airflow_config
           AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: sqlite:///${{ github.workspace }}/cornflow-server/airflow_config/airflow.db
+          AIRFLOW__CORE__DAGS_FOLDER: ${{ github.workspace }}/cornflow-server/airflow_config/dags
+          AIRFLOW__CORE__LOAD_EXAMPLES: 0
           AIRFLOW_URL: http://127.0.0.1:8080
           AIRFLOW_USER: admin
           AIRFLOW_PWD: admin
