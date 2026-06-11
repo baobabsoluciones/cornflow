@@ -4,6 +4,8 @@ Unit test for the log in endpoint
 
 import json
 import logging as log
+import statistics
+import time
 from unittest import mock
 import requests
 import jwt
@@ -45,6 +47,53 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
         """
         super().test_successful_log_in()
         self.assertEqual(self.idx, self.response.json["id"])
+
+    def test_log_in_timing_no_user_enumeration(self):
+        """
+        Tests that a log in attempt with a non-existent username takes a time
+        similar to one with a wrong password for an existing user, so that
+        valid usernames can not be enumerated through response timing.
+        """
+        existing_user_payload = {
+            "username": "testname",
+            "password": "Wrongpassword1!",
+        }
+        missing_user_payload = {
+            "username": "nonexistentname",
+            "password": "Wrongpassword1!",
+        }
+
+        def time_log_in(payload):
+            start = time.perf_counter()
+            response = self.client.post(
+                LOGIN_URL,
+                data=json.dumps(payload),
+                follow_redirects=True,
+                headers={"Content-Type": "application/json"},
+            )
+            elapsed = time.perf_counter() - start
+            self.assertEqual(400, response.status_code)
+            return elapsed
+
+        # Warm-up requests so neither case pays one-time setup costs
+        time_log_in(existing_user_payload)
+        time_log_in(missing_user_payload)
+
+        repetitions = 5
+        existing_user_times = []
+        missing_user_times = []
+        for _ in range(repetitions):
+            existing_user_times.append(time_log_in(existing_user_payload))
+            missing_user_times.append(time_log_in(missing_user_payload))
+
+        median_existing = statistics.median(existing_user_times)
+        median_missing = statistics.median(missing_user_times)
+
+        # Both paths run a bcrypt hash, so their times should be comparable.
+        # Without the dummy hash on the missing-user path that case is at
+        # least an order of magnitude faster, failing this bound widely.
+        self.assertGreaterEqual(median_missing, 0.5 * median_existing)
+        self.assertGreaterEqual(median_existing, 0.5 * median_missing)
 
     @mock.patch("cornflow.endpoints.login.Auth.generate_token")
     def test_exception_on_token_generation(self, mock_generate_token):
