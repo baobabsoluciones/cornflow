@@ -303,20 +303,36 @@ wheels = [
 [[package]]
 name = "cornflow-client"
 version = "1.3.0"
-source = { registry = "https://pypi.org/simple" }
+source = { editable = "../libs/client" }
 dependencies = [
     { name = "genson" },
     { name = "jsonschema" },
     { name = "marshmallow" },
+    { name = "openpyxl" },
     { name = "ortools" },
     { name = "pulp" },
     { name = "pytups" },
     { name = "requests" },
+    { name = "tomli", marker = "python_full_version < '3.11'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/93/ac/476f9e966c0e9f8e1f656be01fd180a916bfe61e4c43de8f22e381b50ffd/cornflow_client-1.3.0.tar.gz", hash = "sha256:5865af8fb59d5f420190663779017c1d704e4b3b3e09b93fd210c3919286564e", size = 103349, upload-time = "2026-02-12T09:28:14.24Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/7f/ca/221fae711072445e3b379c9b39cb2c963e936aaffdffbe7e1a43b97ef16f/cornflow_client-1.3.0-py3-none-any.whl", hash = "sha256:3f95f32430734fddd1b3a4f0b3d0277a6af0d2379403ae9d9e861c05d5a462cf", size = 134547, upload-time = "2026-02-12T09:28:13.003Z" },
+
+[package.metadata]
+requires-dist = [
+    { name = "coverage", extras = ["toml"], marker = "extra == 'dev'", specifier = ">=7.0" },
+    { name = "genson", specifier = "==1.2.2" },
+    { name = "jsonschema", specifier = "==4.21.1" },
+    { name = "marshmallow", specifier = "==3.26.2" },
+    { name = "openpyxl", specifier = "==3.1.5" },
+    { name = "openpyxl", marker = "extra == 'excel'", specifier = "==3.1.5" },
+    { name = "ortools", specifier = "==9.8.3296" },
+    { name = "pandas", marker = "extra == 'dev'", specifier = "==2.2.0" },
+    { name = "pandas", marker = "extra == 'excel'", specifier = "==2.2.0" },
+    { name = "pulp", specifier = "==2.9.0" },
+    { name = "pytups", specifier = "==0.86.2" },
+    { name = "requests", specifier = "==2.32.4" },
+    { name = "tomli", marker = "python_full_version < '3.11'", specifier = ">=2.0" },
 ]
+provides-extras = ["dev", "excel"]
 
 [[package]]
 name = "cornflow-dags"
@@ -349,14 +365,14 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "click", specifier = "<=8.1.7" },
-    { name = "cornflow-client", specifier = ">=1.2.0" },
+    { name = "cornflow-client", editable = "../libs/client" },
     { name = "coverage", extras = ["toml"], marker = "extra == 'dev'", specifier = ">=7.0" },
     { name = "hackathonbaobab2020", extras = ["solvers"] },
     { name = "highspy", specifier = "==1.9.0" },
     { name = "matplotlib", marker = "extra == 'dev'" },
     { name = "numpy", specifier = "<2.0.0" },
     { name = "numpyencoder", marker = "extra == 'dev'" },
-    { name = "openpyxl", specifier = "<=3.1.2" },
+    { name = "openpyxl", specifier = "<=3.1.5" },
     { name = "orloge", specifier = "<=0.17.2" },
     { name = "ortools", specifier = "<=9.8.3296" },
     { name = "pandas", specifier = "<=2.2.0" },
@@ -797,14 +813,14 @@ wheels = [
 
 [[package]]
 name = "marshmallow"
-version = "3.20.2"
+version = "3.26.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "packaging" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/03/81/763717b3448e5d3a3906f27ab2ffedc9a495e8077946f54b8033967d29fd/marshmallow-3.20.2.tar.gz", hash = "sha256:4c1daff273513dc5eb24b219a8035559dc573c8f322558ef85f5438ddd1236dd", size = 185043, upload-time = "2024-01-09T21:43:21.005Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/55/79/de6c16cc902f4fc372236926b0ce2ab7845268dcc30fb2fbb7f71b418631/marshmallow-3.26.2.tar.gz", hash = "sha256:bbe2adb5a03e6e3571b573f42527c6fe926e17467833660bebd11593ab8dfd57", size = 222095, upload-time = "2025-12-22T06:53:53.309Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/57/e9/4368d49d3b462da16a3bac976487764a84dd85cef97232c7bd61f5bdedf3/marshmallow-3.20.2-py3-none-any.whl", hash = "sha256:c21d4b98fee747c130e6bc8f45c4b3199ea66bc00c12ee1f639f0aeca034d5e9", size = 49449, upload-time = "2024-01-09T21:43:18.093Z" },
+    { url = "https://files.pythonhosted.org/packages/be/2f/5108cb3ee4ba6501748c4908b908e55f42a5b66245b4cfe0c99326e1ef6e/marshmallow-3.26.2-py3-none-any.whl", hash = "sha256:013fa8a3c4c276c24d26d84ce934dc964e2aa794345a0f8c7e5a7191482c8a73", size = 50964, upload-time = "2025-12-22T06:53:51.801Z" },
 ]
 
 [[package]]
@@ -937,14 +953,14 @@ wheels = [
 
 [[package]]
 name = "openpyxl"
-version = "3.1.2"
+version = "3.1.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "et-xmlfile" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/42/e8/af028681d493814ca9c2ff8106fc62a4a32e4e0ae14602c2a98fc7b741c8/openpyxl-3.1.2.tar.gz", hash = "sha256:a6f5977418eff3b2d5500d54d9db50c8277a368436f4e4f8ddb1be3422870184", size = 185977, upload-time = "2023-03-11T16:58:38.78Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/3d/f9/88d94a75de065ea32619465d2f77b29a0469500e99012523b91cc4141cd1/openpyxl-3.1.5.tar.gz", hash = "sha256:cf0e3cf56142039133628b5acffe8ef0c12bc902d2aadd3e0fe5878dc08d1050", size = 186464, upload-time = "2024-06-28T14:03:44.161Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/6a/94/a59521de836ef0da54aaf50da6c4da8fb4072fb3053fa71f052fd9399e7a/openpyxl-3.1.2-py2.py3-none-any.whl", hash = "sha256:f91456ead12ab3c6c2e9491cf33ba6d08357d802192379bb482f1033ade496f5", size = 249985, upload-time = "2023-03-11T16:58:36.257Z" },
+    { url = "https://files.pythonhosted.org/packages/c0/da/977ded879c29cbd04de313843e76868e6e13408a94ed6b987245dc7c8506/openpyxl-3.1.5-py2.py3-none-any.whl", hash = "sha256:5282c12b107bffeef825f4617dc029afaf41d0ea60823bbb665ef3079dc79de2", size = 250910, upload-time = "2024-06-28T14:03:41.161Z" },
 ]
 
 [[package]]

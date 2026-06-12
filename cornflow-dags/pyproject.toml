@@ -29,7 +29,7 @@ dependencies = [
     "pytups<=0.86.2",
     "ortools<=9.8.3296",
     "xmltodict<=0.13.0",
-    "openpyxl<=3.1.2",
+    "openpyxl<=3.1.5",
     "pyomo<=6.7.0",
     "tsplib95<=0.7.1",
     "numpy<2.0.0",
@@ -42,6 +42,11 @@ dev = [
     "numpyencoder",
     "matplotlib",
 ]
+
+# Use the in-repo client so the locked/synced environment always matches the
+# branch being tested instead of the published PyPI release.
+[tool.uv.sources]
+cornflow-client = { path = "../libs/client", editable = true }
 
 [tool.setuptools.packages.find]
 where = ["."]
