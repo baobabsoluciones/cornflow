@@ -74,10 +74,14 @@ class CustomTestCaseLive(LiveServerTestCase):
                 "password": "Testpassword1!",
             }
         response = self.login_or_signup(data)
-        user_role = UserRoleModel({"user_id": response["id"], "role_id": role_id})
-        user_role.save()
+        user_role = UserRoleModel.query.filter_by(
+            user_id=response["id"], role_id=role_id
+        ).first()
+        if user_role is None:
+            user_role = UserRoleModel({"user_id": response["id"], "role_id": role_id})
+            user_role.save()
 
-        db.session.commit()
+            db.session.commit()
 
         return self.login_or_signup(data)["token"]
 

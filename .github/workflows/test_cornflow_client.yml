@@ -95,11 +95,11 @@ jobs:
           AIRFLOW_VERSION=2.9.1
           PYTHON_VERSION="$(afvenv/bin/python --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
           CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
-          
+
           # INSTALACIONES LOCALES (Sin Git URLs)
           uv pip install --python afvenv/bin/python "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
           uv pip install --python afvenv/bin/python orloge pulp
-          
+
           # Instalar cliente y dags desde las carpetas locales del checkout
           uv pip install --python afvenv/bin/python -e ../libs/client
           uv pip install --python afvenv/bin/python -e ../cornflow-dags
@@ -148,10 +148,10 @@ jobs:
           cd ../..
           cd cornflow-server
           uv sync --extra dev
-          
+
           # Instalar cliente local en el entorno de cornflow
           uv pip install -e ../libs/client
-          
+
           uv run flask db upgrade -d cornflow/migrations/
           uv run flask access_init
 
@@ -173,13 +173,13 @@ jobs:
             echo "ERROR: register_deployed_dags failed after 10 attempts"
             exit 1
           fi
-          
+
           # Crear usuarios y permisos
           uv run flask create_admin_user -u admin -e admin@cornflow.org -p Adminpassword1!
           uv run flask create_service_user -u airflow -e airflow@cornflow.org -p Airflow_test_password1
           uv run flask create_base_user -u user -e user@cornflow.org -p UserPassword1!
           uv run flask register_dag_permissions -o 1
-          
+
           # Arrancar servidor Cornflow
           uv run flask run -p 5050 &
           sleep 10
