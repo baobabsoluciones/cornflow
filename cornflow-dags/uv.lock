@@ -302,8 +302,8 @@ wheels = [
 
 [[package]]
 name = "cornflow-client"
-version = "1.3.0"
-source = { editable = "../libs/client" }
+version = "1.3.5"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "genson" },
     { name = "jsonschema" },
@@ -313,33 +313,17 @@ dependencies = [
     { name = "pulp" },
     { name = "pytups" },
     { name = "requests" },
-    { name = "tomli", marker = "python_full_version < '3.11'" },
 ]
-
-[package.metadata]
-requires-dist = [
-    { name = "coverage", extras = ["toml"], marker = "extra == 'dev'", specifier = ">=7.0" },
-    { name = "genson", specifier = "==1.2.2" },
-    { name = "jsonschema", specifier = "==4.21.1" },
-    { name = "marshmallow", specifier = "==3.26.2" },
-    { name = "openpyxl", specifier = "==3.1.5" },
-    { name = "openpyxl", marker = "extra == 'excel'", specifier = "==3.1.5" },
-    { name = "ortools", specifier = "==9.8.3296" },
-    { name = "pandas", marker = "extra == 'dev'", specifier = "==2.2.0" },
-    { name = "pandas", marker = "extra == 'excel'", specifier = "==2.2.0" },
-    { name = "pulp", specifier = "==2.9.0" },
-    { name = "pytups", specifier = "==0.86.2" },
-    { name = "requests", specifier = "==2.32.4" },
-    { name = "tomli", marker = "python_full_version < '3.11'", specifier = ">=2.0" },
+sdist = { url = "https://files.pythonhosted.org/packages/f7/89/86985e6f05a601b0ac40709f92fd094f404697d0dddaa7a0ddbe0d444607/cornflow_client-1.3.5.tar.gz", hash = "sha256:313b5f2872f4cf53bca61ee64098a17d9b5437f7ef6e64b3c564aaef01455434", size = 113320, upload-time = "2026-06-03T16:39:07.579Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/fb/7d/2d68cf3011573b2f4583517a21002e57a7ad6bae0af287844d0151247fdb/cornflow_client-1.3.5-py3-none-any.whl", hash = "sha256:bfe491e1b48adda005bed5d17728fc43481ec0285ccc96c7abce39d2ad8593e6", size = 145240, upload-time = "2026-06-03T16:39:06.293Z" },
 ]
-provides-extras = ["dev", "excel"]
 
 [[package]]
 name = "cornflow-dags"
 version = "1.3.0"
 source = { editable = "." }
 dependencies = [
-    { name = "click" },
     { name = "cornflow-client" },
     { name = "hackathonbaobab2020", extra = ["solvers"] },
     { name = "highspy" },
@@ -364,23 +348,22 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "click", specifier = "<=8.1.7" },
-    { name = "cornflow-client", editable = "../libs/client" },
+    { name = "cornflow-client", specifier = "==1.3.5" },
     { name = "coverage", extras = ["toml"], marker = "extra == 'dev'", specifier = ">=7.0" },
     { name = "hackathonbaobab2020", extras = ["solvers"] },
     { name = "highspy", specifier = "==1.9.0" },
     { name = "matplotlib", marker = "extra == 'dev'" },
-    { name = "numpy", specifier = "<2.0.0" },
+    { name = "numpy", specifier = "==1.26.4" },
     { name = "numpyencoder", marker = "extra == 'dev'" },
-    { name = "openpyxl", specifier = "<=3.1.5" },
-    { name = "orloge", specifier = "<=0.17.2" },
-    { name = "ortools", specifier = "<=9.8.3296" },
-    { name = "pandas", specifier = "<=2.2.0" },
-    { name = "pulp", specifier = "<=2.9.0" },
-    { name = "pyomo", specifier = "<=6.7.0" },
-    { name = "pytups", specifier = "<=0.86.2" },
-    { name = "tsplib95", specifier = "<=0.7.1" },
-    { name = "xmltodict", specifier = "<=0.13.0" },
+    { name = "openpyxl", specifier = "==3.1.5" },
+    { name = "orloge", specifier = "==0.17.2" },
+    { name = "ortools", specifier = "==9.8.3296" },
+    { name = "pandas", specifier = "==2.2.0" },
+    { name = "pulp", specifier = "==2.9.0" },
+    { name = "pyomo", specifier = "==6.7.0" },
+    { name = "pytups", specifier = "==0.86.2" },
+    { name = "tsplib95", specifier = "==0.7.1" },
+    { name = "xmltodict", specifier = "==0.13.0" },
 ]
 provides-extras = ["dev"]
 
