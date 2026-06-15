@@ -10,11 +10,21 @@ Uploading a new app / solver
 Setting the environment
 ------------------------
 
-This project requires python 3.7 or above::
+This project requires Python 3.10 or above and uses `uv` for dependency management. Dependencies are defined in ``pyproject.toml`` and locked in ``uv.lock``.
 
-    python -m venv venv
-    venv/Scripts/activate
-    pip install -r requirements.txt
+Install `uv`_ if needed, then from the project root run::
+
+    uv sync --extra dev
+
+This creates a virtual environment (``.venv``) and installs the project and dev dependencies (including coverage). To run commands inside that environment::
+
+    uv run <command>
+
+Alternatively, activate the environment manually (e.g. ``.venv\\Scripts\\activate`` on Windows, ``source .venv/bin/activate`` on Unix) and run commands as usual.
+
+.. _uv: https://docs.astral.sh/uv/
+
+Docker/Airflow use this project via ``pyproject.toml`` and ``uv.lock``: the compose mounts ``./cornflow-dags`` to ``/app/cornflow-dags`` and the init script runs ``uv sync --no-dev`` there (the image must have ``uv`` installed).
 
 Introduction
 -------------
@@ -296,4 +306,4 @@ and add a reference to your solver::
 
 Then, you can execute the unittests for your solver with the following command::
 
-    python -m unittest tests.test_dags.GraphColor
+    uv run python -m unittest tests.test_dags.GraphColor

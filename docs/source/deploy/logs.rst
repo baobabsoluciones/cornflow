@@ -63,7 +63,7 @@ If we want to view logs with a command, here things get a bit complicated since 
     [2021-05-19 17:37:27,173] {logging_mixin.py:104} INFO - looking for apps in dir=/usr/local/airflow/dags
     [2021-05-19 17:37:27,173] {logging_mixin.py:104} INFO - Files are: ['graph_coloring.py', 'update_all_schemas.py', '__init__.py', 'graph_coloring_output.json', 'hk_2020_dag.py', 'dag_timer.py', 'graph_coloring_input.json', '__pycache__', 'optim_dag.py']
     [2021-05-19 17:37:28,149] {logging_mixin.py:104} WARNING - /usr/local/airflow/.local/lib/python3.8/site-packages/hackathonbaobab2020/execution/__init__.py:7 UserWarning: To use the benchmark functions, you need to install the benchmark dependencies:
-    `pip install hackathonbaobab2020[benchmark]`
+    ``uv pip install hackathonbaobab2020[benchmark]``
     [2021-05-19 17:37:28,251] {logging_mixin.py:104} INFO - Found the following apps: ['graph_coloring', 'hk_2020_dag', 'timer', 'solve_model_dag']
     [2021-05-19 17:37:28,571] {python.py:118} INFO - Done. Returned value was: None
     [2021-05-19 17:37:28,588] {taskinstance.py:1185} INFO - Marking task as SUCCESS. dag_id=update_all_schemas, task_id=update_all_schemas, execution_date=20210518T173709, start_date=20210519T173726, end_date=20210519T173728

@@ -51,8 +51,8 @@ x-airflow-common: &airflow-common
     CORNFLOW_SERVICE_USER: cornflow
     CORNFLOW_SERVICE_PWD: cornflow1234
   volumes:
+    - ./cornflow-dags:/app/cornflow-dags
     - ./cornflow-dags/DAG:/usr/local/airflow/dags
-    - ./cornflow-dags/requirements.txt:/requirements.txt
     - ./cornflow-server/airflow_config/logs:/usr/local/airflow/logs
     - ./cornflow-server/airflow_config/plugins:/usr/local/airflow/plugins
     - ./cornflow-server/airflow_config/airflow_local_settings.py:/usr/local/airflow/config/airflow_local_settings.py

@@ -1,11 +1,20 @@
 import setuptools
+from pathlib import Path
 
-with open("README.rst") as fh:
+try:
+    import tomllib
+except ModuleNotFoundError:
+    import tomli as tomllib
+
+ROOT = Path(__file__).resolve().parent
+
+with open(ROOT / "README.rst", encoding="utf-8") as fh:
     long_description = fh.read()
 
-required = []
-with open("requirements.txt", "r") as fh:
-    required.append(fh.read().splitlines())
+with open(ROOT / "pyproject.toml", "rb") as fh:
+    pyproject_data = tomllib.load(fh)
+
+required = pyproject_data.get("project", {}).get("dependencies", [])
 
 setuptools.setup(
     name="cornflow",

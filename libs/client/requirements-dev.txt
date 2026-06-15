@@ -1,3 +1,0 @@
--r requirements.txt
-coverage
-pandas==2.2.0
