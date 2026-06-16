@@ -158,12 +158,25 @@ def _setup_environment_variables():
         os.environ["AIRFLOW_PWD"] = airflow_pwd
         os.environ["AIRFLOW_URL"] = airflow_url
     elif cornflow_backend == DATABRICKS_BACKEND:
+        required_databricks_vars = [
+            "DATABRICKS_HOST",
+            "DATABRICKS_CLIENT_SECRET",
+            "DATABRICKS_TOKEN_ENDPOINT",
+            "DATABRICKS_EP_CLUSTERS",
+            "DATABRICKS_CLIENT_ID",
+        ]
+        missing = [var for var in required_databricks_vars if not os.getenv(var)]
+        if missing:
+            sys.exit(
+                "FATAL: the Databricks backend requires the following environment "
+                f"variables to be set: {', '.join(missing)}"
+            )
         databricks_url = os.getenv("DATABRICKS_HOST")
         databricks_auth_secret = os.getenv("DATABRICKS_CLIENT_SECRET")
         databricks_token_endpoint = os.getenv("DATABRICKS_TOKEN_ENDPOINT")
         databricks_ep_clusters = os.getenv("DATABRICKS_EP_CLUSTERS")
         databricks_client_id = os.getenv("DATABRICKS_CLIENT_ID")
-        databricks_health_path = os.getenv("DATABRICKS_HEALTH_PATH")
+        databricks_health_path = os.getenv("DATABRICKS_HEALTH_PATH", "default path")
         os.environ["DATABRICKS_HEALTH_PATH"] = databricks_health_path
         os.environ["DATABRICKS_HOST"] = databricks_url
         os.environ["DATABRICKS_CLIENT_SECRET"] = databricks_auth_secret
