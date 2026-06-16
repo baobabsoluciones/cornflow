@@ -9,14 +9,12 @@ from logging.config import dictConfig
 import click
 
 # Partial imports
-from flask import Flask
+from flask import Flask, Blueprint
 from flask.cli import with_appcontext
 from flask_apispec.extension import FlaskApiSpec
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_restful import Api
-from werkzeug.exceptions import NotFound
-from werkzeug.middleware.dispatcher import DispatcherMiddleware
 
 # Module imports
 from cornflow.commands import (
@@ -84,19 +82,14 @@ def create_app(env_name="development", dataconn=None):
 
             event.listen(db.engine, "connect", _fk_pragma_on_connect)
 
-    api = Api(app)
+    # Rutas del Core bajo /cornflow/ via Blueprint
+    cornflow_bp = Blueprint("cornflow", __name__, url_prefix="/cornflow")
+    api = Api(cornflow_bp)
     for res in resources:
         api.add_resource(res["resource"], res["urls"], endpoint=res["endpoint"])
     if app.config["ALARMS_ENDPOINTS"]:
         for res in alarms_resources:
             api.add_resource(res["resource"], res["urls"], endpoint=res["endpoint"])
-
-    docs = FlaskApiSpec(app)
-    for res in resources:
-        docs.register(target=res["resource"], endpoint=res["endpoint"])
-    if app.config["ALARMS_ENDPOINTS"]:
-        for res in alarms_resources:
-            docs.register(target=res["resource"], endpoint=res["endpoint"])
 
     # Resource for the log-in
     auth_type = app.config["AUTH_TYPE"]
@@ -124,6 +117,15 @@ def create_app(env_name="development", dataconn=None):
             log_txt="Error while configuring authentication. The authentication type is not valid.",
         )
 
+    app.register_blueprint(cornflow_bp)
+
+    docs = FlaskApiSpec(app)
+    for res in resources:
+        docs.register(target=res["resource"], endpoint=res["endpoint"])
+    if app.config["ALARMS_ENDPOINTS"]:
+        for res in alarms_resources:
+            docs.register(target=res["resource"], endpoint=res["endpoint"])
+
     initialize_errorhandlers(app)
     init_compress(app)
 
@@ -137,11 +139,6 @@ def create_app(env_name="development", dataconn=None):
     app.cli.add_command(access_init)
     app.cli.add_command(register_deployed_dags)
     app.cli.add_command(register_dag_permissions)
-
-    if app.config["APPLICATION_ROOT"] != "/" and app.config["EXTERNAL_APP"] == 0:
-        app.wsgi_app = DispatcherMiddleware(
-            NotFound(), {app.config["APPLICATION_ROOT"]: app.wsgi_app}
-        )
 
     from importlib.metadata import entry_points
     for ep in entry_points(group="cornflow.plugins"):
