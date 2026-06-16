@@ -121,10 +121,10 @@ def create_app(env_name="development", dataconn=None):
 
     docs = FlaskApiSpec(app)
     for res in resources:
-        docs.register(target=res["resource"], endpoint=res["endpoint"])
+        docs.register(target=res["resource"], endpoint=res["endpoint"], blueprint="cornflow")
     if app.config["ALARMS_ENDPOINTS"]:
         for res in alarms_resources:
-            docs.register(target=res["resource"], endpoint=res["endpoint"])
+            docs.register(target=res["resource"], endpoint=res["endpoint"], blueprint="cornflow")
 
     initialize_errorhandlers(app)
     init_compress(app)
