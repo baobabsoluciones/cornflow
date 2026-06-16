@@ -102,6 +102,11 @@ class DefaultConfig(object):
     # compress config
     COMPRESS_REGISTER = False
 
+    # Password recovery endpoint. Disabled by default: when enabled, the current
+    # endpoint resets the user's password on an unauthenticated request, which
+    # allows account-lockout abuse. Keep off until the token-based flow lands.
+    PASSWORD_RECOVERY_ENABLED = int(os.getenv("PASSWORD_RECOVERY_ENABLED", 0))
+
     # Email server
     SERVICE_EMAIL_ADDRESS = os.getenv("SERVICE_EMAIL_ADDRESS", None)
     SERVICE_EMAIL_PASSWORD = os.getenv("SERVICE_EMAIL_PASSWORD", None)
