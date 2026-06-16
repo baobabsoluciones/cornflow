@@ -82,7 +82,7 @@ def create_app(env_name="development", dataconn=None):
 
             event.listen(db.engine, "connect", _fk_pragma_on_connect)
 
-    # Rutas del Core bajo /cornflow/ via Blueprint
+    # Rutas del Core bajo /cornflow/ via Blueprint (URLs canónicas)
     cornflow_bp = Blueprint("cornflow", __name__, url_prefix="/cornflow")
     api = Api(cornflow_bp)
     for res in resources:
@@ -118,6 +118,23 @@ def create_app(env_name="development", dataconn=None):
         )
 
     app.register_blueprint(cornflow_bp)
+
+    # Alias de compatibilidad: mismas rutas sin prefijo (URLs legacy)
+    api_compat = Api(app)
+    for res in resources:
+        api_compat.add_resource(res["resource"], res["urls"], endpoint=res["endpoint"] + "_compat")
+    if app.config["ALARMS_ENDPOINTS"]:
+        for res in alarms_resources:
+            api_compat.add_resource(res["resource"], res["urls"], endpoint=res["endpoint"] + "_compat")
+    if auth_type == AUTH_DB:
+        _signup_activated = int(app.config["SIGNUP_ACTIVATED"])
+        if _signup_activated in [SIGNUP_WITH_AUTH, SIGNUP_WITH_NO_AUTH]:
+            api_compat.add_resource(SignUpEndpoint, CONDITIONAL_ENDPOINTS["signup"], endpoint="signup_compat")
+        api_compat.add_resource(LoginEndpoint, CONDITIONAL_ENDPOINTS["login"], endpoint="login_compat")
+    elif auth_type == AUTH_LDAP:
+        api_compat.add_resource(LoginEndpoint, CONDITIONAL_ENDPOINTS["login"], endpoint="login_compat")
+    elif auth_type == AUTH_OID:
+        api_compat.add_resource(LoginOpenAuthEndpoint, CONDITIONAL_ENDPOINTS["login"], endpoint="login_compat")
 
     docs = FlaskApiSpec(app)
     for res in resources:
