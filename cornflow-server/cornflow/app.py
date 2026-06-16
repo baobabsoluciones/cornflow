@@ -15,6 +15,8 @@ from flask_apispec.extension import FlaskApiSpec
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_restful import Api
+from werkzeug.exceptions import NotFound
+from werkzeug.middleware.dispatcher import DispatcherMiddleware
 
 # Module imports
 from cornflow.commands import (
@@ -157,9 +159,18 @@ def create_app(env_name="development", dataconn=None):
     app.cli.add_command(register_deployed_dags)
     app.cli.add_command(register_dag_permissions)
 
-    from importlib.metadata import entry_points
-    for ep in entry_points(group="cornflow.plugins"):
-        ep.load()().init_app(app)
+    if int(app.config["EXTERNAL_APP"]) == 1:
+        # Legacy mode: DispatcherMiddleware mounts cornflow under APPLICATION_ROOT.
+        # The external app is responsible for combining both apps via wsgi.py.
+        if app.config["APPLICATION_ROOT"] != "/":
+            app.wsgi_app = DispatcherMiddleware(
+                NotFound(), {app.config["APPLICATION_ROOT"]: app.wsgi_app}
+            )
+    else:
+        # Plugin mode: autodiscover and mount plugins registered under cornflow.plugins.
+        from importlib.metadata import entry_points
+        for ep in entry_points(group="cornflow.plugins"):
+            ep.load()().init_app(app)
 
     return app
 
