@@ -1,0 +1,433 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+---
+# Default values for Cornflow with Airflow.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+#
+# =============================================================================
+# IMPORTANT: CONFIGURATION FOR DIFFERENT RELEASE NAMES
+# =============================================================================
+#
+# This chart is parameterized to work with different release names.
+# If you install with: helm install my-project ./helm-charts/cornflow
+# Or with: helm install cornflow-staging ./helm-charts/cornflow
+#
+# The following variables need to be changed MANUALLY according to your release name:
+#
+# 1. In the cornflow.env section:
+#    - EXTERNAL_APP: Set to "1" if running as external app (affects URLs)
+#
+# 2. In the airflow.extraVolumes section:
+#    - claimName: RELEASE_NAME-airflow-dags
+#      Change RELEASE_NAME to your release name
+#
+# 3. In the airflow.env section:
+#    - AIRFLOW_CONN_CF_URI: Automatically configured based on EXTERNAL_APP setting
+#      If EXTERNAL_APP=0: "http://service_user:Service_user1234@RELEASE_NAME-cornflow-server:5000/"
+#      If EXTERNAL_APP=1: "http://service_user:Service_user1234@RELEASE_NAME-cornflow-server:5000/cornflow/"
+#
+# =============================================================================
+
+# =============================================================================
+# GLOBAL CONFIGURATION
+# =============================================================================
+
+# Global configuration
+global:
+  imageRegistry: ""
+  imagePullSecrets: []
+  storageClass: ""
+
+# =============================================================================
+# IMAGE CONFIGURATION
+# =============================================================================
+
+# Cornflow image configuration
+image:
+  repository: baobabsoluciones/cornflow
+  tag: "release-v1.2.4"
+  pullPolicy: IfNotPresent  # Use Always for production
+
+# =============================================================================
+# SERVICE CONFIGURATION
+# =============================================================================
+
+# Service configuration
+service:
+  type: ClusterIP  # Use LoadBalancer or NodePort for external access
+  port: 5000
+  annotations: {}
+
+
+
+# =============================================================================
+# CORNFLOW APPLICATION CONFIGURATION
+# =============================================================================
+
+# Cornflow application configuration
+cornflow:
+  replicaCount: 1  # Increase for production (2-3 recommended)
+  
+  # If true, the container root filesystem is mounted read-only (more secure).
+  # Set to false if your image needs to write inside the image filesystem.
+  # set to false writing into the image filesystem (needed by gunicorn pidfile/tempfiles under /usr/src/app)
+  readOnlyRootFilesystem: true
+
+  # Probes configuration
+  # Default health endpoint for Cornflow server.
+  # If EXTERNAL_APP=1, you typically want "/cornflow/health".
+  probes:
+    path: /health/
+
+  # If true (default), mount an emptyDir on /usr/src/app.
+  # Set to false to avoid masking the image content at /usr/src/app.
+  # change to false in case of a personal cornflow image
+  mountAppEmptyDir: true
+
+  # Resource configuration
+  resources:
+    # Development settings
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    # Production settings (uncomment and adjust):
+    # limits:
+    #   cpu: 2000m
+    #   memory: 2Gi
+    # requests:
+    #   cpu: 1000m
+    #   memory: 1Gi
+  
+  # Node placement
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  
+  # Horizontal pod autoscaler
+  autoscaling:
+    enabled: false  # Enable for production
+    minReplicas: 1
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+  
+  # Environment variables
+  env:
+    # =============================================================================
+    # DATABASE CONFIGURATION
+    # =============================================================================
+    DEFAULT_POSTGRES: "1"  # Use Cornflow's specific DB variables
+    # IMPORTANT: change to your release name (e.g., my-project, cornflow, etc.)
+    # CORNFLOW_DB_HOST: "RELEASE_NAME-cornflow-postgresql" must be set to your release name
+    # Example: value: "my-project-cornflow-postgresql" for helm install my-project ./helm-charts/cornflow
+    CORNFLOW_DB_HOST: "my-cornflow-cornflow-postgresql"
+    CORNFLOW_DB_PORT: "5432"
+    CORNFLOW_DB_USER: "cornflow"
+    CORNFLOW_DB_PASSWORD: "cornflow"
+    CORNFLOW_DB: "cornflow"
+    
+    # =============================================================================
+    # APPLICATION CONFIGURATION
+    # =============================================================================
+    # IMPORTANT: change to your release name (e.g., my-project, cornflow, etc.)
+    # AIRFLOW_URL: "http://RELEASE_NAME-webserver:8080" must be set to your release name
+    # Example: value: "my-cornflow-webserver:8080" for helm install my-cornflow ./helm-charts/cornflow
+    AIRFLOW_URL: "http://my-cornflow-webserver:8080"
+    APPLICATION_ROOT: "/"  # Application root path
+    EXTERNAL_APP: "0"  # Set to "1" if running as external app
+    # IMPORTANT: If you are running as external app, you must set the EXTERNAL_APP_MODULE to the name of the folder where the external app is located
+    #EXTERNAL_APP_MODULE: "my-external-app" # Set to external app module name if running as external app
+    SERVICE_NAME: "Cornflow"
+    SECRET_KEY: "your-secret-key-here"  # CHANGE THIS FOR PRODUCTION
+    SECRET_BI_KEY: "your-bi-secret-key-here"  # CHANGE THIS FOR PRODUCTION
+    AUTH_TYPE: "1"  # Database authentication (1=DB, 2=OID)
+    DEFAULT_ROLE: "2"  # Planner role
+    CORS_ORIGINS: "*"  # Restrict for production
+    LOG_LEVEL: "20"  # INFO level (10=DEBUG, 20=INFO, 30=WARNING, 40=ERROR)
+    SIGNUP_ACTIVATED: "1"  # Set to "0" for production
+    SERVICE_USER_ALLOW_PASSWORD_LOGIN: "1"  # Set to "0" for production
+    OPEN_DEPLOYMENT: "1"  # Set to "0" for production
+    USER_ACCESS_ALL_OBJECTS: "0"  # Planner users can access other users' objects
+    TOKEN_DURATION: "24"  # Token duration in hours
+    PWD_ROTATION_TIME: "120"  # Password rotation time in days
+
+    # =============================================================================
+    # FLASK CONFIGURATION
+    # =============================================================================
+    FLASK_ENV: "development"
+    
+    # =============================================================================
+    # LDAP CONFIGURATION (for LDAP authentication)
+    # =============================================================================
+    LDAP_HOST: "ldap://openldap:389"
+    LDAP_BIND_DN: "cn=admin,dc=example,dc=org"
+    LDAP_BIND_PASSWORD: "admin"
+    LDAP_USERNAME_ATTRIBUTE: "cn"
+    LDAP_USER_BASE: "ou=users,dc=example,dc=org"
+    LDAP_SERVICE_BASE: "ou=users,dc=example,dc=org"
+    LDAP_EMAIL_ATTRIBUTE: "mail"
+    LDAP_USER_OBJECT_CLASS: "inetOrgPerson"
+    LDAP_GROUP_OBJECT_CLASS: "groupOfNames"
+    LDAP_GROUP_ATTRIBUTE: "cn"
+    LDAP_GROUP_BASE: "dc=example,dc=org"
+    LDAP_GROUP_TO_ROLE_SERVICE: "service"
+    LDAP_GROUP_TO_ROLE_ADMIN: "administrators"
+    LDAP_GROUP_TO_ROLE_VIEWER: "viewers"
+    LDAP_GROUP_TO_ROLE_PLANNER: "planners"
+    LDAP_PROTOCOL_VERSION: "3"
+    LDAP_USE_TLS: "False"
+    
+    # =============================================================================
+    # OPENID CONNECT CONFIGURATION (for OID authentication)
+    # =============================================================================
+    OID_PROVIDER: ""  # OpenID provider URL
+    OID_EXPECTED_AUDIENCE: ""  # Expected audience for OID tokens
+    
+    # =============================================================================
+    # EMAIL SERVER CONFIGURATION
+    # =============================================================================
+    SERVICE_EMAIL_ADDRESS: ""  # Email address for notifications
+    SERVICE_EMAIL_PASSWORD: ""  # Email password
+    SERVICE_EMAIL_SERVER: ""  # SMTP server
+    SERVICE_EMAIL_PORT: ""  # SMTP port
+    
+    # =============================================================================
+    # ALARMS CONFIGURATION
+    # =============================================================================
+    CF_ALARMS_ENDPOINT: "0"  # Enable alarms endpoints
+    
+    # =============================================================================
+    # SERVICE USER CONFIGURATION
+    # =============================================================================
+    CORNFLOW_SERVICE_USER: "service_user"
+    CORNFLOW_SERVICE_PWD: "Service_user1234"  # CHANGE THIS FOR PRODUCTION
+
+    # =============================================================================
+    # ADMIN USER CONFIGURATION
+    # =============================================================================
+    CORNFLOW_ADMIN_USER: "cornflow_admin"
+    CORNFLOW_ADMIN_PWD: "Cornflow_admin1234"  # CHANGE THIS FOR PRODUCTION
+    
+    # =============================================================================
+    # AIRFLOW CONFIGURATION
+    # =============================================================================
+    # AIRFLOW_URL: Automatically configured in the template
+    AIRFLOW_USER: "admin"  # Must match airflow.users[0].username
+    AIRFLOW_PWD: "admin"  # Must match airflow.users[0].password
+
+# =============================================================================
+# POSTGRESQL CONFIGURATION
+# =============================================================================
+
+# PostgreSQL configuration for Cornflow
+# change to false if you are using an external database
+postgresql:
+  enabled: true
+  image:
+    repository: postgres
+    tag: "15.4"
+  auth:
+    postgresPassword: "postgres"
+    username: "cornflow"
+    password: "cornflow"
+    database: "cornflow"
+  primary:
+    persistence:
+      enabled: true
+      size: 8Gi
+      storageClass: ""
+  service:
+    type: ClusterIP
+    port: 5432
+
+
+
+# =============================================================================
+# PERSISTENCE CONFIGURATION
+# =============================================================================
+
+# Note: Airflow logs persistence is configured in airflow.logs.persistence section
+
+# =============================================================================
+# SECURITY CONFIGURATION
+# =============================================================================
+
+# ServiceAccount configuration
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+# Security context
+security:
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+
+# =============================================================================
+# MONITORING CONFIGURATION
+# =============================================================================
+
+# Monitoring configuration
+monitoring:
+  enabled: false  # Enable for production
+  serviceMonitor:
+    enabled: false  # Enable for production
+    interval: 30s
+    scrapeTimeout: 10s
+
+# =============================================================================
+# SCALING CONFIGURATION
+# =============================================================================
+
+# Pod disruption budget
+podDisruptionBudget:
+  enabled: false  # Enable for production
+  minAvailable: 1
+
+# =============================================================================
+# AIRFLOW CONFIGURATION (OPTIONAL - Set enabled: true to deploy Airflow with Cornflow)
+# =============================================================================
+
+# Airflow configuration - Set enabled: true to deploy Airflow with Cornflow
+airflow:
+  enabled: true  # Set to false to deploy without Airflow
+  executor: KubernetesExecutor
+  images:
+    airflow:
+      repository: baobabsoluciones/airflow-k8s
+      tag: "latest"
+      pullPolicy: IfNotPresent
+  
+  # Airflow webserver configuration
+  webserver:
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 2Gi
+      requests:
+        cpu: 500m
+        memory: 1Gi
+    # Service configuration
+    service:
+      type: ClusterIP
+  # Airflow scheduler configuration
+  scheduler:
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+      requests:
+        cpu: 500m
+        memory: 512Mi
+    serviceAccount:
+      create: true
+      name: "airflow-scheduler"
+      annotations: {}
+    # Extra init containers to copy Cornflow DAGs
+    extraInitContainers:
+      - name: cornflow-dags-init
+        image: alpine/git
+        imagePullPolicy: IfNotPresent
+        command:
+          - /bin/sh
+          - -c
+          - |
+            set -e
+            echo "Cloning Cornflow repository..."
+            git clone --depth 1 --branch master https://github.com/baobabsoluciones/cornflow.git /tmp/cornflow
+            echo "Copying DAGs to Airflow..."
+            cp -r /tmp/cornflow/cornflow-dags/DAG/* /opt/airflow/dags/ || true
+            echo "Copying requirements.txt to Airflow..."
+            cp /tmp/cornflow/cornflow-dags/requirements.txt /opt/airflow/dags/ || true
+            echo "DAGs and requirements copied successfully!"
+        volumeMounts:
+          - name: dags
+            mountPath: /opt/airflow/dags
+    # Extra init containers to install Python dependencies
+      - name: install-requirements
+        image: apache/airflow:2.10.5
+        imagePullPolicy: IfNotPresent
+        command:
+          - /bin/sh
+          - -c
+          - |
+            set -e
+            echo "Installing Python dependencies from requirements.txt..."
+            if [ -f /opt/airflow/dags/requirements.txt ]; then
+              pip install --target /opt/airflow/dags/deps -r /opt/airflow/dags/requirements.txt
+              echo "Dependencies installed successfully!"
+            else
+              echo "Warning: requirements.txt not found, skipping installation"
+            fi
+        volumeMounts:
+          - name: dags
+            mountPath: /opt/airflow/dags
+  # Airflow triggerer configuration
+  triggerer:
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 250m
+        memory: 256Mi
+  # Airflow Redis configuration (for Celery)
+  redis:
+    enabled: false  # Disable Airflow's Redis, we'll use a simpler setup
+    
+  # Airflow Workers configuration
+  workers:
+    replicas: 1
+  
+  # PgBouncer configuration for Airflow (only parameters allowed by the official chart)
+  pgbouncer:
+    enabled: true  # Can only be enabled/disabled and adjust parameters allowed by the official chart
+
+  # Airflow logs config
+  logs:
+    persistence:
+      enabled: true
+      
+  # Airflow DAGs volume configuration
+  dags:
+    persistence:
+      enabled: true
+      size: 1Gi
+      
+  # Airflow configuration
+  env:
+    - name: AIRFLOW__API__AUTH_BACKEND
+      value: "airflow.api.auth.backend.basic_auth"
+    - name: PYTHONPATH
+      value: "/opt/airflow/dags/deps"
+    # Cornflow configuration for Airflow
+    - name: AIRFLOW_CONN_CF_URI
+      # IMPORTANT: Change RELEASE_NAME to your release name (e.g., decision-ops-cornflow, my-project-cornflow, local-cornflow-cornflow, production-porject--cornflow, etc.)
+      # Example: value: "http://service_user:Service_user1234@my-project-cornflow-server:5000/" for helm install my-project ./helm-charts/cornflow
+      # Note: If EXTERNAL_APP=1, the URL should include /cornflow (e.g., :5000/cornflow/)
+      #value: "http://service_user:Service_user1234@RELEASE_NAME-cornflow-server:5000/"  # Change RELEASE_NAME to your release name
+      value: "http://service_user:Service_user1234@my-cornflow-cornflow-server:5000/"  # This is the default value for the cornflow-server service
+
+# =============================================================================
+# PRODUCTION RECOMMENDATIONS
+# =============================================================================
+# TODO: add production recommendations
