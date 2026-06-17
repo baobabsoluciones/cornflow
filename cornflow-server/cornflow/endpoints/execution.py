@@ -406,7 +406,7 @@ class ExecutionRelaunchEndpoint(OrchestratorMixin):
         )
 
         # If the execution is still running or queued, raise an error
-        if execution.state == 0 or execution.state == -7:
+        if execution.state in (EXEC_STATE_RUNNING, EXEC_STATE_QUEUED):
             return {"message": "This execution is still running"}, 400
 
         # this allows testing without airflow interaction:
