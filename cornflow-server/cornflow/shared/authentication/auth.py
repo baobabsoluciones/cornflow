@@ -403,8 +403,13 @@ class Auth:
             )
 
         action_id = PERMISSION_METHOD_MAP[method]
+        # Try the URL as-is first; if not found try with /cornflow/ prefix for
+        # requests arriving via the legacy (unprefixed) routes.
+        view = ViewModel.query.filter_by(url_rule=url).first()
+        if view is None and not url.startswith("/cornflow/"):
+            view = ViewModel.query.filter_by(url_rule="/cornflow" + url).first()
         try:
-            view_id = ViewModel.query.filter_by(url_rule=url).first().id
+            view_id = view.id
         except AttributeError:
             current_app.logger.error(
                 "The permission for this endpoint is not in the database."

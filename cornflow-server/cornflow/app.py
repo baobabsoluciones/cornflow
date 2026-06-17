@@ -9,7 +9,7 @@ from logging.config import dictConfig
 import click
 
 # Partial imports
-from flask import Flask
+from flask import Flask, Blueprint
 from flask.cli import with_appcontext
 from flask_apispec.extension import FlaskApiSpec
 from flask_cors import CORS
@@ -84,19 +84,14 @@ def create_app(env_name="development", dataconn=None):
 
             event.listen(db.engine, "connect", _fk_pragma_on_connect)
 
-    api = Api(app)
+    # Rutas del Core bajo /cornflow/ via Blueprint (URLs canónicas)
+    cornflow_bp = Blueprint("cornflow", __name__, url_prefix="/cornflow")
+    api = Api(cornflow_bp)
     for res in resources:
         api.add_resource(res["resource"], res["urls"], endpoint=res["endpoint"])
     if app.config["ALARMS_ENDPOINTS"]:
         for res in alarms_resources:
             api.add_resource(res["resource"], res["urls"], endpoint=res["endpoint"])
-
-    docs = FlaskApiSpec(app)
-    for res in resources:
-        docs.register(target=res["resource"], endpoint=res["endpoint"])
-    if app.config["ALARMS_ENDPOINTS"]:
-        for res in alarms_resources:
-            docs.register(target=res["resource"], endpoint=res["endpoint"])
 
     # Resource for the log-in
     auth_type = app.config["AUTH_TYPE"]
@@ -124,6 +119,32 @@ def create_app(env_name="development", dataconn=None):
             log_txt="Error while configuring authentication. The authentication type is not valid.",
         )
 
+    app.register_blueprint(cornflow_bp)
+
+    # Alias de compatibilidad: mismas rutas sin prefijo (URLs legacy)
+    api_compat = Api(app)
+    for res in resources:
+        api_compat.add_resource(res["resource"], res["urls"], endpoint=res["endpoint"] + "_compat")
+    if app.config["ALARMS_ENDPOINTS"]:
+        for res in alarms_resources:
+            api_compat.add_resource(res["resource"], res["urls"], endpoint=res["endpoint"] + "_compat")
+    if auth_type == AUTH_DB:
+        _signup_activated = int(app.config["SIGNUP_ACTIVATED"])
+        if _signup_activated in [SIGNUP_WITH_AUTH, SIGNUP_WITH_NO_AUTH]:
+            api_compat.add_resource(SignUpEndpoint, CONDITIONAL_ENDPOINTS["signup"], endpoint="signup_compat")
+        api_compat.add_resource(LoginEndpoint, CONDITIONAL_ENDPOINTS["login"], endpoint="login_compat")
+    elif auth_type == AUTH_LDAP:
+        api_compat.add_resource(LoginEndpoint, CONDITIONAL_ENDPOINTS["login"], endpoint="login_compat")
+    elif auth_type == AUTH_OID:
+        api_compat.add_resource(LoginOpenAuthEndpoint, CONDITIONAL_ENDPOINTS["login"], endpoint="login_compat")
+
+    docs = FlaskApiSpec(app)
+    for res in resources:
+        docs.register(target=res["resource"], endpoint=res["endpoint"], blueprint="cornflow")
+    if app.config["ALARMS_ENDPOINTS"]:
+        for res in alarms_resources:
+            docs.register(target=res["resource"], endpoint=res["endpoint"], blueprint="cornflow")
+
     initialize_errorhandlers(app)
     init_compress(app)
 
@@ -138,10 +159,18 @@ def create_app(env_name="development", dataconn=None):
     app.cli.add_command(register_deployed_dags)
     app.cli.add_command(register_dag_permissions)
 
-    if app.config["APPLICATION_ROOT"] != "/" and app.config["EXTERNAL_APP"] == 0:
-        app.wsgi_app = DispatcherMiddleware(
-            NotFound(), {app.config["APPLICATION_ROOT"]: app.wsgi_app}
-        )
+    if int(app.config["EXTERNAL_APP"]) == 1:
+        # Legacy mode: DispatcherMiddleware mounts cornflow under APPLICATION_ROOT.
+        # The external app is responsible for combining both apps via wsgi.py.
+        if app.config["APPLICATION_ROOT"] != "/":
+            app.wsgi_app = DispatcherMiddleware(
+                NotFound(), {app.config["APPLICATION_ROOT"]: app.wsgi_app}
+            )
+    else:
+        # Plugin mode: autodiscover and mount plugins registered under cornflow.plugins.
+        from importlib.metadata import entry_points
+        for ep in entry_points(group="cornflow.plugins"):
+            ep.load()().init_app(app)
 
     return app
 
