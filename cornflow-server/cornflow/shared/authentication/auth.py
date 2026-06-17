@@ -473,7 +473,7 @@ class BIAuth(Auth):
     def generate_token(user_id: int = None) -> str:
         """
         Generates a token given a user_id. The token will contain the username in the sub claim.
-        BI tokens do not include expiration time.
+        BI tokens expire after BI_TOKEN_DURATION hours.
 
         :param int user_id: user id to generate the token for
         :return: the generated token
@@ -493,6 +493,8 @@ class BIAuth(Auth):
             )
 
         payload = {
+            "exp": datetime.now(timezone.utc)
+            + timedelta(hours=float(current_app.config["BI_TOKEN_DURATION"])),
             "iat": datetime.now(timezone.utc),
             "sub": user.username,
             "iss": INTERNAL_TOKEN_ISSUER,
