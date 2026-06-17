@@ -207,7 +207,7 @@ def _setup_environment_variables():
     # Cornflow logging and deployment config
     cornflow_logging = os.getenv("CORNFLOW_LOGGING", "console")
     os.environ["CORNFLOW_LOGGING"] = cornflow_logging
-    open_deployment = os.getenv("OPEN_DEPLOYMENT", 1)
+    open_deployment = os.getenv("OPEN_DEPLOYMENT", 0)
     os.environ["OPEN_DEPLOYMENT"] = str(open_deployment)
     signup_activated = os.getenv("SIGNUP_ACTIVATED", SIGNUP_WITH_AUTH)
     os.environ["SIGNUP_ACTIVATED"] = str(signup_activated)
