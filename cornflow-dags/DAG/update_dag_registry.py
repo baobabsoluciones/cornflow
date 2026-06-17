@@ -44,7 +44,9 @@ def update_dag_registry(**kwargs):
             all_apps[app.name] = app
         for model in model_dags:
             if model.dag_id not in all_apps:
-                logger.warning(f"App {model.dag_id} is registered in Airflow database but there is no app for it. Skipping")
+                logger.warning(
+                    f"App {model.dag_id} is registered in Airflow database but there is no app for it. Skipping"
+                )
                 continue
             app = all_apps[model.dag_id]
             if model.dag_id not in deployed_dags:
@@ -54,9 +56,12 @@ def update_dag_registry(**kwargs):
                     instance_schema=app.instance.schema,
                     instance_checks_schema=app.instance.schema_checks,
                     solution_schema=app.solution.schema,
-                    solution_checks_schema=app.solvers[
+                    solution_checks_schema=app.get_solver(
                         app.get_default_solver_name()
-                    ].schema_checks,
+                    ).schema_checks,
+                    kpis_schema=app.get_solver(
+                        app.get_default_solver_name()
+                    ).schema_kpis,
                     config_schema=app.schema,
                     encoding="br",
                 )
@@ -73,6 +78,9 @@ def update_dag_registry(**kwargs):
                         solution_checks_schema=app.get_solver(
                             app.get_default_solver_name()
                         ).schema_checks,
+                        kpis_schema=app.get_solver(
+                            app.get_default_solver_name()
+                        ).schema_kpis,
                         config_schema=app.schema,
                     ),
                     encoding="br",

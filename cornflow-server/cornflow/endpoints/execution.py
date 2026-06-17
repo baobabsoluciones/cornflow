@@ -4,18 +4,23 @@ or check the status of an ongoing one
 These endpoints hve different access url, but manage the same data entities
 """
 
-# Import from libraries
-from cornflow_client.airflow.api import Airflow
+# Imports from external libraries
+from datetime import datetime, timedelta, timezone
+from flask import request, current_app, make_response, send_file
+from flask_apispec import marshal_with, use_kwargs, doc
 
+import os
+import time
+import zipfile
+
+# Import from cornflow-client
+from cornflow_client.airflow.api import Airflow
 from cornflow_client.databricks.api import Databricks
 from cornflow_client.constants import INSTANCE_SCHEMA, CONFIG_SCHEMA, SOLUTION_SCHEMA
-from flask import request, current_app
-from flask_apispec import marshal_with, use_kwargs, doc
 
 # Import from internal modules
 from cornflow.endpoints.meta_resource import BaseMetaResource
 from cornflow.models import InstanceModel, DeployedWorkflow, ExecutionModel
-from cornflow.shared.const import config_orchestrator
 from cornflow.schemas.execution import (
     ExecutionDetailsEndpointResponse,
     ExecutionDetailsEndpointWithIndicatorsResponse,
@@ -28,14 +33,15 @@ from cornflow.schemas.execution import (
     QueryFiltersExecution,
     ReLaunchExecutionRequest,
     ExecutionDetailsWithIndicatorsAndLogResponse,
+    ExecutionFilesPostRequest,
 )
 from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.compress import compressed
 from cornflow.shared.const import (
+    config_orchestrator,
+    SERVICE_ROLE,
     AIRFLOW_BACKEND,
     DATABRICKS_BACKEND,
-)
-from cornflow.shared.const import (
     AIRFLOW_ERROR_MSG,
     AIRFLOW_NOT_REACHABLE_MSG,
     DAG_PAUSED_MSG,
@@ -49,6 +55,9 @@ from cornflow.shared.const import (
     DATABRICKS_TO_STATE_MAP,
     EXEC_STATE_STOPPED,
     EXEC_STATE_QUEUED,
+    EXECUTION_FILES_STATUS_OK,
+    EXECUTION_FILES_STATUS_DELETED,
+    EXECUTION_FILES_STATUS_MESSAGE_DICT,
 )
 
 from cornflow.shared.exceptions import (
@@ -57,6 +66,7 @@ from cornflow.shared.exceptions import (
     ObjectDoesNotExist,
     InvalidData,
     EndpointNotImplemented,
+    InvalidUsage,
 )
 from cornflow.shared.validators import (
     json_schema_validate_as_string,
@@ -142,7 +152,10 @@ class ExecutionEndpoint(OrchestratorMixin):
           created by the authenticated user) and a integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        executions = self.get_list(user=self.get_user(), **kwargs)
+        checks_and_kpis = kwargs.pop("checks_and_kpis", False)
+        executions = self.get_list(
+            user=self.get_user(), checks_and_kpis=checks_and_kpis, **kwargs
+        )
         current_app.logger.info(f"User {self.get_user()} gets list of executions")
 
         executions = [
@@ -371,8 +384,6 @@ class ExecutionRelaunchEndpoint(OrchestratorMixin):
         :rtype: Tuple(dict, integer)
         """
         config = current_app.config
-        if "schema" not in kwargs:
-            kwargs["schema"] = self.orch_const["def_schema"]
 
         self.put_detail(
             data=dict(config=kwargs["config"]), user=self.get_user(), idx=idx
@@ -388,8 +399,11 @@ class ExecutionRelaunchEndpoint(OrchestratorMixin):
                 log_txt=f"Error while user {self.get_user()} tries to relaunch execution {idx}. "
                 + err,
             )
+        schema = execution.schema
 
-        execution.update({"checks": None})
+        execution.update(
+            {"checks": None, "kpis": None, "last_run_checks_and_kpis": False}
+        )
 
         # If the execution is still running or queued, raise an error
         if execution.state == 0 or execution.state == -7:
@@ -403,9 +417,7 @@ class ExecutionRelaunchEndpoint(OrchestratorMixin):
             }, 201
 
         # Validate config before running the dag
-        config_schema = DeployedWorkflow.get_one_schema(
-            config, kwargs["schema"], CONFIG_SCHEMA
-        )
+        config_schema = DeployedWorkflow.get_one_schema(config, schema, CONFIG_SCHEMA)
         config_errors = json_schema_validate_as_string(config_schema, kwargs["config"])
         if config_errors:
             raise InvalidData(
@@ -413,7 +425,6 @@ class ExecutionRelaunchEndpoint(OrchestratorMixin):
                 log_txt=f"Error while user {self.get_user()} tries to relaunch execution {idx}. "
                 f"Configuration data does not match the jsonschema.",
             )
-        schema = execution.schema
 
         # Check if orchestrator is alive
         if not self.orch_client.is_alive(config=current_app.config):
@@ -576,7 +587,9 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
             )
 
         self.orch_client.set_dag_run_to_fail(
-            dag_name=execution.schema, run_id=execution.run_id
+            dag_name=execution.schema,
+            run_id=execution.run_id,
+            checks_and_kpis_workflow=execution.last_run_checks_and_kpis,
         )
         # We should check if the execution has been stopped
         execution.update_state(EXEC_STATE_STOPPED)
@@ -652,7 +665,11 @@ class ExecutionStatusEndpoint(OrchestratorMixin):
                 + error,
             )
         try:
-            state = self.orch_client.get_run_status(schema, run_id)
+            state = self.orch_client.get_run_status(
+                schema,
+                run_id,
+                checks_and_kpis_workflow=execution.last_run_checks_and_kpis,
+            )
         except self.orch_error as err:
             error = self.orch_const["name"] + f" responded with an error: {err}"
             _raise_af_error(
@@ -747,6 +764,190 @@ class ExecutionLogEndpoint(ExecutionDetailsEndpointBase):
         """
         current_app.logger.info(f"User {self.get_user()} gets log of execution {idx}")
         return self.get_detail(user=self.get_user(), idx=idx)
+
+
+class ExecutionFilesEndpointMixin(ExecutionDetailsEndpointBase):
+    """
+    Endpoint used to handle the execution files.
+    """
+
+    ROLES_WITH_ACCESS = [SERVICE_ROLE]
+
+    @staticmethod
+    def check_execution_files_active(func):
+        def wrapper(self, *args, **kwargs):
+            """
+            If execution files are not enabled, return an Exception
+            """
+            if not current_app.config["EXECUTION_FILES"]:
+                raise EndpointNotImplemented(
+                    "Execution files are not active for this deployment"
+                )
+            return func(self, *args, **kwargs)
+
+        return wrapper
+
+    @staticmethod
+    def _get_execution_files_path(execution_idx):
+        """
+        Generate execution files path.
+        """
+        return os.path.join(
+            current_app.config["EXECUTION_FILES_PATH"], f"{execution_idx}.zip"
+        )
+
+
+class ExecutionFilesEndpoint(ExecutionFilesEndpointMixin):
+    @doc(description="Get execution files", tags=["Executions"], inherit=False)
+    @authenticate(auth_class=Auth())
+    @ExecutionFilesEndpointMixin.check_execution_files_active
+    def get(self, idx):
+        """
+        Get the execution files for a specific execution.
+        :param str idx: ID of the execution.
+        """
+        current_app.logger.info(
+            f"User {self.get_user()} gets execution files for execution {idx}"
+        )
+        execution = self.data_model.get_one_object(user=self.get_user(), idx=idx)
+        if execution is None:
+            raise ObjectDoesNotExist(
+                log_txt=f"Error while user {self.get_user()} tries to get the files of execution {idx}. "
+                f"The execution does not exist."
+            )
+
+        execution_files_status = execution.execution_files_status
+        if execution_files_status != EXECUTION_FILES_STATUS_OK:
+            return {
+                "status": execution_files_status,
+                "error": EXECUTION_FILES_STATUS_MESSAGE_DICT[execution_files_status],
+            }, 400
+
+        zip_file_path = self._get_execution_files_path(idx)
+        if not os.path.exists(zip_file_path):
+            # Files were not found. We try indicating to the front to re-generate them.
+            execution.update({"execution_files_status": EXECUTION_FILES_STATUS_DELETED})
+            return {
+                "status": EXECUTION_FILES_STATUS_DELETED,
+                "error": EXECUTION_FILES_STATUS_MESSAGE_DICT[
+                    EXECUTION_FILES_STATUS_DELETED
+                ],
+            }, 400
+
+        # Generate response
+        response = make_response(
+            send_file(
+                zip_file_path,
+                mimetype="application/zip",
+                as_attachment=True,
+                download_name=f'{execution.name}_{time.strftime("%Y%m%d-%H%M%S")}.zip',
+            )
+        )
+        response.headers["X-Message"] = EXECUTION_FILES_STATUS_MESSAGE_DICT[
+            execution_files_status
+        ]
+        response.headers["X-Status-Code"] = "200"
+        return response
+
+    @doc(description="Save an execution's files", tags=["Executions"], inherit=False)
+    @authenticate(auth_class=Auth())
+    @ExecutionFilesEndpointMixin.check_execution_files_active
+    def post(self, idx):
+        """
+        Save the execution files for a specific execution.
+        :param str idx: ID of the execution.
+        :param kwargs: dict with status
+        """
+        current_app.logger.info(
+            f"User {self.get_user()} creates execution files for execution {idx}"
+        )
+
+        # Check request data format
+        request_data = request.values.to_dict()
+        request_data = ExecutionFilesPostRequest().load(request_data)
+
+        execution_files_status = request_data["execution_files_status"]
+
+        execution = self.data_model.get_one_object(user=self.get_user(), idx=idx)
+        if execution is None:
+            raise ObjectDoesNotExist(
+                log_txt=f"Error while user {self.get_user()} tries to save the files of execution {idx}. "
+                f"The execution does not exist."
+            )
+
+        if execution_files_status != EXECUTION_FILES_STATUS_OK:
+            execution.update({"execution_files_status": execution_files_status})
+            return {"message": "Execution files status saved correctly"}, 200
+
+        file = request.files.get("execution_file")
+        if file is None:
+            raise InvalidUsage(
+                "Execution file status was 'OK' but not file was provided."
+            )
+
+        if not file.filename.lower().endswith(".zip") or not zipfile.is_zipfile(
+            file.stream
+        ):
+            raise InvalidUsage("The execution file must be a valid .zip file")
+
+        file.stream.seek(0)
+
+        zip_file_path = self._get_execution_files_path(idx)
+
+        if not os.path.exists(current_app.config["EXECUTION_FILES_PATH"]):
+            os.makedirs(current_app.config["EXECUTION_FILES_PATH"])
+
+        file.save(zip_file_path)
+        execution.update({"execution_files_status": execution_files_status})
+
+        return {"message": "Execution files saved correctly"}, 200
+
+
+class ExecutionFilesCleanupEndpoint(ExecutionFilesEndpointMixin):
+    @doc(description="Clean old executions files", tags=["Executions"], inherit=False)
+    @authenticate(auth_class=Auth())
+    @ExecutionFilesEndpointMixin.check_execution_files_active
+    def delete(self):
+        """
+        Clean old execution files.
+        """
+        current_app.logger.info(f"User {self.get_user()} runs execution files cleanup")
+
+        execution_files_path = current_app.config["EXECUTION_FILES_PATH"]
+        cleanup_frequency = current_app.config["EXECUTION_FILES_CLEANUP_FREQUENCY"]
+        if cleanup_frequency == 0:
+            raise EndpointNotImplemented(
+                "Execution files cleanup is deactivated server-side."
+            )
+
+        if not os.path.exists(execution_files_path):
+            return {"message": "No execution files found"}, 200
+
+        nb_deleted_files = 0
+        for file in os.listdir(execution_files_path):
+            execution_id = file.replace(".zip", "")
+            full_file_path = os.path.join(execution_files_path, file)
+
+            execution = self.data_model.get_one_object(
+                user=self.get_user(), idx=execution_id
+            )
+            today = datetime.now(timezone.utc)
+            if execution is None or (
+                execution.updated_at.replace(tzinfo=timezone.utc)
+                <= today - timedelta(days=cleanup_frequency)
+            ):
+                try:
+                    os.remove(full_file_path)
+                    nb_deleted_files += 1
+                    if execution is not None:
+                        execution.update(
+                            {"execution_files_status": EXECUTION_FILES_STATUS_DELETED}
+                        )
+                except Exception as err:
+                    current_app.logger.error(
+                        f"Error deleting execution file {file}: {err}"
+                    )
+        return {"message": f"{nb_deleted_files} files were deleted."}, 200
 
 
 # region aux_functions

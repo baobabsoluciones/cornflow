@@ -12,7 +12,7 @@ from flask_apispec import use_kwargs, doc, marshal_with
 from cornflow.endpoints.meta_resource import BaseMetaResource
 from cornflow.models import DeployedWorkflow, ExecutionModel, InstanceModel, CaseModel
 from cornflow.schemas import DeployedDAGSchema, DeployedDAGEditSchema
-from cornflow.schemas.case import CaseCheckRequest
+from cornflow.schemas.case import CaseChecksKPIsRequest
 from cornflow.schemas.instance import InstanceCheckRequest
 from cornflow.schemas.execution import (
     ExecutionDagPostRequest,
@@ -109,6 +109,7 @@ class DAGDetailEndpoint(BaseMetaResource):
         # Check data format
         data = kwargs.get("data")
         checks = kwargs.get("checks")
+        kpis = kwargs.get("kpis")
         if data is None:
             # only check format if executions_results exist
             solution_schema = None
@@ -143,6 +144,8 @@ class DAGDetailEndpoint(BaseMetaResource):
             new_data["data"] = data
         if checks is not None:
             new_data["checks"] = checks
+        if kpis is not None:
+            new_data["kpis"] = kpis
         kwargs.update(new_data)
         execution.update(kwargs)
 
@@ -174,7 +177,7 @@ class DAGInstanceEndpoint(BaseMetaResource):
 
 class DAGCaseEndpoint(BaseMetaResource):
     """
-    Endpoint used by airflow to write case checks
+    Endpoint used by airflow to write case checks and KPIs
     """
 
     ROLES_WITH_ACCESS = [ADMIN_ROLE, SERVICE_ROLE]
@@ -184,13 +187,13 @@ class DAGCaseEndpoint(BaseMetaResource):
         self.data_model = CaseModel
 
     @doc(
-        description="Endpoint to save case checks performed on the DAG",
+        description="Endpoint to save case checks and KPIs performed on the DAG",
         tags=["DAGs"],
     )
     @authenticate(auth_class=Auth())
-    @use_kwargs(CaseCheckRequest, location="json")
+    @use_kwargs(CaseChecksKPIsRequest, location="json")
     def put(self, idx, **req_data):
-        current_app.logger.info(f"Case checks saved for instance {idx}")
+        current_app.logger.info(f"Case checks and KPIs saved for instance {idx}")
         return self.put_detail(data=req_data, idx=idx, track_user=False)
 
 

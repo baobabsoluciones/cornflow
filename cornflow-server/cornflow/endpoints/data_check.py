@@ -4,6 +4,7 @@ External endpoints to launch the solution check on an execution
 
 # Import from libraries
 from cornflow_client.airflow.api import Airflow
+from cornflow_client.airflow.dag_utilities import get_workflow_name_check_kpis
 from cornflow_client.constants import INSTANCE_SCHEMA, SOLUTION_SCHEMA
 from flask import request, current_app
 from flask_apispec import marshal_with, doc
@@ -69,7 +70,8 @@ def _run_airflow_data_check(
         )
 
     # Check if DAG is paused
-    schema_info = af_client.get_workflow_info(workflow_name=schema)
+    workflow_name = get_workflow_name_check_kpis(schema)
+    schema_info = af_client.get_workflow_info(workflow_name=workflow_name)
     info = schema_info.json()
     if info.get("is_paused", False):
         current_app.logger.error(DAG_PAUSED_MSG)
@@ -87,7 +89,10 @@ def _run_airflow_data_check(
     # Run the DAG
     try:
         response = af_client.run_workflow(
-            execution.id, workflow_name=schema, checks_only=True, **run_dag_kwargs
+            execution.id,
+            workflow_name=schema,
+            checks_and_kpis_only=True,
+            **run_dag_kwargs,
         )
     except AirflowError as err:
         error = f"{AIRFLOW_ERROR_MSG} {err}"
@@ -106,10 +111,11 @@ def _run_airflow_data_check(
     # Update execution on success
     af_data = response.json()
     execution.run_id = af_data.get("dag_run_id")
+    execution.last_run_checks_and_kpis = True
     execution.update_state(EXEC_STATE_QUEUED)
 
 
-class DataCheckExecutionEndpoint(BaseMetaResource):
+class DataCheckKPIsExecutionEndpoint(BaseMetaResource):
     """
     Endpoint used to execute the instance and solution checks on an execution
     """
@@ -222,10 +228,11 @@ class DataCheckInstanceEndpoint(BaseMetaResource):
                 + err,
             )
         payload = dict(
-            config=dict(checks_only=True),
+            config=dict(checks_and_kpis_only=True),
             instance_id=instance.id,
             name=f"data_check_instance_{instance.name}",
             schema=instance.schema,
+            checks_and_kpis_only=True,
         )
         schema = instance.schema
 
@@ -250,7 +257,7 @@ class DataCheckInstanceEndpoint(BaseMetaResource):
         return execution, 201
 
 
-class DataCheckCaseEndpoint(BaseMetaResource):
+class DataCheckCaseKPIsEndpoint(BaseMetaResource):
     """
     Endpoint used to execute the instance and solution checks on an execution
     """
@@ -327,10 +334,11 @@ class DataCheckCaseEndpoint(BaseMetaResource):
             instance, _ = self.post_list(data=instance_payload)
 
         payload = dict(
-            config=dict(checks_only=True),
+            config=dict(checks_and_kpis_only=True),
             instance_id=instance.id,
             name=f"data_check_case_{case.name}",
             schema=schema,
+            checks_and_kpis_only=True,
         )
         if case.solution is not None:
             validation_schema = schema

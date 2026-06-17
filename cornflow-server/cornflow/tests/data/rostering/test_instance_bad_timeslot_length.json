@@ -1,0 +1,496 @@
+{
+  "employees": [
+    {
+      "id": 1,
+      "name": "employee1",
+      "manager": true
+    },
+    {
+      "id": 2,
+      "name": "employee2",
+      "manager": true
+    },
+    {
+      "id": 3,
+      "name": "employee3",
+      "manager": true
+    },
+    {
+      "id": 4,
+      "name": "employee4",
+      "manager": true
+    }
+  ],
+  "shifts": [
+    {
+      "id": 1,
+      "name": "morning",
+      "start": "08:00",
+      "end": "15:00"
+    },
+    {
+      "id": 2,
+      "name": "afternoon",
+      "start": "13:00",
+      "end": "20:00"
+    },
+    {
+      "id": 3,
+      "name": "full_day",
+      "start": "08:00",
+      "end": "20:00"
+    }
+  ],
+  "contracts": [
+    {
+      "id": 11,
+      "id_employee": 1,
+      "id_shift": 3,
+      "start_contract": "2021-09-06",
+      "end_contract": null,
+      "weekly_hours": 32,
+      "days_worked": 4
+    },
+    {
+      "id": 12,
+      "id_employee": 2,
+      "id_shift": 1,
+      "start_contract": "2021-09-06",
+      "end_contract": null,
+      "weekly_hours": 32,
+      "days_worked": 5
+    },
+    {
+      "id": 13,
+      "id_employee": 3,
+      "id_shift": 2,
+      "start_contract": "2021-09-06",
+      "end_contract": "2021-09-12",
+      "weekly_hours": 24,
+      "days_worked": 5
+    },
+    {
+      "id": 14,
+      "id_employee": 3,
+      "id_shift": 3,
+      "start_contract": "2021-09-13",
+      "end_contract": null,
+      "weekly_hours": 40,
+      "days_worked": 5
+    },
+    {
+      "id": 15,
+      "id_employee": 4,
+      "id_shift": 3,
+      "start_contract": "2021-09-06",
+      "end_contract": "2021-09-12",
+      "weekly_hours": 40,
+      "days_worked": 5
+    }
+  ],
+  "demand": [
+    {
+      "day": "2021-09-06",
+      "hour": "08:00",
+      "demand": 10
+    },
+    {
+      "day": "2021-09-06",
+      "hour": "09:00",
+      "demand": 15
+    },
+    {
+      "day": "2021-09-06",
+      "hour": "10:00",
+      "demand": 15
+    },
+    {
+      "day": "2021-09-06",
+      "hour": "11:00",
+      "demand": 20
+    },
+    {
+      "day": "2021-09-06",
+      "hour": "12:00",
+      "demand": 25
+    },
+    {
+      "day": "2021-09-06",
+      "hour": "13:00",
+      "demand": 30
+    },
+    {
+      "day": "2021-09-06",
+      "hour": "14:00",
+      "demand": 30
+    },
+    {
+      "day": "2021-09-06",
+      "hour": "15:00",
+      "demand": 25
+    },
+    {
+      "day": "2021-09-06",
+      "hour": "16:00",
+      "demand": 20
+    },
+    {
+      "day": "2021-09-06",
+      "hour": "17:00",
+      "demand": 15
+    },
+    {
+      "day": "2021-09-06",
+      "hour": "18:00",
+      "demand": 15
+    },
+    {
+      "day": "2021-09-06",
+      "hour": "19:00",
+      "demand": 10
+    },
+    {
+      "day": "2021-09-07",
+      "hour": "08:00",
+      "demand": 10
+    },
+    {
+      "day": "2021-09-07",
+      "hour": "09:00",
+      "demand": 15
+    },
+    {
+      "day": "2021-09-07",
+      "hour": "10:00",
+      "demand": 15
+    },
+    {
+      "day": "2021-09-07",
+      "hour": "11:00",
+      "demand": 20
+    },
+    {
+      "day": "2021-09-07",
+      "hour": "12:00",
+      "demand": 20
+    },
+    {
+      "day": "2021-09-07",
+      "hour": "13:00",
+      "demand": 20
+    },
+    {
+      "day": "2021-09-07",
+      "hour": "14:00",
+      "demand": 25
+    },
+    {
+      "day": "2021-09-07",
+      "hour": "15:00",
+      "demand": 30
+    },
+    {
+      "day": "2021-09-07",
+      "hour": "16:00",
+      "demand": 25
+    },
+    {
+      "day": "2021-09-07",
+      "hour": "17:00",
+      "demand": 20
+    },
+    {
+      "day": "2021-09-07",
+      "hour": "18:00",
+      "demand": 15
+    },
+    {
+      "day": "2021-09-07",
+      "hour": "19:00",
+      "demand": 10
+    },
+    {
+      "day": "2021-09-08",
+      "hour": "08:00",
+      "demand": 10
+    },
+    {
+      "day": "2021-09-08",
+      "hour": "09:00",
+      "demand": 15
+    },
+    {
+      "day": "2021-09-08",
+      "hour": "10:00",
+      "demand": 20
+    },
+    {
+      "day": "2021-09-08",
+      "hour": "11:00",
+      "demand": 25
+    },
+    {
+      "day": "2021-09-08",
+      "hour": "12:00",
+      "demand": 30
+    },
+    {
+      "day": "2021-09-08",
+      "hour": "13:00",
+      "demand": 35
+    },
+    {
+      "day": "2021-09-08",
+      "hour": "14:00",
+      "demand": 40
+    },
+    {
+      "day": "2021-09-08",
+      "hour": "15:00",
+      "demand": 35
+    },
+    {
+      "day": "2021-09-08",
+      "hour": "16:00",
+      "demand": 30
+    },
+    {
+      "day": "2021-09-08",
+      "hour": "17:00",
+      "demand": 25
+    },
+    {
+      "day": "2021-09-08",
+      "hour": "18:00",
+      "demand": 20
+    },
+    {
+      "day": "2021-09-08",
+      "hour": "19:00",
+      "demand": 15
+    },
+    {
+      "day": "2021-09-09",
+      "hour": "08:00",
+      "demand": 10
+    },
+    {
+      "day": "2021-09-09",
+      "hour": "09:00",
+      "demand": 10
+    },
+    {
+      "day": "2021-09-09",
+      "hour": "10:00",
+      "demand": 10
+    },
+    {
+      "day": "2021-09-09",
+      "hour": "11:00",
+      "demand": 15
+    },
+    {
+      "day": "2021-09-09",
+      "hour": "12:00",
+      "demand": 15
+    },
+    {
+      "day": "2021-09-09",
+      "hour": "13:00",
+      "demand": 20
+    },
+    {
+      "day": "2021-09-09",
+      "hour": "14:00",
+      "demand": 20
+    },
+    {
+      "day": "2021-09-09",
+      "hour": "15:00",
+      "demand": 25
+    },
+    {
+      "day": "2021-09-09",
+      "hour": "16:00",
+      "demand": 20
+    },
+    {
+      "day": "2021-09-09",
+      "hour": "17:00",
+      "demand": 15
+    },
+    {
+      "day": "2021-09-09",
+      "hour": "18:00",
+      "demand": 15
+    },
+    {
+      "day": "2021-09-09",
+      "hour": "19:00",
+      "demand": 10
+    },
+    {
+      "day": "2021-09-10",
+      "hour": "08:00",
+      "demand": 10
+    },
+    {
+      "day": "2021-09-10",
+      "hour": "09:00",
+      "demand": 15
+    },
+    {
+      "day": "2021-09-10",
+      "hour": "10:00",
+      "demand": 15
+    },
+    {
+      "day": "2021-09-10",
+      "hour": "11:00",
+      "demand": 20
+    },
+    {
+      "day": "2021-09-10",
+      "hour": "12:00",
+      "demand": 25
+    },
+    {
+      "day": "2021-09-10",
+      "hour": "13:00",
+      "demand": 25
+    },
+    {
+      "day": "2021-09-10",
+      "hour": "14:00",
+      "demand": 25
+    },
+    {
+      "day": "2021-09-10",
+      "hour": "15:00",
+      "demand": 25
+    },
+    {
+      "day": "2021-09-10",
+      "hour": "16:00",
+      "demand": 30
+    },
+    {
+      "day": "2021-09-10",
+      "hour": "17:00",
+      "demand": 30
+    },
+    {
+      "day": "2021-09-10",
+      "hour": "18:00",
+      "demand": 35
+    },
+    {
+      "day": "2021-09-10",
+      "hour": "19:00",
+      "demand": 30
+    }
+  ],
+  "weekly_schedule": [
+    {
+      "week_day": 1,
+      "starting_hour": "08:00",
+      "ending_hour": "15:00"
+    },
+    {
+      "week_day": 1,
+      "starting_hour": "15:00",
+      "ending_hour": "20:00"
+    },
+    {
+      "week_day": 2,
+      "starting_hour": "08:00",
+      "ending_hour": "20:00"
+    },
+    {
+      "week_day": 3,
+      "starting_hour": "08:00",
+      "ending_hour": "20:00"
+    },
+    {
+      "week_day": 4,
+      "starting_hour": "08:00",
+      "ending_hour": "20:00"
+    },
+    {
+      "week_day": 5,
+      "starting_hour": "08:00",
+      "ending_hour": "20:00"
+    }
+  ],
+  "schedule_exceptions": [
+    {
+      "date": "2021-09-07",
+      "starting_hour": "08:00",
+      "ending_hour": "15:00"
+    },
+    {
+      "date": "2021-09-07",
+      "starting_hour": "15:00",
+      "ending_hour": "20:00"
+    }
+  ],
+  "employee_schedule": [
+    {
+      "id_employee": 1,
+      "id_contract": 11,
+      "week_day": 1
+    },
+    {
+      "id_employee": 1,
+      "id_contract": 11,
+      "week_day": 2
+    },
+    {
+      "id_employee": 1,
+      "id_contract": 11,
+      "week_day": 3
+    },
+    {
+      "id_employee": 1,
+      "id_contract": 11,
+      "week_day": 5
+    }
+  ],
+  "parameters": {
+    "horizon": 1,
+    "slot_length": 120,
+    "starting_date": "2021-09-06",
+    "min_working_hours": 4,
+    "min_resting_hours": 12
+  },
+  "requirements": {
+    "rq02": "strict",
+    "rq03": "strict",
+    "rq05": "strict",
+    "rq06": "strict",
+    "rq07": "strict",
+    "rq08": "strict",
+    "rq09": "strict",
+    "rq10": "strict",
+    "rq11": "strict",
+    "rq12": "strict",
+    "rq13": "soft",
+    "rq14": "soft",
+    "rq15": "soft",
+    "rq16": "strict"
+  },
+  "penalties": {
+    "rq02": 1,
+    "rq03": 1,
+    "rq05": 1,
+    "rq06": 1,
+    "rq07": 4,
+    "rq08": 2,
+    "rq09": 2,
+    "rq10": 1,
+    "rq13": 1,
+    "rq14": 1,
+    "rq15": 1,
+    "rq16": 5
+  }
+}

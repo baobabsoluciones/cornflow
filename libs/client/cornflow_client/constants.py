@@ -27,6 +27,7 @@ SOLUTION_SCHEMA = "solution"
 CONFIG_SCHEMA = "config"
 INSTANCE_CHECKS_SCHEMA = "instance_checks"
 SOLUTION_CHECKS_SCHEMA = "solution_checks"
+KPIS_SCHEMA = "kpis"
 
 # why it stopped
 STATUS_NOT_SOLVED = 0
@@ -59,6 +60,13 @@ STATUS_CONV = {
 # is there a solution?
 SOLUTION_STATUS_INFEASIBLE = 0
 SOLUTION_STATUS_FEASIBLE = 2
+
+# are there execution files?
+EXECUTION_FILES_STATUS_NOT_GENERATED = 0
+EXECUTION_FILES_STATUS_ERROR = -1
+EXECUTION_FILES_STATUS_DELETED = -2
+EXECUTION_FILES_STATUS_NOT_UP_TO_DATE = -3
+EXECUTION_FILES_STATUS_OK = 1
 
 PYOMO_STOP_MAPPING = {
     "unbounded": STATUS_UNBOUNDED,
@@ -299,6 +307,10 @@ class BadInstanceChecks(Exception):
 
 
 class BadSolutionChecks(Exception):
+    pass
+
+
+class BadKPIs(Exception):
     pass
 
 
