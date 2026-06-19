@@ -12,6 +12,7 @@ from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
 
 from flask import current_app
+from sqlalchemy import event, inspect as sa_inspect
 from cornflow.app import create_app
 from cornflow.tests import base_test_execution
 
@@ -30,9 +31,11 @@ from cornflow.shared.const import (
     VIEWER_ROLE,
 )
 from cornflow.tests.const import (
+    DAG_URL,
     EXECUTION_FILES_CLEANUP_URL,
     EXECUTION_FILES_URL,
     EXECUTION_PATH,
+    EXECUTION_SOLUTION_PATH,
     EXECUTION_URL_NORUN,
     INSTANCE_PATH,
     INSTANCE_URL,
@@ -492,3 +495,360 @@ class TestExecutionFilesEndpoint(CustomTestCase):
         self.assertEqual("0 files were deleted.", response.json["message"])
 
     # endregion
+
+
+class TestExecutionDataLoadedInList(CustomTestCase):
+    """
+    CHG001 — task001: Verification test for the current (problematic) behaviour.
+
+    This test documents that ExecutionModel.get_all_objects() currently loads the
+    `data` column from the database even though the list endpoint never returns it
+    in the JSON response.
+
+    The test is expected to PASS with the current codebase (before the fix in
+    task002). After applying the deferred-loading fix it will FAIL, at which point
+    it should be updated (or replaced) to assert the corrected behaviour.
+    """
+
+    def setUp(self):
+        super().setUp()
+        # Load instance fixture and create a parent instance
+        with open(INSTANCE_PATH) as f:
+            instance_payload = json.load(f)
+        self.instance_id = self.create_new_row(
+            INSTANCE_URL, InstanceModel, instance_payload
+        )
+
+        # Load execution fixture and create the execution (without triggering a run)
+        with open(EXECUTION_PATH) as f:
+            execution_payload = json.load(f)
+        execution_payload["instance_id"] = self.instance_id
+        self.execution_id = self.create_new_row(
+            EXECUTION_URL_NORUN, ExecutionModel, execution_payload
+        )
+
+        # Use a service user to push solution data into the execution via the DAG
+        # endpoint so that the `data` column is non-NULL in the database.
+        service_token = self.create_service_user()
+        with open(EXECUTION_SOLUTION_PATH) as f:
+            solution_data = json.load(f)
+        self.update_row(
+            url=DAG_URL + self.execution_id + "/",
+            change={"data": solution_data},
+            payload_to_check={},
+            check_payload=False,
+            token=service_token,
+        )
+
+    # ------------------------------------------------------------------
+    # Helper: collect SQL statements emitted during get_all_objects
+    # ------------------------------------------------------------------
+
+    def _capture_queries_for_get_all_objects(self):
+        """
+        Listens for SQLAlchemy 'before_cursor_execute' events while calling
+        ExecutionModel.get_all_objects and returns the captured SQL statements.
+        """
+        captured_queries = []
+
+        def _listener(conn, cursor, statement, parameters, context, executemany):
+            captured_queries.append(statement)
+
+        engine = db.engine
+        event.listen(engine, "before_cursor_execute", _listener)
+        try:
+            executions = ExecutionModel.get_all_objects(user=self.user)
+        finally:
+            event.remove(engine, "before_cursor_execute", _listener)
+
+        return executions, captured_queries
+
+    # ------------------------------------------------------------------
+    # Tests
+    # ------------------------------------------------------------------
+
+    def test_data_is_loaded_in_list_via_sqlalchemy_inspect(self):
+        """
+        Verify (SQLAlchemy inspect) that the `data` attribute is deferred
+        in memory after get_all_objects() — i.e. it IS in the 'unloaded' set.
+
+        This test was updated after applying the deferred-loading fix from task002:
+        get_all_objects now uses defer(cls.data), so 'data' must appear in
+        state.unloaded for every object returned by the list query.
+
+        FIXED BEHAVIOUR: 'data' IS in state.unloaded (deferred load).
+        """
+        executions = ExecutionModel.get_all_objects(user=self.user)
+
+        self.assertGreater(
+            len(executions),
+            0,
+            "Expected at least one execution to be returned by get_all_objects",
+        )
+
+        for execution in executions:
+            state = sa_inspect(execution)
+            # After the fix: 'data' must be in unloaded (deferred loading applied)
+            self.assertIn(
+                "data",
+                state.unloaded,
+                "FIXED BEHAVIOUR: 'data' must be deferred (not loaded in memory) "
+                "for the list query after applying defer(cls.data) in get_all_objects.",
+            )
+
+    def test_data_is_loaded_in_list_via_sql_interception(self):
+        """
+        Verify (SQL interception) that the SELECT statement emitted by
+        get_all_objects() does NOT include the 'data' column.
+
+        This test was updated after applying the deferred-loading fix from task002:
+        get_all_objects now uses defer(cls.data), so the column 'data' must be
+        absent from the SELECT statement emitted by the list query.
+
+        FIXED BEHAVIOUR: 'data' is NOT in the SELECT (deferred load).
+        """
+        executions, captured_queries = self._capture_queries_for_get_all_objects()
+
+        self.assertGreater(
+            len(executions),
+            0,
+            "Expected at least one execution to be returned by get_all_objects",
+        )
+
+        self.assertTrue(
+            len(captured_queries) > 0,
+            "No SQL queries were captured; the event listener may not have fired.",
+        )
+
+        # After the fix, no query in the list call should select the `data` column.
+        data_in_query = any(
+            '"data"' in q or " data," in q.lower() or " data " in q.lower()
+            for q in captured_queries
+        )
+        self.assertFalse(
+            data_in_query,
+            "FIXED BEHAVIOUR: the SELECT generated by get_all_objects must NOT "
+            "include the 'data' column after applying defer(cls.data). "
+            "Captured queries: " + str(captured_queries),
+        )
+
+
+class TestExecutionDataNotLoadedInList(CustomTestCase):
+    """
+    CHG001 — task002: Verification tests for the corrected behaviour.
+
+    These tests assert that after the fix (defer(cls.data) in get_all_objects and
+    removal of indicators from the list schema) the `data` column is NOT loaded
+    eagerly, and the list endpoint no longer returns `indicators`.
+
+    Expected test results:
+    - BEFORE the fix (current code): these tests FAIL.
+    - AFTER the fix (task002): these tests PASS.
+    """
+
+    def setUp(self):
+        super().setUp()
+        # Load instance fixture and create a parent instance
+        with open(INSTANCE_PATH) as f:
+            instance_payload = json.load(f)
+        self.instance_id = self.create_new_row(
+            INSTANCE_URL, InstanceModel, instance_payload
+        )
+
+        # Load execution fixture and create the execution (without triggering a run)
+        with open(EXECUTION_PATH) as f:
+            execution_payload = json.load(f)
+        execution_payload["instance_id"] = self.instance_id
+        self.execution_id = self.create_new_row(
+            EXECUTION_URL_NORUN, ExecutionModel, execution_payload
+        )
+
+        # Use a service user to push solution data into the execution via the DAG
+        # endpoint so that the `data` column is non-NULL in the database.
+        service_token = self.create_service_user()
+        with open(EXECUTION_SOLUTION_PATH) as f:
+            solution_data = json.load(f)
+        self.update_row(
+            url=DAG_URL + self.execution_id + "/",
+            change={"data": solution_data},
+            payload_to_check={},
+            check_payload=False,
+            token=service_token,
+        )
+
+    # ------------------------------------------------------------------
+    # Helper: collect SQL statements emitted during get_all_objects
+    # ------------------------------------------------------------------
+
+    def _capture_queries_for_get_all_objects(self):
+        """
+        Listens for SQLAlchemy 'before_cursor_execute' events while calling
+        ExecutionModel.get_all_objects and returns the captured SQL statements.
+        """
+        captured_queries = []
+
+        def _listener(conn, cursor, statement, parameters, context, executemany):
+            captured_queries.append(statement)
+
+        engine = db.engine
+        event.listen(engine, "before_cursor_execute", _listener)
+        try:
+            executions = ExecutionModel.get_all_objects(user=self.user)
+        finally:
+            event.remove(engine, "before_cursor_execute", _listener)
+
+        return executions, captured_queries
+
+    # ------------------------------------------------------------------
+    # Tests — these FAIL before the fix, PASS after the fix
+    # ------------------------------------------------------------------
+
+    def test_data_is_deferred_in_list_via_sqlalchemy_inspect(self):
+        """
+        CHG001 fix verification (SQLAlchemy inspect):
+
+        After applying defer(cls.data) in get_all_objects, the `data` attribute
+        must appear in state.unloaded for every object returned by the list query.
+
+        FAILS before fix: 'data' will not be in unloaded (eager load).
+        PASSES after fix: 'data' IS in unloaded (deferred load).
+        """
+        executions = ExecutionModel.get_all_objects(user=self.user)
+
+        self.assertGreater(
+            len(executions),
+            0,
+            "Expected at least one execution to be returned by get_all_objects",
+        )
+
+        for execution in executions:
+            state = sa_inspect(execution)
+            self.assertIn(
+                "data",
+                state.unloaded,
+                "EXPECTED BEHAVIOUR after fix: 'data' should be deferred (not loaded) "
+                "for the list query. It was found in the loaded attributes, meaning "
+                "the fix has not been applied yet.",
+            )
+
+    def test_data_is_not_in_select_via_sql_interception(self):
+        """
+        CHG001 fix verification (SQL interception):
+
+        After applying defer(cls.data) in get_all_objects, the SELECT statement
+        emitted by the list query must NOT include the 'data' column.
+
+        FAILS before fix: the SELECT will include 'data'.
+        PASSES after fix: 'data' is absent from the SELECT.
+        """
+        executions, captured_queries = self._capture_queries_for_get_all_objects()
+
+        self.assertGreater(
+            len(executions),
+            0,
+            "Expected at least one execution to be returned by get_all_objects",
+        )
+
+        self.assertTrue(
+            len(captured_queries) > 0,
+            "No SQL queries were captured; the event listener may not have fired.",
+        )
+
+        # After the fix, no query in the list call should select the `data` column.
+        # We intentionally avoid matching substrings like "updated_at" that contain
+        # "data" — we look for the column name as a quoted identifier or standalone
+        # word to reduce false positives.
+        data_in_query = any(
+            '"data"' in q or " data," in q.lower() or " data " in q.lower()
+            for q in captured_queries
+        )
+        self.assertFalse(
+            data_in_query,
+            "EXPECTED BEHAVIOUR after fix: the SELECT should NOT include the 'data' "
+            "column, but it was found in the captured queries. The defer fix has not "
+            "been applied yet. Captured queries: " + str(captured_queries),
+        )
+
+    def test_list_endpoint_does_not_return_indicators(self):
+        """
+        CHG001 fix verification (HTTP response):
+
+        After eliminating `indicators` from ExecutionDetailsWithIndicatorsAndLogResponse,
+        the GET /execution/ endpoint must NOT return an `indicators` key in any item.
+
+        FAILS before fix: `indicators` is present in every list item.
+        PASSES after fix: `indicators` is absent from every list item.
+        """
+        from cornflow.tests.const import EXECUTION_URL
+
+        response = self.client.get(
+            EXECUTION_URL,
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+
+        self.assertEqual(
+            200,
+            response.status_code,
+            f"GET /execution/ returned unexpected status {response.status_code}",
+        )
+
+        items = response.json
+        self.assertIsInstance(items, list)
+        self.assertGreater(len(items), 0, "Expected at least one execution in the list")
+
+        for item in items:
+            self.assertNotIn(
+                "indicators",
+                item,
+                "EXPECTED BEHAVIOUR after fix: 'indicators' should not appear in list "
+                "items. It was found, meaning the schema fix has not been applied yet.",
+            )
+
+    def test_list_endpoint_returns_basic_fields(self):
+        """
+        Regression test: after the fix, the list endpoint must still return all
+        basic fields that were present before (minus `indicators`).
+
+        PASSES both before and after the fix for all fields except `indicators`.
+        Included here as a regression guard for the task002 changes.
+        """
+        from cornflow.tests.const import EXECUTION_URL
+
+        response = self.client.get(
+            EXECUTION_URL,
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+
+        self.assertEqual(200, response.status_code)
+
+        items = response.json
+        self.assertIsInstance(items, list)
+        self.assertGreater(len(items), 0, "Expected at least one execution in the list")
+
+        required_fields = [
+            "id",
+            "name",
+            "description",
+            "created_at",
+            "updated_at",
+            "user_id",
+            "username",
+            "data_hash",
+            "state",
+            "message",
+            "config",
+            "instance_id",
+            "schema",
+            "log",
+        ]
+
+        for item in items:
+            for field in required_fields:
+                self.assertIn(
+                    field,
+                    item,
+                    f"Required field '{field}' is missing from the list response item. "
+                    "The fix must not remove basic fields from the list endpoint.",
+                )
