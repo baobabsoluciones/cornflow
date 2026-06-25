@@ -69,7 +69,12 @@ def create_app(env_name="development", dataconn=None):
     # initialization for init_cornflow_service.py
     if dataconn is not None:
         app.config["SQLALCHEMY_DATABASE_URI"] = dataconn
-    CORS(app)
+    cors_origins = app.config.get("CORS_ORIGINS", "*")
+    if isinstance(cors_origins, str) and cors_origins != "*":
+        cors_origins = [
+            origin.strip() for origin in cors_origins.split(",") if origin.strip()
+        ]
+    CORS(app, origins=cors_origins)
     bcrypt.init_app(app)
     db.init_app(app)
     Migrate(app=app, db=db)
