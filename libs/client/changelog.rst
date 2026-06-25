@@ -1,4 +1,4 @@
-version 1.3.5
+version 1.3.6rc1
 --------------
 - released: 2026-06-03
 - description: KPIs in data checks, execution output files and new role
