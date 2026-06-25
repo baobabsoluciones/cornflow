@@ -104,7 +104,6 @@ class BaseExecutionList(BaseTestCases.ListFilters, ABC):
             "log",
             "instance_id",
             "name",
-            "indicators",
             "username",
             "first_name",
             "last_name",

@@ -7,6 +7,7 @@ from flask import current_app
 import hashlib
 from sqlalchemy.dialects.postgresql import JSON, TEXT
 from sqlalchemy import desc, or_
+from sqlalchemy.orm import defer
 from sqlalchemy.sql.expression import false
 
 # Imports from internal modules
@@ -184,7 +185,7 @@ class ExecutionModel(BaseDataModel):
         :return: The objects
         :rtype: list(:class:`BaseDataModel`)
         """
-        query = cls.query.filter(cls.deleted_at == None)
+        query = cls.query.options(defer(cls.data), defer(cls.checks)).filter(cls.deleted_at == None)
         user_access = int(current_app.config["USER_ACCESS_ALL_OBJECTS"])
         if (
             user is not None
