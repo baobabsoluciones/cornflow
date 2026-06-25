@@ -1,3 +1,11 @@
+version 1.3.6
+--------------
+- released: 2026-06-25
+- description: Security update and performance improvement
+- changelog:
+    - Upgrade cryptography to 48.0.1 and PyJWT to 2.13.0
+    - Improve performance of executions endpoint
+
 version 1.3.5
 --------------
 - released: 2026-06-03
