@@ -1,4 +1,5 @@
 """gunicorn WSGI server configuration."""
+
 import os
 from multiprocessing import cpu_count
 

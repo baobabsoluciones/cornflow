@@ -48,9 +48,7 @@ class TestLogConfig(unittest.TestCase):
     def test_stream_can_be_set_to_stderr(self):
         with patch.dict("os.environ", {"CORNFLOW_LOG_STREAM": "stderr"}):
             config = log_config(20)
-        self.assertEqual(
-            config["handlers"]["console"]["stream"], "ext://sys.stderr"
-        )
+        self.assertEqual(config["handlers"]["console"]["stream"], "ext://sys.stderr")
 
     def test_json_format_uses_json_formatter(self):
         with patch.dict("os.environ", {"CORNFLOW_LOG_FORMAT": "json"}):

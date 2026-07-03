@@ -27,7 +27,9 @@ class BufferedCloudHandler(logging.Handler):
     Subclasses must implement :meth:`_upload` and :meth:`destination`.
     """
 
-    def __init__(self, bucket, prefix="cornflow-logs", upload_interval=60, max_buffer=5000):
+    def __init__(
+        self, bucket, prefix="cornflow-logs", upload_interval=60, max_buffer=5000
+    ):
         super().__init__()
         self.bucket = bucket
         self.prefix = str(prefix).strip("/")

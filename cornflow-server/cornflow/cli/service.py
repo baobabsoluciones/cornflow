@@ -223,7 +223,9 @@ def _setup_environment_variables():
     os.environ["OPEN_DEPLOYMENT"] = str(open_deployment)
     signup_activated = os.getenv("SIGNUP_ACTIVATED", SIGNUP_WITH_AUTH)
     os.environ["SIGNUP_ACTIVATED"] = str(signup_activated)
-    user_access_all_objects = os.getenv("USER_ACCESS_ALL_OBJECTS", USER_ACCESS_ALL_OBJECTS_NO)
+    user_access_all_objects = os.getenv(
+        "USER_ACCESS_ALL_OBJECTS", USER_ACCESS_ALL_OBJECTS_NO
+    )
     os.environ["USER_ACCESS_ALL_OBJECTS"] = str(user_access_all_objects)
     default_role = int(os.getenv("DEFAULT_ROLE", PLANNER_ROLE))
     os.environ["DEFAULT_ROLE"] = str(default_role)
@@ -242,26 +244,26 @@ def _setup_environment_variables():
     external_application = int(os.getenv("EXTERNAL_APP", 0))
     external_app_module = os.getenv("EXTERNAL_APP_MODULE")
     base_dict = {
-            "environment": environment,
-            "auth": auth,
-            "cornflow_db_conn": cornflow_db_conn,
-            "cornflow_admin_user": cornflow_admin_user,
-            "cornflow_admin_email": cornflow_admin_email,
-            "cornflow_admin_pwd": cornflow_admin_pwd,
-            "cornflow_service_user": cornflow_service_user,
-            "cornflow_service_email": cornflow_service_email,
-            "cornflow_service_pwd": cornflow_service_pwd,
-            "cornflow_logging": cornflow_logging,
-            "open_deployment": open_deployment,
-            "external_application": external_application,
-            "external_app_module": external_app_module,
-            "cornflow_backend": cornflow_backend,
-        }
+        "environment": environment,
+        "auth": auth,
+        "cornflow_db_conn": cornflow_db_conn,
+        "cornflow_admin_user": cornflow_admin_user,
+        "cornflow_admin_email": cornflow_admin_email,
+        "cornflow_admin_pwd": cornflow_admin_pwd,
+        "cornflow_service_user": cornflow_service_user,
+        "cornflow_service_email": cornflow_service_email,
+        "cornflow_service_pwd": cornflow_service_pwd,
+        "cornflow_logging": cornflow_logging,
+        "open_deployment": open_deployment,
+        "external_application": external_application,
+        "external_app_module": external_app_module,
+        "cornflow_backend": cornflow_backend,
+    }
     if cornflow_backend == AIRFLOW_BACKEND:
         base_dict["airflow_user"] = airflow_user
         base_dict["airflow_pwd"] = airflow_pwd
         base_dict["airflow_url"] = airflow_url
-    
+
     elif cornflow_backend == DATABRICKS_BACKEND:
         base_dict["databricks_url"] = databricks_url
         base_dict["databricks_auth_secret"] = databricks_auth_secret
@@ -269,7 +271,7 @@ def _setup_environment_variables():
         base_dict["databricks_ep_clusters"] = databricks_ep_clusters
         base_dict["databricks_client_id"] = databricks_client_id
         base_dict["databricks_health_path"] = databricks_health_path
-        
+
     else:
         raise Exception("Selected backend not among valid options")
 
