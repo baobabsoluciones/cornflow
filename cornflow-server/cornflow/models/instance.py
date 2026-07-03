@@ -3,9 +3,13 @@
 # Import from libraries
 import hashlib
 
+from flask import current_app
+from sqlalchemy.orm import defer
+
 # Imported from internal models
 from cornflow.models.base_data_model import BaseDataModel
 from cornflow.shared import db
+from cornflow.shared.const import USER_ACCESS_ALL_OBJECTS_NO
 
 
 class InstanceModel(BaseDataModel):
@@ -77,6 +81,44 @@ class InstanceModel(BaseDataModel):
                 db.session.add(execution)
 
         super().update(data)
+
+    @classmethod
+    def get_all_objects(cls, *args, **kwargs):
+        """
+        Query to get all instances from a user, deferring the heavy data/checks
+        columns since the list endpoints do not serialize them.
+
+        :return: The objects
+        :rtype: list(:class:`InstanceModel`)
+        """
+        kwargs.setdefault("options", [defer(cls.data), defer(cls.checks)])
+        return super().get_all_objects(*args, **kwargs)
+
+    @classmethod
+    def get_one_object(cls, user=None, idx=None, defer_data=False, **kwargs):
+        """
+        Query to get one instance from the user and the id.
+
+        :param UserModel user: user object performing the query
+        :param str or int idx: ID from the object to get
+        :param bool defer_data: whether to defer loading the heavy data/checks columns
+        :return: The object or None if it does not exist
+        :rtype: :class:`InstanceModel`
+        """
+        if not defer_data:
+            return super().get_one_object(user=user, idx=idx, **kwargs)
+        query = cls.query.options(defer(cls.data), defer(cls.checks)).filter_by(
+            id=idx, deleted_at=None
+        )
+        if user is not None:
+            user_access = int(current_app.config["USER_ACCESS_ALL_OBJECTS"])
+            if (
+                not user.is_admin()
+                and not user.is_service_user()
+                and user_access == USER_ACCESS_ALL_OBJECTS_NO
+            ):
+                query = query.filter_by(user_id=user.id)
+        return query.first()
 
     def __repr__(self):
         """

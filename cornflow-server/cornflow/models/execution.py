@@ -19,6 +19,7 @@ from cornflow.shared.const import (
     EXECUTION_FILES_STATUS_NOT_GENERATED,
     EXECUTION_FILES_STATUS_OK,
     EXECUTION_FILES_STATUS_NOT_UP_TO_DATE,
+    USER_ACCESS_ALL_OBJECTS_NO,
 )
 
 
@@ -161,6 +162,33 @@ class ExecutionModel(BaseDataModel):
         """
         self.log_text = txt
         super().update({})
+
+    @classmethod
+    def get_one_object(cls, user=None, idx=None, defer_data=False, **kwargs):
+        """
+        Query to get one object from the user and the id.
+
+        :param UserModel user: user object performing the query
+        :param str or int idx: ID from the object to get
+        :param bool defer_data: whether to defer loading the heavy data/log columns
+        :return: The object or None if it does not exist
+        :rtype: :class:`ExecutionModel`
+        """
+        query = cls.query
+        if defer_data:
+            query = query.options(
+                defer(cls.data), defer(cls.log_text), defer(cls.log_json)
+            )
+        query = query.filter_by(id=idx, deleted_at=None)
+        user_access = int(current_app.config["USER_ACCESS_ALL_OBJECTS"])
+        if (
+            user is not None
+            and not user.is_admin()
+            and not user.is_service_user()
+            and user_access == USER_ACCESS_ALL_OBJECTS_NO
+        ):
+            query = query.filter_by(user_id=user.id)
+        return query.first()
 
     @classmethod
     def get_all_objects(

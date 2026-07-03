@@ -58,6 +58,7 @@ class BaseDataModel(TraceAttributesModel):
         offset=0,
         limit=10,
         user=None,
+        options=None,
     ):
         """
         Query to get all objects from a user
@@ -72,10 +73,13 @@ class BaseDataModel(TraceAttributesModel):
         :param string update_date_lte: update_at needs to be smaller or equal to this
         :param int offset: query offset for pagination
         :param int limit: query size limit
+        :param list options: extra SQLAlchemy loader options (e.g. defer()) to apply to the query
         :return: The objects
         :rtype: list(:class:`BaseDataModel`)
         """
         query = cls.query.filter(cls.deleted_at == None)
+        if options:
+            query = query.options(*options)
         user_access = int(current_app.config["USER_ACCESS_ALL_OBJECTS"])
         if (
             user is not None

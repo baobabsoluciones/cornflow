@@ -24,6 +24,7 @@ from cornflow.models import InstanceModel, DeployedWorkflow, ExecutionModel
 from cornflow.schemas.execution import (
     ExecutionDetailsEndpointResponse,
     ExecutionDetailsEndpointWithIndicatorsResponse,
+    ExecutionDetailsEndpointNoDataResponse,
     ExecutionDataEndpointResponse,
     ExecutionLogEndpointResponse,
     ExecutionStatusEndpointResponse,
@@ -228,7 +229,9 @@ class ExecutionEndpoint(OrchestratorMixin):
         # region INDEPENDIENTE A AIRFLOW
         config = current_app.config
         execution, status_code = self.post_list(data=kwargs)
-        instance = InstanceModel.get_one_object(idx=execution.instance_id)
+        instance = InstanceModel.get_one_object(
+            idx=execution.instance_id, defer_data=True
+        )
         if execution.schema != instance.schema:
             execution.delete()
             raise InvalidData(error="Instance and execution schema mismatch")
@@ -497,7 +500,7 @@ class ExecutionDetailsEndpointBase(OrchestratorMixin):
 class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
     @doc(description="Get details of an execution", tags=["Executions"], inherit=False)
     @authenticate(auth_class=Auth())
-    @marshal_with(ExecutionDetailsEndpointWithIndicatorsResponse)
+    @marshal_with(ExecutionDetailsEndpointNoDataResponse)
     @BaseMetaResource.get_data_or_404
     def get(self, idx):
         """
@@ -513,7 +516,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
         current_app.logger.info(
             f"User {self.get_user()} gets details of execution {idx}"
         )
-        return self.get_detail(user=self.get_user(), idx=idx)
+        return self.get_detail(user=self.get_user(), idx=idx, defer_data=True)
 
     @doc(description="Edit an execution", tags=["Executions"], inherit=False)
     @authenticate(auth_class=Auth())
