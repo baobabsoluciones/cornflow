@@ -5,14 +5,26 @@ import time
 import logging
 from logging import error
 
+from cornflow.shared.log_config import JsonFormatter
+
 # Configure a logger for the service module
 logger = logging.getLogger("cornflow.service")
 logger.setLevel(logging.INFO)
 
 # Add console handler if not already present
 if not logger.handlers:
-    handler = logging.StreamHandler(sys.stdout)
-    formatter = logging.Formatter("%(asctime)s [%(name)s] [%(levelname)s] %(message)s")
+    stream = (
+        sys.stderr
+        if os.getenv("CORNFLOW_LOG_STREAM", "stdout").lower() == "stderr"
+        else sys.stdout
+    )
+    handler = logging.StreamHandler(stream)
+    if os.getenv("CORNFLOW_LOG_FORMAT", "text").lower() == "json":
+        formatter = JsonFormatter()
+    else:
+        formatter = logging.Formatter(
+            "%(asctime)s [%(name)s] [%(levelname)s] %(message)s"
+        )
     handler.setFormatter(formatter)
     logger.addHandler(handler)
     logger.propagate = False
