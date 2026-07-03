@@ -107,19 +107,23 @@ class BaseDataModel(TraceAttributesModel):
         return query.order_by(desc(cls.created_at)).offset(offset).limit(limit).all()
 
     @classmethod
-    def get_one_object(cls, user=None, idx=None, **kwargs):
+    def get_one_object(cls, user=None, idx=None, options=None, **kwargs):
         """
         Query to get one object from the user and the id.
 
         :param UserModel user: user object performing the query
         :param str or int idx: ID from the object to get
+        :param list options: extra SQLAlchemy loader options (e.g. defer()) to apply to the query
         :return: The object or None if it does not exist
         :rtype: :class:`BaseDataModel`
         """
         user_access = int(current_app.config["USER_ACCESS_ALL_OBJECTS"])
         if user is None:
             return super().get_one_object(idx=idx)
-        query = cls.query.filter_by(id=idx, deleted_at=None)
+        query = cls.query
+        if options:
+            query = query.options(*options)
+        query = query.filter_by(id=idx, deleted_at=None)
         if not user.is_admin() and not user.is_service_user() and user_access == USER_ACCESS_ALL_OBJECTS_NO:
             query = query.filter_by(user_id=user.id)
         return query.first()

@@ -3,13 +3,11 @@
 # Import from libraries
 import hashlib
 
-from flask import current_app
 from sqlalchemy.orm import defer
 
 # Imported from internal models
 from cornflow.models.base_data_model import BaseDataModel
 from cornflow.shared import db
-from cornflow.shared.const import USER_ACCESS_ALL_OBJECTS_NO
 
 
 class InstanceModel(BaseDataModel):
@@ -105,20 +103,8 @@ class InstanceModel(BaseDataModel):
         :return: The object or None if it does not exist
         :rtype: :class:`InstanceModel`
         """
-        if not defer_data:
-            return super().get_one_object(user=user, idx=idx, **kwargs)
-        query = cls.query.options(defer(cls.data), defer(cls.checks)).filter_by(
-            id=idx, deleted_at=None
-        )
-        if user is not None:
-            user_access = int(current_app.config["USER_ACCESS_ALL_OBJECTS"])
-            if (
-                not user.is_admin()
-                and not user.is_service_user()
-                and user_access == USER_ACCESS_ALL_OBJECTS_NO
-            ):
-                query = query.filter_by(user_id=user.id)
-        return query.first()
+        options = [defer(cls.data), defer(cls.checks)] if defer_data else None
+        return super().get_one_object(user=user, idx=idx, options=options, **kwargs)
 
     def __repr__(self):
         """

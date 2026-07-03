@@ -19,7 +19,6 @@ from cornflow.shared.const import (
     EXECUTION_FILES_STATUS_NOT_GENERATED,
     EXECUTION_FILES_STATUS_OK,
     EXECUTION_FILES_STATUS_NOT_UP_TO_DATE,
-    USER_ACCESS_ALL_OBJECTS_NO,
 )
 
 
@@ -174,21 +173,12 @@ class ExecutionModel(BaseDataModel):
         :return: The object or None if it does not exist
         :rtype: :class:`ExecutionModel`
         """
-        query = cls.query
-        if defer_data:
-            query = query.options(
-                defer(cls.data), defer(cls.log_text), defer(cls.log_json)
-            )
-        query = query.filter_by(id=idx, deleted_at=None)
-        user_access = int(current_app.config["USER_ACCESS_ALL_OBJECTS"])
-        if (
-            user is not None
-            and not user.is_admin()
-            and not user.is_service_user()
-            and user_access == USER_ACCESS_ALL_OBJECTS_NO
-        ):
-            query = query.filter_by(user_id=user.id)
-        return query.first()
+        options = (
+            [defer(cls.data), defer(cls.log_text), defer(cls.log_json)]
+            if defer_data
+            else None
+        )
+        return super().get_one_object(user=user, idx=idx, options=options, **kwargs)
 
     @classmethod
     def get_all_objects(
