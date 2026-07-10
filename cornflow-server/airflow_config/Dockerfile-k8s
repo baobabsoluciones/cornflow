@@ -9,7 +9,7 @@
 # - This Dockerfile performs network downloads during build (git clones, wget).
 # - Including Gurobi binaries may have licensing implications; control via SOLVER_LIST.
 
-ARG AIRFLOW_VERSION="2.10.5"
+ARG AIRFLOW_VERSION="3.2.2"
 # Prefer the official image so `/entrypoint` exists.
 # If your registry only mirrors `apache/airflow:2.10.5`, switch the tag accordingly.
 FROM apache/airflow:${AIRFLOW_VERSION}-python3.12
