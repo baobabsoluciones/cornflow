@@ -7,6 +7,7 @@ import jsonpatch
 from flask import current_app
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.exc import DBAPIError, IntegrityError
+from sqlalchemy.orm import defer
 
 # Import from internal modules
 from cornflow.models.base_data_model import BaseDataModel
@@ -125,6 +126,21 @@ class CaseModel(BaseDataModel):
         self.solution_hash = hash_json_256(self.solution)
         self.solution_checks = data.get("solution_checks", None)
         self.kpis = data.get("kpis", None)
+
+    @classmethod
+    def get_all_objects(cls, *args, **kwargs):
+        """
+        Query to get all cases from a user, deferring the checks/solution_checks/kpis
+        columns since the list endpoint does not serialize them (only data and solution
+        are used, for the is_dir flag and the indicators).
+
+        :return: The objects
+        :rtype: list(:class:`CaseModel`)
+        """
+        kwargs.setdefault(
+            "options", [defer(cls.checks), defer(cls.solution_checks), defer(cls.kpis)]
+        )
+        return super().get_all_objects(*args, **kwargs)
 
     @classmethod
     def from_parent_id(cls, user, data):

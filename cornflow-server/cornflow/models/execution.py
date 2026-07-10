@@ -163,6 +163,24 @@ class ExecutionModel(BaseDataModel):
         super().update({})
 
     @classmethod
+    def get_one_object(cls, user=None, idx=None, defer_data=False, **kwargs):
+        """
+        Query to get one object from the user and the id.
+
+        :param UserModel user: user object performing the query
+        :param str or int idx: ID from the object to get
+        :param bool defer_data: whether to defer loading the heavy data/log columns
+        :return: The object or None if it does not exist
+        :rtype: :class:`ExecutionModel`
+        """
+        options = (
+            [defer(cls.data), defer(cls.log_text), defer(cls.log_json)]
+            if defer_data
+            else None
+        )
+        return super().get_one_object(user=user, idx=idx, options=options, **kwargs)
+
+    @classmethod
     def get_all_objects(
         cls,
         user,

@@ -23,6 +23,7 @@ from cornflow_client.constants import (
     BadInstance,
     EXECUTION_FILES_STATUS_NOT_GENERATED,
 )
+
 from .experiment import ExperimentCore
 
 # Imports from internal modules
@@ -311,6 +312,7 @@ class ApplicationCore(ABC):
         # Perform data checks only if a valid solution dict was obtained
         # and the solver implements data_checks
         # Checks for non-None and non-empty dict
+        solution_has_errors = False
         if final_sol_dict:
             solution_checks, solution_has_errors = self._check_solution_errors(algo)
 
