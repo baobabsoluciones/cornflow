@@ -6,7 +6,7 @@
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=ad592e98" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=9454f7d5" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=70423902" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -186,15 +186,15 @@ data-aria-dark="Switch to auto color mode">
       <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
   <article class="yue" role="main">
           <section id="custom-role-and-extra-permissions-configuration">
-<h1>Custom role and extra permissions configuration<a class="headerlink" href="#custom-role-and-extra-permissions-configuration" title="Link to this heading">¶</a></h1>
+<h1>Custom role and extra permissions configuration<a class="headerlink" href="#custom-role-and-extra-permissions-configuration" title="Link to this heading">#</a></h1>
 <section id="overview">
-<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h2>
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">#</a></h2>
 <p>Cornflow provides two powerful mechanisms to configure custom permissions in external applications:
 <code class="docutils literal notranslate"><span class="pre">CUSTOM_ROLES_ACTIONS</span></code> for defining default actions for custom roles, and <code class="docutils literal notranslate"><span class="pre">EXTRA_PERMISSION_ASSIGNATION</span></code>
 for assigning specific additional permissions to any role on particular endpoints.</p>
 </section>
 <section id="what-it-provides">
-<h2>What it Provides<a class="headerlink" href="#what-it-provides" title="Link to this heading">¶</a></h2>
+<h2>What it Provides<a class="headerlink" href="#what-it-provides" title="Link to this heading">#</a></h2>
 <p>Cornflow’s permission system provides flexible permission management for external applications:</p>
 <ul class="simple">
 <li><p><strong>Custom Role Configuration</strong>: Define specific default actions for custom roles according to business needs</p></li>
@@ -204,9 +204,9 @@ for assigning specific additional permissions to any role on particular endpoint
 </ul>
 </section>
 <section id="configuration">
-<h2>Configuration<a class="headerlink" href="#configuration" title="Link to this heading">¶</a></h2>
+<h2>Configuration<a class="headerlink" href="#configuration" title="Link to this heading">#</a></h2>
 <section id="define-constants-in-the-external-app">
-<h3>1. Define Constants in the External App<a class="headerlink" href="#define-constants-in-the-external-app" title="Link to this heading">¶</a></h3>
+<h3>1. Define Constants in the External App<a class="headerlink" href="#define-constants-in-the-external-app" title="Link to this heading">#</a></h3>
 <p>In your external app’s <code class="docutils literal notranslate"><span class="pre">shared/const.py</span></code> file, define both <code class="docutils literal notranslate"><span class="pre">CUSTOM_ROLES_ACTIONS</span></code> and <code class="docutils literal notranslate"><span class="pre">EXTRA_PERMISSION_ASSIGNATION</span></code> constants:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">cornflow.shared.const</span><span class="w"> </span><span class="kn">import</span> <span class="n">GET_ACTION</span><span class="p">,</span> <span class="n">POST_ACTION</span><span class="p">,</span> <span class="n">PUT_ACTION</span><span class="p">,</span> <span class="n">PATCH_ACTION</span>
 </span><span data-line="2"><span class="kn">from</span><span class="w"> </span><span class="nn">cornflow.shared.const</span><span class="w"> </span><span class="kn">import</span> <span class="n">VIEWER_ROLE</span><span class="p">,</span> <span class="n">PLANNER_ROLE</span>
@@ -238,7 +238,7 @@ for assigning specific additional permissions to any role on particular endpoint
 </div>
 </section>
 <section id="use-roles-in-endpoints">
-<h3>2. Use Roles in Endpoints<a class="headerlink" href="#use-roles-in-endpoints" title="Link to this heading">¶</a></h3>
+<h3>2. Use Roles in Endpoints<a class="headerlink" href="#use-roles-in-endpoints" title="Link to this heading">#</a></h3>
 <p>In your endpoints, define which roles have access using <code class="docutils literal notranslate"><span class="pre">ROLES_WITH_ACCESS</span></code>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">class</span><span class="w"> </span><span class="nc">ProductionPlanningResource</span><span class="p">(</span><span class="n">BaseInstanceResource</span><span class="p">):</span>
 </span><span data-line="2">    <span class="c1"># Custom role 888 + standard role</span>
@@ -257,7 +257,7 @@ for assigning specific additional permissions to any role on particular endpoint
 </div>
 </section>
 <section id="complete-external-app-structure">
-<h3>3. Complete External App Structure<a class="headerlink" href="#complete-external-app-structure" title="Link to this heading">¶</a></h3>
+<h3>3. Complete External App Structure<a class="headerlink" href="#complete-external-app-structure" title="Link to this heading">#</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1">external_app/
 </span><span data-line="2">├── shared/
 </span><span data-line="3">│   └── const.py              # Contains CUSTOM_ROLES_ACTIONS and EXTRA_PERMISSION_ASSIGNATION
@@ -270,9 +270,9 @@ for assigning specific additional permissions to any role on particular endpoint
 </section>
 </section>
 <section id="complete-example">
-<h2>Complete Example<a class="headerlink" href="#complete-example" title="Link to this heading">¶</a></h2>
+<h2>Complete Example<a class="headerlink" href="#complete-example" title="Link to this heading">#</a></h2>
 <section id="external-app-shared-const-py">
-<h3>external_app/shared/const.py<a class="headerlink" href="#external-app-shared-const-py" title="Link to this heading">¶</a></h3>
+<h3>external_app/shared/const.py<a class="headerlink" href="#external-app-shared-const-py" title="Link to this heading">#</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">cornflow.shared.const</span><span class="w"> </span><span class="kn">import</span> <span class="n">GET_ACTION</span><span class="p">,</span> <span class="n">POST_ACTION</span><span class="p">,</span> <span class="n">PUT_ACTION</span><span class="p">,</span> <span class="n">PATCH_ACTION</span>
 </span><span data-line="2"><span class="kn">from</span><span class="w"> </span><span class="nn">cornflow.shared.const</span><span class="w"> </span><span class="kn">import</span> <span class="n">VIEWER_ROLE</span><span class="p">,</span> <span class="n">PLANNER_ROLE</span>
 </span><span data-line="3">
@@ -302,7 +302,7 @@ for assigning specific additional permissions to any role on particular endpoint
 </div>
 </section>
 <section id="external-app-endpoints-resources-py">
-<h3>external_app/endpoints/resources.py<a class="headerlink" href="#external-app-endpoints-resources-py" title="Link to this heading">¶</a></h3>
+<h3>external_app/endpoints/resources.py<a class="headerlink" href="#external-app-endpoints-resources-py" title="Link to this heading">#</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">cornflow.endpoints</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseInstanceResource</span>
 </span><span data-line="2"><span class="kn">from</span><span class="w"> </span><span class="nn">cornflow.shared.const</span><span class="w"> </span><span class="kn">import</span> <span class="n">PLANNER_ROLE</span><span class="p">,</span> <span class="n">VIEWER_ROLE</span>
 </span><span data-line="3">
@@ -341,9 +341,9 @@ for assigning specific additional permissions to any role on particular endpoint
 </section>
 </section>
 <section id="how-both-systems-work-together">
-<h2>How Both Systems Work Together<a class="headerlink" href="#how-both-systems-work-together" title="Link to this heading">¶</a></h2>
+<h2>How Both Systems Work Together<a class="headerlink" href="#how-both-systems-work-together" title="Link to this heading">#</a></h2>
 <section id="understanding-the-permission-flow">
-<h3>Understanding the Permission Flow<a class="headerlink" href="#understanding-the-permission-flow" title="Link to this heading">¶</a></h3>
+<h3>Understanding the Permission Flow<a class="headerlink" href="#understanding-the-permission-flow" title="Link to this heading">#</a></h3>
 <p>The permission system works in two phases:</p>
 <ol class="arabic simple">
 <li><p><strong>Base Permissions from CUSTOM_ROLES_ACTIONS</strong>: Each custom role receives its default actions on all endpoints where it appears in <code class="docutils literal notranslate"><span class="pre">ROLES_WITH_ACCESS</span></code></p></li>
@@ -351,7 +351,7 @@ for assigning specific additional permissions to any role on particular endpoint
 </ol>
 </section>
 <section id="example-permission-flow">
-<h3>Example Permission Flow<a class="headerlink" href="#example-permission-flow" title="Link to this heading">¶</a></h3>
+<h3>Example Permission Flow<a class="headerlink" href="#example-permission-flow" title="Link to this heading">#</a></h3>
 <p>Given this configuration:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">CUSTOM_ROLES_ACTIONS</span> <span class="o">=</span> <span class="p">{</span>
 </span><span data-line="2">    <span class="mi">888</span><span class="p">:</span> <span class="p">[</span><span class="n">GET_ACTION</span><span class="p">,</span> <span class="n">POST_ACTION</span><span class="p">],</span>  <span class="c1"># Default actions for role 888</span>
@@ -381,9 +381,9 @@ for assigning specific additional permissions to any role on particular endpoint
 </section>
 </section>
 <section id="validations-and-errors">
-<h2>Validations and Errors<a class="headerlink" href="#validations-and-errors" title="Link to this heading">¶</a></h2>
+<h2>Validations and Errors<a class="headerlink" href="#validations-and-errors" title="Link to this heading">#</a></h2>
 <section id="error-for-undefined-role">
-<h3>Error for Undefined Role<a class="headerlink" href="#error-for-undefined-role" title="Link to this heading">¶</a></h3>
+<h3>Error for Undefined Role<a class="headerlink" href="#error-for-undefined-role" title="Link to this heading">#</a></h3>
 <p>If a custom role is used in <code class="docutils literal notranslate"><span class="pre">ROLES_WITH_ACCESS</span></code> but not defined in <code class="docutils literal notranslate"><span class="pre">CUSTOM_ROLES_ACTIONS</span></code>, a <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> will be raised:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="ne">ValueError</span><span class="p">:</span> <span class="n">The</span> <span class="n">following</span> <span class="n">custom</span> <span class="n">roles</span> <span class="n">are</span> <span class="n">used</span> <span class="ow">in</span> <span class="n">code</span> <span class="n">but</span> <span class="ow">not</span> <span class="n">defined</span> <span class="ow">in</span> <span class="n">CUSTOM_ROLES_ACTIONS</span><span class="p">:</span> <span class="p">{</span><span class="mi">888</span><span class="p">}</span><span class="o">.</span>
 </span><span data-line="2"><span class="n">Please</span> <span class="n">define</span> <span class="n">their</span> <span class="n">allowed</span> <span class="n">actions</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">CUSTOM_ROLES_ACTIONS</span> <span class="n">dictionary</span> <span class="ow">in</span> <span class="n">shared</span><span class="o">/</span><span class="n">const</span><span class="o">.</span><span class="n">py</span><span class="o">.</span>
@@ -391,7 +391,7 @@ for assigning specific additional permissions to any role on particular endpoint
 </div>
 </section>
 <section id="error-example">
-<h3>Error Example<a class="headerlink" href="#error-example" title="Link to this heading">¶</a></h3>
+<h3>Error Example<a class="headerlink" href="#error-example" title="Link to this heading">#</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># ❌ INCORRECT - Role 888 used but not defined</span>
 </span><span data-line="2"><span class="n">CUSTOM_ROLES_ACTIONS</span> <span class="o">=</span> <span class="p">{</span>
 </span><span data-line="3">    <span class="c1"># Only role 777 is defined</span>
@@ -406,7 +406,7 @@ for assigning specific additional permissions to any role on particular endpoint
 </div>
 </section>
 <section id="solution">
-<h3>Solution<a class="headerlink" href="#solution" title="Link to this heading">¶</a></h3>
+<h3>Solution<a class="headerlink" href="#solution" title="Link to this heading">#</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># ✅ CORRECT - All roles are defined</span>
 </span><span data-line="2"><span class="n">CUSTOM_ROLES_ACTIONS</span> <span class="o">=</span> <span class="p">{</span>
 </span><span data-line="3">    <span class="mi">777</span><span class="p">:</span> <span class="p">[</span><span class="n">GET_ACTION</span><span class="p">,</span> <span class="n">PATCH_ACTION</span><span class="p">],</span>
@@ -418,7 +418,7 @@ for assigning specific additional permissions to any role on particular endpoint
 </section>
 </section>
 <section id="backward-compatibility">
-<h2>Backward Compatibility<a class="headerlink" href="#backward-compatibility" title="Link to this heading">¶</a></h2>
+<h2>Backward Compatibility<a class="headerlink" href="#backward-compatibility" title="Link to this heading">#</a></h2>
 <ul class="simple">
 <li><p>If an external app doesn’t define <code class="docutils literal notranslate"><span class="pre">CUSTOM_ROLES_ACTIONS</span></code> or <code class="docutils literal notranslate"><span class="pre">EXTRA_PERMISSION_ASSIGNATION</span></code>, functionality continues to work normally</p></li>
 <li><p>Standard roles (<code class="docutils literal notranslate"><span class="pre">VIEWER_ROLE</span></code>, <code class="docutils literal notranslate"><span class="pre">PLANNER_ROLE</span></code>, <code class="docutils literal notranslate"><span class="pre">ADMIN_ROLE</span></code>, <code class="docutils literal notranslate"><span class="pre">SERVICE_ROLE</span></code>) are not affected</p></li>
@@ -427,7 +427,7 @@ for assigning specific additional permissions to any role on particular endpoint
 </ul>
 </section>
 <section id="available-actions">
-<h2>Available Actions<a class="headerlink" href="#available-actions" title="Link to this heading">¶</a></h2>
+<h2>Available Actions<a class="headerlink" href="#available-actions" title="Link to this heading">#</a></h2>
 <p>The available actions you can use in <code class="docutils literal notranslate"><span class="pre">CUSTOM_ROLES_ACTIONS</span></code> are:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># Read (GET)</span>
 </span><span data-line="2"><span class="n">GET_ACTION</span> <span class="o">=</span> <span class="mi">1</span>

@@ -6,7 +6,7 @@
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=ad592e98" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=9454f7d5" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=70423902" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -154,7 +154,7 @@ data-aria-dark="Switch to auto color mode">
       <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
   <article class="yue" role="main">
           <section id="examples-of-solution-methods">
-<h1>Examples of solution methods<a class="headerlink" href="#examples-of-solution-methods" title="Link to this heading">¶</a></h1>
+<h1>Examples of solution methods<a class="headerlink" href="#examples-of-solution-methods" title="Link to this heading">#</a></h1>
 <p>In this section we list the public examples in the <a class="reference external" href="https://github.com/baobabsoluciones/cornflow/tree/master/cornflow-dags">cornflow-dags</a> part of the repository.</p>
 <p>In order to use any of the examples, check the <a class="reference internal" href="../guides/use_solver.html#user-your-solution-method"><span class="std std-ref">User your solution method</span></a> section and put the “dag name” when asked for the schema argument. Also, the solver name needs to be included in the <code class="docutils literal notranslate"><span class="pre">solver</span></code> property in the configuration of the execution. If not, the default solver will be used. The names of the available solvers can be found when downloading the schema (see <code class="xref py py-meth docutils literal notranslate"><span class="pre">cornflow_client.cornflow_client.CornFlow.get_schema()</span></code>) or in the individual example page.</p>
 <p>Current examples:</p>

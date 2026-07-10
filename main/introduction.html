@@ -6,7 +6,7 @@
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=ad592e98" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=9454f7d5" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=70423902" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -162,7 +162,7 @@ data-aria-dark="Switch to auto color mode">
       <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
   <article class="yue" role="main">
           <section id="introduction">
-<span id="introduction-label"></span><h1>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">¶</a></h1>
+<span id="introduction-label"></span><h1>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">#</a></h1>
 <a class="reference external image-reference" href="https://github.com/baobabsoluciones/cornflow/actions"><img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/baobabsoluciones/cornflow/build_docs.yml?label=docs&amp;logo=github&amp;style=for-the-badge" />
 </a>
 <a class="reference external image-reference" href="https://pypi.python.org/pypi/cornflow"><img alt="PyPI" src="https://img.shields.io/pypi/v/cornflow?label=cornflow&amp;style=for-the-badge" />
@@ -181,13 +181,13 @@ data-aria-dark="Switch to auto color mode">
 <p>cornflow uses input and output schemas to define “optimization problems” and then accepts any (for now python) code that reads data in the input schema and returns a solution in the output schema. We use JSONSchema to define these schemas. By working like this, cornflow becomes technique-agnostic without losing data-validation and re-usability (e.g., we can have more than one “solution method” for the same problem).</p>
 <p>Being technique-agnostic implies we sometimes use CP models built with ortools, MIP models built with pyomo and some heuristics in pure python. But again, we could also have a localsolver model or any metaheuristic as long as it complies with the interface format for the particular optimization problem. In the <a class="reference internal" href="../examples/index.html#examples-of-solution-methods"><span class="std std-ref">Examples of solution methods</span></a> section we describe some of the demo solution methods we have built and deployed.</p>
 <section id="ways-it-can-be-used">
-<h2>Ways it can be used<a class="headerlink" href="#ways-it-can-be-used" title="Link to this heading">¶</a></h2>
+<h2>Ways it can be used<a class="headerlink" href="#ways-it-can-be-used" title="Link to this heading">#</a></h2>
 <p>cornflow main advantage is its flexibility and so it can be used and deployed in many ways. The easiest is to use the test server we already have deployed to test the current offer of solvers. For this, check the <a class="reference internal" href="../guides/use_solver.html#user-your-solution-method"><span class="std std-ref">User your solution method</span></a> section on how to test the server and then the <a class="reference internal" href="../examples/index.html#examples-of-solution-methods"><span class="std std-ref">Examples of solution methods</span></a> section to see what solvers are available.</p>
 <p>If you want to have your solution available in the server, feel free to propose a new solution method via a Pull Request. This is explained in section <a class="reference internal" href="../guides/deploy_solver_new.html#how-to-deploy-a-new-solution-method-2-0"><span class="std std-ref">How to deploy a new solution method (2.0)</span></a>.</p>
 <p>Finally, if you want to deploy your own cornflow-server privately and deploy your own private solution methods, you can check the several ways in which you can do that in <a class="reference internal" href="../deploy/index.html#deploy-your-own-cornflow-server"><span class="std std-ref">Deploy your own cornflow-server</span></a>.</p>
 </section>
 <section id="components">
-<h2>Components<a class="headerlink" href="#components" title="Link to this heading">¶</a></h2>
+<h2>Components<a class="headerlink" href="#components" title="Link to this heading">#</a></h2>
 <p>cornflow is composed of several components:</p>
 <div class="sd-container-fluid sd-sphinx-override sd-mb-4 sd-p-2 docutils">
 <div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-1 sd-row-cols-md-2 sd-row-cols-lg-2 sd-g-2 sd-g-xs-2 sd-g-sm-2 sd-g-md-2 sd-g-lg-2 docutils">
