@@ -24,6 +24,7 @@ from cornflow.models import InstanceModel, DeployedWorkflow, ExecutionModel
 from cornflow.schemas.execution import (
     ExecutionDetailsEndpointResponse,
     ExecutionDetailsEndpointWithIndicatorsResponse,
+    ExecutionDetailsEndpointNoDataResponse,
     ExecutionDataEndpointResponse,
     ExecutionLogEndpointResponse,
     ExecutionStatusEndpointResponse,
@@ -497,7 +498,7 @@ class ExecutionDetailsEndpointBase(OrchestratorMixin):
 class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
     @doc(description="Get details of an execution", tags=["Executions"], inherit=False)
     @authenticate(auth_class=Auth())
-    @marshal_with(ExecutionDetailsEndpointWithIndicatorsResponse)
+    @marshal_with(ExecutionDetailsEndpointNoDataResponse)
     @BaseMetaResource.get_data_or_404
     def get(self, idx):
         """
@@ -513,7 +514,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
         current_app.logger.info(
             f"User {self.get_user()} gets details of execution {idx}"
         )
-        return self.get_detail(user=self.get_user(), idx=idx)
+        return self.get_detail(user=self.get_user(), idx=idx, defer_data=True)
 
     @doc(description="Edit an execution", tags=["Executions"], inherit=False)
     @authenticate(auth_class=Auth())

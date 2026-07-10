@@ -139,7 +139,7 @@ class InstanceDetailsEndpointBase(BaseMetaResource):
         :rtype: Tuple(dict, integer)
         """
         current_app.logger.info(f"User {self.get_user()} gets instance {idx}")
-        return self.get_detail(user=self.get_user(), idx=idx)
+        return self.get_detail(user=self.get_user(), idx=idx, defer_data=True)
 
 
 class InstanceDetailsEndpoint(InstanceDetailsEndpointBase):
@@ -157,7 +157,9 @@ class InstanceDetailsEndpoint(InstanceDetailsEndpointBase):
         :return: A dictionary with a confirmation message and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        schema = InstanceModel.get_one_object(user=self.get_user(), idx=idx).schema
+        schema = InstanceModel.get_one_object(
+            user=self.get_user(), idx=idx, defer_data=True
+        ).schema
 
         if kwargs.get("data") is not None and schema is not None:
             if schema == "pulp":
