@@ -173,5 +173,4 @@ cornssh.pub
 
 # airflow logs
 cornflow-server/airflow_config/logs
-.claude
 context
