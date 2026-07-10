@@ -1,3 +1,11 @@
+version 1.3.7
+--------------
+- released: 2026-07-10
+- description: Performance improvement
+- changelog:
+    - Improve performance of executions endpoint
+    - Add bug fix for when using click 8.4.0 with celery executor
+
 version 1.3.6
 --------------
 - released: 2026-06-25
