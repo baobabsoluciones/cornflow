@@ -36,10 +36,12 @@ from cornflow.tests.const import (
     EXECUTION_FILES_URL,
     EXECUTION_PATH,
     EXECUTION_SOLUTION_PATH,
+    EXECUTION_URL,
     EXECUTION_URL_NORUN,
     INSTANCE_PATH,
     INSTANCE_URL,
 )
+from cornflow.shared.utils import hash_json_256
 from cornflow.tests.custom_test_case import CustomTestCase
 from cornflow.tests.unit.tools import patch_af_client, patch_db_client
 
@@ -654,3 +656,369 @@ class TestExecutionListDataLoading(CustomTestCase):
                     item,
                     f"Required field '{field}' is missing from the execution list response.",
                 )
+
+
+class TestExecutionContractBaseline(CustomTestCase):
+    """
+    Contract tests for the endpoints that expose heavy JSON/TEXT columns
+    (`data`, `checks`, `kpis`, `log_text`, `log_json`) on instances and
+    executions.
+
+    These tests pin the exact response shape and the stability of
+    `data_hash`, so any internal change to how those columns are loaded or
+    serialized can be verified to leave client-observable behavior unchanged.
+    """
+
+    def setUp(self):
+        super().setUp()
+        with open(INSTANCE_PATH) as f:
+            instance_payload = json.load(f)
+        self.instance_id = self.create_new_row(
+            INSTANCE_URL, InstanceModel, instance_payload
+        )
+
+        with open(EXECUTION_PATH) as f:
+            execution_payload = json.load(f)
+        execution_payload["instance_id"] = self.instance_id
+        self.execution_id = self.create_new_row(
+            EXECUTION_URL_NORUN, ExecutionModel, execution_payload
+        )
+
+        # Push solution data (data/checks/kpis/log) into the execution via the
+        # DAG endpoint (service user) so that every heavy column is populated
+        # and observable in the baseline snapshots.
+        service_token = self.create_service_user()
+        with open(EXECUTION_SOLUTION_PATH) as f:
+            solution_data = json.load(f)
+
+        self.reference_data = solution_data
+        self.reference_data_hash = hash_json_256(solution_data)
+
+        self.update_row(
+            url=DAG_URL + self.execution_id + "/",
+            change={
+                "data": solution_data,
+                "checks": {"check_1": {"result": True, "detail": "ok"}},
+            },
+            payload_to_check={},
+            check_payload=False,
+            token=service_token,
+        )
+
+    @staticmethod
+    def _capture_queries(callable_under_test):
+        captured_queries = []
+
+        def _listener(conn, cursor, statement, parameters, context, executemany):
+            captured_queries.append(statement)
+
+        engine = db.engine
+        event.listen(engine, "before_cursor_execute", _listener)
+        try:
+            result = callable_under_test()
+        finally:
+            event.remove(engine, "before_cursor_execute", _listener)
+
+        return result, captured_queries
+
+    @staticmethod
+    def _select_includes_column(queries, column_name):
+        needle_variants = [
+            f'"{column_name}"',
+            f" {column_name},",
+            f" {column_name} ",
+            f".{column_name}",
+        ]
+        return any(
+            any(variant in q for variant in needle_variants) for q in queries
+        )
+
+    # region contract/baseline snapshots
+
+    def test_baseline_execution_data_endpoint_contract(self):
+        """
+        `GET /execution/{id}/data/` must return `id`, `data`, `checks`,
+        `kpis` and `log`, with `data` byte/shape-identical to what was
+        stored.
+        """
+        response = self.client.get(
+            EXECUTION_URL + self.execution_id + "/data/",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+        self.assertEqual(200, response.status_code)
+        body = response.json
+
+        for field in ["id", "data", "checks", "kpis", "log"]:
+            self.assertIn(field, body)
+
+        self.assertEqual(self.execution_id, body["id"])
+        self.assertEqual(
+            self.reference_data,
+            body["data"],
+            "The 'data' field returned by GET /execution/{id}/data/ must be "
+            "byte/shape-identical to what was stored.",
+        )
+
+    def test_baseline_instance_data_endpoint_contract(self):
+        """
+        `GET /instance/{id}/data/` must return `id`, `data` and `checks`.
+        """
+        response = self.client.get(
+            INSTANCE_URL + self.instance_id + "/data/",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+        self.assertEqual(200, response.status_code)
+        body = response.json
+
+        for field in ["id", "data", "checks"]:
+            self.assertIn(field, body)
+        self.assertEqual(self.instance_id, body["id"])
+
+    def test_baseline_execution_log_endpoint_contract(self):
+        """
+        `GET /execution/{id}/log/` must return `id` and `log`.
+        """
+        response = self.client.get(
+            EXECUTION_URL + self.execution_id + "/log/",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+        self.assertEqual(200, response.status_code)
+        body = response.json
+        self.assertIn("id", body)
+        self.assertIn("log", body)
+
+    def test_baseline_execution_status_endpoint_contract(self):
+        """
+        `GET /execution/{id}/status/` must return only `id`, `state`,
+        `message` and `data_hash`; it must never expose `data`, `checks`,
+        `kpis`, `log`, `log_text` or `log_json`.
+        """
+        response = self.client.get(
+            EXECUTION_URL + self.execution_id + "/status/",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+        self.assertEqual(200, response.status_code)
+        body = response.json
+
+        for field in ["id", "state", "message", "data_hash"]:
+            self.assertIn(field, body)
+        for field in ["data", "checks", "kpis", "log", "log_text", "log_json"]:
+            self.assertNotIn(field, body)
+
+    def test_baseline_execution_detail_endpoint_contract(self):
+        """
+        `GET /execution/{id}/` must expose the standard metadata fields and
+        must never include `data` or `indicators`.
+        """
+        response = self.client.get(
+            EXECUTION_URL + self.execution_id + "/",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+        self.assertEqual(200, response.status_code)
+        body = response.json
+
+        for field in [
+            "id",
+            "name",
+            "description",
+            "data_hash",
+            "state",
+            "message",
+            "instance_id",
+            "schema",
+        ]:
+            self.assertIn(field, body)
+        self.assertNotIn("data", body)
+        self.assertNotIn("indicators", body)
+
+    def test_baseline_instance_detail_endpoint_contract(self):
+        """
+        `GET /instance/{id}/` must expose the standard metadata fields and
+        must never include `data`.
+        """
+        response = self.client.get(
+            INSTANCE_URL + self.instance_id + "/",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+        self.assertEqual(200, response.status_code)
+        body = response.json
+
+        for field in ["id", "name", "description", "data_hash", "schema"]:
+            self.assertIn(field, body)
+        self.assertNotIn("data", body)
+
+    # endregion
+
+    # region data_hash stability
+
+    def test_data_hash_is_stable_for_reference_payload(self):
+        """
+        `hash_json_256` must be deterministic/reproducible for the same
+        `data` payload.
+        """
+        hash_1 = hash_json_256(self.reference_data)
+        hash_2 = hash_json_256(self.reference_data)
+        self.assertEqual(hash_1, hash_2)
+        self.assertEqual(self.reference_data_hash, hash_1)
+
+    def test_data_hash_matches_instance_creation_payload(self):
+        """
+        `data_hash` for an instance created via `POST /instance/` must match
+        `hash_json_256` computed locally on the exact `data` payload sent by
+        the client.
+        """
+        with open(INSTANCE_PATH) as f:
+            instance_payload = json.load(f)
+
+        response = self.client.get(
+            INSTANCE_URL + self.instance_id + "/",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+        self.assertEqual(200, response.status_code)
+        expected_hash = hash_json_256(instance_payload["data"])
+        self.assertEqual(expected_hash, response.json["data_hash"])
+
+    def test_data_hash_is_not_recomputed_when_dag_endpoint_writes_solution(self):
+        """
+        Documents current behavior: `ExecutionModel.data_hash` is only
+        computed once, in `BaseDataModel.__init__` at creation time.
+        `BaseDataModel.update()` (used by `DAGDetailEndpoint.put` to write
+        the solution `data`) does a
+        plain `setattr` per field and never recalculates `data_hash`.
+
+        As a result, `data_hash` on `GET /execution/{id}/status/` reflects
+        the hash of the `data` payload sent at creation time (`None`/absent
+        for a `run=0` execution created without a solution), NOT the hash of
+        the solution `data` written later via the DAG endpoint. Clients may
+        already depend on this behavior, so it must be preserved unless a
+        change is deliberately scoped and documented.
+        """
+        response = self.client.get(
+            EXECUTION_URL + self.execution_id + "/status/",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(self.token),
+        )
+        self.assertEqual(200, response.status_code)
+
+        hash_of_creation_payload = hash_json_256(None)
+        self.assertEqual(hash_of_creation_payload, response.json["data_hash"])
+        self.assertNotEqual(self.reference_data_hash, response.json["data_hash"])
+
+    # endregion
+
+    # region SQL-level column loading
+
+    def test_status_endpoint_query_does_not_defer_data_and_log_columns(self):
+        """
+        `GET /execution/{id}/status/` must not load `data`, `log_text` or
+        `log_json` in its SELECT: the response schema never serializes them.
+        """
+
+        def _call_status_endpoint():
+            return self.client.get(
+                EXECUTION_URL + self.execution_id + "/status/",
+                follow_redirects=True,
+                headers=self.get_header_with_auth(self.token),
+            )
+
+        response, captured_queries = self._capture_queries(_call_status_endpoint)
+        self.assertEqual(200, response.status_code)
+        self.assertGreater(
+            len(captured_queries),
+            0,
+            "No SQL queries were captured; the event listener may not have fired.",
+        )
+
+        deferred_columns = ["data", "log_text", "log_json"]
+        columns_in_select = {
+            column: self._select_includes_column(captured_queries, column)
+            for column in deferred_columns
+        }
+
+        self.assertFalse(
+            any(columns_in_select.values()),
+            "GET /execution/{id}/status/ must not load data/log_text/log_json "
+            f"in its SELECT. Columns found in SELECT: {columns_in_select}. "
+            f"Captured queries: {captured_queries}",
+        )
+
+    # TODO(remove-before-merge): temporary coverage gap tracker. Both
+    # `checks` and `kpis` are still loaded by `ExecutionModel.get_one_object`
+    # even with `defer_data=True`, including by `GET /execution/{id}/status/`
+    # and `ExecutionDetailsEndpoint.get`. Once `get_one_object` also defers
+    # `checks`/`kpis`, drop this test (its assertion becomes part of
+    # `test_status_endpoint_query_does_not_defer_data_and_log_columns` and of
+    # a similar check on `ExecutionModel.get_one_object` directly) instead of
+    # keeping it as a documented gap.
+    def test_get_one_object_defer_data_does_not_defer_checks_and_kpis_YET(self):
+        """
+        `ExecutionModel.get_one_object(defer_data=True)` only defers `data`,
+        `log_text` and `log_json`; it never defers `checks` nor `kpis`, so
+        any caller using `defer_data=True` still loads a potentially large
+        `checks`/`kpis` blob into memory. Currently FAILS, documenting a
+        known gap; must pass once `checks`/`kpis` are added to the defer
+        list.
+        """
+
+        def _call_get_one_object():
+            return ExecutionModel.get_one_object(
+                user=self.user, idx=self.execution_id, defer_data=True
+            )
+
+        execution, captured_queries = self._capture_queries(_call_get_one_object)
+        self.assertIsNotNone(execution)
+        self.assertGreater(
+            len(captured_queries),
+            0,
+            "No SQL queries were captured; the event listener may not have fired.",
+        )
+
+        gap_columns = ["checks", "kpis"]
+        columns_in_select = {
+            column: self._select_includes_column(captured_queries, column)
+            for column in gap_columns
+        }
+
+        self.assertFalse(
+            any(columns_in_select.values()),
+            "ExecutionModel.get_one_object(defer_data=True) must defer "
+            "'checks' and 'kpis' too, not just 'data'/'log_text'/'log_json'. "
+            f"Columns found in SELECT: {columns_in_select}. "
+            f"Captured queries: {captured_queries}",
+        )
+
+    def test_data_endpoint_query_loads_data_and_checks_and_kpis(self):
+        """
+        `GET /execution/{id}/data/` must load `data`, `checks` and `kpis`,
+        since it serializes all three in the response.
+        """
+
+        def _call_data_endpoint():
+            return self.client.get(
+                EXECUTION_URL + self.execution_id + "/data/",
+                follow_redirects=True,
+                headers=self.get_header_with_auth(self.token),
+            )
+
+        response, captured_queries = self._capture_queries(_call_data_endpoint)
+        self.assertEqual(200, response.status_code)
+
+        heavy_columns = ["data", "checks", "kpis"]
+        columns_in_select = {
+            column: self._select_includes_column(captured_queries, column)
+            for column in heavy_columns
+        }
+        self.assertTrue(
+            all(columns_in_select.values()),
+            "Expected GET /execution/{id}/data/ to load data/checks/kpis. "
+            f"Found: {columns_in_select}. Captured queries: {captured_queries}",
+        )
+
+    # endregion

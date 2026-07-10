@@ -621,7 +621,9 @@ class ExecutionStatusEndpoint(OrchestratorMixin):
             and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        execution = self.data_model.get_one_object(user=self.get_user(), idx=idx)
+        execution = self.data_model.get_one_object(
+            user=self.get_user(), idx=idx, defer_data=True
+        )
         if execution is None:
             raise ObjectDoesNotExist(
                 log_txt=f"Error while user {self.get_user()} tries to get the status of execution {idx}. "
@@ -700,7 +702,9 @@ class ExecutionStatusEndpoint(OrchestratorMixin):
         :rtype: Tuple(dict, integer)
         """
 
-        execution = self.data_model.get_one_object(user=self.get_user(), idx=idx)
+        execution = self.data_model.get_one_object(
+            user=self.get_user(), idx=idx, defer_data=True
+        )
         if execution is None:
             raise ObjectDoesNotExist()
         if execution.state not in [
