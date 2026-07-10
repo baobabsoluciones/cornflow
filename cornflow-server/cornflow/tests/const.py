@@ -81,6 +81,8 @@ MAIN_ALARMS_URL = PREFIX + "/main-alarms/"
 
 LICENSES_URL = PREFIX + "/licences/"
 
+FRONTEND_AUTOMATION_URL = "/frontend-automation/"
+
 PUBLIC_DAGS = [
     "solve_model_dag",
     "gc",

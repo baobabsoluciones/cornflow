@@ -40,8 +40,9 @@ from .execution import (
     ExecutionLogEndpoint,
     ExecutionRelaunchEndpoint,
     ExecutionFilesEndpoint,
-    ExecutionFilesCleanupEndpoint
+    ExecutionFilesCleanupEndpoint,
 )
+from .frontend_automation import FrontendAutomationEndpoint
 from .health import HealthEndpoint
 from .instance import (
     InstanceEndpoint,
@@ -58,6 +59,7 @@ from .tables import TablesEndpoint, TablesDetailsEndpoint
 from .token import TokenEndpoint
 from .user import UserEndpoint, UserDetailsEndpoint, ToggleUserAdmin, RecoverPassword
 from .user_role import UserRoleListEndpoint, UserRoleDetailEndpoint
+
 
 resources = [
     dict(resource=InstanceEndpoint, urls="/instance/", endpoint="instance"),
@@ -130,8 +132,16 @@ resources = [
         endpoint="execution-relaunch",
     ),
     dict(resource=ExecutionEndpoint, urls="/execution/", endpoint="execution"),
-    dict(resource=ExecutionFilesEndpoint, urls="/execution/files/<string:idx>/", endpoint="execution-files"),
-    dict(resource=ExecutionFilesCleanupEndpoint, urls="/execution/files/cleanup/", endpoint="execution-files-cleanup"),
+    dict(
+        resource=ExecutionFilesEndpoint,
+        urls="/execution/files/<string:idx>/",
+        endpoint="execution-files",
+    ),
+    dict(
+        resource=ExecutionFilesCleanupEndpoint,
+        urls="/execution/files/cleanup/",
+        endpoint="execution-files-cleanup",
+    ),
     dict(resource=DAGDetailEndpoint, urls="/dag/<string:idx>/", endpoint="dag"),
     dict(resource=DAGEndpointManual, urls="/dag/", endpoint="dag-manual"),
     dict(
@@ -237,6 +247,11 @@ resources = [
         resource=TablesDetailsEndpoint,
         urls="/table/<string:table_name>/<string:idx>/",
         endpoint="tables-detail",
+    ),
+    dict(
+        resource=FrontendAutomationEndpoint,
+        urls="/frontend-automation/",
+        endpoint="frontend-automation",
     ),
 ]
 

@@ -13,4 +13,6 @@ Contents:
     Test your solution method <testing_app>
     Use your solution method <use_solver>
     Debug your solution method <debug_with_airflow>
+    Frontend automation <frontend_automation>
+    Frontend automation response schema <info_frontend_automation_schema>
 
