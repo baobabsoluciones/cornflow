@@ -26,11 +26,11 @@ def restrict_to_owner(query, model, user):
 
     :param query: a SQLAlchemy query/session.query(...) object
     :param model: the model class being queried (must have `user_id`)
-    :param user: the requesting `UserModel`, or None
+    :param user: the requesting `UserModel` (must be authenticated -- callers
+      pass `self.get_user()`, which never returns `None`: it raises
+      `InvalidUsage` instead)
     :return: the query, filtered by owner if required
     """
-    if user is None:
-        return query
     user_access = int(current_app.config["USER_ACCESS_ALL_OBJECTS"])
     if (
         not user.is_admin()
