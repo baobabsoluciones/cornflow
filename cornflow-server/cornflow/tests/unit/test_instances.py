@@ -192,6 +192,13 @@ class TestInstancesDataEndpoint(TestInstancesDetailEndpointBase):
         self.response_items.remove("executions")
         self.items_to_check += ["data", "checks"]
 
+    def _data_url(self, idx):
+        """
+        URL used by the tests below. Overridden by subclasses that
+        exercise an alternate implementation of the same endpoint.
+        """
+        return INSTANCE_URL + idx + "/data/"
+
     def test_get_one_instance(self):
         idx = self.create_new_row(self.url, self.model, self.payload)
         payload = {**self.payload, **dict(id=idx)}
@@ -207,7 +214,7 @@ class TestInstancesDataEndpoint(TestInstancesDetailEndpointBase):
             "created_at",
         ]
         result = self.get_one_row(
-            INSTANCE_URL + idx + "/data/", payload, keys_to_check=keys_to_check
+            self._data_url(idx), payload, keys_to_check=keys_to_check
         )
         dif = self.response_items.symmetric_difference(result.keys())
         self.assertEqual(len(dif), 0)
@@ -219,7 +226,7 @@ class TestInstancesDataEndpoint(TestInstancesDetailEndpointBase):
             "Authorization": f"Bearer {self.token}",
             "Accept-Encoding": "gzip",
         }
-        response = self.client.get(INSTANCE_URL + idx + "/data/", headers=headers)
+        response = self.client.get(self._data_url(idx), headers=headers)
         self.assertEqual(response.headers["Content-Encoding"], "gzip")
         raw = zlib.decompress(response.data, 16 + zlib.MAX_WBITS).decode("utf-8")
         response = json.loads(raw)
@@ -230,7 +237,7 @@ class TestInstancesDataEndpoint(TestInstancesDetailEndpointBase):
         idx = self.create_new_row(self.url, self.model, self.payload)
         token = self.create_service_user()
         payload = {**self.payload, **dict(id=idx)}
-        self.get_one_row(INSTANCE_URL + idx + "/data/", payload, token=token)
+        self.get_one_row(self._data_url(idx), payload, token=token)
 
     def test_get_none_instance_planner_one(self):
         # Test planner users cannot access objects of other users
@@ -238,7 +245,7 @@ class TestInstancesDataEndpoint(TestInstancesDetailEndpointBase):
         token = self.create_planner()
 
         self.get_one_row(
-            INSTANCE_URL + idx + "/data/",
+            self._data_url(idx),
             payload=None,
             expected_status=404,
             check_payload=False,

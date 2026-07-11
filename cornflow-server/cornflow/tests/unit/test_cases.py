@@ -959,6 +959,13 @@ class TestCaseDataEndpoint(CustomTestCase):
             "data",
         ]
 
+    def _data_url(self, idx):
+        """
+        URL used by the tests below. Overridden by subclasses that
+        exercise an alternate implementation of the same endpoint.
+        """
+        return self.url + str(idx) + "/data/"
+
     def test_get_data(self):
         """
         Test retrieving case data.
@@ -988,7 +995,7 @@ class TestCaseDataEndpoint(CustomTestCase):
             "kpis",
         ]
         self.get_one_row(
-            self.url + str(self.payload["id"]) + "/data/",
+            self._data_url(self.payload["id"]),
             self.payload,
             keys_to_check=keys_to_check,
         )
@@ -1000,7 +1007,7 @@ class TestCaseDataEndpoint(CustomTestCase):
         Verifies proper error handling for non-existent cases.
         """
         self.get_one_row(
-            self.url + str(500) + "/data/",
+            self._data_url(500),
             {},
             expected_status=404,
             check_payload=False,
@@ -1020,7 +1027,7 @@ class TestCaseDataEndpoint(CustomTestCase):
         headers["Accept-Encoding"] = "gzip"
 
         response = self.client.get(
-            self.url + str(self.payload["id"]) + "/data/", headers=headers
+            self._data_url(self.payload["id"]), headers=headers
         )
         self.assertEqual(response.headers["Content-Encoding"], "gzip")
         raw = zlib.decompress(response.data, 16 + zlib.MAX_WBITS).decode("utf-8")

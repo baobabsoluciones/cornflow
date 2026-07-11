@@ -141,6 +141,13 @@ class TestDagDetailEndpoint(TestExecutionsDetailEndpointMock):
     - Error handling for unauthorized access
     """
 
+    def _dag_get_url(self, idx):
+        """
+        URL used by test_get_dag/test_get_no_dag. Overridden by subclasses
+        that exercise an alternate implementation of the same endpoint.
+        """
+        return f"{DAG_URL}{idx}/"
+
     def test_put_dag(self):
         """
         Test updating a DAG.
@@ -209,7 +216,7 @@ class TestDagDetailEndpoint(TestExecutionsDetailEndpointMock):
         token = self.create_service_user()
         keys_to_check = ["id", "data", "solution_data", "config"]
         data = self.get_one_row(
-            url=DAG_URL + idx + "/",
+            url=self._dag_get_url(idx),
             token=token,
             check_payload=False,
             payload=self.payload,
@@ -247,7 +254,7 @@ class TestDagDetailEndpoint(TestExecutionsDetailEndpointMock):
         """
         idx = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
         data = self.get_one_row(
-            url=DAG_URL + idx + "/",
+            url=self._dag_get_url(idx),
             token=self.token,
             check_payload=False,
             payload=self.payload,
