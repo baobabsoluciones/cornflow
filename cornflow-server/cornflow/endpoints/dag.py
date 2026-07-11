@@ -160,76 +160,11 @@ class DAGDetailEndpoint(BaseMetaResource):
         return {"message": "results successfully saved"}, 200
 
 
-class DAGDetailEndpointFast(BaseMetaResource):
-    """
-    DEPRECATED: intermediate optimization step, superseded by
-    :class:`DAGDetailEndpointRaw` (a further-optimized variant that
-    also skips JSON decode/encode on the huge columns, which this one
-    still pays for). Not routed -- kept only for the benchmark scripts
-    in ``cornflow.tests.load`` that compare it against the other variants.
-
-    Fetches only the columns needed for the response with a single
-    SQLAlchemy Core-style JOIN query, instead of loading two full ORM
-    objects (which also pull in unused heavy columns like ``checks``,
-    ``kpis``, ``log_text`` and ``log_json``).
-    """
-
-    ROLES_WITH_ACCESS = [ADMIN_ROLE, SERVICE_ROLE]
-
-    @doc(
-        description="Get input data and configuration for an execution (optimized)",
-        tags=["DAGs"],
-    )
-    @authenticate(auth_class=Auth())
-    def get(self, idx):
-        """
-        API method to get the data of the instance that is going to be executed.
-        Same response contract as :meth:`DAGDetailEndpoint.get`.
-
-        :param str idx: ID of the execution
-        :return: the execution data (body) in a dictionary with structure of :class:`ConfigSchema`
-          and :class:`DataSchema` and an integer for HTTP status code
-        :rtype: Tuple(dict, integer)
-        """
-        row = (
-            db.session.query(
-                InstanceModel.id,
-                InstanceModel.data,
-                ExecutionModel.data,
-                ExecutionModel.config,
-            )
-            .join(ExecutionModel, ExecutionModel.instance_id == InstanceModel.id)
-            .filter(
-                ExecutionModel.id == idx,
-                ExecutionModel.deleted_at.is_(None),
-                InstanceModel.deleted_at.is_(None),
-            )
-            .first()
-        )
-        if row is None:
-            err = "The execution does not exist."
-            raise ObjectDoesNotExist(
-                error=err,
-                log_txt=f"Error while user {self.get_user()} tries to get input data for execution {idx}."
-                + err,
-            )
-        instance_id, instance_data, solution_data, config = row
-        current_app.logger.info(
-            f"User {self.get_user()} gets input data of execution {idx}"
-        )
-        return {
-            "id": instance_id,
-            "data": instance_data,
-            "solution_data": solution_data,
-            "config": config,
-        }, 200
-
-
 class DAGDetailEndpointRaw(DAGDetailEndpoint):
     """
-    Further-optimized variant of :class:`DAGDetailEndpointFast`'s GET, now
-    routed at ``/dag/<idx>/`` in place of :class:`DAGDetailEndpoint`.
-    Inherits ``put`` unchanged from :class:`DAGDetailEndpoint`.
+    Optimized variant of :class:`DAGDetailEndpoint`'s GET, now routed at
+    ``/dag/<idx>/`` in place of it. Inherits ``put`` unchanged from
+    :class:`DAGDetailEndpoint`.
 
     ``data``, ``solution_data`` and ``config`` are returned completely
     verbatim by this endpoint (no server-side transformation), so the

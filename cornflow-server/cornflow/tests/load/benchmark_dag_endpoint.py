@@ -1,13 +1,10 @@
 """
-Benchmark comparing three implementations of the same GET endpoint
+Benchmark comparing two implementations of the same GET endpoint
 (execution + instance ``data``, plus ``config``) when those JSON fields
 are very large:
 
 - DAGDetailEndpoint: two full ORM object fetches. DEPRECATED, no longer
   routed in the live app -- registered here on a benchmark-only path.
-- DAGDetailEndpointFast: one column-pruned JOIN query, still decoding the
-  JSON columns into Python. DEPRECATED, no longer routed in the live app --
-  registered here on a benchmark-only path.
 - DAGDetailEndpointRaw: one column-pruned JOIN query that casts the JSON
   columns to text, skipping decode entirely, and splices the raw JSON text
   straight into a hand-built response body. This is the live implementation,
@@ -27,7 +24,7 @@ import json
 import statistics
 import time
 
-from cornflow.endpoints.dag import DAGDetailEndpoint, DAGDetailEndpointFast
+from cornflow.endpoints.dag import DAGDetailEndpoint
 from cornflow.models import ExecutionModel, InstanceModel
 from cornflow.shared import db
 from cornflow.tests.base_test_execution import TestExecutionsDetailEndpointMock
@@ -47,46 +44,37 @@ NUM_REQUESTS = 20
 
 VARIANTS = [
     ("original", "_benchmark_original/"),
-    ("fast", "_benchmark_fast/"),
     ("raw", ""),
 ]
 
-
-DEPRECATED_ROUTES = [
-    (
-        "/dag/<string:idx>/_benchmark_original/",
-        "dag_benchmark_original",
-        DAGDetailEndpoint,
-    ),
-    (
-        "/dag/<string:idx>/_benchmark_fast/",
-        "dag_benchmark_fast",
-        DAGDetailEndpointFast,
-    ),
-]
+DEPRECATED_ROUTE = (
+    "/dag/<string:idx>/_benchmark_original/",
+    "dag_benchmark_original",
+    DAGDetailEndpoint,
+)
 
 
 def _register_deprecated_routes(app):
     """
     The live app only routes DAGDetailEndpointRaw at /dag/<idx>/ now (see
-    cornflow.endpoints.__init__). Register the deprecated Original/Fast
-    implementations on separate, benchmark-only paths so this script can
-    still compare all three. Must run before `case.setUp()` (Flask locks
-    `add_url_rule` after the first request).
+    cornflow.endpoints.__init__). Register the deprecated Original
+    implementation on a separate, benchmark-only path so this script can
+    still compare it against the live one. Must run before `case.setUp()`
+    (Flask locks `add_url_rule` after the first request).
     """
-    for url_rule, endpoint_name, view_class in DEPRECATED_ROUTES:
-        register_deprecated_route(
-            app, url_rule, endpoint_name, view_class, view_class.ROLES_WITH_ACCESS
-        )
+    url_rule, endpoint_name, view_class = DEPRECATED_ROUTE
+    register_deprecated_route(
+        app, url_rule, endpoint_name, view_class, view_class.ROLES_WITH_ACCESS
+    )
 
 
 def _grant_deprecated_permissions():
     """
-    Grant GET permission for the benchmark-only routes. Must run after
+    Grant GET permission for the benchmark-only route. Must run after
     `case.setUp()` (needs the `api_view`/`roles`/`actions` tables).
     """
-    for url_rule, endpoint_name, view_class in DEPRECATED_ROUTES:
-        grant_get_permission(url_rule, endpoint_name, view_class.ROLES_WITH_ACCESS)
+    url_rule, endpoint_name, view_class = DEPRECATED_ROUTE
+    grant_get_permission(url_rule, endpoint_name, view_class.ROLES_WITH_ACCESS)
 
 
 def _build_large_payload(target_bytes):

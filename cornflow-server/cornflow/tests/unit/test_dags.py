@@ -280,65 +280,6 @@ class TestDagDetailEndpoint(TestExecutionsDetailEndpointMock):
         )
 
 
-class TestDagDetailEndpointFastDeprecated(TestExecutionsDetailEndpointMock):
-    """
-    DAGDetailEndpointFast is DEPRECATED and no longer routed in the live
-    app (superseded by DAGDetailEndpointRaw) -- see its docstring. It's
-    kept only so the benchmark scripts in cornflow.tests.load can still
-    compare it against the other variants. This test wires it onto an
-    ad-hoc route the same way those scripts do, so it stays under
-    regression coverage instead of silently bit-rotting.
-    """
-
-    URL_RULE = "/dag/<string:idx>/_test_fast/"
-    ENDPOINT_NAME = "dag_fast_test"
-
-    def setUp(self):
-        from cornflow.endpoints.dag import DAGDetailEndpointFast
-        from cornflow.tests.load._deprecated_routes import (
-            grant_get_permission,
-            register_deprecated_route,
-        )
-
-        # Must run before super().setUp() (Flask locks add_url_rule after
-        # the first request, which super().setUp() triggers via signup/login).
-        register_deprecated_route(
-            self.app,
-            self.URL_RULE,
-            self.ENDPOINT_NAME,
-            DAGDetailEndpointFast,
-            DAGDetailEndpointFast.ROLES_WITH_ACCESS,
-        )
-        super().setUp()
-        # Must run after super().setUp() (needs the api_view/roles/actions tables).
-        grant_get_permission(
-            self.URL_RULE, self.ENDPOINT_NAME, DAGDetailEndpointFast.ROLES_WITH_ACCESS
-        )
-
-    def test_get_dag_fast(self):
-        idx = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
-        token = self.create_service_user()
-        keys_to_check = ["id", "data", "solution_data", "config"]
-        self.get_one_row(
-            url=f"/dag/{idx}/_test_fast/",
-            token=token,
-            check_payload=False,
-            payload=self.payload,
-            keys_to_check=keys_to_check,
-        )
-
-    def test_get_dag_fast_not_found(self):
-        token = self.create_service_user()
-        self.get_one_row(
-            url="/dag/this_execution_does_not_exist/_test_fast/",
-            token=token,
-            check_payload=False,
-            payload={},
-            expected_status=404,
-            keys_to_check=["error"],
-        )
-
-
 class TestDeployedDAG(TestCase):
     """
     Test suite for deployed DAG functionality.
