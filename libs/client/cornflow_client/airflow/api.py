@@ -48,11 +48,21 @@ class Airflow(object):
         """
         Check if the Airflow server is alive.
 
+        Airflow 3 removed the v1 health endpoint (/api/v1/health) in favour
+        of /api/v2/monitor/health. If the v1 endpoint answers 404, retry
+        against the v2 endpoint so this works against both Airflow 2 and 3.
+
         :param config: The configuration dictionary
         :return: True if the Airflow server is alive, False otherwise
         """
         try:
             response = requests.get(f"{self.url}/health")
+            if response.status_code == 404:
+                response = requests.get(
+                    f"{self.url}/health".replace(
+                        "/api/v1/health", "/api/v2/monitor/health"
+                    )
+                )
         except (ConnectionError, HTTPError):
             return False
         try:
