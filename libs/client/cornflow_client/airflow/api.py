@@ -152,6 +152,12 @@ class Airflow(object):
         url = f"{self.api_url}/dags/{dag_name}/dagRuns"
         if dag_run_id is not None:
             url = url + f"/{dag_run_id}"
+        elif method == "POST" and self._resolve_api_version() == "v2":
+            # Airflow 3's trigger endpoint requires the "logical_date" key to
+            # be present (null lets Airflow auto-assign it, same as omitting
+            # "execution_date" used to do on Airflow 2's v1 endpoint).
+            payload = dict(payload or {})
+            payload.setdefault("logical_date", None)
         response = self.request_headers_auth(method=method, url=url, json=payload)
         return response
 
@@ -308,12 +314,13 @@ class Airflow(object):
             # Airflow 3 replaced updateTaskInstancesState with a per-task
             # PATCH; the dag_run_id is already part of the URL, so there's
             # no need for a first call to fetch the run's execution date.
+            # PatchTaskInstanceBody forbids extra fields and has no "dry_run"
+            # or "task_id" field (dry-run is a separate endpoint in v2).
             url = (
                 f"{self.api_url}/dags/{dag_name}/dagRuns/{run_id}"
                 f"/taskInstances/{dag_name}"
             )
             payload = dict(
-                dry_run=False,
                 include_downstream=True,
                 include_future=False,
                 include_past=False,
