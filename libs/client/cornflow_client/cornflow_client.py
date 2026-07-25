@@ -116,19 +116,28 @@ class CornFlow:
             f"Connection failed with status code: {response.status_code}: {response.text}"
         )
 
-    def login(self, username, pwd, encoding=None):
+    def login(self, username, pwd, totp_code=None, encoding=None):
         """
         Log-in to the server.
 
         :param str username: username
         :param str pwd: password
+        :param str totp_code: the TOTP (or backup) code from the
+          authenticator app, needed when the user has two-factor
+          authentication enabled
         :param str encoding: the type of encoding used in the call. Defaults to 'br'
 
         :return: a dictionary with a token inside
         """
-        response = self.raw.login(username, pwd, encoding=encoding)
+        response = self.raw.login(username, pwd, totp_code=totp_code, encoding=encoding)
         if response.status_code != 200:
             raise CornFlowApiError(
                 f"Login failed with status code: {response.status_code}: {response.text}"
             )
-        return response.json()
+        result = response.json()
+        if "token" not in result:
+            raise CornFlowApiError(
+                "Login did not return a token: the user must complete the "
+                f"two-factor authentication step: {result}"
+            )
+        return result

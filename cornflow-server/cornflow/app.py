@@ -49,6 +49,38 @@ from cornflow.shared.exceptions import initialize_errorhandlers, ConfigurationEr
 from cornflow.shared.log_config import log_config
 
 
+# Minimum length in bytes of the JWT signing keys. HMAC-SHA256 requires keys
+# of at least 256 bits (RFC 7518, section 3.2) and CCN-STIC-807 requires
+# equivalent strength for the employed cryptography.
+MINIMUM_SECRET_KEY_LENGTH = 32
+
+
+def _check_secret_keys(app):
+    """
+    Refuses to start the application when a JWT signing key is configured
+    with less than MINIMUM_SECRET_KEY_LENGTH bytes, so weak keys can not be
+    used to sign session tokens.
+
+    :param app: the Flask application being created
+    """
+    for key_name in ("SECRET_TOKEN_KEY", "SECRET_BI_KEY"):
+        value = app.config.get(key_name)
+        if value is None:
+            # Token generation will fail at runtime with a clear error;
+            # deployments must provide the keys through the environment
+            app.logger.warning(
+                f"{key_name} is not configured: authentication tokens can "
+                f"not be issued until it is set"
+            )
+            continue
+        if len(str(value).encode("utf8")) < MINIMUM_SECRET_KEY_LENGTH:
+            raise ConfigurationError(
+                f"{key_name} must be at least {MINIMUM_SECRET_KEY_LENGTH} "
+                f"bytes long (256 bits). Generate one with: "
+                f'python -c "import secrets; print(secrets.token_hex(32))"'
+            )
+
+
 def create_app(env_name="development", dataconn=None):
     """
 
@@ -66,6 +98,7 @@ def create_app(env_name="development", dataconn=None):
     app.logger.setLevel(app_config[env_name].LOG_LEVEL)
 
     app.config.from_object(app_config[env_name])
+    _check_secret_keys(app)
     # initialization for init_cornflow_service.py
     if dataconn is not None:
         app.config["SQLALCHEMY_DATABASE_URI"] = dataconn

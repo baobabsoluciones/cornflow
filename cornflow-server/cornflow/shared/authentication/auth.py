@@ -26,6 +26,10 @@ from cornflow.shared.const import (
     PERMISSION_METHOD_MAP,
     INTERNAL_TOKEN_ISSUER,
     OID_PROVIDER_AZURE,
+    PWD_ROTATION_ALLOWED_ENDPOINTS,
+    TOKEN_PURPOSE_ALLOWED_ENDPOINTS,
+    TOKEN_PURPOSE_MFA_SETUP,
+    TOKEN_PURPOSE_PWD_RESET,
 )
 from cornflow.shared.exceptions import (
     CommunicationError,
@@ -40,14 +44,107 @@ public_keys_cache = TTLCache(maxsize=10, ttl=3600)
 
 
 class Auth:
+    # BI tokens (BIAuth) are long-lived by design and skip the
+    # token-version revocation check
+    CHECK_TOKEN_VERSION = True
+
     def __init__(self, user_model=UserModel):
         self.user_model = user_model
 
     def authenticate(self):
-        user = self.get_user_from_header(request.headers)
+        user, payload = self.get_user_and_payload_from_header(request.headers)
+        purpose = payload.get("purpose") if isinstance(payload, dict) else None
+        if purpose is not None:
+            Auth._check_purpose_token_access(purpose, user)
+        else:
+            Auth._check_password_rotation(user)
         Auth._get_permission_for_request(request, user.id)
         g.user = user
         return True
+
+    @staticmethod
+    def _check_purpose_token_access(purpose: str, user):
+        """
+        Tokens carrying a purpose claim are temporary tokens that can only be
+        used on a restricted set of endpoints (e.g. the MFA enrollment ones
+        or the password reset endpoint).
+
+        :param str purpose: the purpose claim found on the token
+        :param user: the user object the token belongs to
+        """
+        endpoint = request.endpoint
+        if endpoint in TOKEN_PURPOSE_ALLOWED_ENDPOINTS.get(purpose, []):
+            return
+        raise InvalidCredentials(
+            "The provided token can only be used for its intended "
+            "purpose and has no access to this endpoint",
+            status_code=403,
+            payload={"error_code": "purpose_token"},
+            log_txt=f"Error while user {user.id} tries to access endpoint "
+            f"{endpoint} with a temporary token with purpose {purpose}.",
+        )
+
+    @staticmethod
+    def _check_password_rotation(user):
+        """
+        When password rotation is enforced, users whose password has expired
+        or is flagged for a forced change can only access the endpoints
+        needed to review their profile and set a new password.
+
+        :param user: the user object
+        """
+        if int(current_app.config.get("PWD_ROTATION_ENFORCE", 1)) != 1:
+            return
+        if user.comes_from_external_provider():
+            return
+        if not (
+            user.pwd_change_required or Auth.password_rotation_expired(user)
+        ):
+            return
+        if user.is_service_user():
+            return
+        endpoint = request.endpoint
+        allowed_methods = PWD_ROTATION_ALLOWED_ENDPOINTS.get(endpoint, [])
+        if request.method in allowed_methods:
+            if endpoint != "user-detail":
+                return
+            target_user_id = (request.view_args or {}).get("user_id")
+            if target_user_id == user.id:
+                return
+        raise NoPermission(
+            error="Your password has expired or must be renewed. "
+            "Please change your password before continuing.",
+            status_code=403,
+            payload={"error_code": "password_rotation"},
+            log_txt=f"Error while user {user.id} tries to access endpoint "
+            f"{endpoint}. The user's password has expired and rotation "
+            f"is enforced.",
+        )
+
+    @staticmethod
+    def password_rotation_expired(user) -> bool:
+        """
+        Checks if the user's password is older than the rotation period
+        defined by the PWD_ROTATION_TIME config (in days).
+
+        :param user: the user object
+        :return: True if the password has expired
+        :rtype: bool
+        """
+        if not user.pwd_last_change:
+            return False
+        if isinstance(user.pwd_last_change, datetime):
+            if user.pwd_last_change.tzinfo is None:
+                last_change = user.pwd_last_change.replace(tzinfo=timezone.utc)
+            else:
+                last_change = user.pwd_last_change
+        else:
+            last_change = datetime.fromtimestamp(user.pwd_last_change, timezone.utc)
+
+        expiration_time = last_change + timedelta(
+            days=int(current_app.config["PWD_ROTATION_TIME"])
+        )
+        return expiration_time < datetime.now(timezone.utc)
 
     @staticmethod
     def dag_permission_required(func):
@@ -86,11 +183,14 @@ class Auth:
         return dag_decorator
 
     @staticmethod
-    def generate_token(user_id: int = None) -> str:
+    def generate_token(user_id: int = None, purpose: str = None) -> str:
         """
         Generates a token given a user_id. The token will contain the username in the sub claim.
 
         :param int user_id: user id to generate the token for
+        :param str purpose: optional purpose claim for temporary restricted
+          tokens (e.g. the MFA enrollment token issued during login). Tokens
+          with a purpose are short-lived and only valid on specific endpoints.
         :return: the generated token
         :rtype: str
         """
@@ -113,7 +213,24 @@ class Auth:
             "iat": datetime.now(timezone.utc),
             "sub": user.username,
             "iss": INTERNAL_TOKEN_ISSUER,
+            # Token version: bumped on security events (password change,
+            # account lock, MFA reset) to revoke outstanding sessions
+            "tv": user.token_version or 0,
         }
+
+        if purpose is not None:
+            purpose_durations = {
+                TOKEN_PURPOSE_MFA_SETUP: int(
+                    current_app.config.get("MFA_SETUP_TOKEN_DURATION_MINUTES", 10)
+                ),
+                TOKEN_PURPOSE_PWD_RESET: int(
+                    current_app.config.get("PWD_RESET_TOKEN_DURATION_MINUTES", 30)
+                ),
+            }
+            payload["purpose"] = purpose
+            payload["exp"] = datetime.now(timezone.utc) + timedelta(
+                minutes=purpose_durations.get(purpose, 10)
+            )
 
         return jwt.encode(
             payload, current_app.config["SECRET_TOKEN_KEY"], algorithm="HS256"
@@ -261,14 +378,17 @@ class Auth:
                 status_code=400,
             )
 
-    def get_user_from_header(self, headers: Headers = None) -> UserModel:
+    def get_user_and_payload_from_header(
+        self, headers: Headers = None
+    ) -> Tuple[UserModel, dict]:
         """
-        Extracts the user from the Authorization headers.
+        Extracts the user and the decoded token payload from the
+        Authorization headers.
 
         :param headers: the request headers
         :type headers: `Headers`
-        :return: the user object
-        :rtype: :class:`UserModel`
+        :return: the user object and the token payload
+        :rtype: Tuple[:class:`UserModel`, dict]
         """
         if headers is None:
             err = "Request headers are missing"
@@ -288,6 +408,54 @@ class Auth:
                 err,
                 log_txt="Error while trying to get user from header. User does not exist.",
                 status_code=400,
+            )
+
+        self._check_token_version(user, data)
+
+        return user, data
+
+    def _check_token_version(self, user, payload):
+        """
+        Rejects internal tokens whose version claim no longer matches the
+        user's current token version: they were revoked by a security event
+        (password change, account lock, MFA reset).
+
+        :param user: the user the token belongs to
+        :param dict payload: the decoded token payload
+        """
+        if not self.CHECK_TOKEN_VERSION:
+            return
+        if not isinstance(payload, dict):
+            return
+        if payload.get("iss") != INTERNAL_TOKEN_ISSUER:
+            # External (OIDC) tokens are managed by the identity provider
+            return
+        if int(payload.get("tv", 0)) != int(user.token_version or 0):
+            raise InvalidCredentials(
+                "The session has been revoked, please log in again",
+                status_code=401,
+                log_txt=f"Error while user {user.id} tries to authenticate. "
+                f"The token version is stale (revoked session).",
+            )
+
+    def get_user_from_header(self, headers: Headers = None) -> UserModel:
+        """
+        Extracts the user from the Authorization headers. Temporary tokens
+        carrying a purpose claim are rejected.
+
+        :param headers: the request headers
+        :type headers: `Headers`
+        :return: the user object
+        :rtype: :class:`UserModel`
+        """
+        user, data = self.get_user_and_payload_from_header(headers)
+        if isinstance(data, dict) and data.get("purpose") is not None:
+            raise InvalidCredentials(
+                "The provided token can only be used for its intended "
+                "purpose and has no access to this endpoint",
+                log_txt="Error while trying to get user from header. "
+                "The token is a temporary purpose token.",
+                status_code=403,
             )
         return user
 
@@ -445,6 +613,8 @@ class Auth:
 
 
 class BIAuth(Auth):
+    CHECK_TOKEN_VERSION = False
+
     def __init__(self, user_model=UserModel):
         super().__init__(user_model)
 

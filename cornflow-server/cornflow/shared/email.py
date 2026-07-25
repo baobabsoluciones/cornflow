@@ -68,6 +68,51 @@ def get_password_recover_email(
     return get_email(text_template, subject, sender, receiver)
 
 
+def get_password_reset_link_email(
+    reset_url: str,
+    expiry_minutes: int,
+    service_name: str,
+    sender: str,
+    receiver: str,
+):
+    """
+    This method builds the email that carries the password reset link.
+
+    :param str reset_url: The full URL of the reset page (with the token)
+    :param int expiry_minutes: Validity of the link in minutes
+    :param str service_name: The name of the service that appears on the
+      subject and on the body
+    :param str sender: The email address from which the email is going to be sent.
+    :param str receiver: The email address to receive the email.
+    :return: The email as a string to be sent
+    :rtype: str
+    """
+    text_template = f"""
+    <html>
+        <body>
+            <p> Hi, </p>
+            <p>
+                A password reset was requested for your {service_name} account.
+                Click the link below to set a new password. The link is valid
+                for {expiry_minutes} minutes and can be used only once:
+            </p>
+            <p><a href="{reset_url}">Set a new password</a></p>
+            <p>
+                If the button does not work, copy this address into your
+                browser:<br>{reset_url}
+            </p>
+            <p>
+                If you did not request this change you can safely ignore this
+                email: your password has not been modified.
+            </p>
+            <p>{service_name}</p>
+        </body>
+    </html>
+    """
+    subject = f"{service_name} - Password reset"
+    return get_email(text_template, subject, sender, receiver)
+
+
 def send_email_to(
     email: str, smtp_server: str, port: int, sender: str, password: str, receiver: str
 ):

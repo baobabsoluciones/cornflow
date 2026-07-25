@@ -28,6 +28,9 @@ class UserEndpointResponse(Schema):
     email = fields.Str()
     created_at = fields.Str()
     pwd_last_change = fields.DateTime()
+    pwd_change_required = fields.Boolean()
+    mfa_enabled = fields.Boolean()
+    locked = fields.Boolean()
 
 
 class UserDetailsEndpointResponse(Schema):
@@ -37,6 +40,9 @@ class UserDetailsEndpointResponse(Schema):
     username = fields.Str()
     email = fields.Str()
     pwd_last_change = fields.DateTime()
+    pwd_change_required = fields.Boolean()
+    mfa_enabled = fields.Boolean()
+    locked = fields.Boolean()
 
 
 class TokenEndpointResponse(Schema):
@@ -47,12 +53,22 @@ class RecoverPasswordRequest(Schema):
     email = fields.Str(required=True)
 
 
+class ResetPasswordRequest(Schema):
+    """
+    Schema for the request that sets a new password with a reset link token
+    """
+
+    password = fields.Str(required=True, load_only=True)
+
+
 class UserEditRequest(Schema):
     username = fields.Str(required=False)
     first_name = fields.Str(required=False)
     last_name = fields.Str(required=False)
     email = fields.Str(required=False)
     password = fields.Str(required=False)
+    # Required (and verified) when a user changes their own password
+    current_password = fields.Str(required=False, load_only=True)
 
 
 class LoginEndpointRequest(Schema):
@@ -62,6 +78,18 @@ class LoginEndpointRequest(Schema):
 
     username = fields.Str(required=True)
     password = fields.Str(required=True)
+    # TOTP or backup code, needed when the user has two-factor
+    # authentication enabled
+    totp_code = fields.Str(required=False, load_only=True)
+
+
+class MFAVerifyRequest(Schema):
+    """
+    Schema for the request that verifies the first TOTP code and activates
+    the two-factor authentication
+    """
+
+    totp_code = fields.Str(required=True, load_only=True)
 
 
 class LoginOpenAuthRequest(Schema):

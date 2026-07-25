@@ -84,7 +84,7 @@ class TestRolesListEndpoint(CustomTestCase):
         )
 
         self.assertEqual(200, response.status_code)
-        self.assertEqual(6, len(response.json))
+        self.assertEqual(7, len(response.json))
 
     def test_get_no_roles(self):
         for role in ROLES_MAP:
@@ -376,7 +376,7 @@ class TestUserRolesDetailEndpoint(CustomTestCase):
         data = {
             "username": "testuser" + str(role),
             "email": "testemail" + str(role) + "@test.org",
-            "password": "Testpassword1!",
+            "password": "Kx9#tR2m!Qw7Zp",
         }
         user_response = self.create_user(data)
 
@@ -416,7 +416,7 @@ class TestUserRolesDetailEndpoint(CustomTestCase):
         data = {
             "username": "testuser",
             "email": "testemail" + "@test.org",
-            "password": "Testpassword1!",
+            "password": "Kx9#tR2m!Qw7Zp",
         }
         user_response = self.create_user(data)
         user_id = user_response.json["id"]
@@ -486,9 +486,9 @@ class TestRolesModelMethods(CustomTestCase):
         """
         Tests the get_all_objects method
         """
-        # We expect 5 roles to be present (from ROLES_MAP constant)
+        # We expect 6 roles to be present (from ROLES_MAP constant)
         instances = RoleModel.get_all_objects().all()
-        self.assertEqual(len(instances), 5)
+        self.assertEqual(len(instances), 6)
 
         # Check that all the roles from ROLES_MAP are present
         role_names = [role.name for role in instances]
@@ -503,7 +503,7 @@ class TestRolesModelMethods(CustomTestCase):
 
         # Test offset parameter - should get all except the first role
         instances = RoleModel.get_all_objects(offset=1).all()
-        self.assertEqual(len(instances), 4)
+        self.assertEqual(len(instances), 5)
 
         # Get the names of all roles except the first one
         remaining_roles = [role.name for role in instances]

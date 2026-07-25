@@ -3,7 +3,7 @@ Model for the relationship between users and roles
 """
 from cornflow.models.meta_models import TraceAttributesModel
 from cornflow.shared import db
-from cornflow.shared.const import ADMIN_ROLE, SERVICE_ROLE
+from cornflow.shared.const import ADMIN_ROLE, PLATFORM_ADMIN_ROLE, SERVICE_ROLE
 
 
 class UserRoleModel(TraceAttributesModel):
@@ -113,6 +113,24 @@ class UserRoleModel(TraceAttributesModel):
         user_roles = cls.get_all_objects(user_id=user_id).all()
         for role in user_roles:
             if role.role_id == SERVICE_ROLE:
+                return True
+
+        return False
+
+    @classmethod
+    def is_platform_admin(cls, user_id):
+        """
+        Method that checks if a given user has the platform administrator
+        role assigned
+
+        :param int user_id: the ID of the user
+        :return: a boolean indicating if the user has the platform admin
+          role assigned or not
+        :rtype: boolean
+        """
+        user_roles = cls.get_all_objects(user_id=user_id).all()
+        for role in user_roles:
+            if role.role_id == PLATFORM_ADMIN_ROLE:
                 return True
 
         return False

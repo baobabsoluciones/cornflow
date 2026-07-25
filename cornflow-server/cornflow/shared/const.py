@@ -10,6 +10,32 @@ DATABRICKS_BACKEND = 2
 CORNFLOW_VERSION = "1.3.7rc1"
 INTERNAL_TOKEN_ISSUER = "cornflow"
 
+# Purpose claims used on temporary restricted tokens. Tokens carrying a
+# purpose claim are only accepted by the endpoints mapped below:
+# - mfa_setup: issued during login when a user still has to enroll in
+#   two-factor authentication
+# - pwd_reset: carried inside the password reset link sent by email
+TOKEN_PURPOSE_MFA_SETUP = "mfa_setup"
+TOKEN_PURPOSE_PWD_RESET = "pwd_reset"
+
+# Endpoint names (as registered on the api) each purpose token can access
+TOKEN_PURPOSE_ALLOWED_ENDPOINTS = {
+    TOKEN_PURPOSE_MFA_SETUP: ["mfa-setup", "mfa-verify"],
+    TOKEN_PURPOSE_PWD_RESET: ["reset-password"],
+}
+
+# Endpoints (name -> allowed methods) that stay reachable when the user's
+# password has expired and password rotation is enforced: the user can check
+# their token, review their own profile (and roles, needed by the web client
+# to render the settings screen) and change their password.
+PWD_ROTATION_ALLOWED_ENDPOINTS = {
+    "user-detail": ["GET", "PUT"],
+    "token": ["GET"],
+    "user-roles": ["GET"],
+    "login": ["POST"],
+    "signup": ["POST"],
+}
+
 # endpoints responses for health check
 STATUS_HEALTHY = "healthy"
 STATUS_UNHEALTHY = "unhealthy"
@@ -102,10 +128,22 @@ ALL_DEFAULT_ACTIONS = [GET_ACTION, PATCH_ACTION, POST_ACTION, PUT_ACTION, DELETE
 DUMMY_ROLE = 0
 VIEWER_ROLE = 1
 PLANNER_ROLE = 2
+# The admin role is meant for client administrators (they manage the users
+# and data of their own deployment)
 ADMIN_ROLE = 3
+# The service role is reserved for machine-to-machine service accounts
 SERVICE_ROLE = 4
+# Platform administrators operate the platform itself: they are the only
+# ones that can unlock accounts locked after too many failed login attempts
+PLATFORM_ADMIN_ROLE = 5
 
-ALL_DEFAULT_ROLES = [VIEWER_ROLE, PLANNER_ROLE, ADMIN_ROLE, SERVICE_ROLE]
+ALL_DEFAULT_ROLES = [
+    VIEWER_ROLE,
+    PLANNER_ROLE,
+    ADMIN_ROLE,
+    SERVICE_ROLE,
+    PLATFORM_ADMIN_ROLE,
+]
 
 ACTIONS_MAP = {
     GET_ACTION: "can_get",
@@ -129,6 +167,7 @@ ROLES_MAP = {
     VIEWER_ROLE: "viewer",
     ADMIN_ROLE: "admin",
     SERVICE_ROLE: "service",
+    PLATFORM_ADMIN_ROLE: "platform_admin",
 }
 
 BASE_PERMISSION_ASSIGNATION = [
@@ -148,6 +187,11 @@ BASE_PERMISSION_ASSIGNATION = [
     (SERVICE_ROLE, PUT_ACTION),
     (SERVICE_ROLE, DELETE_ACTION),
     (SERVICE_ROLE, POST_ACTION),
+    (PLATFORM_ADMIN_ROLE, GET_ACTION),
+    (PLATFORM_ADMIN_ROLE, PATCH_ACTION),
+    (PLATFORM_ADMIN_ROLE, POST_ACTION),
+    (PLATFORM_ADMIN_ROLE, PUT_ACTION),
+    (PLATFORM_ADMIN_ROLE, DELETE_ACTION),
 ]
 
 EXTRA_PERMISSION_ASSIGNATION = [
@@ -161,6 +205,11 @@ EXTRA_PERMISSION_ASSIGNATION = [
     (VIEWER_ROLE, GET_ACTION, "execution-files"),
     (PLANNER_ROLE, GET_ACTION, "execution-files"),
     (ADMIN_ROLE, GET_ACTION, "execution-files"),
+    (VIEWER_ROLE, POST_ACTION, "mfa-setup"),
+    (VIEWER_ROLE, POST_ACTION, "mfa-verify"),
+    (VIEWER_ROLE, DELETE_ACTION, "user-mfa"),
+    (VIEWER_ROLE, PUT_ACTION, "reset-password"),
+    (DUMMY_ROLE, PUT_ACTION, "reset-password"),
 ]
 
 # are there execution files?

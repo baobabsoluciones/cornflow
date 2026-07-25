@@ -14,6 +14,43 @@ from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
 
 
+def _env_int_floor(name: str, default: int, floor: int) -> int:
+    """
+    Reads an integer environment variable enforcing a security floor: the
+    resulting value can never be lower than `floor`, so a tampered
+    environment can not weaken the policy below the minimum threshold.
+    """
+    try:
+        value = int(os.getenv(name, default))
+    except (TypeError, ValueError):
+        value = default
+    return max(value, floor)
+
+
+def _env_int_ceiling(name: str, default: int, ceiling: int) -> int:
+    """
+    Reads an integer environment variable enforcing a security ceiling: the
+    resulting value can never be higher than `ceiling` (used where larger
+    values weaken security, e.g. token lifetimes or lockout attempts).
+    """
+    try:
+        value = int(os.getenv(name, default))
+    except (TypeError, ValueError):
+        value = default
+    return min(value, ceiling)
+
+
+def _env_float_ceiling(name: str, default: float, ceiling: float) -> float:
+    """
+    Float version of :func:`_env_int_ceiling`.
+    """
+    try:
+        value = float(os.getenv(name, default))
+    except (TypeError, ValueError):
+        value = default
+    return min(value, ceiling)
+
+
 class DefaultConfig(object):
     """
     Default configuration class
@@ -121,11 +158,59 @@ class DefaultConfig(object):
         os.getenv("EXECUTION_FILES_CLEANUP_FREQUENCY", 90)
     )
 
-    # Token duration in hours
-    TOKEN_DURATION = os.getenv("TOKEN_DURATION", 24)
+    # The security-related values below read the environment but are clamped
+    # to a floor or a ceiling, so a compromised or misconfigured environment
+    # can not weaken the policy below the CCN-STIC-807 minimum thresholds.
 
-    # Password rotation time in days
-    PWD_ROTATION_TIME = os.getenv("PWD_ROTATION_TIME", 120)
+    # Token duration in hours (ceiling: 24)
+    TOKEN_DURATION = _env_float_ceiling("TOKEN_DURATION", 8, 24)
+
+    # Password rotation time in days (ceiling: 365)
+    PWD_ROTATION_TIME = _env_int_ceiling("PWD_ROTATION_TIME", 120, 365)
+
+    # Password policy (CCN-STIC-807 hardening)
+    # Minimum password length (floor: 12)
+    PWD_MIN_LENGTH = _env_int_floor("PWD_MIN_LENGTH", 12, 12)
+    # Minimum zxcvbn strength score (0-4) required for new passwords (floor: 3)
+    PWD_MIN_ZXCVBN_SCORE = _env_int_floor("PWD_MIN_ZXCVBN_SCORE", 3, 3)
+    # Number of previous passwords that can not be reused (floor: 10)
+    PWD_HISTORY_SIZE = _env_int_floor("PWD_HISTORY_SIZE", 10, 10)
+    # Similarity ratio (0-1) above which a new password is rejected for being
+    # too close to the previous one (ceiling: 0.9, higher would allow near
+    # identical passwords)
+    PWD_MAX_SIMILARITY = _env_float_ceiling("PWD_MAX_SIMILARITY", 0.8, 0.9)
+    # If 1, users with an expired or flagged password can only access
+    # the endpoints needed to change it (hard rotation enforcement)
+    PWD_ROTATION_ENFORCE = int(os.getenv("PWD_ROTATION_ENFORCE", 1))
+
+    # Account lockout: after LOGIN_MAX_ATTEMPTS consecutive failed login
+    # attempts (wrong password or wrong TOTP code) the account is locked
+    # until a platform administrator unlocks it. Service users are exempt
+    # to avoid denial-of-service of the cornflow-airflow communication.
+    # Attempts ceiling: 10.
+    LOGIN_MAX_ATTEMPTS = _env_int_ceiling("LOGIN_MAX_ATTEMPTS", 5, 10)
+
+    # Two-factor authentication (TOTP). If 1, all internal (database
+    # authenticated) users except service users must enroll and provide
+    # a TOTP code to log in.
+    MFA_REQUIRED = int(os.getenv("MFA_REQUIRED", 1))
+    # Duration in minutes of the temporary token issued to complete
+    # the MFA enrollment during login (ceiling: 30)
+    MFA_SETUP_TOKEN_DURATION_MINUTES = _env_int_ceiling(
+        "MFA_SETUP_TOKEN_DURATION_MINUTES", 10, 30
+    )
+
+    # Base URL of the cornflow web client, used to build the password reset
+    # link sent by email (e.g. https://cornflow.example.com). When it is not
+    # configured the recovery email falls back to sending a temporary
+    # password.
+    CORNFLOW_UI_URL = os.getenv("CORNFLOW_UI_URL")
+    # Duration in minutes of the password reset link (ceiling: 60)
+    PWD_RESET_TOKEN_DURATION_MINUTES = _env_int_ceiling(
+        "PWD_RESET_TOKEN_DURATION_MINUTES", 30, 60
+    )
+    # Number of one-time backup codes generated on MFA enrollment
+    MFA_BACKUP_CODES_NUMBER = _env_int_ceiling("MFA_BACKUP_CODES_NUMBER", 8, 20)
 
 
 class Development(DefaultConfig):
@@ -146,8 +231,8 @@ class Testing(DefaultConfig):
     DEBUG = False
     TESTING = True
     PROPAGATE_EXCEPTIONS = True
-    SECRET_TOKEN_KEY = "TESTINGSECRETKEY"
-    SECRET_BI_KEY = "THISISANOTHERKEY"
+    SECRET_TOKEN_KEY = "TESTINGSECRETKEY_TESTINGSECRETKEY_32B"
+    SECRET_BI_KEY = "THISISANOTHERKEY_THISISANOTHERKEY_32B"
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///cornflow_test.db")
     AIRFLOW_URL = os.getenv("AIRFLOW_URL", "http://localhost:8080")
     PRESERVE_CONTEXT_ON_EXCEPTION = False
@@ -156,6 +241,9 @@ class Testing(DefaultConfig):
     OPEN_DEPLOYMENT = 1
     LOG_LEVEL = int(os.getenv("LOG_LEVEL", 10))
     SIGNUP_ACTIVATED = SIGNUP_WITH_NO_AUTH
+    # MFA is disabled for the generic test suite. Specific MFA tests
+    # activate it explicitly.
+    MFA_REQUIRED = 0
 
 
 class TestingDatabricks(Testing):

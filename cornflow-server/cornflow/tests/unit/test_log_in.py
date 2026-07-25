@@ -30,7 +30,7 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
         self.data = {
             "username": "testname",
             "email": "test@test.com",
-            "password": "Testpassword1!",
+            "password": "Kx9#tR2m!Qw7Zp",
         }
         user = UserModel(data=self.data)
         user.save()
@@ -88,7 +88,7 @@ class TestLogInOpenAuth(CustomTestCase):
         self.user_data = {
             "username": "testname",
             "email": "test@test.com",
-            "password": "Testpassword1!",
+            "password": "Kx9#tR2m!Qw7Zp",
         }
 
         test_user = UserModel(data=self.user_data)
@@ -101,7 +101,7 @@ class TestLogInOpenAuth(CustomTestCase):
         self.service_data = {
             "username": "service_user",
             "email": "service@test.com",
-            "password": "Testpassword1!",
+            "password": "Kx9#tR2m!Qw7Zp",
         }
 
         service_user = UserModel(data=self.service_data)
@@ -470,7 +470,7 @@ class TestLogInOpenAuthService(CustomTestCase):
         self.user_data = {
             "username": "testname",
             "email": "test@test.com",
-            "password": "Testpassword1!",
+            "password": "Kx9#tR2m!Qw7Zp",
         }
 
         test_user = UserModel(data=self.user_data)
@@ -483,7 +483,7 @@ class TestLogInOpenAuthService(CustomTestCase):
         self.service_data = {
             "username": "service_user",
             "email": "service@test.com",
-            "password": "Testpassword1!",
+            "password": "Kx9#tR2m!Qw7Zp",
         }
 
         service_user = UserModel(data=self.service_data)

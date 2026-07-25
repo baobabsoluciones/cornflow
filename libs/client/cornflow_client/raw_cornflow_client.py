@@ -214,22 +214,30 @@ class RawCornFlow(object):
         return requests.get(urljoin(self.url, "health/"))
 
     @prepare_encoding
-    def login(self, username, pwd, encoding=None):
+    def login(self, username, pwd, totp_code=None, encoding=None):
         """
         Log-in to the server.
 
         :param str username: username
         :param str pwd: password
+        :param str totp_code: the TOTP (or backup) code from the
+          authenticator app, needed when the user has two-factor
+          authentication enabled
         :param str encoding: the type of encoding used in the call. Defaults to 'br'
 
         :return: a dictionary with a token inside
         """
+        payload = {"username": username, "password": pwd}
+        if totp_code is not None:
+            payload["totp_code"] = totp_code
         response = requests.post(
             urljoin(self.url, "login/"),
-            json={"username": username, "password": pwd},
+            json=payload,
             headers={"Content-Encoding": encoding},
         )
-        if response.status_code == 200:
+        # When two-factor authentication is pending the response is a 200
+        # without a token (mfa_required / mfa_setup_required flags instead)
+        if response.status_code == 200 and "token" in response.json():
             self.token = response.json()["token"]
         return response
 

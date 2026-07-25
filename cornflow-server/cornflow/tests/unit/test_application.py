@@ -29,7 +29,7 @@ class TestApplicationRoot(CustomTestCase):
         self.data = {
             "username": "testname",
             "email": "test@test.com",
-            "password": "Testpassword1!",
+            "password": "Kx9#tR2m!Qw7Zp",
         }
 
         user = UserModel(self.data)
