@@ -4,6 +4,7 @@ from cornflow.cli.arguments import username, password, email, verbose
 from cornflow.cli.utils import get_app
 from cornflow.commands import create_user_with_role
 from cornflow.models import UserModel
+from cornflow.shared.audit import audit
 from cornflow.shared.authentication.auth import BIAuth
 from cornflow.shared.const import PLATFORM_ADMIN_ROLE, SERVICE_ROLE, VIEWER_ROLE
 from cornflow.shared.exceptions import (
@@ -91,6 +92,13 @@ def unlock_user(username):
         if not user:
             raise ObjectDoesNotExist("User does not exist")
         user.unlock_account()
+        audit(
+            "account.unlocked",
+            actor="cli",
+            target_id=user.id,
+            target=username,
+            source="cli",
+        )
         click.echo(f"User {username} has been unlocked")
         return True
 
@@ -111,6 +119,13 @@ def issue_bi_token(username):
             raise ObjectDoesNotExist("User does not exist")
         token = BIAuth.generate_token(user.id)
         app.logger.info(f"A BI token was generated for user {username} via the CLI")
+        audit(
+            "bitoken.issued",
+            actor="cli",
+            target_id=user.id,
+            target=username,
+            source="cli",
+        )
         click.echo(token)
         return True
 
@@ -136,6 +151,13 @@ def issue_api_key(username):
         token = Auth.generate_api_key(user.id)
         app.logger.info(
             f"A personal API key was generated for user {username} via the CLI"
+        )
+        audit(
+            "apikey.issued",
+            actor="cli",
+            target_id=user.id,
+            target=username,
+            source="cli",
         )
         click.echo(token)
         return True

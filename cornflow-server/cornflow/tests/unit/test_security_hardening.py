@@ -9,6 +9,7 @@ Unit tests for the CCN-STIC-807 security hardening features:
 """
 
 import json
+import logging
 import os
 import re
 import unittest
@@ -1574,3 +1575,122 @@ class TestMFAFlow(TestCase):
         self.assertEqual(200, response.status_code)
         self.assertIsNotNone(response.json.get("token"))
         self.assertNotIn("mfa_setup_required", response.json)
+
+
+class _AuditCapture(logging.Handler):
+    """Captures the JSON records emitted on the cornflow.audit logger."""
+
+    def __init__(self):
+        super().__init__()
+        self.records = []
+
+    def emit(self, record):
+        try:
+            self.records.append(json.loads(record.getMessage()))
+        except (ValueError, TypeError):
+            pass
+
+    def events(self):
+        return [r.get("event") for r in self.records]
+
+    def by_event(self, event):
+        return [r for r in self.records if r.get("event") == event]
+
+
+class TestAuditLogging(TestCase):
+    """
+    Tests for the structured security audit log: each security-relevant
+    event is emitted as a JSON record on the dedicated cornflow.audit logger.
+    """
+
+    def create_app(self):
+        return create_app("testing")
+
+    def setUp(self):
+        db.create_all()
+        access_init_command(verbose=False)
+        register_deployed_dags_command_test(verbose=False)
+        self.user_data = {
+            "username": "audituser",
+            "email": "audit@test.com",
+            "password": STRONG_PASSWORD,
+        }
+        response = self.client.post(
+            SIGNUP_URL, data=json.dumps(self.user_data), headers=JSON_HEADER
+        )
+        self.user_id = response.json["id"]
+        register_dag_permissions_command(
+            open_deployment=int(current_app.config["OPEN_DEPLOYMENT"]), verbose=0
+        )
+        self.audit_logger = logging.getLogger("cornflow.audit")
+        self.capture = _AuditCapture()
+        self.audit_logger.addHandler(self.capture)
+
+    def tearDown(self):
+        self.audit_logger.removeHandler(self.capture)
+        db.session.remove()
+        db.drop_all()
+
+    def log_in(self, password):
+        return self.client.post(
+            LOGIN_URL,
+            data=json.dumps(
+                {"username": self.user_data["username"], "password": password}
+            ),
+            headers=JSON_HEADER,
+        )
+
+    def test_login_success_is_audited(self):
+        self.log_in(self.user_data["password"])
+        events = self.capture.by_event("login.success")
+        self.assertEqual(1, len(events))
+        record = events[0]
+        # The record carries the mandatory schema fields
+        self.assertTrue(record["audit"])
+        self.assertEqual("success", record["outcome"])
+        self.assertEqual(self.user_id, record["actor_id"])
+        self.assertEqual(self.user_data["username"], record["actor"])
+        self.assertIn("ts", record)
+
+    def test_bad_password_is_audited_as_failure(self):
+        self.log_in("Wrong#Password9!x")
+        events = self.capture.by_event("login.failure")
+        self.assertEqual(1, len(events))
+        self.assertEqual("failure", events[0]["outcome"])
+        self.assertEqual("bad_password", events[0]["reason"])
+
+    def test_unknown_user_is_audited_as_failure(self):
+        self.client.post(
+            LOGIN_URL,
+            data=json.dumps({"username": "ghost", "password": STRONG_PASSWORD}),
+            headers=JSON_HEADER,
+        )
+        events = self.capture.by_event("login.failure")
+        self.assertEqual(1, len(events))
+        self.assertEqual("unknown_user", events[0]["reason"])
+        # The attempted username is recorded on the trusted audit channel
+        self.assertEqual("ghost", events[0]["actor"])
+
+    def test_password_change_is_audited(self):
+        token = self.log_in(self.user_data["password"]).json["token"]
+        self.client.put(
+            f"{USER_URL}{self.user_id}/",
+            data=json.dumps(
+                {
+                    "password": OTHER_STRONG_PASSWORD,
+                    "current_password": self.user_data["password"],
+                }
+            ),
+            headers=auth_header(token),
+        )
+        events = self.capture.by_event("password.changed")
+        self.assertEqual(1, len(events))
+        self.assertEqual(self.user_id, events[0]["target_id"])
+
+    def test_audit_can_be_disabled(self):
+        current_app.config["AUDIT_LOG_ENABLED"] = 0
+        try:
+            self.log_in(self.user_data["password"])
+            self.assertEqual([], self.capture.records)
+        finally:
+            current_app.config["AUDIT_LOG_ENABLED"] = 1

@@ -32,6 +32,7 @@ from cornflow.endpoints.meta_resource import BaseMetaResource
 from cornflow.models import MFABackupCodeModel, UserModel
 from cornflow.schemas.user import MFAVerifyRequest
 from cornflow.shared import db
+from cornflow.shared.audit import audit
 from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.const import ALL_DEFAULT_ROLES
 from cornflow.shared.exceptions import (
@@ -152,6 +153,7 @@ class MFAVerifyEndpoint(BaseMetaResource):
 
         token = self.auth_class.generate_token(user.id)
         current_app.logger.info(f"User {user.id} completed MFA enrollment")
+        audit("mfa.enrolled", actor_id=user.id, actor=user.username)
         return {"backup_codes": backup_codes, "token": token, "id": user.id}, 200
 
 
@@ -197,5 +199,11 @@ class UserMFAResetEndpoint(BaseMetaResource):
         user_obj.save()
         current_app.logger.info(
             f"The MFA of user {user_id} was reset by user {self.get_user()}"
+        )
+        audit(
+            "mfa.reset",
+            target_id=user_id,
+            target=user_obj.username,
+            self_service=(self.get_user_id() == user_id) or None,
         )
         return {"message": "The two-factor authentication has been reset"}, 200

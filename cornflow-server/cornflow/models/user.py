@@ -20,6 +20,7 @@ from cornflow.shared import (
     bcrypt,
     db,
 )
+from cornflow.shared.audit import audit
 from cornflow.shared.const import PASSWORD_SPECIAL_CHARACTERS
 from cornflow.shared.encryption import decrypt_value, encrypt_value
 from cornflow.shared.exceptions import InvalidCredentials
@@ -295,6 +296,13 @@ class UserModel(TraceAttributesModel):
                 f"User {self.username} locked after {max_attempts} failed "
                 f"login attempts. A platform administrator must unlock the "
                 f"account."
+            )
+            audit(
+                "account.locked",
+                outcome="locked",
+                target_id=self.id,
+                target=self.username,
+                attempts=self.failed_login_attempts,
             )
         db.session.add(self)
         db.session.commit()

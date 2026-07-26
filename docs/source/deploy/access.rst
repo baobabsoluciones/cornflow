@@ -258,6 +258,38 @@ service_user``) and expose it to Airflow as ``CORNFLOW_SERVICE_API_KEY``:
 ``connect_to_cornflow`` then uses the long-lived key and skips the per-task
 login. Rotate it yearly (regenerate + update the variable).
 
+Security audit log
+*********************
+
+Security-relevant events are emitted as structured JSON records on a
+dedicated logger (``cornflow.audit``), separate from the application log, so
+a log pipeline / SIEM can collect and retain them. Each record is a single
+JSON object per line, for example::
+
+    {"ts": "2026-07-26T09:14:02.511+00:00", "audit": true, "event": "login.success", "outcome": "success", "actor_id": 42, "actor": "jdoe", "ip": "10.0.3.7", "method": "db"}
+    {"ts": "2026-07-26T09:16:10.882+00:00", "audit": true, "event": "account.locked", "outcome": "locked", "target_id": 42, "target": "jdoe", "attempts": 5}
+
+Every record carries a UTC ``ts`` timestamp, the ``audit`` marker (for easy
+filtering), the ``event`` name and its ``outcome``; the actor, target, source
+IP and event-specific fields are added when known. Inside a request the actor
+and IP are filled in automatically; from the CLI the ``source`` is ``cli``.
+The events covered include ``login.success`` / ``login.failure``,
+``account.locked`` / ``account.unlocked``, ``password.changed`` /
+``password.reset`` / ``password.recovery_requested``, ``mfa.enrolled`` /
+``mfa.reset``, ``apikey.issued`` / ``apikey.revoked``, ``bitoken.issued`` and
+``role.granted`` / ``role.revoked``.
+
+The failed-login records may name the attempted (even non-existent) username:
+this is intentional and useful to defenders because the audit channel is a
+trusted internal sink. The client-facing responses stay generic and never
+reveal whether a username or email exists.
+
+This is the emission layer only. Collection, append-only retention, host time
+synchronisation and alerting are the responsibility of the deployment's log
+pipeline / SIEM (e.g. ship stdout to Loki / ELK / CloudWatch and alert on
+repeated ``account.locked`` or ``apikey.issued`` bursts). Auditing can be
+turned off with ``AUDIT_LOG_ENABLED=0`` (on by default).
+
 Roles definition
 *********************
 

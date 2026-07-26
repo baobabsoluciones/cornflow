@@ -19,6 +19,7 @@ from cornflow.models import (
 )
 from cornflow.schemas.user import LoginEndpointRequest, LoginOpenAuthRequest
 from cornflow.shared import db
+from cornflow.shared.audit import audit
 from cornflow.shared.authentication import Auth, LDAPBase
 from cornflow.shared.rate_limit import (
     limiter,
@@ -76,10 +77,22 @@ class LoginBaseEndpoint(BaseMetaResource):
             current_app.logger.info(
                 f"User {user.id} logged in successfully using database authentication"
             )
+            audit(
+                "login.success",
+                actor_id=user.id,
+                actor=user.username,
+                method="db",
+            )
         elif auth_type == AUTH_LDAP:
             user = self.auth_ldap_authenticate(**kwargs)
             current_app.logger.info(
                 f"User {user.id} logged in successfully using LDAP authentication"
+            )
+            audit(
+                "login.success",
+                actor_id=user.id,
+                actor=user.username,
+                method="ldap",
             )
         elif auth_type == AUTH_OID:
             if kwargs.get("username") and kwargs.get("password"):
@@ -94,12 +107,24 @@ class LoginBaseEndpoint(BaseMetaResource):
                 current_app.logger.info(
                     f"Service user {user.id} logged in successfully using password"
                 )
+                audit(
+                    "login.success",
+                    actor_id=user.id,
+                    actor=user.username,
+                    method="oid_service",
+                )
                 token = self.auth_class.generate_token(user.id)
             else:
                 token = self.auth_class().get_token_from_header(request.headers)
                 user = self.auth_oid_authenticate(token=token)
                 current_app.logger.info(
                     f"User {user.id} logged in successfully using OpenID authentication"
+                )
+                audit(
+                    "login.success",
+                    actor_id=user.id,
+                    actor=user.username,
+                    method="oid",
                 )
 
             response.update({"token": token, "id": user.id})
@@ -172,6 +197,13 @@ class LoginBaseEndpoint(BaseMetaResource):
             if not valid:
                 # Wrong second-factor codes also count towards the lockout
                 user.register_failed_login()
+                audit(
+                    "login.failure",
+                    outcome="failure",
+                    actor_id=user.id,
+                    actor=user.username,
+                    reason="bad_totp",
+                )
                 if user.is_login_locked():
                     self.raise_account_locked(user)
                 raise InvalidCredentials(
@@ -205,6 +237,15 @@ class LoginBaseEndpoint(BaseMetaResource):
         user = self.data_model.get_one_object(username=username)
 
         if not user:
+            # The audit channel is a trusted internal sink, so recording the
+            # attempted (non-existent) username is fine and useful to
+            # defenders; the response to the client stays generic.
+            audit(
+                "login.failure",
+                outcome="failure",
+                actor=username,
+                reason="unknown_user",
+            )
             raise InvalidCredentials()
 
         # The password is always checked first and, on failure, the same
@@ -215,6 +256,13 @@ class LoginBaseEndpoint(BaseMetaResource):
         # the legitimate owner of the account.
         if not user.check_hash(password):
             user.register_failed_login()
+            audit(
+                "login.failure",
+                outcome="failure",
+                actor_id=user.id,
+                actor=user.username,
+                reason="bad_password",
+            )
             raise InvalidCredentials()
 
         self.check_account_lock(user)

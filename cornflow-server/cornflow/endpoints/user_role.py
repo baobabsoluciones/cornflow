@@ -11,6 +11,7 @@ from flask_apispec import doc, marshal_with, use_kwargs
 from cornflow.endpoints.meta_resource import BaseMetaResource
 from cornflow.models import UserRoleModel
 from cornflow.schemas.user_role import UserRoleRequest, UserRoleResponse
+from cornflow.shared.audit import audit
 from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.const import ADMIN_ROLE, AUTH_LDAP
 from cornflow.shared.exceptions import (
@@ -90,6 +91,11 @@ class UserRoleListEndpoint(BaseMetaResource):
             current_app.logger.info(
                 f"User {self.get_user()} creates a new role assignment"
             )
+            audit(
+                "role.granted",
+                target_id=kwargs.get("user_id"),
+                role_id=kwargs.get("role_id"),
+            )
             return self.activate_detail(**kwargs)
         elif UserRoleModel.check_if_role_assigned(**kwargs):
             raise ObjectAlreadyExists(
@@ -101,6 +107,11 @@ class UserRoleListEndpoint(BaseMetaResource):
             # the request that doesn't have to be the user that is getting a role
             current_app.logger.info(
                 f"User {self.get_user()} creates a new role assignment"
+            )
+            audit(
+                "role.granted",
+                target_id=kwargs.get("user_id"),
+                role_id=kwargs.get("role_id"),
             )
             return self.post_list(kwargs, trace_field="admin_id")
 
@@ -169,4 +180,5 @@ class UserRoleDetailEndpoint(BaseMetaResource):
         current_app.logger.info(
             f"User {self.get_user()} deletes user role assignment for user {user_id} and role {role_id}"
         )
+        audit("role.revoked", target_id=user_id, role_id=role_id)
         return self.delete_detail(user_id=user_id, role_id=role_id)

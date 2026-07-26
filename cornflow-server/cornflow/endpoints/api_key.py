@@ -21,6 +21,7 @@ from flask_apispec import doc, marshal_with, use_kwargs
 from cornflow.endpoints.meta_resource import BaseMetaResource
 from cornflow.models import UserModel
 from cornflow.schemas.user import ApiKeyRequest, ApiKeyResponse
+from cornflow.shared.audit import audit
 from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.const import ALL_DEFAULT_ROLES, TOKEN_TYPE_API_KEY
 from cornflow.shared.exceptions import (
@@ -98,6 +99,13 @@ class UserApiKeyEndpoint(BaseMetaResource):
             days=int(current_app.config["API_KEY_DURATION_DAYS"])
         )
         current_app.logger.info(f"User {user.id} generated a personal API key")
+        audit(
+            "apikey.issued",
+            actor_id=user.id,
+            actor=user.username,
+            source="ui",
+            expires_at=expires_at,
+        )
         return {"api_key": api_key, "expires_at": expires_at}, 201
 
     @doc(description="Revoke the personal API key", tags=["Users"])
@@ -114,4 +122,5 @@ class UserApiKeyEndpoint(BaseMetaResource):
         user = self.get_user()
         user.revoke_api_keys()
         current_app.logger.info(f"User {user.id} revoked their personal API key")
+        audit("apikey.revoked", actor_id=user.id, actor=user.username, source="ui")
         return {"message": "The API key has been revoked"}, 200

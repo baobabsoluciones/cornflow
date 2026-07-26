@@ -260,6 +260,12 @@ class DefaultConfig(object):
     # Number of one-time backup codes generated on MFA enrollment
     MFA_BACKUP_CODES_NUMBER = _env_int_ceiling("MFA_BACKUP_CODES_NUMBER", 8, 20)
 
+    # Structured security audit log. When 1 (default) each security-relevant
+    # event (login, lockout, unlock, password/MFA/token/role changes) is
+    # emitted as a JSON line on the dedicated "cornflow.audit" logger for a
+    # log pipeline / SIEM to collect and retain.
+    AUDIT_LOG_ENABLED = int(os.getenv("AUDIT_LOG_ENABLED", 1))
+
 
 class Development(DefaultConfig):
     """

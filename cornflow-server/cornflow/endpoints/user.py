@@ -18,6 +18,7 @@ from cornflow.schemas.user import (
     UserSchema,
 )
 from cornflow.shared import db
+from cornflow.shared.audit import audit
 from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.const import (
     ADMIN_ROLE,
@@ -235,6 +236,13 @@ class UserDetailsEndpoint(BaseMetaResource):
                 )
 
         current_app.logger.info(f"User {user_id} was edited by user {self.get_user()}")
+        if new_password is not None:
+            audit(
+                "password.changed",
+                target_id=user_id,
+                target=user_obj.username,
+                admin_set=(self.get_user_id() != user_id) or None,
+            )
         return self.put_detail(data=data, idx=user_id, track_user=False)
 
 
@@ -273,6 +281,7 @@ class UserUnlockEndpoint(BaseMetaResource):
             f"User {user_id} was unlocked by platform administrator "
             f"{self.get_user()}"
         )
+        audit("account.unlocked", target_id=user_id, target=user_obj.username)
         return {"message": "The user account has been unlocked"}, 200
 
 
@@ -307,6 +316,12 @@ class ToggleUserAdmin(BaseMetaResource):
         if make_admin:
             UserRoleModel(data={"user_id": user_id, "role_id": ADMIN_ROLE}).save()
             current_app.logger.info(f"User {user_id} was made into an admin")
+            audit(
+                "role.granted",
+                target_id=user_id,
+                target=user_obj.username,
+                role="admin",
+            )
         else:
             # A client admin can not revoke the admin role from another admin;
             # only a platform administrator can do it
@@ -320,6 +335,12 @@ class ToggleUserAdmin(BaseMetaResource):
                 )
             UserRoleModel.query.filter_by(user_id=user_id, role_id=ADMIN_ROLE).delete()
             current_app.logger.info(f"User {user_id} was removed admin role")
+            audit(
+                "role.revoked",
+                target_id=user_id,
+                target=user_obj.username,
+                role="admin",
+            )
             try:
                 db.session.commit()
             except IntegrityError as e:
@@ -365,6 +386,12 @@ class ResetPassword(BaseMetaResource):
         current_app.logger.info(
             f"User {user_obj.id} set a new password through a reset link"
         )
+        audit(
+            "password.reset",
+            actor_id=user_obj.id,
+            actor=user_obj.username,
+            method="reset_link",
+        )
         return {"message": "The password has been updated"}, 200
 
 
@@ -407,6 +434,13 @@ class RecoverPassword(BaseMetaResource):
 
         user_obj = self.data_model({"email": receiver})
         if not user_obj.check_email_in_use():
+            # Logged to the trusted audit channel only; the response stays
+            # neutral so it never reveals whether the email is registered.
+            audit(
+                "password.recovery_requested",
+                target=receiver,
+                found=False,
+            )
             return {"message": message}, 200
 
         user_obj = self.data_model.get_one_user_by_email(receiver)
@@ -441,6 +475,13 @@ class RecoverPassword(BaseMetaResource):
             current_app.logger.info(
                 f"User with email {receiver} has requested a password reset link"
             )
+            audit(
+                "password.recovery_requested",
+                target_id=user_obj.id,
+                target=user_obj.username,
+                found=True,
+                method="reset_link",
+            )
             return {"message": message}, 200
 
         # Legacy fallback (CORNFLOW_UI_URL not configured, e.g. API-only
@@ -470,5 +511,12 @@ class RecoverPassword(BaseMetaResource):
 
         current_app.logger.info(
             f"User with email {receiver} has requested a new password"
+        )
+        audit(
+            "password.recovery_requested",
+            target_id=user_obj.id,
+            target=user_obj.username,
+            found=True,
+            method="temp_password",
         )
         return {"message": message}, 200
