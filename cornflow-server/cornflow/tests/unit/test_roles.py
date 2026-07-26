@@ -22,6 +22,7 @@ from cornflow.shared.const import (
     ALL_DEFAULT_ROLES,
     DUMMY_ROLE,
     PLANNER_ROLE,
+    PLATFORM_ADMIN_ROLE,
     ROLES_MAP,
     SERVICE_ROLE,
     VIEWER_ROLE,
@@ -189,7 +190,7 @@ class TestRolesDetailEndpoint(CustomTestCase):
                 )
 
     def test_delete_role_authorized(self):
-        self.token = self.create_user_with_role(ADMIN_ROLE)
+        self.token = self.create_user_with_role(PLATFORM_ADMIN_ROLE)
         response = self.client.delete(
             self.url + str(VIEWER_ROLE) + "/",
             follow_redirects=True,
@@ -281,8 +282,10 @@ class TestUserRolesListEndpoint(CustomTestCase):
             self.create_new_row(self.url, self.model, self.new_user_role)
 
     def test_post_role_assignment_not_authorized_user(self):
+        # The platform admin role is a superset of the client admin role, so it
+        # also has access to the user role endpoints
         for role in ROLES_MAP:
-            if role not in self.roles_with_access:
+            if role not in self.roles_with_access and role != PLATFORM_ADMIN_ROLE:
                 self.token = self.create_user_with_role(role)
                 self.create_new_row(
                     self.url, self.model, {}, expected_status=403, check_payload=False
@@ -343,8 +346,10 @@ class TestUserRolesDetailEndpoint(CustomTestCase):
             self.assertEqual(self.payload, response.json)
 
     def test_get_user_role_not_authorized_user(self):
+        # The platform admin role is a superset of the client admin role, so it
+        # also has access to the user role endpoints
         for role in ROLES_MAP:
-            if role not in self.roles_with_access:
+            if role not in self.roles_with_access and role != PLATFORM_ADMIN_ROLE:
                 self.token = self.create_user_with_role(role)
                 response = self.client.get(
                     self.url
@@ -397,8 +402,10 @@ class TestUserRolesDetailEndpoint(CustomTestCase):
         self.assertEqual(self.payload_2, role_response.json)
 
     def test_delete_user_role_not_authorized_user(self):
+        # The platform admin role is a superset of the client admin role, so it
+        # also has access to the user role endpoints
         for role in ROLES_MAP:
-            if role not in self.roles_with_access:
+            if role not in self.roles_with_access and role != PLATFORM_ADMIN_ROLE:
                 self.token = self.create_user_with_role(role)
                 response = self.client.delete(
                     self.url
@@ -441,7 +448,7 @@ class TestRolesModelMethods(CustomTestCase):
 
     def test_user_role_delete_cascade(self):
         payload = {"user_id": self.user.id}
-        self.token = self.create_user_with_role(ADMIN_ROLE)
+        self.token = self.create_user_with_role(PLATFORM_ADMIN_ROLE)
         self.cascade_delete(
             self.url,
             self.model,
@@ -453,7 +460,7 @@ class TestRolesModelMethods(CustomTestCase):
         )
 
     def test_permission_delete_cascade(self):
-        self.token = self.create_user_with_role(ADMIN_ROLE)
+        self.token = self.create_user_with_role(PLATFORM_ADMIN_ROLE)
         idx = self.create_new_row(self.url, self.model, self.payload)
         payload = {"action_id": 1, "api_view_id": 1, "role_id": idx}
         PermissionViewRoleModel(payload).save()
@@ -473,12 +480,12 @@ class TestRolesModelMethods(CustomTestCase):
         self.assertIsNone(permission)
 
     def test_repr_method(self):
-        self.token = self.create_user_with_role(ADMIN_ROLE)
+        self.token = self.create_user_with_role(PLATFORM_ADMIN_ROLE)
         idx = self.create_new_row(self.url, self.model, self.payload)
         self.repr_method(idx, "<Role test_role>")
 
     def test_str_method(self):
-        self.token = self.create_user_with_role(ADMIN_ROLE)
+        self.token = self.create_user_with_role(PLATFORM_ADMIN_ROLE)
         idx = self.create_new_row(self.url, self.model, self.payload)
         self.str_method(idx, "<Role test_role>")
 

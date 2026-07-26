@@ -58,6 +58,12 @@ def upgrade():
             "token_version", sa.Integer(), nullable=False, server_default="0"
         ),
     )
+    op.add_column(
+        "users", sa.Column("totp_last_counter", sa.Integer(), nullable=True)
+    )
+    op.add_column(
+        "users", sa.Column("last_login_at", sa.DateTime(), nullable=True)
+    )
 
     op.create_table(
         "user_password_history",
@@ -119,6 +125,8 @@ def downgrade():
         op.f("ix_user_password_history_user_id"), table_name="user_password_history"
     )
     op.drop_table("user_password_history")
+    op.drop_column("users", "last_login_at")
+    op.drop_column("users", "totp_last_counter")
     op.drop_column("users", "token_version")
     op.drop_column("users", "locked")
     op.drop_column("users", "failed_login_attempts")

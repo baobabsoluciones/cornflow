@@ -11,6 +11,7 @@ Flask-Bcrypt==1.0.1
 Flask-Compress==1.14
 flask-cors==6.0.0
 flask-inflate==0.3
+Flask-Limiter==3.8.0
 Flask-Migrate==4.0.5
 Flask-RESTful==0.3.10
 Flask-SQLAlchemy==2.5.1

@@ -132,7 +132,9 @@ class MFAVerifyEndpoint(BaseMetaResource):
                 log_txt=f"Error while user {user.id} tries to verify MFA. "
                 f"MFA is already enabled.",
             )
-        if not user.check_totp_code(kwargs.get("totp_code")):
+        if not user.check_totp_code(
+            kwargs.get("totp_code"), enforce_replay=False
+        ):
             raise InvalidCredentials(
                 "Invalid two-factor authentication code",
                 log_txt=f"Error while user {user.id} tries to verify MFA. "

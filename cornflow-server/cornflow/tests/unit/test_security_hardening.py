@@ -15,6 +15,7 @@ import unittest
 from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
 
+import jwt
 import pyotp
 from flask import Flask, current_app
 from flask_testing import TestCase
@@ -25,9 +26,14 @@ from cornflow.commands.dag import register_deployed_dags_command_test
 from cornflow.commands.permissions import register_dag_permissions_command
 from cornflow.models import UserModel, UserRoleModel
 from cornflow.shared import db
+from cornflow.shared.authentication.auth import BIAuth
 from cornflow.shared.const import ADMIN_ROLE, PLATFORM_ADMIN_ROLE, SERVICE_ROLE
+from cornflow.shared.exceptions import InvalidCredentials
 from cornflow.shared.validators import check_password_pattern, passwords_too_similar
 from cornflow.tests.const import LOGIN_URL, SIGNUP_URL, USER_URL, INSTANCE_URL
+
+ROLES_URL = "/roles/"
+PERMISSION_URL = "/permission/"
 
 MFA_SETUP_URL = "/mfa/setup/"
 MFA_VERIFY_URL = "/mfa/verify/"
@@ -277,6 +283,207 @@ class TestPasswordRotationEnforcement(TestCase):
 
         user = UserModel.get_one_user(self.user_id)
         self.assertTrue(user.pwd_change_required)
+
+
+class TestRoleScoping(TestCase):
+    """
+    Tests that platform-only endpoints (roles, permissions) are reachable by
+    platform administrators but not client administrators, that platform
+    admin is a superset (still reaches the client-admin endpoints), and that
+    only platform admins can revoke the admin role.
+    """
+
+    def create_app(self):
+        return create_app("testing")
+
+    def setUp(self):
+        db.create_all()
+        access_init_command(verbose=False)
+        register_deployed_dags_command_test(verbose=False)
+        self.admin_token = self.create_user_with_role(
+            "clientadmin", "clientadmin@test.com", ADMIN_ROLE
+        )
+        self.platform_token = self.create_user_with_role(
+            "platformadmin", "platformadmin@test.com", PLATFORM_ADMIN_ROLE
+        )
+        # A plain user, target for the revoke-admin tests
+        self.target_id = self._signup(
+            "targetadmin", "targetadmin@test.com"
+        )
+        UserRoleModel({"user_id": self.target_id, "role_id": ADMIN_ROLE}).save()
+        register_dag_permissions_command(
+            open_deployment=int(current_app.config["OPEN_DEPLOYMENT"]), verbose=0
+        )
+
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
+
+    def _signup(self, username, email):
+        response = self.client.post(
+            SIGNUP_URL,
+            data=json.dumps(
+                {
+                    "username": username,
+                    "email": email,
+                    "password": STRONG_PASSWORD,
+                }
+            ),
+            headers=JSON_HEADER,
+        )
+        return response.json["id"]
+
+    def create_user_with_role(self, username, email, role_id):
+        user_id = self._signup(username, email)
+        UserRoleModel({"user_id": user_id, "role_id": role_id}).save()
+        return self.client.post(
+            LOGIN_URL,
+            data=json.dumps({"username": username, "password": STRONG_PASSWORD}),
+            headers=JSON_HEADER,
+        ).json["token"]
+
+    def get(self, url, token):
+        return self.client.get(url, headers=auth_header(token))
+
+    def test_client_admin_denied_on_platform_endpoints(self):
+        for url in (ROLES_URL, PERMISSION_URL, "/apiview/", "/action/"):
+            response = self.get(url, self.admin_token)
+            self.assertEqual(
+                403, response.status_code, msg=f"admin should be denied {url}"
+            )
+
+    def test_platform_admin_allowed_on_platform_endpoints(self):
+        for url in (ROLES_URL, PERMISSION_URL, "/apiview/", "/action/"):
+            response = self.get(url, self.platform_token)
+            self.assertEqual(
+                200, response.status_code, msg=f"platform admin denied {url}"
+            )
+
+    def test_platform_admin_is_superset(self):
+        # Platform admin also reaches the client-admin endpoints (user list)
+        response = self.get(USER_URL, self.platform_token)
+        self.assertEqual(200, response.status_code)
+
+    def test_client_admin_keeps_user_management(self):
+        response = self.get(USER_URL, self.admin_token)
+        self.assertEqual(200, response.status_code)
+
+    def test_client_admin_can_not_revoke_admin(self):
+        response = self.client.put(
+            f"{USER_URL}{self.target_id}/0/",
+            headers=auth_header(self.admin_token),
+        )
+        self.assertEqual(403, response.status_code)
+        # via the user/role delete path too
+        response = self.client.delete(
+            f"/user/role/{self.target_id}/{ADMIN_ROLE}/",
+            headers=auth_header(self.admin_token),
+        )
+        self.assertEqual(403, response.status_code)
+
+    def test_platform_admin_can_revoke_admin(self):
+        response = self.client.put(
+            f"{USER_URL}{self.target_id}/0/",
+            headers=auth_header(self.platform_token),
+        )
+        self.assertEqual(200, response.status_code)
+        self.assertFalse(
+            UserRoleModel.is_admin(self.target_id),
+        )
+
+    def test_client_admin_can_assign_roles(self):
+        # Assigning a (non-admin) role is still a client-admin power
+        from cornflow.shared.const import VIEWER_ROLE
+
+        response = self.client.post(
+            "/user/role/",
+            data=json.dumps({"user_id": self.target_id, "role_id": VIEWER_ROLE}),
+            headers=auth_header(self.admin_token),
+        )
+        self.assertIn(response.status_code, (200, 201))
+
+
+class TestBITokenExpiry(TestCase):
+    """
+    Tests that BI tokens now expire and that an expired one is rejected.
+    """
+
+    def create_app(self):
+        return create_app("testing")
+
+    def setUp(self):
+        db.create_all()
+        access_init_command(verbose=False)
+        self.user = UserModel(
+            {
+                "username": "bitoken",
+                "email": "bitoken@test.com",
+                "password": STRONG_PASSWORD,
+            }
+        )
+        self.user.save()
+
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
+
+    def test_valid_bi_token_decodes(self):
+        token = BIAuth.generate_token(self.user.id)
+        payload = BIAuth.decode_token(token)
+        self.assertEqual("bitoken", payload["sub"])
+        self.assertIn("exp", payload)
+
+    def test_expired_bi_token_is_rejected(self):
+        # Craft a token that expired an hour ago, signed with the BI key
+        payload = {
+            "exp": datetime.now(timezone.utc) - timedelta(hours=1),
+            "iat": datetime.now(timezone.utc) - timedelta(days=100),
+            "sub": self.user.username,
+        }
+        expired = jwt.encode(
+            payload, current_app.config["SECRET_BI_KEY"], algorithm="HS256"
+        )
+        with self.assertRaises(InvalidCredentials):
+            BIAuth.decode_token(expired)
+
+
+class TestGetDbConn(unittest.TestCase):
+    """
+    Tests that the CLI database connection resolver honours DATABASE_URL so
+    CLI commands run inside the container reach the same database as the
+    server (the Docker image forces DEFAULT_POSTGRES=1).
+    """
+
+    def setUp(self):
+        self._saved = {
+            k: os.environ.get(k)
+            for k in ("DATABASE_URL", "DEFAULT_POSTGRES", "CORNFLOW_DB_HOST")
+        }
+
+    def tearDown(self):
+        for k, v in self._saved.items():
+            if v is None:
+                os.environ.pop(k, None)
+            else:
+                os.environ[k] = v
+
+    def test_database_url_takes_precedence(self):
+        from cornflow.cli.utils import get_db_conn
+
+        os.environ["DEFAULT_POSTGRES"] = "1"
+        os.environ["CORNFLOW_DB_HOST"] = "wrong_host"
+        os.environ["DATABASE_URL"] = "postgresql://u:p@realhost:5432/realdb"
+        self.assertEqual(
+            "postgresql://u:p@realhost:5432/realdb", get_db_conn()
+        )
+
+    def test_falls_back_to_postgres_parts(self):
+        from cornflow.cli.utils import get_db_conn
+
+        os.environ.pop("DATABASE_URL", None)
+        os.environ["DEFAULT_POSTGRES"] = "1"
+        os.environ["CORNFLOW_DB_HOST"] = "somehost"
+        self.assertIn("somehost", get_db_conn())
 
 
 class TestConfigSecurityClamping(unittest.TestCase):
@@ -547,6 +754,128 @@ class TestLoginLockout(TestCase):
         self.assertIsNotNone(response.json.get("token"))
 
 
+class TestRateLimiting(TestCase):
+    """
+    Tests the per-IP rate limiting of the sensitive unauthenticated
+    endpoints (login and password recovery).
+    """
+
+    def create_app(self):
+        # Dedicated config with rate limiting enabled from init_app time
+        # (the base testing config keeps it off)
+        return create_app("testing-ratelimit")
+
+    def setUp(self):
+        db.create_all()
+        access_init_command(verbose=False)
+        register_deployed_dags_command_test(verbose=False)
+        self.user_data = {
+            "username": "ratelimit",
+            "email": "ratelimit@test.com",
+            "password": STRONG_PASSWORD,
+        }
+        self.client.post(
+            SIGNUP_URL, data=json.dumps(self.user_data), headers=JSON_HEADER
+        )
+        register_dag_permissions_command(
+            open_deployment=int(current_app.config["OPEN_DEPLOYMENT"]), verbose=0
+        )
+
+    def tearDown(self):
+        # Reset the shared limiter storage so counts do not leak between tests
+        from cornflow.shared.rate_limit import limiter
+
+        try:
+            limiter.reset()
+        except Exception:
+            pass
+        db.session.remove()
+        db.drop_all()
+
+    def try_login(self, password="wrong"):
+        return self.client.post(
+            LOGIN_URL,
+            data=json.dumps(
+                {"username": self.user_data["username"], "password": password}
+            ),
+            headers=JSON_HEADER,
+        )
+
+    def test_login_is_rate_limited_per_ip(self):
+        # The limit is 3 per minute
+        for _ in range(3):
+            response = self.try_login()
+            self.assertNotEqual(429, response.status_code)
+
+        response = self.try_login()
+        self.assertEqual(429, response.status_code)
+        self.assertIn("Too many requests", response.json.get("message", ""))
+
+    def test_rate_limit_counts_across_usernames(self):
+        # Spraying different usernames from the same IP still hits the limit
+        for i in range(3):
+            self.client.post(
+                LOGIN_URL,
+                data=json.dumps(
+                    {"username": f"sprayed{i}", "password": "whatever"}
+                ),
+                headers=JSON_HEADER,
+            )
+        response = self.client.post(
+            LOGIN_URL,
+            data=json.dumps({"username": "sprayed99", "password": "whatever"}),
+            headers=JSON_HEADER,
+        )
+        self.assertEqual(429, response.status_code)
+
+    def test_recover_password_is_rate_limited(self):
+        for _ in range(2):
+            response = self.client.put(
+                "/user/recover-password/",
+                data=json.dumps({"email": "someone@test.com"}),
+                headers=JSON_HEADER,
+            )
+            self.assertNotEqual(429, response.status_code)
+
+        response = self.client.put(
+            "/user/recover-password/",
+            data=json.dumps({"email": "someone@test.com"}),
+            headers=JSON_HEADER,
+        )
+        self.assertEqual(429, response.status_code)
+        self.assertIn("Too many requests", response.json.get("message", ""))
+
+    def test_forwarded_for_used_when_trusted(self):
+        current_app.config["RATELIMIT_TRUST_FORWARDED_FOR"] = 1
+        # Different forwarded IPs are limited independently
+        for _ in range(3):
+            self.client.post(
+                LOGIN_URL,
+                data=json.dumps(
+                    {"username": self.user_data["username"], "password": "x"}
+                ),
+                headers={**JSON_HEADER, "X-Forwarded-For": "10.0.0.1"},
+            )
+        # A different client IP still has budget
+        response = self.client.post(
+            LOGIN_URL,
+            data=json.dumps(
+                {"username": self.user_data["username"], "password": "x"}
+            ),
+            headers={**JSON_HEADER, "X-Forwarded-For": "10.0.0.2"},
+        )
+        self.assertNotEqual(429, response.status_code)
+        # The first client IP is now blocked
+        response = self.client.post(
+            LOGIN_URL,
+            data=json.dumps(
+                {"username": self.user_data["username"], "password": "x"}
+            ),
+            headers={**JSON_HEADER, "X-Forwarded-For": "10.0.0.1"},
+        )
+        self.assertEqual(429, response.status_code)
+
+
 class TestPasswordResetLink(TestCase):
     """
     Tests the password reset flow based on a time-limited, single-use link
@@ -687,6 +1016,63 @@ class TestPasswordResetLink(TestCase):
 
         user = UserModel.get_one_user(self.user_id)
         self.assertFalse(user.pwd_change_required)
+
+
+class TestLastLogin(TestCase):
+    """
+    Tests that the last-login timestamp is tracked and returned so the
+    client can show the user their previous access.
+    """
+
+    def create_app(self):
+        return create_app("testing")
+
+    def setUp(self):
+        db.create_all()
+        access_init_command(verbose=False)
+        register_deployed_dags_command_test(verbose=False)
+        self.user_data = {
+            "username": "lastlogin",
+            "email": "lastlogin@test.com",
+            "password": STRONG_PASSWORD,
+        }
+        response = self.client.post(
+            SIGNUP_URL, data=json.dumps(self.user_data), headers=JSON_HEADER
+        )
+        self.user_id = response.json["id"]
+        register_dag_permissions_command(
+            open_deployment=int(current_app.config["OPEN_DEPLOYMENT"]), verbose=0
+        )
+
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
+
+    def log_in(self):
+        return self.client.post(
+            LOGIN_URL,
+            data=json.dumps(
+                {
+                    "username": self.user_data["username"],
+                    "password": self.user_data["password"],
+                }
+            ),
+            headers=JSON_HEADER,
+        )
+
+    def test_last_login_is_tracked(self):
+        # First login: there is no previous access
+        response = self.log_in()
+        self.assertEqual(200, response.status_code)
+        self.assertIsNone(response.json.get("last_login"))
+        self.assertIsNotNone(
+            UserModel.get_one_user(self.user_id).last_login_at
+        )
+
+        # Second login: the previous access is returned
+        response = self.log_in()
+        self.assertEqual(200, response.status_code)
+        self.assertIsNotNone(response.json.get("last_login"))
 
 
 class TestTokenRevocation(TestCase):
@@ -913,6 +1299,18 @@ class TestMFAFlow(TestCase):
 
         # Login with an invalid code fails
         response = self.log_in(totp_code="000000")
+        self.assertEqual(400, response.status_code)
+
+    def test_totp_code_can_not_be_replayed(self):
+        secret, _, _ = self.enroll()
+        code = pyotp.TOTP(secret).now()
+
+        response = self.log_in(totp_code=code)
+        self.assertEqual(200, response.status_code)
+        self.assertIsNotNone(response.json.get("token"))
+
+        # The very same code can not be used again (replay within the window)
+        response = self.log_in(totp_code=code)
         self.assertEqual(400, response.status_code)
 
     def test_backup_code_is_single_use(self):

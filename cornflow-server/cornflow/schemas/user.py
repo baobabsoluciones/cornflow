@@ -31,6 +31,7 @@ class UserEndpointResponse(Schema):
     pwd_change_required = fields.Boolean()
     mfa_enabled = fields.Boolean()
     locked = fields.Boolean()
+    last_login_at = fields.DateTime()
 
 
 class UserDetailsEndpointResponse(Schema):
@@ -43,6 +44,7 @@ class UserDetailsEndpointResponse(Schema):
     pwd_change_required = fields.Boolean()
     mfa_enabled = fields.Boolean()
     locked = fields.Boolean()
+    last_login_at = fields.DateTime()
 
 
 class TokenEndpointResponse(Schema):

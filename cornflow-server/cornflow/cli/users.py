@@ -95,6 +95,26 @@ def unlock_user(username):
         return True
 
 
+@users.command(
+    name="bi_token",
+    help="Generate a BI token for a user (valid for BI_TOKEN_DURATION_DAYS "
+    "days). Intended to be run inside the server with database access; no "
+    "further authentication is required because CLI access is already "
+    "privileged. Use it to (re)generate Power BI tokens.",
+)
+@username
+def issue_bi_token(username):
+    app = get_app()
+    with app.app_context():
+        user = UserModel.get_one_user_by_username(username)
+        if not user:
+            raise ObjectDoesNotExist("User does not exist")
+        token = BIAuth.generate_token(user.id)
+        app.logger.info(f"A BI token was generated for user {username} via the CLI")
+        click.echo(token)
+        return True
+
+
 @create.command(
     name="token",
     help="Creates a token for a user that is never going to expire. This token can only be used on BI endpoints",

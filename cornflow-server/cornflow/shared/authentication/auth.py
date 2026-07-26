@@ -632,6 +632,12 @@ class BIAuth(Auth):
                 token, current_app.config["SECRET_BI_KEY"], algorithms="HS256"
             )
 
+        except jwt.ExpiredSignatureError:
+            raise InvalidCredentials(
+                "The BI token has expired, please generate a new one",
+                log_txt="Error while trying to decode a BI token. The token has expired.",
+                status_code=400,
+            )
         except jwt.InvalidTokenError:
             raise InvalidCredentials(
                 "Invalid token, please try again with a new token",
@@ -642,8 +648,9 @@ class BIAuth(Auth):
     @staticmethod
     def generate_token(user_id: int = None) -> str:
         """
-        Generates a token given a user_id. The token will contain the username in the sub claim.
-        BI tokens do not include expiration time.
+        Generates a BI token given a user_id. The token contains the username
+        in the sub claim and expires after BI_TOKEN_DURATION_DAYS days (it can
+        be regenerated with `cornflow users bi_token`).
 
         :param int user_id: user id to generate the token for
         :return: the generated token
@@ -663,6 +670,8 @@ class BIAuth(Auth):
             )
 
         payload = {
+            "exp": datetime.now(timezone.utc)
+            + timedelta(days=int(current_app.config["BI_TOKEN_DURATION_DAYS"])),
             "iat": datetime.now(timezone.utc),
             "sub": user.username,
             "iss": INTERNAL_TOKEN_ISSUER,

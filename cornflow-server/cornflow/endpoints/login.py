@@ -2,6 +2,8 @@
 External endpoint for the user to log in to the cornflow webserver
 """
 
+from datetime import datetime, timezone
+
 # Partial imports
 from flask import current_app, request
 from flask_apispec import use_kwargs, doc
@@ -18,6 +20,11 @@ from cornflow.models import (
 from cornflow.schemas.user import LoginEndpointRequest, LoginOpenAuthRequest
 from cornflow.shared import db
 from cornflow.shared.authentication import Auth, LDAPBase
+from cornflow.shared.rate_limit import (
+    limiter,
+    login_rate_limit,
+    RATE_LIMIT_MESSAGE,
+)
 from cornflow.shared.const import (
     AUTH_DB,
     AUTH_LDAP,
@@ -60,9 +67,12 @@ class LoginBaseEndpoint(BaseMetaResource):
             if mfa_response is not None:
                 return mfa_response, 200
             # The authentication is fully completed: clear the failed
-            # login attempts counter
+            # login attempts counter and record the login timestamp. The
+            # previous timestamp is returned so the client can show the
+            # user their last access.
             user.reset_failed_login()
             response.update({"change_password": check_last_password_change(user)})
+            response.update({"last_login": self._register_successful_login(user)})
             current_app.logger.info(
                 f"User {user.id} logged in successfully using database authentication"
             )
@@ -105,6 +115,22 @@ class LoginBaseEndpoint(BaseMetaResource):
         response.update({"token": token, "id": user.id})
 
         return response, 200
+
+    @staticmethod
+    def _register_successful_login(user):
+        """
+        Stamps the current login time on the user and returns the previous
+        login time (ISO string or None) so the client can display it.
+
+        :param user: the user that just logged in
+        :return: the previous last-login timestamp as ISO 8601, or None
+        :rtype: str or None
+        """
+        previous = user.last_login_at
+        user.last_login_at = datetime.now(timezone.utc)
+        db.session.add(user)
+        db.session.commit()
+        return previous.isoformat() if previous else None
 
     def check_mfa(self, user, totp_code):
         """
@@ -354,6 +380,11 @@ class LoginEndpoint(LoginBaseEndpoint):
         self.auth_class = Auth
         self.user_role_association = UserRoleModel
 
+    # Per-IP rate limit applied around the whole endpoint (flask-restful
+    # discovers class-level decorators; a per-method decorator would not be
+    # enforced through its dispatch)
+    decorators = [limiter.limit(login_rate_limit, error_message=RATE_LIMIT_MESSAGE)]
+
     @doc(description="Log in", tags=["Users"])
     @use_kwargs(LoginEndpointRequest, location="json")
     def post(self, **kwargs):
@@ -370,6 +401,8 @@ class LoginEndpoint(LoginBaseEndpoint):
 
 class LoginOpenAuthEndpoint(LoginBaseEndpoint):
     """ """
+
+    decorators = [limiter.limit(login_rate_limit, error_message=RATE_LIMIT_MESSAGE)]
 
     def __init__(self):
         super().__init__()

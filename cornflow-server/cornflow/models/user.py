@@ -69,6 +69,11 @@ class UserModel(TraceAttributesModel):
     # Incremented on security events (password change, lock, MFA reset) to
     # invalidate every outstanding session token of the user
     token_version = db.Column(db.Integer, nullable=False, default=0)
+    # Last accepted TOTP time-step, to reject replay of the same or an older
+    # code within its validity window
+    totp_last_counter = db.Column(db.Integer, nullable=True)
+    # Timestamp of the last successful login (shown to the user)
+    last_login_at = db.Column(db.DateTime, nullable=True)
     email = db.Column(db.String(128), nullable=False, unique=True)
 
     user_roles = db.relationship("UserRoleModel", cascade="all,delete", backref="users")
@@ -116,6 +121,8 @@ class UserModel(TraceAttributesModel):
         self.failed_login_attempts = 0
         self.locked = False
         self.token_version = 0
+        self.totp_last_counter = None
+        self.last_login_at = None
         # TODO: handle better None passwords that can be found when using ldap
         check_pass, msg = check_password_pattern(
             data.get("password"), user_data=data
@@ -235,7 +242,8 @@ class UserModel(TraceAttributesModel):
         """
         if password is None:
             return None
-        return bcrypt.generate_password_hash(password, rounds=10).decode("utf8")
+        # rounds omitted on purpose: Flask-Bcrypt uses BCRYPT_LOG_ROUNDS
+        return bcrypt.generate_password_hash(password).decode("utf8")
 
     def check_hash(self, password):
         """
@@ -329,20 +337,51 @@ class UserModel(TraceAttributesModel):
         """
         return decrypt_value(self.totp_secret)
 
-    def check_totp_code(self, code: str) -> bool:
+    def check_totp_code(self, code: str, enforce_replay: bool = True) -> bool:
         """
         Verifies a TOTP code against the secret of the user.
 
+        When ``enforce_replay`` is True (the login path) a code from the same
+        or an older time-step than the last accepted one is rejected, and the
+        accepted step is recorded. A ±1 step window is allowed for clock
+        drift. During enrollment (``enforce_replay`` False) the code is only
+        validated: the replay counter is left untouched so the user can log
+        in with a fresh code right after enrolling.
+
         :param str code: the 6 digit code from the authenticator app
-        :return: True if the code is valid
+        :param bool enforce_replay: whether to enforce and record the
+          anti-replay counter
+        :return: True if the code is valid (and not a replay when enforced)
         :rtype: bool
         """
+        import time
+
         import pyotp
 
         secret = self.get_totp_secret()
         if not secret or not code:
             return False
-        return pyotp.TOTP(secret).verify(str(code).strip(), valid_window=1)
+        code = str(code).strip()
+        totp = pyotp.TOTP(secret)
+        interval = 30
+        now = int(time.time())
+        current_step = now // interval
+        # Check the current step and its immediate neighbours (clock drift)
+        for step in (current_step, current_step - 1, current_step + 1):
+            if totp.at(step * interval) == code:
+                if not enforce_replay:
+                    return True
+                if (
+                    self.totp_last_counter is not None
+                    and step <= self.totp_last_counter
+                ):
+                    # The code (or an older one) was already used
+                    return False
+                self.totp_last_counter = step
+                db.session.add(self)
+                db.session.commit()
+                return True
+        return False
 
     @classmethod
     def get_all_users(cls):

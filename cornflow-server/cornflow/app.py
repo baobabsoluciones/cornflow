@@ -17,6 +17,7 @@ from flask_migrate import Migrate
 from flask_restful import Api
 from werkzeug.exceptions import NotFound
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 # Module imports
 from cornflow.commands import (
@@ -37,6 +38,7 @@ from cornflow.endpoints.login import LoginEndpoint, LoginOpenAuthEndpoint
 from cornflow.endpoints.signup import SignUpEndpoint
 from cornflow.shared import db, bcrypt
 from cornflow.shared.compress import init_compress
+from cornflow.shared.rate_limit import limiter
 from cornflow.shared.const import (
     AUTH_DB,
     AUTH_LDAP,
@@ -106,6 +108,15 @@ def create_app(env_name="development", dataconn=None):
     bcrypt.init_app(app)
     db.init_app(app)
     Migrate(app=app, db=db)
+
+    # When behind a trusted reverse proxy, honour the forwarded headers so the
+    # rate limiter and the logs see the real client IP instead of the proxy's
+    if int(app.config.get("RATELIMIT_TRUST_FORWARDED_FOR", 0)):
+        app.wsgi_app = ProxyFix(
+            app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1
+        )
+
+    limiter.init_app(app)
 
     if "sqlite" in app.config["SQLALCHEMY_DATABASE_URI"]:
 

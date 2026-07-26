@@ -34,8 +34,9 @@ class MFABackupCodeModel(TraceAttributesModel):
     def __init__(self, data):
         super().__init__()
         self.user_id = data.get("user_id")
+        # rounds omitted on purpose: Flask-Bcrypt uses BCRYPT_LOG_ROUNDS
         self.code_hash = bcrypt.generate_password_hash(
-            data.get("code"), rounds=10
+            data.get("code")
         ).decode("utf8")
         self.used_at = None
 

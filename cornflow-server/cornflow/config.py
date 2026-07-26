@@ -65,6 +65,10 @@ class DefaultConfig(object):
 
     AUTH_TYPE = int(os.getenv("AUTH_TYPE", AUTH_DB))
     DEFAULT_ROLE = int(os.getenv("DEFAULT_ROLE", PLANNER_ROLE))
+    # bcrypt work factor for password hashing (Flask-Bcrypt reads this when
+    # generate_password_hash is called without an explicit rounds argument).
+    # Floor of 12 as recommended by CCN-STIC-807 for the employed hashing.
+    BCRYPT_LOG_ROUNDS = _env_int_floor("BCRYPT_LOG_ROUNDS", 12, 12)
     CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*")
     SQLALCHEMY_TRACK_MODIFICATIONS = True
     DEBUG = True
@@ -165,6 +169,10 @@ class DefaultConfig(object):
     # Token duration in hours (ceiling: 24)
     TOKEN_DURATION = _env_float_ceiling("TOKEN_DURATION", 8, 24)
 
+    # BI token lifetime in days (never-expiring BI tokens are not allowed).
+    # Ceiling of 365 days; regenerate with `cornflow users bi_token`.
+    BI_TOKEN_DURATION_DAYS = _env_int_ceiling("BI_TOKEN_DURATION_DAYS", 90, 365)
+
     # Password rotation time in days (ceiling: 365)
     PWD_ROTATION_TIME = _env_int_ceiling("PWD_ROTATION_TIME", 120, 365)
 
@@ -199,6 +207,22 @@ class DefaultConfig(object):
     MFA_SETUP_TOKEN_DURATION_MINUTES = _env_int_ceiling(
         "MFA_SETUP_TOKEN_DURATION_MINUTES", 10, 30
     )
+
+    # Per-IP rate limiting of the sensitive unauthenticated endpoints
+    RATELIMIT_ENABLED = int(os.getenv("RATELIMIT_ENABLED", 1))
+    # Shared storage backend for the counters. Defaults to in-memory, which
+    # is per-process: production behind several gunicorn workers should set a
+    # shared backend, e.g. redis://host:6379.
+    RATELIMIT_STORAGE_URI = os.getenv("RATELIMIT_STORAGE_URI", "memory://")
+    # Trust the X-Forwarded-For header (only when behind a trusted reverse
+    # proxy that sets it); otherwise the direct connection IP is used.
+    RATELIMIT_TRUST_FORWARDED_FOR = int(
+        os.getenv("RATELIMIT_TRUST_FORWARDED_FOR", 0)
+    )
+    RATELIMIT_LOGIN = os.getenv("RATELIMIT_LOGIN", "10 per minute")
+    RATELIMIT_RECOVER = os.getenv("RATELIMIT_RECOVER", "5 per hour")
+    # Return the standard rate-limit headers on responses
+    RATELIMIT_HEADERS_ENABLED = True
 
     # Base URL of the cornflow web client, used to build the password reset
     # link sent by email (e.g. https://cornflow.example.com). When it is not
@@ -244,10 +268,27 @@ class Testing(DefaultConfig):
     # MFA is disabled for the generic test suite. Specific MFA tests
     # activate it explicitly.
     MFA_REQUIRED = 0
+    # Rate limiting is disabled for the generic test suite (which makes many
+    # rapid login calls). Specific rate-limit tests enable it explicitly.
+    RATELIMIT_ENABLED = 0
+    # Low bcrypt work factor to keep the test suite fast (production uses 12)
+    BCRYPT_LOG_ROUNDS = 4
 
 
 class TestingDatabricks(Testing):
     CORNFLOW_BACKEND = DATABRICKS_BACKEND
+
+
+class TestingRateLimit(Testing):
+    """
+    Configuration class for the rate-limiting tests (the feature is off in
+    the base testing config so the rest of the suite is not throttled).
+    """
+
+    RATELIMIT_ENABLED = 1
+    RATELIMIT_STORAGE_URI = "memory://"
+    RATELIMIT_LOGIN = "3 per minute"
+    RATELIMIT_RECOVER = "2 per hour"
 
 
 class TestingOpenAuth(Testing):
@@ -289,4 +330,5 @@ app_config = {
     "testing-oauth": TestingOpenAuth,
     "testing-root": TestingApplicationRoot,
     "testing-databricks": TestingDatabricks,
+    "testing-ratelimit": TestingRateLimit,
 }

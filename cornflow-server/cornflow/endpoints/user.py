@@ -40,6 +40,11 @@ from cornflow.shared.email import (
     get_password_reset_link_email,
     send_email_to,
 )
+from cornflow.shared.rate_limit import (
+    limiter,
+    recover_rate_limit,
+    RATE_LIMIT_MESSAGE,
+)
 from cornflow.shared.validators import (
     check_email_pattern,
     check_password_pattern,
@@ -303,6 +308,16 @@ class ToggleUserAdmin(BaseMetaResource):
             UserRoleModel(data={"user_id": user_id, "role_id": ADMIN_ROLE}).save()
             current_app.logger.info(f"User {user_id} was made into an admin")
         else:
+            # A client admin can not revoke the admin role from another admin;
+            # only a platform administrator can do it
+            if not self.get_user().is_platform_admin():
+                raise NoPermission(
+                    error="Only a platform administrator can revoke the admin "
+                    "role from a user",
+                    log_txt=f"Error while user {self.get_user()} tries to revoke "
+                    f"the admin role of user {user_id}. Only platform "
+                    f"administrators can revoke admin.",
+                )
             UserRoleModel.query.filter_by(user_id=user_id, role_id=ADMIN_ROLE).delete()
             current_app.logger.info(f"User {user_id} was removed admin role")
             try:
@@ -325,6 +340,7 @@ class ResetPassword(BaseMetaResource):
     """
 
     ROLES_WITH_ACCESS = ALL_DEFAULT_ROLES
+    decorators = [limiter.limit(recover_rate_limit, error_message=RATE_LIMIT_MESSAGE)]
 
     def __init__(self):
         super().__init__()
@@ -356,6 +372,8 @@ class RecoverPassword(BaseMetaResource):
     """
     Endpoint to recover the password
     """
+
+    decorators = [limiter.limit(recover_rate_limit, error_message=RATE_LIMIT_MESSAGE)]
 
     def __init__(self):
         super().__init__()

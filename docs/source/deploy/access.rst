@@ -138,6 +138,20 @@ authentication reset all revoke the user's sessions, which then answer
 401 and require a new login. BI tokens are excluded (they are long-lived
 by design and signed with a separate key).
 
+Per-IP rate limiting: the login, password recovery and password reset
+endpoints are rate limited per client IP, on top of the per-account
+lockout. This throttles password spraying (many usernames from one source)
+and abuse of the recovery endpoint to flood inboxes. Limits are
+configurable (``RATELIMIT_LOGIN`` default ``10 per minute``,
+``RATELIMIT_RECOVER`` default ``5 per hour``); over the limit the endpoint
+answers 429. The counters use an in-memory backend by default, which is
+per-process: a production deployment behind several gunicorn workers must
+set ``RATELIMIT_STORAGE_URI`` to a shared backend (e.g. ``redis://...``).
+When behind a reverse proxy, set ``RATELIMIT_TRUST_FORWARDED_FOR=1`` so the
+real client IP (from ``X-Forwarded-For``) is used instead of the proxy's;
+leave it off on direct deployments so the header can not be spoofed. The
+whole feature can be disabled with ``RATELIMIT_ENABLED=0``.
+
 Account lockout: after ``LOGIN_MAX_ATTEMPTS`` (default 5, capped at 10)
 consecutive failed login attempts — wrong password or wrong two-factor
 code — the account is locked. While locked, the login endpoint answers 403
@@ -184,16 +198,58 @@ locally.
   when a phone is lost). With ``MFA_REQUIRED=1`` the user will enroll again
   at the next login.
 
+BI tokens
+************
+
+BI tokens are long-lived tokens for BI tools (e.g. Power BI) signed with a
+separate key (``SECRET_BI_KEY``). They are no longer permanent: they expire
+after ``BI_TOKEN_DURATION_DAYS`` days (default 90, capped at 365) and are
+excluded from the per-request session-revocation check. Regenerate one from
+inside the server (where the CLI has database access) with::
+
+    cornflow users bi_token -u <username>
+
+This command needs no further authentication because CLI/shell access is
+already privileged; the generation is logged.
+
+.. note::
+   Running the cornflow CLI inside the container requires it to reach the
+   same database as the server. The CLI now honours ``DATABASE_URL`` first
+   (the same variable the server uses), so as long as ``DATABASE_URL`` is set
+   in the container environment, commands such as ``cornflow users bi_token``
+   connect correctly. Previously the image forced ``DEFAULT_POSTGRES=1``,
+   which made the CLI rebuild the URL from the ``CORNFLOW_DB_*`` defaults and
+   fail to connect. Token generation additionally needs ``SECRET_KEY`` and
+   ``SECRET_BI_KEY`` present in the container environment (set them
+   explicitly; do not rely on a value generated at startup, which is not
+   available to a later ``docker exec`` session and would also prevent
+   decrypting stored MFA secrets across restarts).
+
 Roles definition
 *********************
 
 In cornflow there is a differentiation between user roles with different characteristics::
 
-    Platform admin - platform operator: manages the platform itself and is the only role that can unlock accounts locked after failed login attempts
-    Admin - client administrator: manages the rest of the cornflow users of their deployment and has access to make changes to the airflow platform
+    Platform admin - platform operator: superset of the client admin. It is the only role that can manage roles and permissions (roles, permission, apiview and action endpoints), unlock locked accounts and revoke the admin role from a user
+    Admin - client administrator: manages the users of their own deployment (create/disable users, assign roles, manage DAG access) but can not manage the permission model nor revoke admin from another admin
     Service - service user role reserved for service accounts (cornflow and airflow communication)
     Viewer - read only user
     Planner - the general user of cornflow can create jobs and send models to solve
+
+The split between platform admin and client admin: a client admin runs the
+day-to-day of their deployment (users, role assignment, DAG access) but can
+not reshape the security model. The roles, permissions, apiview and action
+endpoints require the platform_admin role; so does unlocking an account and
+revoking the admin role from a user (a client admin can grant admin but only
+a platform admin can take it away). The platform admin inherits every
+client-admin permission on top of the platform-only ones.
+
+.. warning::
+   A fresh deployment needs at least one platform administrator to manage
+   roles and unlock accounts. Provision one with
+   ``cornflow users create platform_admin`` (or set the
+   ``CORNFLOW_PLATFORM_ADMIN_USER`` / ``CORNFLOW_PLATFORM_ADMIN_EMAIL`` /
+   ``CORNFLOW_PLATFORM_ADMIN_PWD`` variables before the service init).
 
 Each role is stored in a table linking the role code with the permissions on the application.
 In addition, there is a temporary link between the user and his role that will not be updated until the login operation is performed again.

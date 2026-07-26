@@ -6,7 +6,7 @@ from cornflow.endpoints.meta_resource import BaseMetaResource
 from cornflow.models import ViewModel
 from cornflow.schemas.view import ViewResponse
 from cornflow.shared.authentication import Auth, authenticate
-from cornflow.shared.const import ADMIN_ROLE
+from cornflow.shared.const import PLATFORM_ADMIN_ROLE
 
 # Import from external libraries
 from flask_apispec import marshal_with, doc
@@ -14,7 +14,7 @@ from flask import current_app
 
 
 class ApiViewListEndpoint(BaseMetaResource):
-    ROLES_WITH_ACCESS = [ADMIN_ROLE]
+    ROLES_WITH_ACCESS = [PLATFORM_ADMIN_ROLE]
     DESCRIPTION = (
         "Endpoint to get the list of all the endpoints defined in cornflow and its url"
     )

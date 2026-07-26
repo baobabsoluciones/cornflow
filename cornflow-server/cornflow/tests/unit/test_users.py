@@ -35,6 +35,7 @@ from cornflow.shared.const import (
     DUMMY_ROLE,
     SERVICE_ROLE,
     PLANNER_ROLE,
+    PLATFORM_ADMIN_ROLE,
     VIEWER_ROLE,
 )
 from cornflow.tests.const import (
@@ -89,6 +90,12 @@ class TestUserEndpoint(TestCase):
             password="Lv8$uS3n!Rx6Ya",
         )
 
+        self.platform_admin = dict(
+            username="aPlatformAdmin",
+            email="platform@test.com",
+            password="Kx9#tR2m!Qw7Zp",
+        )
+
         self.service_user = dict(
             username="aServiceUser",
             email="service_user@test.com",
@@ -117,6 +124,7 @@ class TestUserEndpoint(TestCase):
             self.planner_2,
             self.admin,
             self.admin_2,
+            self.platform_admin,
             self.service_user,
             self.dummy,
         ]
@@ -146,6 +154,12 @@ class TestUserEndpoint(TestCase):
             if "admin" in u_data["email"]:
                 user_role = UserRoleModel(
                     {"user_id": u_data["id"], "role_id": ADMIN_ROLE}
+                )
+                user_role.save()
+
+            if "platform" in u_data["email"]:
+                user_role = UserRoleModel(
+                    {"user_id": u_data["id"], "role_id": PLATFORM_ADMIN_ROLE}
                 )
                 user_role.save()
 
@@ -293,9 +307,15 @@ class TestUserEndpoint(TestCase):
         self.assertEqual(True, UserRoleModel.is_admin(self.planner["id"]))
 
     def test_admin_takes_someone_admin(self):
+        # A client admin can no longer revoke the admin role
         response = self.make_admin(self.admin, self.admin_2, 0)
+        self.assertEqual(403, response.status_code)
+        self.assertEqual(True, UserRoleModel.is_admin(self.admin_2["id"]))
+
+        # Only a platform administrator can revoke the admin role
+        response = self.make_admin(self.platform_admin, self.admin_2, 0)
         self.assertEqual(200, response.status_code)
-        self.assertEqual(False, UserRoleModel.is_admin(self.planner["id"]))
+        self.assertEqual(False, UserRoleModel.is_admin(self.admin_2["id"]))
 
     def test_user_deletes_admin(self):
         response = self.delete_user(self.planner, self.admin)
