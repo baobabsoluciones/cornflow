@@ -60,7 +60,7 @@ class TestCornflowClientUser(TestCase):
 
     def test_sign_up(self):
         response = self.client.sign_up(
-            "test_username", "test_username@cornflow.org", "TestPassword2!"
+            "test_username", "test_username@cornflow.org", "Hn7-wKp.Rb4Vt9"
         )
         self.assertIn("id", response.keys())
         self.assertIn("token", response.keys())

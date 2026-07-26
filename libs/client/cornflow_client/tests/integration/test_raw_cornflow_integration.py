@@ -80,7 +80,7 @@ class TestRawCornflowClientUser(TestCase):
 
     def test_sign_up(self):
         response = self.client.raw.sign_up(
-            "test_username_2", "test_username_2@cornflow.org", "TestPassword2!"
+            "test_username_2", "test_username_2@cornflow.org", "Hn7-wKp.Rb4Vt9"
         )
         data = response.json()
         self.assertIn("id", data.keys())
