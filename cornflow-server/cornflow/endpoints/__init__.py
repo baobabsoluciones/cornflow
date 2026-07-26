@@ -8,6 +8,7 @@ from flask import current_app
 from cornflow.shared.const import CONDITIONAL_ENDPOINTS
 from .action import ActionListEndpoint
 from .alarms import AlarmsEndpoint, AlarmDetailEndpoint
+from .api_key import UserApiKeyEndpoint
 from .apiview import ApiViewListEndpoint
 from .case import (
     CaseEndpoint,
@@ -181,6 +182,11 @@ resources = [
         resource=UserMFAResetEndpoint,
         urls="/user/<int:user_id>/mfa/",
         endpoint="user-mfa",
+    ),
+    dict(
+        resource=UserApiKeyEndpoint,
+        urls="/user/api-key/",
+        endpoint="user-api-key",
     ),
     dict(resource=SchemaEndpoint, urls="/schema/", endpoint="schema"),
     dict(

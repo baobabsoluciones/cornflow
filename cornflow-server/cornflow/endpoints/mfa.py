@@ -191,8 +191,9 @@ class UserMFAResetEndpoint(BaseMetaResource):
         user_obj.set_totp_secret(None)
         user_obj.mfa_enabled = False
         MFABackupCodeModel.delete_all_for_user(user_id)
-        # Resetting the MFA revokes every outstanding session of the user
+        # Resetting the MFA revokes every outstanding session and API key
         user_obj.revoke_all_sessions()
+        user_obj.api_key_version = (user_obj.api_key_version or 0) + 1
         user_obj.save()
         current_app.logger.info(
             f"The MFA of user {user_id} was reset by user {self.get_user()}"

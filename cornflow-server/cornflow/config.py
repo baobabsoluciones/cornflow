@@ -178,6 +178,15 @@ class DefaultConfig(object):
     # Ceiling of 365 days; regenerate with `cornflow users bi_token`.
     BI_TOKEN_DURATION_DAYS = _env_int_ceiling("BI_TOKEN_DURATION_DAYS", 90, 365)
 
+    # Personal API key (alternative long-lived credential to the session JWT)
+    # If 0, personal API key generation is disabled on this deployment.
+    PERSONAL_TOKEN_ENABLED = int(os.getenv("PERSONAL_TOKEN_ENABLED", 1))
+    # API key lifetime in days (default 1 year, ceiling 2 years)
+    API_KEY_DURATION_DAYS = _env_int_ceiling("API_KEY_DURATION_DAYS", 365, 730)
+    # Require a fresh TOTP (step-up) when an MFA-enabled user generates an
+    # API key through the API/UI. The CLI path is exempt (machine access).
+    API_KEY_STEPUP_TOTP = int(os.getenv("API_KEY_STEPUP_TOTP", 1))
+
     # Password rotation time in days (ceiling: 365)
     PWD_ROTATION_TIME = _env_int_ceiling(
         "PWD_ROTATION_TIME", DEFAULT_PWD_ROTATION_TIME, 365

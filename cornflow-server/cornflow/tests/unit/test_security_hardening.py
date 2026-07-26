@@ -447,6 +447,196 @@ class TestBITokenExpiry(TestCase):
             BIAuth.decode_token(expired)
 
 
+class TestApiKey(TestCase):
+    """
+    Tests for the personal API key: generation behind a full session, use as
+    a bearer credential, one-active-key semantics (regeneration revokes the
+    previous), explicit revoke, the restriction away from security-sensitive
+    endpoints, and the MFA step-up.
+    """
+
+    def create_app(self):
+        return create_app("testing")
+
+    def setUp(self):
+        db.create_all()
+        access_init_command(verbose=False)
+        register_deployed_dags_command_test(verbose=False)
+        self.user_data = {
+            "username": "apikeyuser",
+            "email": "apikey@test.com",
+            "password": STRONG_PASSWORD,
+        }
+        response = self.client.post(
+            SIGNUP_URL, data=json.dumps(self.user_data), headers=JSON_HEADER
+        )
+        self.user_id = response.json["id"]
+        register_dag_permissions_command(
+            open_deployment=int(current_app.config["OPEN_DEPLOYMENT"]), verbose=0
+        )
+        self.session_token = self.client.post(
+            LOGIN_URL,
+            data=json.dumps(
+                {
+                    "username": self.user_data["username"],
+                    "password": self.user_data["password"],
+                }
+            ),
+            headers=JSON_HEADER,
+        ).json["token"]
+
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
+
+    def generate_key(self, token=None, totp_code=None):
+        body = {}
+        if totp_code is not None:
+            body["totp_code"] = totp_code
+        return self.client.post(
+            "/user/api-key/",
+            data=json.dumps(body),
+            headers=auth_header(token or self.session_token),
+        )
+
+    def test_generate_and_use_api_key(self):
+        response = self.generate_key()
+        self.assertEqual(201, response.status_code)
+        api_key = response.json["api_key"]
+        self.assertIsNotNone(api_key)
+        self.assertIn("expires_at", response.json)
+
+        # The key authenticates a normal request (reading own profile)
+        response = self.client.get(
+            f"{USER_URL}{self.user_id}/", headers=auth_header(api_key)
+        )
+        self.assertEqual(200, response.status_code)
+
+    def test_api_key_forbidden_on_sensitive_endpoints(self):
+        api_key = self.generate_key().json["api_key"]
+        # Can not mint another API key with an API key
+        response = self.generate_key(token=api_key)
+        self.assertEqual(403, response.status_code)
+        self.assertEqual("api_key_forbidden", response.json.get("error_code"))
+        # Can not change the password with an API key
+        response = self.client.put(
+            f"{USER_URL}{self.user_id}/",
+            data=json.dumps(
+                {
+                    "password": OTHER_STRONG_PASSWORD,
+                    "current_password": self.user_data["password"],
+                }
+            ),
+            headers=auth_header(api_key),
+        )
+        self.assertEqual(403, response.status_code)
+
+    def test_regenerating_revokes_previous(self):
+        first = self.generate_key().json["api_key"]
+        # first works
+        self.assertEqual(
+            200,
+            self.client.get(
+                f"{USER_URL}{self.user_id}/", headers=auth_header(first)
+            ).status_code,
+        )
+        second = self.generate_key().json["api_key"]
+        # second works, first is now revoked
+        self.assertEqual(
+            200,
+            self.client.get(
+                f"{USER_URL}{self.user_id}/", headers=auth_header(second)
+            ).status_code,
+        )
+        response = self.client.get(
+            f"{USER_URL}{self.user_id}/", headers=auth_header(first)
+        )
+        self.assertEqual(401, response.status_code)
+
+    def test_revoke_api_key(self):
+        api_key = self.generate_key().json["api_key"]
+        response = self.client.delete(
+            "/user/api-key/", headers=auth_header(self.session_token)
+        )
+        self.assertEqual(200, response.status_code)
+        response = self.client.get(
+            f"{USER_URL}{self.user_id}/", headers=auth_header(api_key)
+        )
+        self.assertEqual(401, response.status_code)
+
+    def test_lock_revokes_api_key(self):
+        api_key = self.generate_key().json["api_key"]
+        current_app.config["LOGIN_MAX_ATTEMPTS"] = 3
+        for _ in range(3):
+            self.client.post(
+                LOGIN_URL,
+                data=json.dumps(
+                    {"username": self.user_data["username"], "password": "wrong"}
+                ),
+                headers=JSON_HEADER,
+            )
+        # The account is locked -> its API key is revoked too
+        response = self.client.get(
+            f"{USER_URL}{self.user_id}/", headers=auth_header(api_key)
+        )
+        self.assertEqual(401, response.status_code)
+
+    def test_step_up_totp_required_for_mfa_user(self):
+        # Enable MFA on the user directly and reuse the still-valid session
+        secret = pyotp.random_base32()
+        user = UserModel.get_one_user(self.user_id)
+        user.set_totp_secret(secret)
+        user.mfa_enabled = True
+        user.save()
+
+        # Without a code -> rejected
+        response = self.generate_key()
+        self.assertEqual(400, response.status_code)
+        # With a valid code -> issued
+        response = self.generate_key(totp_code=pyotp.TOTP(secret).now())
+        self.assertEqual(201, response.status_code)
+
+
+class TestApiKeyDisabled(TestCase):
+    """API key generation can be disabled per deployment."""
+
+    def create_app(self):
+        app = create_app("testing")
+        app.config["PERSONAL_TOKEN_ENABLED"] = 0
+        return app
+
+    def setUp(self):
+        db.create_all()
+        access_init_command(verbose=False)
+        register_deployed_dags_command_test(verbose=False)
+        data = {
+            "username": "nokeyuser",
+            "email": "nokey@test.com",
+            "password": STRONG_PASSWORD,
+        }
+        self.client.post(SIGNUP_URL, data=json.dumps(data), headers=JSON_HEADER)
+        register_dag_permissions_command(
+            open_deployment=int(current_app.config["OPEN_DEPLOYMENT"]), verbose=0
+        )
+        self.token = self.client.post(
+            LOGIN_URL,
+            data=json.dumps(
+                {"username": data["username"], "password": data["password"]}
+            ),
+            headers=JSON_HEADER,
+        ).json["token"]
+
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
+
+    def test_generation_disabled(self):
+        response = self.client.post(
+            "/user/api-key/", data=json.dumps({}), headers=auth_header(self.token)
+        )
+        self.assertEqual(501, response.status_code)
+
+
 class TestGetDbConn(unittest.TestCase):
     """
     Tests that the CLI database connection resolver honours DATABASE_URL so

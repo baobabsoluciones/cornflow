@@ -241,6 +241,45 @@ class RawCornFlow(object):
             self.token = response.json()["token"]
         return response
 
+    def set_api_key(self, api_key):
+        """
+        Uses a personal API key as the credential for subsequent calls,
+        instead of a session token obtained through login(). The API key is a
+        long-lived bearer token that must have been generated beforehand
+        (through the UI, create_api_key() or the `cornflow users api_key` CLI).
+
+        :param str api_key: the personal API key
+        """
+        self.token = api_key
+
+    @ask_token
+    @prepare_encoding
+    def create_api_key(self, totp_code=None, encoding=None):
+        """
+        Generates a personal API key for the currently logged-in user (a
+        prior login() with password and, if required, TOTP is needed). The
+        key is a long-lived bearer credential returned only once. Generating
+        a new key revokes the previous one.
+
+        :param str totp_code: a fresh TOTP code, required when the user has
+          two-factor authentication enabled and the server enforces the
+          step-up (API_KEY_STEPUP_TOTP)
+        :param str encoding: the type of encoding used in the call. Defaults to 'br'
+
+        :return: the requests response; on success its json has 'api_key'
+        """
+        payload = {}
+        if totp_code is not None:
+            payload["totp_code"] = totp_code
+        return requests.post(
+            urljoin(self.url, "user/api-key/"),
+            json=payload,
+            headers={
+                "Authorization": f"Bearer {self.token}",
+                "Content-Encoding": encoding,
+            },
+        )
+
     @ask_token
     @log_call
     @prepare_encoding

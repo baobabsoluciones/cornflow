@@ -141,3 +141,37 @@ class CornFlow:
                 f"two-factor authentication step: {result}"
             )
         return result
+
+    def set_api_key(self, api_key):
+        """
+        Uses a personal API key as the credential for subsequent calls,
+        instead of logging in. The API key is a long-lived bearer token
+        generated beforehand (UI, create_api_key() or the
+        `cornflow users api_key` CLI). Useful for unattended automation and
+        for the cornflow<->airflow service connection.
+
+        :param str api_key: the personal API key
+        """
+        self.raw.set_api_key(api_key)
+
+    def create_api_key(self, totp_code=None, encoding=None):
+        """
+        Generates a personal API key for the currently logged-in user (a
+        prior login() is required). Returns the key string; it is shown only
+        once and generating a new one revokes the previous key.
+
+        :param str totp_code: a fresh TOTP code, required when the user has
+          two-factor authentication enabled and the server enforces the
+          step-up
+        :param str encoding: the type of encoding used in the call. Defaults to 'br'
+
+        :return: the personal API key
+        :rtype: str
+        """
+        response = self.raw.create_api_key(totp_code=totp_code, encoding=encoding)
+        if response.status_code != 201:
+            raise CornFlowApiError(
+                f"API key generation failed with status code: "
+                f"{response.status_code}: {response.text}"
+            )
+        return response.json()["api_key"]

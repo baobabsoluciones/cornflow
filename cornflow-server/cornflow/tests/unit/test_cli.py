@@ -327,7 +327,7 @@ class CLITests(TestCase):
         self.assertEqual(len(actions), 5)
         self.assertEqual(len(roles), 6)
         self.assertEqual(len(views), (len(resources) + len(alarms_resources)))
-        self.assertEqual(len(permissions), 951)
+        self.assertEqual(len(permissions), 976)
 
     def test_permissions_base_command(self):
         """
@@ -353,7 +353,7 @@ class CLITests(TestCase):
         self.assertEqual(len(actions), 5)
         self.assertEqual(len(roles), 6)
         self.assertEqual(len(views), (len(resources) + len(alarms_resources)))
-        self.assertEqual(len(permissions), 951)
+        self.assertEqual(len(permissions), 976)
 
     def test_service_entrypoint(self):
         """

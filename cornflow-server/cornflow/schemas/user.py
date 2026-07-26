@@ -94,6 +94,20 @@ class MFAVerifyRequest(Schema):
     totp_code = fields.Str(required=True, load_only=True)
 
 
+class ApiKeyRequest(Schema):
+    """
+    Schema for the personal API key generation request. The TOTP code is the
+    optional step-up second factor when the user has MFA enabled.
+    """
+
+    totp_code = fields.Str(required=False, load_only=True)
+
+
+class ApiKeyResponse(Schema):
+    api_key = fields.Str()
+    expires_at = fields.DateTime()
+
+
 class LoginOpenAuthRequest(Schema):
     """
     Schema for the login request with OpenID authentication

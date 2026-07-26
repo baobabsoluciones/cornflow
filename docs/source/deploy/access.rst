@@ -225,6 +225,39 @@ already privileged; the generation is logged.
    available to a later ``docker exec`` session and would also prevent
    decrypting stored MFA secrets across restarts).
 
+Personal API keys
+********************
+
+A personal API key is a long-lived bearer token (default 1 year,
+``API_KEY_DURATION_DAYS``, capped at 2 years) that authenticates the API as
+an alternative to the short-lived session JWT — every endpoint accepts
+either credential. It is meant for unattended automation.
+
+- **Minted behind full authentication.** It is issued only on a full
+  session; when the user has MFA enabled the server requires a fresh TOTP
+  step-up (``API_KEY_STEPUP_TOTP``, on by default). It can be generated from
+  the web client (Settings), the ``cornflow-client`` library
+  (``create_api_key()`` after ``login``), or the CLI
+  (``cornflow users api_key -u <username>``, trusted by machine access — no
+  TOTP). Shown only once.
+- **One active key per user.** Generating a new key revokes the previous
+  one; it is also revoked explicitly (``DELETE /user/api-key/`` or the
+  Settings screen), and automatically on account lock and MFA reset. A
+  routine password change does NOT revoke it (automation continuity).
+- **Not for account management.** An API key can not reach the
+  security-sensitive endpoints (password change, MFA, API key
+  management, user/role administration): a leaked key can not escalate.
+- **Disable per deployment** with ``PERSONAL_TOKEN_ENABLED=0`` (the Settings
+  section is hidden and the endpoint returns 501).
+
+Service users can hold an API key too. Because the cornflow↔airflow service
+connection otherwise re-logs in with the service password on every task
+(and the session token now expires in 8 h), the recommended setup is to
+generate a key for the service user (``cornflow users api_key -u
+service_user``) and expose it to Airflow as ``CORNFLOW_SERVICE_API_KEY``:
+``connect_to_cornflow`` then uses the long-lived key and skips the per-task
+login. Rotate it yearly (regenerate + update the variable).
+
 Roles definition
 *********************
 

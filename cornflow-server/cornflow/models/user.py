@@ -70,6 +70,10 @@ class UserModel(TraceAttributesModel):
     # Incremented on security events (password change, lock, MFA reset) to
     # invalidate every outstanding session token of the user
     token_version = db.Column(db.Integer, nullable=False, default=0)
+    # Version embedded in the personal API key. Bumped to revoke previous
+    # keys (one active key per user), on explicit revoke, on account lock
+    # and on MFA reset. Not affected by routine password changes.
+    api_key_version = db.Column(db.Integer, nullable=False, default=0)
     # Last accepted TOTP time-step, to reject replay of the same or an older
     # code within its validity window
     totp_last_counter = db.Column(db.Integer, nullable=True)
@@ -124,6 +128,7 @@ class UserModel(TraceAttributesModel):
         self.token_version = 0
         self.totp_last_counter = None
         self.last_login_at = None
+        self.api_key_version = 0
         # TODO: handle better None passwords that can be found when using ldap
         check_pass, msg = check_password_pattern(
             data.get("password"), user_data=data
@@ -283,8 +288,9 @@ class UserModel(TraceAttributesModel):
         self.failed_login_attempts = (self.failed_login_attempts or 0) + 1
         if self.failed_login_attempts >= max_attempts:
             self.locked = True
-            # Locking also revokes every outstanding session of the user
+            # Locking revokes every outstanding session and personal API key
             self.revoke_all_sessions()
+            self.api_key_version = (self.api_key_version or 0) + 1
             current_app.logger.warning(
                 f"User {self.username} locked after {max_attempts} failed "
                 f"login attempts. A platform administrator must unlock the "
@@ -320,6 +326,25 @@ class UserModel(TraceAttributesModel):
         """
         self.token_version = (self.token_version or 0) + 1
         db.session.add(self)
+
+    def rotate_api_key(self):
+        """
+        Bumps the API key version so any previously issued personal API key
+        is invalidated (one active key per user), and commits. The new key
+        itself is signed afterwards by the auth layer with the new version.
+        """
+        self.api_key_version = (self.api_key_version or 0) + 1
+        db.session.add(self)
+        db.session.commit()
+
+    def revoke_api_keys(self):
+        """
+        Invalidates the user's personal API key without issuing a new one
+        (explicit disable, and on account lock / MFA reset).
+        """
+        self.api_key_version = (self.api_key_version or 0) + 1
+        db.session.add(self)
+        db.session.commit()
 
     def set_totp_secret(self, secret: str):
         """

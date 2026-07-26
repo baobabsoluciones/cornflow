@@ -115,6 +115,32 @@ def issue_bi_token(username):
         return True
 
 
+@users.command(
+    name="api_key",
+    help="Generate a personal API key for a user (valid for "
+    "API_KEY_DURATION_DAYS days). Intended to be run inside the server with "
+    "database access; no TOTP step-up is required because CLI access is "
+    "already privileged. Generating a new key revokes the previous one. "
+    "Useful for the cornflow<->airflow service account.",
+)
+@username
+def issue_api_key(username):
+    from cornflow.shared.authentication.auth import Auth
+
+    app = get_app()
+    with app.app_context():
+        user = UserModel.get_one_user_by_username(username)
+        if not user:
+            raise ObjectDoesNotExist("User does not exist")
+        user.rotate_api_key()
+        token = Auth.generate_api_key(user.id)
+        app.logger.info(
+            f"A personal API key was generated for user {username} via the CLI"
+        )
+        click.echo(token)
+        return True
+
+
 @create.command(
     name="token",
     help="Creates a token for a user that is never going to expire. This token can only be used on BI endpoints",

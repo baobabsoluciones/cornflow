@@ -54,6 +54,34 @@ TOKEN_PURPOSE_ALLOWED_ENDPOINTS = {
     TOKEN_PURPOSE_PWD_RESET: ["reset-password"],
 }
 
+# Personal API key: a long-lived bearer token, alternative to the session
+# JWT, minted behind full authentication (password + TOTP). Its tokens carry
+# this type claim and an api-key version that is bumped to revoke previous
+# keys (one active key per user).
+TOKEN_TYPE_API_KEY = "api_key"
+
+# Security-sensitive endpoints (name -> methods) that an API key can NOT
+# reach: a leaked key must not be able to change the password, manage MFA,
+# mint or revoke API keys, or touch user/role administration. It is meant
+# for data and automation access, not account/security self-management.
+API_KEY_FORBIDDEN_ENDPOINTS = {
+    "user-api-key": ["POST", "DELETE"],
+    "mfa-setup": ["POST"],
+    "mfa-verify": ["POST"],
+    "user-mfa": ["DELETE"],
+    "reset-password": ["PUT"],
+    "user-detail": ["PUT", "DELETE"],
+    "user-admin": ["PUT"],
+    "user-unlock": ["PUT"],
+    "signup": ["POST"],
+    "roles": ["POST"],
+    "roles-detail": ["PUT", "DELETE"],
+    "permissions": ["POST"],
+    "permission-detail": ["PUT", "DELETE"],
+    "user-roles": ["POST"],
+    "user-roles-detail": ["DELETE"],
+}
+
 # Endpoints (name -> allowed methods) that stay reachable when the user's
 # password has expired and password rotation is enforced: the user can check
 # their token, review their own profile (and roles, needed by the web client
@@ -240,6 +268,11 @@ EXTRA_PERMISSION_ASSIGNATION = [
     (VIEWER_ROLE, DELETE_ACTION, "user-mfa"),
     (VIEWER_ROLE, PUT_ACTION, "reset-password"),
     (DUMMY_ROLE, PUT_ACTION, "reset-password"),
+    # Any authenticated user can manage their own personal API key
+    (DUMMY_ROLE, POST_ACTION, "user-api-key"),
+    (DUMMY_ROLE, DELETE_ACTION, "user-api-key"),
+    (VIEWER_ROLE, POST_ACTION, "user-api-key"),
+    (VIEWER_ROLE, DELETE_ACTION, "user-api-key"),
 ]
 
 # are there execution files?

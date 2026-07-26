@@ -22,6 +22,7 @@ from cornflow.models import (
     ViewModel,
 )
 from cornflow.shared.const import (
+    API_KEY_FORBIDDEN_ENDPOINTS,
     AUTH_OID,
     PERMISSION_METHOD_MAP,
     INTERNAL_TOKEN_ISSUER,
@@ -30,6 +31,7 @@ from cornflow.shared.const import (
     TOKEN_PURPOSE_ALLOWED_ENDPOINTS,
     TOKEN_PURPOSE_MFA_SETUP,
     TOKEN_PURPOSE_PWD_RESET,
+    TOKEN_TYPE_API_KEY,
 )
 from cornflow.shared.exceptions import (
     CommunicationError,
@@ -53,14 +55,63 @@ class Auth:
 
     def authenticate(self):
         user, payload = self.get_user_and_payload_from_header(request.headers)
+        token_type = payload.get("type") if isinstance(payload, dict) else None
         purpose = payload.get("purpose") if isinstance(payload, dict) else None
-        if purpose is not None:
+        if token_type == TOKEN_TYPE_API_KEY:
+            # Personal API key: validate its version and restrict it away from
+            # the security-management surface (it is a data/automation
+            # credential, not for account self-management)
+            Auth._check_api_key(user, payload)
+            Auth._check_api_key_access(user)
+        elif purpose is not None:
             Auth._check_purpose_token_access(purpose, user)
         else:
             Auth._check_password_rotation(user)
+        # Expose the token type so endpoints can require a full session for
+        # sensitive actions (e.g. minting API keys)
+        g.token_type = token_type
         Auth._get_permission_for_request(request, user.id)
         g.user = user
         return True
+
+    @staticmethod
+    def _check_api_key(user, payload):
+        """
+        Rejects a personal API key whose version no longer matches the user's
+        current one (revoked by regeneration, explicit revoke, account lock
+        or MFA reset).
+
+        :param user: the user the key belongs to
+        :param dict payload: the decoded token payload
+        """
+        if int(payload.get("akv", -1)) != int(user.api_key_version or 0):
+            raise InvalidCredentials(
+                "The API key has been revoked, please generate a new one",
+                status_code=401,
+                log_txt=f"Error while user {user.id} authenticates with an API "
+                f"key. The key version is stale (revoked).",
+            )
+
+    @staticmethod
+    def _check_api_key_access(user):
+        """
+        Blocks a personal API key from reaching the security-sensitive
+        endpoints (password change, MFA, API key management, user/role
+        administration). A leaked key must not be able to escalate.
+
+        :param user: the user the key belongs to
+        """
+        endpoint = request.endpoint
+        forbidden_methods = API_KEY_FORBIDDEN_ENDPOINTS.get(endpoint, [])
+        if request.method in forbidden_methods:
+            raise NoPermission(
+                error="This action requires an interactive session and can "
+                "not be performed with an API key",
+                status_code=403,
+                payload={"error_code": "api_key_forbidden"},
+                log_txt=f"Error while user {user.id} tries to access endpoint "
+                f"{endpoint} ({request.method}) with an API key.",
+            )
 
     @staticmethod
     def _check_purpose_token_access(purpose: str, user):
@@ -231,6 +282,46 @@ class Auth:
             payload["exp"] = datetime.now(timezone.utc) + timedelta(
                 minutes=purpose_durations.get(purpose, 10)
             )
+
+        return jwt.encode(
+            payload, current_app.config["SECRET_TOKEN_KEY"], algorithm="HS256"
+        )
+
+    @staticmethod
+    def generate_api_key(user_id: int = None) -> str:
+        """
+        Generates a personal API key for a user: a long-lived bearer token
+        (API_KEY_DURATION_DAYS) that is an alternative to the session JWT.
+        The caller must bump the user's api_key_version first (rotate_api_key)
+        so previously issued keys are revoked; this method signs a key with
+        the current version.
+
+        :param int user_id: user id to generate the key for
+        :return: the generated API key
+        :rtype: str
+        """
+        if user_id is None:
+            err = "The user id passed to generate the API key is not valid."
+            raise InvalidUsage(
+                err, log_txt="Error while trying to generate an API key. " + err
+            )
+
+        user = UserModel.get_one_user(user_id)
+        if user is None:
+            err = "User does not exist"
+            raise InvalidUsage(
+                err, log_txt="Error while trying to generate an API key. " + err
+            )
+
+        payload = {
+            "exp": datetime.now(timezone.utc)
+            + timedelta(days=int(current_app.config["API_KEY_DURATION_DAYS"])),
+            "iat": datetime.now(timezone.utc),
+            "sub": user.username,
+            "iss": INTERNAL_TOKEN_ISSUER,
+            "type": TOKEN_TYPE_API_KEY,
+            "akv": user.api_key_version or 0,
+        }
 
         return jwt.encode(
             payload, current_app.config["SECRET_TOKEN_KEY"], algorithm="HS256"
@@ -426,6 +517,9 @@ class Auth:
         if not self.CHECK_TOKEN_VERSION:
             return
         if not isinstance(payload, dict):
+            return
+        if payload.get("type") == TOKEN_TYPE_API_KEY:
+            # API keys use their own version (akv), checked in authenticate
             return
         if payload.get("iss") != INTERNAL_TOKEN_ISSUER:
             # External (OIDC) tokens are managed by the identity provider
