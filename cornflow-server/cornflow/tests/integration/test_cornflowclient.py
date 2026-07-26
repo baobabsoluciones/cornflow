@@ -318,7 +318,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         self.create_service_user(
             dict(
                 username="service_user@cornflow.com",
-                pwd="Serviceuser_1234",
+                pwd="Kd8-rVt.Nq2Wp5",
                 email="service_user@cornflow.com",
             )
         )

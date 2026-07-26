@@ -37,6 +37,11 @@ class CustomTestCaseLive(LiveServerTestCase):
 
     def setUp(self, create_all=True):
         if create_all:
+            # Drop first so a previous test whose setUp raised (and therefore
+            # skipped tearDown) can not leave stale rows behind: otherwise
+            # re-registering the deployed DAGs fails with a UNIQUE constraint
+            # error and cascades into every subsequent test.
+            db.drop_all()
             db.create_all()
         access_init_command(False)
         register_deployed_dags_command_test(verbose=False)
