@@ -110,7 +110,13 @@ class LoginBaseEndpoint(BaseMetaResource):
         try:
             token = self.auth_class.generate_token(user.id)
         except Exception as e:
-            raise InvalidUsage(f"Error in generating user token: {str(e)}", 400)
+            raise InvalidUsage(
+                "Could not complete the login. Please try again or contact "
+                "an administrator.",
+                status_code=400,
+                log_txt=f"Error while generating the token for user {user.id}: "
+                f"{str(e)}",
+            )
 
         response.update({"token": token, "id": user.id})
 
@@ -201,13 +207,17 @@ class LoginBaseEndpoint(BaseMetaResource):
         if not user:
             raise InvalidCredentials()
 
-        self.check_account_lock(user)
-
+        # The password is always checked first and, on failure, the same
+        # generic error is returned whether the account exists, the password
+        # is wrong or the account is locked. This avoids leaking (through the
+        # account-locked message) that a given username exists. The lock is
+        # only revealed to a caller that provided the correct password, i.e.
+        # the legitimate owner of the account.
         if not user.check_hash(password):
             user.register_failed_login()
-            if user.is_login_locked():
-                self.raise_account_locked(user)
             raise InvalidCredentials()
+
+        self.check_account_lock(user)
 
         return user
 

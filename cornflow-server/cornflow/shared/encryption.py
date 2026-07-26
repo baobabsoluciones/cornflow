@@ -56,7 +56,8 @@ def decrypt_value(value: str) -> str:
         return _get_fernet().decrypt(value.encode("utf8")).decode("utf8")
     except InvalidToken:
         raise InvalidUsage(
-            "Stored secret could not be decrypted. "
-            "Check that the application SECRET_KEY has not changed.",
+            "An internal error occurred. Please contact an administrator.",
             status_code=500,
+            log_txt="A stored secret could not be decrypted. Check that the "
+            "application SECRET_KEY has not changed.",
         )

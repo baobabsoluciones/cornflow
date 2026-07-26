@@ -11,16 +11,15 @@ from jsonschema import Draft7Validator, validators
 from disposable_email_domains import blocklist
 from zxcvbn import zxcvbn
 
-# Default values for the password policy. They can be overridden through the
-# application config (see config.py): PWD_MIN_LENGTH, PWD_MIN_ZXCVBN_SCORE
-# and PWD_MAX_SIMILARITY.
-DEFAULT_PWD_MIN_LENGTH = 12
-DEFAULT_PWD_MIN_ZXCVBN_SCORE = 3
-DEFAULT_PWD_MAX_SIMILARITY = 0.8
-
-# Personal data shorter than this is not searched for inside the password to
-# avoid false positives with very short names.
-MIN_PERSONAL_TOKEN_LENGTH = 3
+from cornflow.shared.const import (
+    DEFAULT_PWD_MAX_SIMILARITY,
+    DEFAULT_PWD_MIN_LENGTH,
+    DEFAULT_PWD_MIN_ZXCVBN_SCORE,
+    EMAIL_PATTERN,
+    MIN_PERSONAL_TOKEN_LENGTH,
+    PASSWORD_SPECIAL_CHARACTERS,
+    PWD_FORBIDDEN_DIGIT_SEQUENCE_LENGTH,
+)
 
 
 def _get_config_value(key: str, default):
@@ -48,7 +47,7 @@ def is_special_character(character):
     :return: a boolean if the character is a special character or not
     :rtype: bool
     """
-    return character in [char for char in "!¡?¿#$%&'()*+-_./:;,<>=@[]^`{}|~\"\\"]
+    return character in PASSWORD_SPECIAL_CHARACTERS
 
 
 def _get_personal_tokens(user_data: dict) -> list:
@@ -107,10 +106,11 @@ def check_password_pattern(
         return False, "Password must contain at least one special character."
     if any(char.isspace() for char in password):
         return False, "Password must not contain whitespace characters."
-    if re.search(r"\d{6,}", password):
+    if re.search(rf"\d{{{PWD_FORBIDDEN_DIGIT_SEQUENCE_LENGTH},}}", password):
         return (
             False,
-            "Password must not contain sequences of 6 or more digits "
+            f"Password must not contain sequences of "
+            f"{PWD_FORBIDDEN_DIGIT_SEQUENCE_LENGTH} or more digits "
             "(such as dates or phone numbers).",
         )
 
@@ -164,8 +164,7 @@ def check_email_pattern(email: str) -> Tuple[bool, Union[str, None]]:
     :return: a boolean if the email is valid
     :rtype: bool
     """
-    email_pattern = r"\b[A-Za-z0-9._-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
-    if re.match(email_pattern, email) is None:
+    if re.match(EMAIL_PATTERN, email) is None:
         return False, "Invalid email address."
     domain = email.split("@")[1]
     if domain in blocklist:

@@ -9,6 +9,11 @@ from cornflow.shared.const import (
     AIRFLOW_BACKEND,
     DATABRICKS_BACKEND,
     USER_ACCESS_ALL_OBJECTS_NO,
+    DEFAULT_PWD_MIN_LENGTH,
+    DEFAULT_PWD_MIN_ZXCVBN_SCORE,
+    DEFAULT_PWD_HISTORY_SIZE,
+    DEFAULT_PWD_MAX_SIMILARITY,
+    DEFAULT_PWD_ROTATION_TIME,
 )
 from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
@@ -174,19 +179,29 @@ class DefaultConfig(object):
     BI_TOKEN_DURATION_DAYS = _env_int_ceiling("BI_TOKEN_DURATION_DAYS", 90, 365)
 
     # Password rotation time in days (ceiling: 365)
-    PWD_ROTATION_TIME = _env_int_ceiling("PWD_ROTATION_TIME", 120, 365)
+    PWD_ROTATION_TIME = _env_int_ceiling(
+        "PWD_ROTATION_TIME", DEFAULT_PWD_ROTATION_TIME, 365
+    )
 
-    # Password policy (CCN-STIC-807 hardening)
-    # Minimum password length (floor: 12)
-    PWD_MIN_LENGTH = _env_int_floor("PWD_MIN_LENGTH", 12, 12)
-    # Minimum zxcvbn strength score (0-4) required for new passwords (floor: 3)
-    PWD_MIN_ZXCVBN_SCORE = _env_int_floor("PWD_MIN_ZXCVBN_SCORE", 3, 3)
-    # Number of previous passwords that can not be reused (floor: 10)
-    PWD_HISTORY_SIZE = _env_int_floor("PWD_HISTORY_SIZE", 10, 10)
+    # Password policy (CCN-STIC-807 hardening). Defaults live in shared/const.py.
+    # Minimum password length (floor: default)
+    PWD_MIN_LENGTH = _env_int_floor(
+        "PWD_MIN_LENGTH", DEFAULT_PWD_MIN_LENGTH, DEFAULT_PWD_MIN_LENGTH
+    )
+    # Minimum zxcvbn strength score (0-4) required for new passwords
+    PWD_MIN_ZXCVBN_SCORE = _env_int_floor(
+        "PWD_MIN_ZXCVBN_SCORE", DEFAULT_PWD_MIN_ZXCVBN_SCORE, DEFAULT_PWD_MIN_ZXCVBN_SCORE
+    )
+    # Number of previous passwords that can not be reused
+    PWD_HISTORY_SIZE = _env_int_floor(
+        "PWD_HISTORY_SIZE", DEFAULT_PWD_HISTORY_SIZE, DEFAULT_PWD_HISTORY_SIZE
+    )
     # Similarity ratio (0-1) above which a new password is rejected for being
     # too close to the previous one (ceiling: 0.9, higher would allow near
     # identical passwords)
-    PWD_MAX_SIMILARITY = _env_float_ceiling("PWD_MAX_SIMILARITY", 0.8, 0.9)
+    PWD_MAX_SIMILARITY = _env_float_ceiling(
+        "PWD_MAX_SIMILARITY", DEFAULT_PWD_MAX_SIMILARITY, 0.9
+    )
     # If 1, users with an expired or flagged password can only access
     # the endpoints needed to change it (hard rotation enforcement)
     PWD_ROTATION_ENFORCE = int(os.getenv("PWD_ROTATION_ENFORCE", 1))

@@ -64,8 +64,10 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
 
         # Assert that the response is a 400 error
         self.assertEqual(400, response.status_code)
-        # Assert that the error message contains the expected text
-        self.assertIn("Error in generating user token", response.json["error"])
+        # The client-facing message is generic (the internal exception detail
+        # is only written to the server log, not leaked to the caller)
+        self.assertIn("Could not complete the login", response.json["error"])
+        self.assertNotIn("Custom exception", response.json["error"])
 
 
 class TestLogInOpenAuth(CustomTestCase):

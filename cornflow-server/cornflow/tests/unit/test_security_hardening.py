@@ -615,16 +615,16 @@ class TestLoginLockout(TestCase):
         )
 
     def test_lockout_after_max_attempts(self):
-        for _ in range(2):
+        # A wrong password always returns the same generic error (no
+        # enumeration), even on the attempt that trips the lock
+        for _ in range(3):
             response = self.log_in("Wrong#Password9!x")
             self.assertEqual(400, response.status_code)
+            self.assertNotEqual("account_locked", response.json.get("error_code"))
 
-        # The attempt that reaches the limit locks the account
-        response = self.log_in("Wrong#Password9!x")
-        self.assertEqual(403, response.status_code)
-        self.assertEqual("account_locked", response.json.get("error_code"))
-
-        # Even the correct password is rejected while locked
+        # The account is now locked: the lock is only revealed to a caller
+        # that provides the correct password (the legitimate owner)
+        self.assertTrue(UserModel.get_one_user(self.user_id).is_login_locked())
         response = self.log_in(self.user_data["password"])
         self.assertEqual(403, response.status_code)
         self.assertEqual("account_locked", response.json.get("error_code"))

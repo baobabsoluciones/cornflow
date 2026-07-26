@@ -10,6 +10,36 @@ DATABRICKS_BACKEND = 2
 CORNFLOW_VERSION = "1.3.7rc1"
 INTERNAL_TOKEN_ISSUER = "cornflow"
 
+# ---------------------------------------------------------------------------
+# Password policy (CCN-STIC-807)
+# ---------------------------------------------------------------------------
+# These are the single source of truth for the policy defaults. config.py
+# reads the environment using them as fallbacks (and clamps them to their
+# security floor/ceiling); validators.py uses them when there is no
+# application context (e.g. some CLI usages).
+DEFAULT_PWD_MIN_LENGTH = 12
+DEFAULT_PWD_MIN_ZXCVBN_SCORE = 3
+DEFAULT_PWD_HISTORY_SIZE = 10
+DEFAULT_PWD_MAX_SIMILARITY = 0.8
+DEFAULT_PWD_ROTATION_TIME = 120
+
+# Personal data (username, names, email local part) shorter than this is not
+# searched for inside the password, to avoid false positives with very short
+# names.
+MIN_PERSONAL_TOKEN_LENGTH = 3
+
+# A password can not contain a run of this many consecutive digits or more
+# (blocks dates, phone numbers...).
+PWD_FORBIDDEN_DIGIT_SEQUENCE_LENGTH = 6
+
+# Characters accepted as "special" for the password policy and used by the
+# random password generator.
+PASSWORD_SPECIAL_CHARACTERS = "!¡?¿#$%&'()*+-_./:;,<>=@[]^`{}|~\"\\"
+
+# Pattern used to validate email addresses. Bounded to avoid catastrophic
+# backtracking.
+EMAIL_PATTERN = r"\b[A-Za-z0-9._-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
+
 # Purpose claims used on temporary restricted tokens. Tokens carrying a
 # purpose claim are only accepted by the endpoints mapped below:
 # - mfa_setup: issued during login when a user still has to enroll in

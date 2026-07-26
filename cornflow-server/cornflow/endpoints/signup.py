@@ -120,9 +120,11 @@ class SignUpEndpoint(BaseMetaResource):
             raise
         except Exception as e:
             raise InvalidUsage(
-                error="Error in generating user token: " + str(e),
+                error="Could not complete the sign up. Please try again or "
+                "contact an administrator.",
                 status_code=400,
-                log_txt="Error while user tries to sign up. Unable to generate token.",
+                log_txt="Error while user tries to sign up. Unable to "
+                f"generate token: {str(e)}",
             )
         current_app.logger.info(f"New user created: {user}")
         return {"token": token, "id": user.id}, 201

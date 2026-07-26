@@ -20,6 +20,7 @@ from cornflow.shared import (
     bcrypt,
     db,
 )
+from cornflow.shared.const import PASSWORD_SPECIAL_CHARACTERS
 from cornflow.shared.encryption import decrypt_value, encrypt_value
 from cornflow.shared.exceptions import InvalidCredentials
 from cornflow.shared.validators import (
@@ -461,7 +462,7 @@ class UserModel(TraceAttributesModel):
             lower_letters = _secure_random.sample(string.ascii_lowercase, nb_lower)
             numbers = _secure_random.sample(list(map(str, list(range(10)))), nb_numbers)
             symbols = _secure_random.sample(
-                "!¡?¿#$%&'()*+-_./:;,<>=@[]^`{}|~\"\\", nb_special_char
+                PASSWORD_SPECIAL_CHARACTERS, nb_special_char
             )
             chars = upper_letters + lower_letters + numbers + symbols
             _secure_random.shuffle(chars)
