@@ -58,7 +58,7 @@ class CustomTestCaseLive(LiveServerTestCase):
 
         self.create_service_user(
             dict(
-                username="service_user", pwd="Airflow_test_password1", email="su@cf.com"
+                username="service_user", pwd="Xq7-mBv.Ld9Rn2", email="su@cf.com"
             )
         )
 

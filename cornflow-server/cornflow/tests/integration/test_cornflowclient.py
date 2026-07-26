@@ -312,7 +312,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
 
         # we create a service user:
         self.create_service_user(
-            dict(username="airflow", pwd="Airflow_test_password1", email="af@cf.com")
+            dict(username="airflow", pwd="Xq7-mBv.Ld9Rn2", email="af@cf.com")
         )
 
         self.create_service_user(
@@ -329,7 +329,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
             dict(
                 username="airflow_test@admin.com",
                 email="airflow_test@admin.com",
-                pwd="Airflow_test_password1",
+                pwd="Xq7-mBv.Ld9Rn2",
             )
         )
 
