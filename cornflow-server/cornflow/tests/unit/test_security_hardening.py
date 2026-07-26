@@ -30,6 +30,7 @@ from cornflow.shared import db
 from cornflow.shared.authentication.auth import BIAuth
 from cornflow.shared.const import ADMIN_ROLE, PLATFORM_ADMIN_ROLE, SERVICE_ROLE
 from cornflow.shared.exceptions import InvalidCredentials
+from cornflow.shared.security import resolve_cors_origins
 from cornflow.shared.validators import check_password_pattern, passwords_too_similar
 from cornflow.tests.const import LOGIN_URL, SIGNUP_URL, USER_URL, INSTANCE_URL
 
@@ -1694,3 +1695,94 @@ class TestAuditLogging(TestCase):
             self.assertEqual([], self.capture.records)
         finally:
             current_app.config["AUDIT_LOG_ENABLED"] = 1
+
+
+class TestSecurityHeaders(TestCase):
+    """
+    Tests for the HTTP security response headers added on every response.
+    """
+
+    def create_app(self):
+        return create_app("testing")
+
+    def _get(self):
+        # A 404 is enough: the after_request hook runs on every response and
+        # this avoids needing the database or an Airflow connection.
+        return self.client.get("/this-path-does-not-exist/")
+
+    def test_headers_present(self):
+        headers = self._get().headers
+        self.assertEqual("nosniff", headers.get("X-Content-Type-Options"))
+        self.assertEqual("DENY", headers.get("X-Frame-Options"))
+        self.assertIn(
+            "default-src 'none'", headers.get("Content-Security-Policy", "")
+        )
+        self.assertIn(
+            "frame-ancestors 'none'", headers.get("Content-Security-Policy", "")
+        )
+        self.assertEqual("no-referrer", headers.get("Referrer-Policy"))
+        self.assertIn("geolocation=()", headers.get("Permissions-Policy", ""))
+        self.assertEqual("no-store", headers.get("Cache-Control"))
+        # HSTS is off in the testing config (no TLS in front)
+        self.assertNotIn("Strict-Transport-Security", headers)
+
+    def test_hsts_present_when_enabled(self):
+        current_app.config["HSTS_ENABLED"] = 1
+        try:
+            headers = self._get().headers
+            self.assertIn(
+                "max-age=", headers.get("Strict-Transport-Security", "")
+            )
+            self.assertIn(
+                "includeSubDomains",
+                headers.get("Strict-Transport-Security", ""),
+            )
+        finally:
+            current_app.config["HSTS_ENABLED"] = 0
+
+    def test_headers_can_be_disabled(self):
+        current_app.config["SECURITY_HEADERS_ENABLED"] = 0
+        try:
+            self.assertNotIn("X-Content-Type-Options", self._get().headers)
+        finally:
+            current_app.config["SECURITY_HEADERS_ENABLED"] = 1
+
+
+class TestCorsOrigins(unittest.TestCase):
+    """
+    Tests for the CORS_ORIGINS normalisation (default-closed in production).
+    """
+
+    def test_wildcard_allows_any(self):
+        self.assertEqual("*", resolve_cors_origins("*"))
+        self.assertEqual("*", resolve_cors_origins(["*"]))
+
+    def test_empty_is_default_closed(self):
+        self.assertEqual([], resolve_cors_origins(""))
+        self.assertEqual([], resolve_cors_origins("   "))
+        self.assertEqual([], resolve_cors_origins(None))
+
+    def test_explicit_allow_list(self):
+        self.assertEqual(
+            ["https://a.example.com", "https://b.example.com"],
+            resolve_cors_origins("https://a.example.com, https://b.example.com"),
+        )
+
+
+class TestDocsGating(unittest.TestCase):
+    """
+    Tests that the Swagger docs UI is registered only when DOCS_ENABLED is on.
+    """
+
+    def test_docs_enabled_serves_swagger(self):
+        app = create_app("testing")
+        response = app.test_client().get("/swagger-ui/")
+        self.assertNotEqual(404, response.status_code)
+
+    def test_docs_disabled_hides_swagger(self):
+        from cornflow.config import Testing
+
+        with patch.object(Testing, "DOCS_ENABLED", 0):
+            app = create_app("testing")
+        response = app.test_client().get("/swagger-ui/")
+        self.assertEqual(404, response.status_code)

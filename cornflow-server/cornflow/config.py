@@ -266,6 +266,30 @@ class DefaultConfig(object):
     # log pipeline / SIEM to collect and retain.
     AUDIT_LOG_ENABLED = int(os.getenv("AUDIT_LOG_ENABLED", 1))
 
+    # HTTP security response headers. They are instructions to browsers only
+    # (the SPA and the docs page); cornflow-client, Airflow and the CLI ignore
+    # them. Stamped on every response by a single after_request hook.
+    SECURITY_HEADERS_ENABLED = int(os.getenv("SECURITY_HEADERS_ENABLED", 1))
+    # HSTS forces HTTPS at the browser. Enable it only once TLS terminates in
+    # front of cornflow: a browser that has seen the header will refuse plain
+    # HTTP afterwards. Off by default here, on by default in production.
+    HSTS_ENABLED = int(os.getenv("HSTS_ENABLED", 0))
+    HSTS_MAX_AGE = int(os.getenv("HSTS_MAX_AGE", 31536000))
+    HSTS_INCLUDE_SUBDOMAINS = int(os.getenv("HSTS_INCLUDE_SUBDOMAINS", 1))
+    HSTS_PRELOAD = int(os.getenv("HSTS_PRELOAD", 0))
+    # Ask browsers/proxies not to cache responses (they carry auth data).
+    SECURITY_NO_STORE = int(os.getenv("SECURITY_NO_STORE", 1))
+    # Optional overrides of the header strings; when unset the strict defaults
+    # in cornflow.shared.security are used.
+    CONTENT_SECURITY_POLICY = os.getenv("CONTENT_SECURITY_POLICY")
+    REFERRER_POLICY = os.getenv("REFERRER_POLICY")
+    PERMISSIONS_POLICY = os.getenv("PERMISSIONS_POLICY")
+
+    # Interactive API docs (Swagger UI at /swagger-ui/). Enabled by default,
+    # but disabled in production (see the Production config) to shrink the
+    # attack surface and keep the deny-by-default CSP.
+    DOCS_ENABLED = int(os.getenv("CORNFLOW_DOCS_ENABLED", 1))
+
 
 class Development(DefaultConfig):
     """
@@ -351,6 +375,15 @@ class Production(DefaultConfig):
     # needs to be on to avoid getting only 500 codes:
     # and https://medium.com/@johanesriandy/flask-error-handler-not-working-on-production-mode-3adca4c7385c
     PROPAGATE_EXCEPTIONS = True
+    # Cross-origin requests are default-closed: only the origins explicitly
+    # listed in CORS_ORIGINS (e.g. the cornflow-ui URL) are allowed.
+    CORS_ORIGINS = os.getenv("CORS_ORIGINS", "")
+    # The interactive docs are off by default in production. Re-enable with
+    # CORNFLOW_DOCS_ENABLED=1 (this relaxes the need for a strict CSP).
+    DOCS_ENABLED = int(os.getenv("CORNFLOW_DOCS_ENABLED", 0))
+    # HSTS on by default: a production ENS deployment terminates TLS in front.
+    # Disable with HSTS_ENABLED=0 if TLS is not yet in place.
+    HSTS_ENABLED = int(os.getenv("HSTS_ENABLED", 1))
 
 
 app_config = {

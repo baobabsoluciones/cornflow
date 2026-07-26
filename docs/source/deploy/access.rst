@@ -290,6 +290,57 @@ pipeline / SIEM (e.g. ship stdout to Loki / ELK / CloudWatch and alert on
 repeated ``account.locked`` or ``apikey.issued`` bursts). Auditing can be
 turned off with ``AUDIT_LOG_ENABLED=0`` (on by default).
 
+Web security headers and CORS
+********************************
+
+Every response carries a set of HTTP security headers (added by a single
+``after_request`` hook). These are instructions to **browsers** only — the
+``cornflow-client`` library, Airflow and the CLI ignore them, so the
+machine-to-machine paths are unaffected.
+
+* ``X-Content-Type-Options: nosniff`` — no MIME sniffing.
+* ``X-Frame-Options: DENY`` and a ``frame-ancestors 'none'`` CSP — no framing
+  (clickjacking).
+* ``Content-Security-Policy: default-src 'none'; frame-ancestors 'none';
+  base-uri 'none'`` — deny-by-default; the API returns JSON and the docs UI is
+  off in production, so nothing needs to load. Override with
+  ``CONTENT_SECURITY_POLICY`` if you re-enable the docs.
+* ``Referrer-Policy: no-referrer`` — do not leak URLs (which may carry tokens,
+  e.g. the password reset link) through the ``Referer`` header.
+* ``Permissions-Policy`` — disables browser features the app does not use.
+* ``Cache-Control: no-store`` — responses carry auth data and should not be
+  cached (``SECURITY_NO_STORE=0`` to disable).
+* The ``Server`` banner is overwritten and ``X-Powered-By`` removed to reduce
+  version fingerprinting.
+
+The whole set can be turned off with ``SECURITY_HEADERS_ENABLED=0``.
+
+.. warning::
+   **HSTS** (``Strict-Transport-Security``) is **on by default in production**
+   (``HSTS_ENABLED``; ``max-age`` one year, ``includeSubDomains``). Only serve
+   the header once TLS terminates in front of cornflow: a browser that has
+   seen it will refuse plain HTTP afterwards. If TLS is not yet in place, set
+   ``HSTS_ENABLED=0`` until it is. ``HSTS_PRELOAD`` is off by default (opting
+   into the preload list is hard to reverse).
+
+**CORS** is driven by ``CORS_ORIGINS``:
+
+* development default ``*`` (any origin),
+* **production default is empty — default-closed**: set ``CORS_ORIGINS`` to
+  the web client origin(s), comma-separated (e.g.
+  ``https://cornflow.example.com``), or the SPA will be unable to call the API
+  from the browser.
+
+Because authentication uses a Bearer token in the ``Authorization`` header
+(not a cookie), classic CSRF is already mitigated; the CORS lock-down is
+defense-in-depth and closes the previously wide-open ``*`` policy.
+
+**Interactive API docs** (Swagger UI at ``/swagger-ui/`` and the OpenAPI
+schema at ``/swagger/``) are **disabled in production** by default
+(``CORNFLOW_DOCS_ENABLED=0``) to shrink the attack surface and keep the strict
+CSP. Re-enable with ``CORNFLOW_DOCS_ENABLED=1`` (you will likely also need to
+relax ``CONTENT_SECURITY_POLICY`` so the Swagger UI assets load).
+
 Roles definition
 *********************
 

@@ -49,6 +49,7 @@ from cornflow.shared.const import (
 )
 from cornflow.shared.exceptions import initialize_errorhandlers, ConfigurationError
 from cornflow.shared.log_config import log_config
+from cornflow.shared.security import init_security_headers, resolve_cors_origins
 
 
 # Minimum length in bytes of the JWT signing keys. HMAC-SHA256 requires keys
@@ -104,7 +105,10 @@ def create_app(env_name="development", dataconn=None):
     # initialization for init_cornflow_service.py
     if dataconn is not None:
         app.config["SQLALCHEMY_DATABASE_URI"] = dataconn
-    CORS(app)
+    # Cross-origin access is driven by CORS_ORIGINS: "*" allows any origin
+    # (development default), an explicit list restricts it and an empty value
+    # (production default) is default-closed.
+    CORS(app, origins=resolve_cors_origins(app.config.get("CORS_ORIGINS", "*")))
     bcrypt.init_app(app)
     db.init_app(app)
     Migrate(app=app, db=db)
@@ -135,12 +139,16 @@ def create_app(env_name="development", dataconn=None):
         for res in alarms_resources:
             api.add_resource(res["resource"], res["urls"], endpoint=res["endpoint"])
 
-    docs = FlaskApiSpec(app)
-    for res in resources:
-        docs.register(target=res["resource"], endpoint=res["endpoint"])
-    if app.config["ALARMS_ENDPOINTS"]:
-        for res in alarms_resources:
+    # The interactive API docs (Swagger UI) are registered only when enabled.
+    # They are off by default in production so the deny-by-default CSP holds
+    # and the OpenAPI schema is not exposed.
+    if int(app.config.get("DOCS_ENABLED", 1)):
+        docs = FlaskApiSpec(app)
+        for res in resources:
             docs.register(target=res["resource"], endpoint=res["endpoint"])
+        if app.config["ALARMS_ENDPOINTS"]:
+            for res in alarms_resources:
+                docs.register(target=res["resource"], endpoint=res["endpoint"])
 
     # Resource for the log-in
     auth_type = app.config["AUTH_TYPE"]
@@ -170,6 +178,7 @@ def create_app(env_name="development", dataconn=None):
 
     initialize_errorhandlers(app)
     init_compress(app)
+    init_security_headers(app)
 
     app.cli.add_command(create_service_user)
     app.cli.add_command(create_admin_user)
