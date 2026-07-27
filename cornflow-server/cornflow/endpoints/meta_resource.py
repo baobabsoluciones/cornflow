@@ -146,7 +146,8 @@ class BaseMetaResource(Resource, MethodResource):
         data = dict(data)
 
         if track_user:
-            user_id = kwargs.get("user").get("id") or self.get_user_id()
+            user = kwargs.get("user")
+            user_id = (user.get("id") if user is not None else None) or self.get_user_id()
             data["user_id"] = user_id
 
         item.update(data)
@@ -169,7 +170,8 @@ class BaseMetaResource(Resource, MethodResource):
         data = dict(data)
 
         if track_user:
-            user_id = kwargs.get("user").get("id") or self.get_user_id()
+            user = kwargs.get("user")
+            user_id = (user.get("id") if user is not None else None) or self.get_user_id()
             data["user_id"] = user_id
 
         item.patch(data)
