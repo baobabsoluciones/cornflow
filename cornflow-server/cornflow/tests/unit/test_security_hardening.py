@@ -1037,6 +1037,24 @@ class TestRateLimiting(TestCase):
         self.assertEqual(429, response.status_code)
         self.assertIn("Too many requests", response.json.get("message", ""))
 
+    def test_token_refresh_is_rate_limited(self):
+        # /token/refresh/ takes a credential in the body like login and
+        # shares its per-IP limit (3 per minute in this config)
+        for _ in range(3):
+            response = self.client.post(
+                "/token/refresh/",
+                data=json.dumps({"refresh_token": "not-a-valid-token"}),
+                headers=JSON_HEADER,
+            )
+            self.assertNotEqual(429, response.status_code)
+
+        response = self.client.post(
+            "/token/refresh/",
+            data=json.dumps({"refresh_token": "not-a-valid-token"}),
+            headers=JSON_HEADER,
+        )
+        self.assertEqual(429, response.status_code)
+
     def test_forwarded_for_used_when_trusted(self):
         current_app.config["RATELIMIT_TRUST_FORWARDED_FOR"] = 1
         # Different forwarded IPs are limited independently

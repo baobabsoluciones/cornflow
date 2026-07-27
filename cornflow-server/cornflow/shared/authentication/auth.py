@@ -36,6 +36,7 @@ from cornflow.shared.const import (
     TOKEN_TYPE_API_KEY,
     TOKEN_TYPE_REFRESH,
 )
+from cornflow.shared.audit import audit
 from cornflow.shared.exceptions import (
     CommunicationError,
     InvalidCredentials,
@@ -449,6 +450,13 @@ class Auth:
             # An already-rotated refresh token is being reused: treat it as a
             # theft signal and kill the whole session.
             session.revoke()
+            audit(
+                "session.reuse_detected",
+                outcome="revoked",
+                actor_id=user.id,
+                actor=user.username,
+                session_id=session.session_id,
+            )
             raise InvalidCredentials(
                 "The session has been revoked, please log in again",
                 status_code=401,

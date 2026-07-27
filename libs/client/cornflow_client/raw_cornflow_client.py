@@ -26,7 +26,19 @@ class RawCornFlow(object):
         def wrapper(self, *args, **kwargs):
             if not self.token:
                 raise CornFlowApiError("Need to login first!")
-            return func(self, *args, **kwargs)
+            response = func(self, *args, **kwargs)
+            # Interactive sessions use a short-lived access token: on a 401
+            # renew it once with the stored refresh token and retry the call
+            # transparently, so long-running scripts keep working. API-key
+            # sessions have no refresh token and are returned as-is.
+            if (
+                getattr(response, "status_code", None) == 401
+                and self.refresh_token
+            ):
+                refresh_response = self.refresh()
+                if refresh_response.status_code == 200:
+                    response = func(self, *args, **kwargs)
+            return response
 
         return wrapper
 

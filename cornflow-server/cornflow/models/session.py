@@ -81,11 +81,14 @@ class SessionModel(TraceAttributesModel):
         """
         Creates and persists a new session for a user, with a fresh
         session_id / jti and the absolute expiry taken from the config.
+        Opportunistically removes the user's stale (revoked or expired)
+        session rows so the table stays bounded for active users.
 
         :param user: the user the session belongs to
         :return: the created session
         :rtype: :class:`SessionModel`
         """
+        cls.purge_stale(user_id=user.id)
         absolute_hours = int(
             current_app.config.get("REFRESH_TOKEN_ABSOLUTE_HOURS", 12)
         )
@@ -98,6 +101,29 @@ class SessionModel(TraceAttributesModel):
         )
         session.save()
         return session
+
+    @classmethod
+    def purge_stale(cls, user_id: int = None) -> int:
+        """
+        Deletes the revoked or expired session rows (for one user or for
+        everyone). The deletion joins the caller's transaction: it is
+        committed by the following save/commit.
+
+        :param int user_id: optional user to restrict the purge to
+        :return: the number of deleted rows
+        :rtype: int
+        """
+        # Naive UTC now: the column is stored naive, and a timezone-aware
+        # bound parameter would break the comparison on SQLite
+        now = datetime.now(timezone.utc).replace(tzinfo=None)
+        query = cls.query.filter(
+            db.or_(cls.revoked.is_(True), cls.expires_at < now)
+        )
+        if user_id is not None:
+            query = query.filter(cls.user_id == user_id)
+        # "fetch" keeps the ORM identity map in sync with the bulk delete
+        # (a new session row may reuse a just-deleted primary key)
+        return query.delete(synchronize_session="fetch")
 
     @classmethod
     def get_active(cls, session_id: str) -> "SessionModel":

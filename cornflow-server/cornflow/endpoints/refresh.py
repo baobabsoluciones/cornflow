@@ -19,10 +19,19 @@ from flask_apispec import doc
 from cornflow.endpoints.meta_resource import BaseMetaResource
 from cornflow.shared.audit import audit
 from cornflow.shared.authentication import Auth
+from cornflow.shared.rate_limit import (
+    limiter,
+    login_rate_limit,
+    RATE_LIMIT_MESSAGE,
+)
 
 
 class RefreshTokenEndpoint(BaseMetaResource):
     """Endpoint to renew a session by exchanging the refresh token."""
+
+    # Same per-IP limit as the login endpoint: both are unauthenticated
+    # endpoints that take a credential in the body
+    decorators = [limiter.limit(login_rate_limit, error_message=RATE_LIMIT_MESSAGE)]
 
     def __init__(self):
         super().__init__()
@@ -46,6 +55,8 @@ class RefreshTokenEndpoint(BaseMetaResource):
 
 class LogoutEndpoint(BaseMetaResource):
     """Endpoint to revoke the session behind a refresh token."""
+
+    decorators = [limiter.limit(login_rate_limit, error_message=RATE_LIMIT_MESSAGE)]
 
     def __init__(self):
         super().__init__()

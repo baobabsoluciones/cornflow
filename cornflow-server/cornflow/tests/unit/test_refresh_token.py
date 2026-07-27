@@ -243,3 +243,63 @@ class TestRefreshTokenFlow(TestCase):
             self.assertNotIn("refresh_token", login.json)
         finally:
             current_app.config["REFRESH_TOKEN_ENABLED"] = 1
+
+    # -- housekeeping / audit ----------------------------------------------
+
+    def test_login_purges_stale_sessions(self):
+        # revoke everything open so far (the signup in setUp also opened a
+        # session): those rows are now stale
+        SessionModel.revoke_all_for_user(self.user_id)
+        db.session.commit()
+
+        # this login purges the revoked rows and opens a fresh session
+        self.login()
+        db.session.expire_all()
+        rows = SessionModel.query.filter_by(user_id=self.user_id).all()
+        self.assertEqual(1, len(rows))
+        self.assertFalse(rows[0].revoked)
+
+        # make it expired: the next login purges it too
+        rows[0].expires_at = datetime.now(timezone.utc) - timedelta(minutes=1)
+        db.session.add(rows[0])
+        db.session.commit()
+        self.login()
+        db.session.expire_all()
+        remaining = SessionModel.query.filter_by(user_id=self.user_id).all()
+        self.assertEqual(1, len(remaining))
+        self.assertFalse(remaining[0].revoked)
+
+    def test_purge_stale_leaves_active_sessions(self):
+        self.login()
+        before = SessionModel.query.filter_by(user_id=self.user_id).count()
+        deleted = SessionModel.purge_stale()
+        db.session.commit()
+        self.assertEqual(0, deleted)
+        self.assertEqual(
+            before, SessionModel.query.filter_by(user_id=self.user_id).count()
+        )
+
+    def test_reuse_detection_emits_audit_event(self):
+        import logging
+
+        records = []
+
+        class _Capture(logging.Handler):
+            def emit(self, record):
+                records.append(record.getMessage())
+
+        capture = _Capture()
+        audit_logger = logging.getLogger("cornflow.audit")
+        audit_logger.addHandler(capture)
+        try:
+            login = self.login().json
+            self.refresh(login["refresh_token"])
+            # replaying the superseded token trips the reuse detection
+            self.refresh(login["refresh_token"])
+        finally:
+            audit_logger.removeHandler(capture)
+        events = [json.loads(r) for r in records if "reuse_detected" in r]
+        self.assertEqual(1, len(events))
+        self.assertEqual("session.reuse_detected", events[0]["event"])
+        self.assertEqual(self.user_id, events[0]["actor_id"])
+        self.assertEqual("revoked", events[0]["outcome"])

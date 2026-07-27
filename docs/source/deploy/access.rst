@@ -258,6 +258,60 @@ service_user``) and expose it to Airflow as ``CORNFLOW_SERVICE_API_KEY``:
 ``connect_to_cornflow`` then uses the long-lived key and skips the per-task
 login. Rotate it yearly (regenerate + update the variable).
 
+Session management and inactivity timeout
+********************************************
+
+Interactive sessions use two tokens instead of one:
+
+* an **access token**, short-lived (``ACCESS_TOKEN_DURATION_MINUTES``,
+  default 15, capped at 60), sent as the Bearer credential on every request;
+* a **refresh token**, bound to a session stored server-side (table
+  ``session_tokens``), used *only* against ``POST /token/refresh/`` to obtain
+  a new access + refresh token pair. It is rejected on every other endpoint.
+
+Each refresh **rotates** the refresh token and slides the **inactivity
+window** (``REFRESH_TOKEN_INACTIVITY_MINUTES``, default 30, capped at 720): a
+session with no refresh for longer than the window is closed and requires a
+full re-login. Independently, no session outlives the **absolute cap**
+(``REFRESH_TOKEN_ABSOLUTE_HOURS``, default 12, capped at 24). The web client
+renews the access token transparently while the user is active, so the net
+effect is a logout after ~30 minutes of inactivity and a re-login at least
+every 12 hours.
+
+Because sessions are stored server-side:
+
+* ``POST /logout/`` revokes a single session (the web client calls it on
+  logout);
+* password change, account lockout and MFA reset revoke **all** the user's
+  sessions (on top of the token-version bump);
+* presenting an **already-rotated refresh token is treated as theft**: the
+  whole session is revoked and a ``session.reuse_detected`` audit event is
+  emitted.
+
+Both ``/token/refresh/`` and ``/logout/`` are rate-limited per IP like the
+login endpoint. Stale session rows are purged opportunistically at login;
+``cornflow sessions purge`` deletes the rest (run it periodically, e.g. from
+a cron job).
+
+**Service users are exempt**: their login returns the single long-lived token
+(``TOKEN_DURATION``, default 8 h) so the cornflow↔airflow connection is
+unaffected — unattended automation should use a personal API key anyway. The
+``cornflow-client`` library refreshes transparently too: on an expired access
+token it renews the session and retries the call, and offers explicit
+``refresh()`` / ``logout()`` methods.
+
+The whole feature can be disabled with ``REFRESH_TOKEN_ENABLED=0``, which
+restores the previous single-token behaviour. Deployments upgrading to this
+version must run the migration that creates the ``session_tokens`` table.
+
+.. note::
+   The web client keeps the refresh token in ``sessionStorage`` (per tab).
+   Duplicating a browser tab copies it: the next refresh from one of the two
+   tabs will be detected as a reuse of a rotated token and close the session
+   in both. This strict behaviour is intentional (reuse detection protects
+   against token theft); users should open a fresh tab and log in instead of
+   duplicating one.
+
 Security audit log
 *********************
 
@@ -276,8 +330,9 @@ and IP are filled in automatically; from the CLI the ``source`` is ``cli``.
 The events covered include ``login.success`` / ``login.failure``,
 ``account.locked`` / ``account.unlocked``, ``password.changed`` /
 ``password.reset`` / ``password.recovery_requested``, ``mfa.enrolled`` /
-``mfa.reset``, ``apikey.issued`` / ``apikey.revoked``, ``bitoken.issued`` and
-``role.granted`` / ``role.revoked``.
+``mfa.reset``, ``apikey.issued`` / ``apikey.revoked``, ``bitoken.issued``,
+``role.granted`` / ``role.revoked`` and the session events
+``session.refreshed`` / ``session.logout`` / ``session.reuse_detected``.
 
 The failed-login records may name the attempted (even non-existent) username:
 this is intentional and useful to defenders because the audit channel is a
