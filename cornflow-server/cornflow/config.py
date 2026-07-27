@@ -171,8 +171,34 @@ class DefaultConfig(object):
     # to a floor or a ceiling, so a compromised or misconfigured environment
     # can not weaken the policy below the CCN-STIC-807 minimum thresholds.
 
-    # Token duration in hours (ceiling: 24)
+    # Token duration in hours (ceiling: 24). Used for the legacy single
+    # session token (service users, or when refresh tokens are disabled) and
+    # as the fallback session lifetime.
     TOKEN_DURATION = _env_float_ceiling("TOKEN_DURATION", 8, 24)
+
+    # Refresh-token sessions (ENS op.acc — session management). When enabled
+    # (default), an interactive login returns a short-lived ACCESS token plus
+    # a REFRESH token; the client exchanges the refresh token for new access
+    # tokens at /token/refresh/ while active. This gives a sliding inactivity
+    # timeout (Model B) with a hard absolute cap, on top of a stateful,
+    # revocable session store. Service users keep the single long-lived token
+    # (they should use API keys for automation).
+    REFRESH_TOKEN_ENABLED = int(os.getenv("REFRESH_TOKEN_ENABLED", 1))
+    # Access-token lifetime in minutes (ceiling: 60). Short so revocation and
+    # inactivity take effect quickly.
+    ACCESS_TOKEN_DURATION_MINUTES = _env_int_ceiling(
+        "ACCESS_TOKEN_DURATION_MINUTES", 15, 60
+    )
+    # Sliding inactivity window in minutes (ceiling: 720 / 12 h): a session
+    # with no refresh for longer than this is closed and requires re-login.
+    REFRESH_TOKEN_INACTIVITY_MINUTES = _env_int_ceiling(
+        "REFRESH_TOKEN_INACTIVITY_MINUTES", 30, 720
+    )
+    # Absolute maximum session lifetime in hours (ceiling: 24): no session,
+    # however active, lives longer than this before a full re-login.
+    REFRESH_TOKEN_ABSOLUTE_HOURS = _env_int_ceiling(
+        "REFRESH_TOKEN_ABSOLUTE_HOURS", 12, 24
+    )
 
     # BI token lifetime in days (never-expiring BI tokens are not allowed).
     # Ceiling of 365 days; regenerate with `cornflow users bi_token`.

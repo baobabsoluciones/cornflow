@@ -58,6 +58,20 @@ class TestCornflowClientUser(TestCase):
         self.assertEqual(response["cornflow_status"], "healthy")
         self.assertEqual(response["backend_status"], "healthy")
 
+    def test_refresh_and_logout(self):
+        # the interactive login returned a refresh token
+        self.assertIsNotNone(self.client.refresh_token)
+        old_token = self.client.token
+        # refresh rotates the access + refresh token and keeps the session
+        result = self.client.refresh()
+        self.assertIn("token", result)
+        self.assertNotEqual(old_token, self.client.token)
+        # the new access token works on an authenticated endpoint
+        self.assertEqual("user", self.client.get_one_user(self.user_id)["username"])
+        # logout revokes the session: a further refresh is no longer possible
+        self.client.logout()
+        self.assertIsNone(self.client.refresh_token)
+
     def test_sign_up(self):
         response = self.client.sign_up(
             "test_username", "test_username@cornflow.org", "Hn7-wKp.Rb4Vt9"

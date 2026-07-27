@@ -16,6 +16,10 @@ class RawCornFlow(object):
     def __init__(self, url, token=None):
         self.url = url
         self.token = token
+        # Refresh token from an interactive login (None when authenticating
+        # with an API key). Used by refresh() to renew the short-lived access
+        # token; long-running automation should prefer a personal API key.
+        self.refresh_token = None
 
     def ask_token(func):
         @wraps(func)
@@ -238,7 +242,54 @@ class RawCornFlow(object):
         # When two-factor authentication is pending the response is a 200
         # without a token (mfa_required / mfa_setup_required flags instead)
         if response.status_code == 200 and "token" in response.json():
-            self.token = response.json()["token"]
+            body = response.json()
+            self.token = body["token"]
+            # Interactive logins also return a refresh token (service users
+            # and refresh-disabled deployments return only the access token)
+            self.refresh_token = body.get("refresh_token")
+        return response
+
+    def refresh(self, encoding=None):
+        """
+        Renews the short-lived access token using the stored refresh token
+        (interactive sessions). On success the access token and the rotated
+        refresh token are stored for subsequent calls.
+
+        :param str encoding: the type of encoding used in the call
+        :return: the requests response; on success its json has a new 'token'
+        """
+        if not self.refresh_token:
+            raise CornFlowApiError(
+                "No refresh token available: log in again (or use an API key)."
+            )
+        response = requests.post(
+            urljoin(self.url, "token/refresh/"),
+            json={"refresh_token": self.refresh_token},
+            headers={"Content-Encoding": encoding},
+        )
+        if response.status_code == 200 and "token" in response.json():
+            body = response.json()
+            self.token = body["token"]
+            self.refresh_token = body.get("refresh_token")
+        return response
+
+    def logout(self, encoding=None):
+        """
+        Revokes the current refresh-token session on the server and clears the
+        locally stored tokens. Idempotent when there is nothing to revoke.
+
+        :param str encoding: the type of encoding used in the call
+        :return: the requests response, or None when there was no session
+        """
+        response = None
+        if self.refresh_token:
+            response = requests.post(
+                urljoin(self.url, "logout/"),
+                json={"refresh_token": self.refresh_token},
+                headers={"Content-Encoding": encoding},
+            )
+        self.token = None
+        self.refresh_token = None
         return response
 
     def set_api_key(self, api_key):
@@ -251,6 +302,8 @@ class RawCornFlow(object):
         :param str api_key: the personal API key
         """
         self.token = api_key
+        # An API-key session is not refreshable
+        self.refresh_token = None
 
     @ask_token
     @prepare_encoding

@@ -88,6 +88,16 @@ class CornFlow:
         """Sets the token"""
         self.raw.token = token
 
+    @property
+    def refresh_token(self):
+        """Gets the refresh token (None outside an interactive session)"""
+        return self.raw.refresh_token
+
+    @refresh_token.setter
+    def refresh_token(self, refresh_token):
+        """Sets the refresh token"""
+        self.raw.refresh_token = refresh_token
+
     @staticmethod
     def expect_status(func, expected_status=None):
         """
@@ -141,6 +151,33 @@ class CornFlow:
                 f"two-factor authentication step: {result}"
             )
         return result
+
+    def refresh(self, encoding=None):
+        """
+        Renews the short-lived access token using the refresh token obtained
+        at login (interactive sessions). Call it when the access token has
+        expired (or proactively for long-running interactive scripts); for
+        unattended automation prefer a personal API key.
+
+        :param str encoding: the type of encoding used in the call
+        :return: a dictionary with the new token inside
+        """
+        response = self.raw.refresh(encoding=encoding)
+        if response.status_code != 200:
+            raise CornFlowApiError(
+                f"Token refresh failed with status code: "
+                f"{response.status_code}: {response.text}"
+            )
+        return response.json()
+
+    def logout(self, encoding=None):
+        """
+        Revokes the current refresh-token session on the server and clears the
+        local credentials.
+
+        :param str encoding: the type of encoding used in the call
+        """
+        self.raw.logout(encoding=encoding)
 
     def set_api_key(self, api_key):
         """

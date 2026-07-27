@@ -60,6 +60,13 @@ TOKEN_PURPOSE_ALLOWED_ENDPOINTS = {
 # keys (one active key per user).
 TOKEN_TYPE_API_KEY = "api_key"
 
+# Interactive session tokens are split in two (ENS op.acc — session
+# management): a short-lived ACCESS token sent on every request, and a
+# longer-lived REFRESH token used only against the refresh endpoint to obtain
+# a new access token. The refresh token is rejected on every normal endpoint.
+TOKEN_TYPE_ACCESS = "access"
+TOKEN_TYPE_REFRESH = "refresh"
+
 # Security-sensitive endpoints (name -> methods) that an API key can NOT
 # reach: a leaked key must not be able to change the password, manage MFA,
 # mint or revoke API keys, or touch user/role administration. It is meant

@@ -18,6 +18,7 @@ from werkzeug.datastructures import Headers
 from cornflow.models import (
     PermissionsDAG,
     PermissionViewRoleModel,
+    SessionModel,
     UserModel,
     ViewModel,
 )
@@ -31,7 +32,9 @@ from cornflow.shared.const import (
     TOKEN_PURPOSE_ALLOWED_ENDPOINTS,
     TOKEN_PURPOSE_MFA_SETUP,
     TOKEN_PURPOSE_PWD_RESET,
+    TOKEN_TYPE_ACCESS,
     TOKEN_TYPE_API_KEY,
+    TOKEN_TYPE_REFRESH,
 )
 from cornflow.shared.exceptions import (
     CommunicationError,
@@ -57,6 +60,15 @@ class Auth:
         user, payload = self.get_user_and_payload_from_header(request.headers)
         token_type = payload.get("type") if isinstance(payload, dict) else None
         purpose = payload.get("purpose") if isinstance(payload, dict) else None
+        if token_type == TOKEN_TYPE_REFRESH:
+            # A refresh token is only valid at the refresh endpoint; it must
+            # never grant access to a normal endpoint.
+            raise InvalidCredentials(
+                "A refresh token can not be used to access this endpoint",
+                status_code=401,
+                log_txt=f"Error while user {user.id} tries to authenticate with "
+                f"a refresh token on endpoint {request.endpoint}.",
+            )
         if token_type == TOKEN_TYPE_API_KEY:
             # Personal API key: validate its version and restrict it away from
             # the security-management surface (it is a data/automation
@@ -286,6 +298,197 @@ class Auth:
         return jwt.encode(
             payload, current_app.config["SECRET_TOKEN_KEY"], algorithm="HS256"
         )
+
+    @staticmethod
+    def generate_access_token(user_id: int = None) -> str:
+        """
+        Generates a short-lived access token (ACCESS_TOKEN_DURATION_MINUTES)
+        carrying the token-version claim. It is the credential sent on every
+        request; the client renews it via the refresh endpoint.
+
+        :param int user_id: user id to generate the token for
+        :return: the generated access token
+        :rtype: str
+        """
+        if user_id is None:
+            err = "The user id passed to generate the token is not valid."
+            raise InvalidUsage(
+                err, log_txt="Error while trying to generate an access token. " + err
+            )
+        user = UserModel.get_one_user(user_id)
+        if user is None:
+            err = "User does not exist"
+            raise InvalidUsage(
+                err, log_txt="Error while trying to generate an access token. " + err
+            )
+        payload = {
+            "exp": datetime.now(timezone.utc)
+            + timedelta(
+                minutes=int(current_app.config["ACCESS_TOKEN_DURATION_MINUTES"])
+            ),
+            "iat": datetime.now(timezone.utc),
+            "sub": user.username,
+            "iss": INTERNAL_TOKEN_ISSUER,
+            "tv": user.token_version or 0,
+            "type": TOKEN_TYPE_ACCESS,
+        }
+        return jwt.encode(
+            payload, current_app.config["SECRET_TOKEN_KEY"], algorithm="HS256"
+        )
+
+    @staticmethod
+    def generate_refresh_token(user_id: int, session) -> str:
+        """
+        Generates a refresh token bound to a stored session. Its absolute
+        expiry equals the session's, and it carries the session id (``sid``)
+        and the current refresh-token id (``jti``) so the server can rotate it
+        and detect reuse.
+
+        :param int user_id: user id to generate the token for
+        :param session: the :class:`SessionModel` the token belongs to
+        :return: the generated refresh token
+        :rtype: str
+        """
+        user = UserModel.get_one_user(user_id)
+        if user is None:
+            err = "User does not exist"
+            raise InvalidUsage(
+                err, log_txt="Error while trying to generate a refresh token. " + err
+            )
+        payload = {
+            "exp": session.expires_at,
+            "iat": datetime.now(timezone.utc),
+            "sub": user.username,
+            "iss": INTERNAL_TOKEN_ISSUER,
+            "tv": user.token_version or 0,
+            "type": TOKEN_TYPE_REFRESH,
+            "sid": session.session_id,
+            "jti": session.jti,
+        }
+        return jwt.encode(
+            payload, current_app.config["SECRET_TOKEN_KEY"], algorithm="HS256"
+        )
+
+    @staticmethod
+    def issue_session_tokens(user) -> dict:
+        """
+        Issues the tokens returned on a successful interactive login/enrollment.
+
+        When refresh-token sessions are enabled and the user is interactive, a
+        stateful session is created and a short access token plus a refresh
+        token are returned. Service users (and deployments with the feature
+        disabled) keep a single long-lived token — automation should use API
+        keys, not refresh tokens.
+
+        :param user: the authenticated user
+        :return: a dict with ``token`` and, when applicable, ``refresh_token``
+        :rtype: dict
+        """
+        if (
+            int(current_app.config.get("REFRESH_TOKEN_ENABLED", 1)) != 1
+            or user.is_service_user()
+        ):
+            return {"token": Auth.generate_token(user.id)}
+        session = SessionModel.create_for_user(user)
+        return {
+            "token": Auth.generate_access_token(user.id),
+            "refresh_token": Auth.generate_refresh_token(user.id, session),
+        }
+
+    @staticmethod
+    def consume_refresh_token(refresh_token: str) -> dict:
+        """
+        Validates a refresh token and, on success, rotates the session and
+        returns a fresh access + refresh token pair. Enforces global
+        revocation (token version), the sliding inactivity window, the
+        absolute session cap and refresh-token reuse detection.
+
+        :param str refresh_token: the refresh token presented by the client
+        :return: a dict with ``token``, ``refresh_token`` and ``id``
+        :rtype: dict
+        """
+        if not refresh_token:
+            raise InvalidCredentials(
+                "A refresh token is required",
+                status_code=400,
+                log_txt="Error while refreshing a session. The refresh token "
+                "is missing.",
+            )
+        payload = Auth.decode_token(refresh_token)
+        if not isinstance(payload, dict) or payload.get("type") != TOKEN_TYPE_REFRESH:
+            raise InvalidCredentials(
+                "Invalid refresh token",
+                status_code=401,
+                log_txt="Error while refreshing a session. The token is not a "
+                "refresh token.",
+            )
+        user = UserModel.get_one_object(username=payload.get("sub"))
+        if user is None:
+            raise InvalidCredentials(
+                "Invalid refresh token",
+                status_code=401,
+                log_txt="Error while refreshing a session. The user does not "
+                "exist.",
+            )
+        if int(payload.get("tv", 0)) != int(user.token_version or 0):
+            raise InvalidCredentials(
+                "The session has been revoked, please log in again",
+                status_code=401,
+                log_txt=f"Error while user {user.id} refreshes a session. The "
+                f"token version is stale (revoked).",
+            )
+        session = SessionModel.get_active(payload.get("sid"))
+        if session is None:
+            raise InvalidCredentials(
+                "The session is no longer valid, please log in again",
+                status_code=401,
+                log_txt=f"Error while user {user.id} refreshes a session. The "
+                f"session does not exist or is revoked.",
+            )
+        if payload.get("jti") != session.jti:
+            # An already-rotated refresh token is being reused: treat it as a
+            # theft signal and kill the whole session.
+            session.revoke()
+            raise InvalidCredentials(
+                "The session has been revoked, please log in again",
+                status_code=401,
+                log_txt=f"Error while user {user.id} refreshes a session. A "
+                f"superseded refresh token was reused; session revoked.",
+            )
+        if session.is_expired() or session.is_inactive():
+            session.revoke()
+            raise InvalidCredentials(
+                "The session has expired, please log in again",
+                status_code=401,
+                log_txt=f"Error while user {user.id} refreshes a session. The "
+                f"session expired (inactivity or absolute cap).",
+            )
+        session.rotate()
+        return {
+            "token": Auth.generate_access_token(user.id),
+            "refresh_token": Auth.generate_refresh_token(user.id, session),
+            "id": user.id,
+        }
+
+    @staticmethod
+    def revoke_session(refresh_token: str):
+        """
+        Revokes the session behind a refresh token (logout). Idempotent: an
+        invalid, expired or already-revoked token is a no-op.
+
+        :param str refresh_token: the refresh token whose session to revoke
+        """
+        if not refresh_token:
+            return
+        try:
+            payload = Auth.decode_token(refresh_token)
+        except InvalidCredentials:
+            return
+        if not isinstance(payload, dict) or payload.get("type") != TOKEN_TYPE_REFRESH:
+            return
+        session = SessionModel.get_active(payload.get("sid"))
+        if session is not None:
+            session.revoke()
 
     @staticmethod
     def generate_api_key(user_id: int = None) -> str:
@@ -550,6 +753,13 @@ class Auth:
                 log_txt="Error while trying to get user from header. "
                 "The token is a temporary purpose token.",
                 status_code=403,
+            )
+        if isinstance(data, dict) and data.get("type") == TOKEN_TYPE_REFRESH:
+            raise InvalidCredentials(
+                "A refresh token can not be used to access this endpoint",
+                log_txt="Error while trying to get user from header. "
+                "The token is a refresh token.",
+                status_code=401,
             )
         return user
 

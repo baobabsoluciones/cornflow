@@ -35,6 +35,7 @@ from cornflow.commands import (
 from cornflow.config import app_config
 from cornflow.endpoints import resources, alarms_resources
 from cornflow.endpoints.login import LoginEndpoint, LoginOpenAuthEndpoint
+from cornflow.endpoints.refresh import LogoutEndpoint, RefreshTokenEndpoint
 from cornflow.endpoints.signup import SignUpEndpoint
 from cornflow.shared import db, bcrypt
 from cornflow.shared.compress import init_compress
@@ -175,6 +176,14 @@ def create_app(env_name="development", dataconn=None):
             error="Invalid authentication type",
             log_txt="Error while configuring authentication. The authentication type is not valid.",
         )
+
+    # Refresh-token session endpoints. Like login, they validate the token in
+    # the request themselves, so they are registered outside the permission
+    # system (no ViewModel / permission entries).
+    api.add_resource(
+        RefreshTokenEndpoint, "/token/refresh/", endpoint="token-refresh"
+    )
+    api.add_resource(LogoutEndpoint, "/logout/", endpoint="logout")
 
     initialize_errorhandlers(app)
     init_compress(app)

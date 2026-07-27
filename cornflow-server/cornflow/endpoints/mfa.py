@@ -151,10 +151,10 @@ class MFAVerifyEndpoint(BaseMetaResource):
         user.mfa_enabled = True
         user.save()
 
-        token = self.auth_class.generate_token(user.id)
+        tokens = self.auth_class.issue_session_tokens(user)
         current_app.logger.info(f"User {user.id} completed MFA enrollment")
         audit("mfa.enrolled", actor_id=user.id, actor=user.username)
-        return {"backup_codes": backup_codes, "token": token, "id": user.id}, 200
+        return {"backup_codes": backup_codes, "id": user.id, **tokens}, 200
 
 
 class UserMFAResetEndpoint(BaseMetaResource):

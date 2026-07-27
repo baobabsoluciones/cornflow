@@ -13,6 +13,7 @@ from .main_alarms import MainAlarmsModel
 from .mfa_backup_code import MFABackupCodeModel
 from .permissions import PermissionViewRoleModel
 from .role import RoleModel
+from .session import SessionModel
 from .user import UserModel
 from .user_password_history import UserPasswordHistoryModel
 from .user_role import UserRoleModel

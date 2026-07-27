@@ -133,7 +133,7 @@ class LoginBaseEndpoint(BaseMetaResource):
             raise ConfigurationError()
 
         try:
-            token = self.auth_class.generate_token(user.id)
+            tokens = self.auth_class.issue_session_tokens(user)
         except Exception as e:
             raise InvalidUsage(
                 "Could not complete the login. Please try again or contact "
@@ -143,7 +143,8 @@ class LoginBaseEndpoint(BaseMetaResource):
                 f"{str(e)}",
             )
 
-        response.update({"token": token, "id": user.id})
+        response.update(tokens)
+        response.update({"id": user.id})
 
         return response, 200
 

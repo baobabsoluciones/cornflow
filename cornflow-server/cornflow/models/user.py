@@ -84,6 +84,11 @@ class UserModel(TraceAttributesModel):
 
     user_roles = db.relationship("UserRoleModel", cascade="all,delete", backref="users")
 
+    # Refresh-token sessions are removed with the user (they carry a FK to it)
+    sessions = db.relationship(
+        "SessionModel", cascade="all,delete", backref="users"
+    )
+
     instances = db.relationship(
         "InstanceModel",
         backref="users",
@@ -329,11 +334,17 @@ class UserModel(TraceAttributesModel):
     def revoke_all_sessions(self):
         """
         Invalidates every outstanding session token of the user by bumping
-        the token version embedded in the tokens. The change is added to the
-        session but not committed (the calling flow commits).
+        the token version embedded in the tokens, and revokes the stored
+        refresh-token sessions so they can no longer be rotated. The change is
+        added to the session but not committed (the calling flow commits).
         """
         self.token_version = (self.token_version or 0) + 1
         db.session.add(self)
+        # Also revoke the stateful refresh-token sessions (imported lazily to
+        # avoid a circular import at module load).
+        from cornflow.models.session import SessionModel
+
+        SessionModel.revoke_all_for_user(self.id)
 
     def rotate_api_key(self):
         """

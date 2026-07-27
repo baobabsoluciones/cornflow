@@ -115,7 +115,7 @@ class SignUpEndpoint(BaseMetaResource):
                     "id": user.id,
                     "mfa_setup_required": True,
                 }, 201
-            token = self.auth_class.generate_token(user.id)
+            tokens = self.auth_class.issue_session_tokens(user)
         except InvalidUsage:
             raise
         except Exception as e:
@@ -127,4 +127,4 @@ class SignUpEndpoint(BaseMetaResource):
                 f"generate token: {str(e)}",
             )
         current_app.logger.info(f"New user created: {user}")
-        return {"token": token, "id": user.id}, 201
+        return {"id": user.id, **tokens}, 201

@@ -46,9 +46,9 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
         super().test_successful_log_in()
         self.assertEqual(self.idx, self.response.json["id"])
 
-    @mock.patch("cornflow.endpoints.login.Auth.generate_token")
+    @mock.patch("cornflow.endpoints.login.Auth.issue_session_tokens")
     def test_exception_on_token_generation(self, mock_generate_token):
-        # Simulate an exception when generate_token is called
+        # Simulate an exception when the session tokens are issued
         mock_generate_token.side_effect = Exception("Custom exception")
 
         # Prepare login payload
