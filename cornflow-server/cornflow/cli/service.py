@@ -415,21 +415,33 @@ def _start_application(external_application, environment, external_app_module=No
 
 
 def _register_ssh_host(host):
-    if host is not None:
-        add_host = f"ssh-keyscan {host} >> {MAIN_WD}/.ssh/known_hosts"
-        config_ssh_host = f"echo Host {host} >> {MAIN_WD}/.ssh/config"
-        config_ssh_key = (
-            f'echo "   IdentityFile {MAIN_WD}/.ssh/id_rsa" >> {MAIN_WD}/.ssh/config'
-        )
-        os.system(add_host)
-        os.system(config_ssh_host)
-        os.system(config_ssh_key)
+    if host is None:
+        return
+
+    known_hosts = f"{MAIN_WD}/.ssh/known_hosts"
+    ssh_config = f"{MAIN_WD}/.ssh/config"
+
+    # ssh-keyscan the host and append its keys to known_hosts. Using an
+    # argument list (no shell) so the host value cannot be used for command
+    # injection, and doing the file append in Python instead of via '>>'.
+    scan = subprocess.run(["ssh-keyscan", host], capture_output=True, text=True)
+    if scan.returncode == 0:
+        with open(known_hosts, "a") as f:
+            f.write(scan.stdout)
+    else:
+        error(f"Error running ssh-keyscan for host {host}: {scan.stderr}")
+
+    with open(ssh_config, "a") as f:
+        f.write(f"Host {host}\n")
+        f.write(f"   IdentityFile {MAIN_WD}/.ssh/id_rsa\n")
 
 
 def _register_key():
-    if os.path.isfile(f"{MAIN_WD}/.ssh/id_rsa"):
-        add_key = f"chmod 0600 {MAIN_WD}/.ssh/id_rsa && ssh-add {MAIN_WD}/.ssh/id_rsa"
-        os.system(add_key)
-        return True
-    else:
+    key_path = f"{MAIN_WD}/.ssh/id_rsa"
+    if not os.path.isfile(key_path):
         return False
+    os.chmod(key_path, 0o600)
+    result = subprocess.run(["ssh-add", key_path], capture_output=True, text=True)
+    if result.returncode != 0:
+        error(f"Error adding ssh key: {result.stderr}")
+    return True
