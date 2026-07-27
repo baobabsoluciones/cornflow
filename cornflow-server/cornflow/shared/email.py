@@ -113,6 +113,76 @@ def get_password_reset_link_email(
     return get_email(text_template, subject, sender, receiver)
 
 
+def get_api_key_expiry_email(
+    username: str,
+    days_left: int,
+    expires_at: str,
+    service_name: str,
+    sender: str,
+    receiver: str,
+    is_owner: bool = True,
+):
+    """
+    This method builds the email warning that a personal API key is about to
+    expire, with the instructions to renew it.
+
+    :param str username: the owner of the API key
+    :param int days_left: whole days left before the key expires
+    :param str expires_at: the expiry date, formatted for a human
+    :param str service_name: The name of the service
+    :param str sender: The email address from which the email is going to be sent.
+    :param str receiver: The email address to receive the email.
+    :param bool is_owner: whether the receiver is the owner of the key (the
+      platform administrators get the same warning worded for a third party)
+    :return: The email as a string to be sent
+    :rtype: str
+    """
+    if days_left <= 0:
+        headline = (
+            f"The API key of <b>{username}</b> has expired"
+            if not is_owner
+            else "Your API key has expired"
+        )
+    else:
+        subject_of = f"The API key of <b>{username}</b>" if not is_owner else "Your API key"
+        headline = f"{subject_of} expires in <b>{days_left} day(s)</b>"
+
+    text_template = f"""
+    <html>
+        <body>
+            <p> Hi, </p>
+            <p>{headline} (expiry date: {expires_at}).</p>
+            <p>
+                Once it expires, any script or integration using it will stop
+                being able to authenticate against {service_name}. Generate a
+                new key before that happens:
+            </p>
+            <ul>
+                <li>from the web client, in the user settings screen,</li>
+                <li>with the cornflow-client library
+                    (<code>create_api_key()</code>), or</li>
+                <li>on the server, with
+                    <code>cornflow users api_key -u {username}</code>.</li>
+            </ul>
+            <p>
+                Generating a new key replaces the previous one. If the key is
+                used by an unattended integration, generate it first and then
+                redeploy with the new value: the previous key keeps working
+                during the configured rotation grace window.
+            </p>
+            <p>{service_name}</p>
+        </body>
+    </html>
+    """
+    if days_left <= 0:
+        subject = f"{service_name} - API key expired ({username})"
+    else:
+        subject = (
+            f"{service_name} - API key expires in {days_left} day(s) ({username})"
+        )
+    return get_email(text_template, subject, sender, receiver)
+
+
 def send_email_to(
     email: str, smtp_server: str, port: int, sender: str, password: str, receiver: str
 ):

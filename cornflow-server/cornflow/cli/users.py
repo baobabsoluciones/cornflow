@@ -7,6 +7,8 @@ from cornflow.models import UserModel
 from cornflow.shared.audit import audit
 from cornflow.shared.authentication.auth import BIAuth
 from cornflow.shared.const import (
+    API_KEY_SCOPE_FULL,
+    API_KEY_SCOPE_READ,
     PLATFORM_ADMIN_ROLE,
     PLATFORM_PLANNER_ROLE,
     PLATFORM_VIEWER_ROLE,
@@ -189,7 +191,14 @@ def issue_bi_token(username):
     "Useful for the cornflow<->airflow service account.",
 )
 @username
-def issue_api_key(username):
+@click.option(
+    "--read-only",
+    is_flag=True,
+    default=False,
+    help="Generate a read-only key: it is refused on any request that is not "
+    "a GET (useful for reporting / BI consumers).",
+)
+def issue_api_key(username, read_only):
     from cornflow.shared.authentication.auth import Auth
 
     app = get_app()
@@ -197,10 +206,12 @@ def issue_api_key(username):
         user = UserModel.get_one_user_by_username(username)
         if not user:
             raise ObjectDoesNotExist("User does not exist")
-        user.rotate_api_key()
-        token = Auth.generate_api_key(user.id)
+        scope = API_KEY_SCOPE_READ if read_only else API_KEY_SCOPE_FULL
+        user.rotate_api_key(scope=scope)
+        token = Auth.generate_api_key(user.id, scope=scope)
         app.logger.info(
-            f"A personal API key was generated for user {username} via the CLI"
+            f"A personal API key was generated for user {username} via the "
+            f"CLI (scope {scope})"
         )
         audit(
             "apikey.issued",
@@ -208,6 +219,7 @@ def issue_api_key(username):
             target_id=user.id,
             target=username,
             source="cli",
+            scope=scope,
         )
         click.echo(token)
         return True

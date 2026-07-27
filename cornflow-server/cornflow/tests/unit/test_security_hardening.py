@@ -704,18 +704,25 @@ class TestApiKey(TestCase):
                 f"{USER_URL}{self.user_id}/", headers=auth_header(first)
             ).status_code,
         )
-        second = self.generate_key().json["api_key"]
-        # second works, first is now revoked
-        self.assertEqual(
-            200,
-            self.client.get(
-                f"{USER_URL}{self.user_id}/", headers=auth_header(second)
-            ).status_code,
-        )
-        response = self.client.get(
-            f"{USER_URL}{self.user_id}/", headers=auth_header(first)
-        )
-        self.assertEqual(401, response.status_code)
+        # The rotation grace window is disabled here so the supersession is
+        # immediate: the window itself (generate first, redeploy after) is
+        # covered by TestApiKeyRotationGrace in test_api_key_lifecycle.py
+        current_app.config["API_KEY_ROTATION_GRACE_MINUTES"] = 0
+        try:
+            second = self.generate_key().json["api_key"]
+            # second works, first is now revoked
+            self.assertEqual(
+                200,
+                self.client.get(
+                    f"{USER_URL}{self.user_id}/", headers=auth_header(second)
+                ).status_code,
+            )
+            response = self.client.get(
+                f"{USER_URL}{self.user_id}/", headers=auth_header(first)
+            )
+            self.assertEqual(401, response.status_code)
+        finally:
+            current_app.config["API_KEY_ROTATION_GRACE_MINUTES"] = 60
 
     def test_revoke_api_key(self):
         api_key = self.generate_key().json["api_key"]

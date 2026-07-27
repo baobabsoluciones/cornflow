@@ -60,6 +60,17 @@ TOKEN_PURPOSE_ALLOWED_ENDPOINTS = {
 # keys (one active key per user).
 TOKEN_TYPE_API_KEY = "api_key"
 
+# Scope of a personal API key, carried in its "scp" claim:
+# - full: every endpoint the user can reach (minus the forbidden ones below)
+# - read: read-only, the key is refused on any request that is not a safe
+#   method. Meant for reporting / BI consumers.
+API_KEY_SCOPE_FULL = "full"
+API_KEY_SCOPE_READ = "read"
+API_KEY_SCOPES = [API_KEY_SCOPE_FULL, API_KEY_SCOPE_READ]
+
+# HTTP methods a read-only credential may use
+READ_ONLY_HTTP_METHODS = ["GET", "HEAD", "OPTIONS"]
+
 # Interactive session tokens are split in two (ENS op.acc — session
 # management): a short-lived ACCESS token sent on every request, and a
 # longer-lived REFRESH token used only against the refresh endpoint to obtain

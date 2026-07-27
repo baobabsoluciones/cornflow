@@ -319,7 +319,7 @@ class RawCornFlow(object):
 
     @ask_token
     @prepare_encoding
-    def create_api_key(self, totp_code=None, encoding=None):
+    def create_api_key(self, totp_code=None, read_only=False, encoding=None):
         """
         Generates a personal API key for the currently logged-in user (a
         prior login() with password and, if required, TOTP is needed). The
@@ -329,6 +329,8 @@ class RawCornFlow(object):
         :param str totp_code: a fresh TOTP code, required when the user has
           two-factor authentication enabled and the server enforces the
           step-up (API_KEY_STEPUP_TOTP)
+        :param bool read_only: request a read-only key, refused by the server
+          on any request that is not a GET (for reporting / BI consumers)
         :param str encoding: the type of encoding used in the call. Defaults to 'br'
 
         :return: the requests response; on success its json has 'api_key'
@@ -336,6 +338,8 @@ class RawCornFlow(object):
         payload = {}
         if totp_code is not None:
             payload["totp_code"] = totp_code
+        if read_only:
+            payload["scope"] = "read"
         return requests.post(
             urljoin(self.url, "user/api-key/"),
             json=payload,

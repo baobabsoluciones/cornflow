@@ -191,21 +191,26 @@ class CornFlow:
         """
         self.raw.set_api_key(api_key)
 
-    def create_api_key(self, totp_code=None, encoding=None):
+    def create_api_key(self, totp_code=None, read_only=False, encoding=None):
         """
         Generates a personal API key for the currently logged-in user (a
         prior login() is required). Returns the key string; it is shown only
-        once and generating a new one revokes the previous key.
+        once and generating a new one supersedes the previous key (which keeps
+        working during the server's rotation grace window).
 
         :param str totp_code: a fresh TOTP code, required when the user has
           two-factor authentication enabled and the server enforces the
           step-up
+        :param bool read_only: request a read-only key: the server refuses it
+          on any request that is not a GET (for reporting / BI consumers)
         :param str encoding: the type of encoding used in the call. Defaults to 'br'
 
         :return: the personal API key
         :rtype: str
         """
-        response = self.raw.create_api_key(totp_code=totp_code, encoding=encoding)
+        response = self.raw.create_api_key(
+            totp_code=totp_code, read_only=read_only, encoding=encoding
+        )
         if response.status_code != 201:
             raise CornFlowApiError(
                 f"API key generation failed with status code: "

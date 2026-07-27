@@ -24,7 +24,10 @@ from cornflow.models import (
 )
 from cornflow.shared.const import (
     API_KEY_FORBIDDEN_ENDPOINTS,
+    API_KEY_SCOPE_FULL,
+    API_KEY_SCOPE_READ,
     AUTH_OID,
+    READ_ONLY_HTTP_METHODS,
     PERMISSION_METHOD_MAP,
     INTERNAL_TOKEN_ISSUER,
     OID_PROVIDER_AZURE,
@@ -76,6 +79,7 @@ class Auth:
             # credential, not for account self-management)
             Auth._check_api_key(user, payload)
             Auth._check_api_key_access(user)
+            Auth._check_api_key_scope(user, payload)
         elif purpose is not None:
             Auth._check_purpose_token_access(purpose, user)
         else:
@@ -94,16 +98,28 @@ class Auth:
         current one (revoked by regeneration, explicit revoke, account lock
         or MFA reset).
 
+        The key superseded by the latest regeneration is still accepted while
+        inside the rotation grace window, so automation can be redeployed with
+        the new key without a gap.
+
         :param user: the user the key belongs to
         :param dict payload: the decoded token payload
         """
-        if int(payload.get("akv", -1)) != int(user.api_key_version or 0):
-            raise InvalidCredentials(
-                "The API key has been revoked, please generate a new one",
-                status_code=401,
-                log_txt=f"Error while user {user.id} authenticates with an API "
-                f"key. The key version is stale (revoked).",
+        version = int(payload.get("akv", -1))
+        if version == int(user.api_key_version or 0):
+            return
+        if user.is_api_key_in_grace(version):
+            current_app.logger.info(
+                f"User {user.id} authenticated with the superseded API key "
+                f"inside the rotation grace window"
             )
+            return
+        raise InvalidCredentials(
+            "The API key has been revoked, please generate a new one",
+            status_code=401,
+            log_txt=f"Error while user {user.id} authenticates with an API "
+            f"key. The key version is stale (revoked).",
+        )
 
     @staticmethod
     def _check_api_key_access(user):
@@ -125,6 +141,30 @@ class Auth:
                 log_txt=f"Error while user {user.id} tries to access endpoint "
                 f"{endpoint} ({request.method}) with an API key.",
             )
+
+    @staticmethod
+    def _check_api_key_scope(user, payload):
+        """
+        Enforces the scope of a personal API key: a read-only key (scope
+        "read", carried in the "scp" claim) is refused on any request that is
+        not a safe method, whatever the user's own permissions are. Meant for
+        reporting / BI consumers that must never write.
+
+        :param user: the user the key belongs to
+        :param dict payload: the decoded token payload
+        """
+        scope = payload.get("scp", API_KEY_SCOPE_FULL)
+        if scope != API_KEY_SCOPE_READ:
+            return
+        if request.method in READ_ONLY_HTTP_METHODS:
+            return
+        raise NoPermission(
+            error="This API key is read-only and can not be used to modify data",
+            status_code=403,
+            payload={"error_code": "api_key_read_only"},
+            log_txt=f"Error while user {user.id} tries a {request.method} on "
+            f"endpoint {request.endpoint} with a read-only API key.",
+        )
 
     @staticmethod
     def _check_purpose_token_access(purpose: str, user):
@@ -499,7 +539,7 @@ class Auth:
             session.revoke()
 
     @staticmethod
-    def generate_api_key(user_id: int = None) -> str:
+    def generate_api_key(user_id: int = None, scope: str = None) -> str:
         """
         Generates a personal API key for a user: a long-lived bearer token
         (API_KEY_DURATION_DAYS) that is an alternative to the session JWT.
@@ -532,6 +572,8 @@ class Auth:
             "iss": INTERNAL_TOKEN_ISSUER,
             "type": TOKEN_TYPE_API_KEY,
             "akv": user.api_key_version or 0,
+            # Scope of the key: a read-only key is refused on unsafe methods
+            "scp": scope or user.api_key_scope or API_KEY_SCOPE_FULL,
         }
 
         return jwt.encode(
@@ -925,6 +967,21 @@ class Auth:
 
 
 class BIAuth(Auth):
+    """
+    .. deprecated::
+       BI tokens are superseded by the **read-only personal API keys**, which
+       are individually revocable, expire per user, are visible and renewable
+       from the web client and get expiry notifications. A BI token can only be
+       invalidated by rotating ``SECRET_BI_KEY``, which kills every BI token at
+       once.
+
+       Kept for backwards compatibility with the deployments (and external
+       applications) whose endpoints still authenticate with ``BIAuth``.
+       Migrate those endpoints to ``Auth`` and hand out read-only API keys
+       (``cornflow users api_key -u <user> --read-only``); this class will be
+       removed in a future release.
+    """
+
     CHECK_TOKEN_VERSION = False
 
     def __init__(self, user_model=UserModel):

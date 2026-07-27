@@ -2,7 +2,9 @@
 This file contains the schemas used for the users defined in the application
 """
 
-from marshmallow import fields, Schema, validates_schema, ValidationError
+from marshmallow import fields, Schema, validate, validates_schema, ValidationError
+
+from cornflow.shared.const import API_KEY_SCOPES
 from .instance import InstanceSchema
 
 
@@ -101,11 +103,18 @@ class ApiKeyRequest(Schema):
     """
 
     totp_code = fields.Str(required=False, load_only=True)
+    # "full" (default) or "read" for a read-only key
+    scope = fields.Str(
+        required=False,
+        load_only=True,
+        validate=validate.OneOf(API_KEY_SCOPES),
+    )
 
 
 class ApiKeyResponse(Schema):
     api_key = fields.Str()
     expires_at = fields.DateTime()
+    scope = fields.Str()
 
 
 class LoginOpenAuthRequest(Schema):

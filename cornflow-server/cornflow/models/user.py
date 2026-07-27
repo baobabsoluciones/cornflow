@@ -21,7 +21,7 @@ from cornflow.shared import (
     db,
 )
 from cornflow.shared.audit import audit
-from cornflow.shared.const import PASSWORD_SPECIAL_CHARACTERS
+from cornflow.shared.const import API_KEY_SCOPE_FULL, PASSWORD_SPECIAL_CHARACTERS
 from cornflow.shared.encryption import decrypt_value, encrypt_value
 from cornflow.shared.exceptions import InvalidCredentials
 from cornflow.shared.validators import (
@@ -75,6 +75,20 @@ class UserModel(TraceAttributesModel):
     # keys (one active key per user), on explicit revoke, on account lock
     # and on MFA reset. Not affected by routine password changes.
     api_key_version = db.Column(db.Integer, nullable=False, default=0)
+    # When the active personal API key was issued: the key itself is never
+    # stored (shown once), only this timestamp, so the expiry can be computed
+    # and notified. NULL when there is no active key (or it predates this).
+    api_key_issued_at = db.Column(db.DateTime, nullable=True)
+    # Scope of the active key: "full" or "read" (read-only). NULL == full.
+    api_key_scope = db.Column(db.String(16), nullable=True)
+    # Smallest expiry threshold (in days) already notified for the active key,
+    # so each notice is sent once. Reset when a new key is issued.
+    api_key_expiry_notified = db.Column(db.Integer, nullable=True)
+    # Rotation grace: the version of the key replaced by the current one and
+    # the instant until which it is still accepted, so automation can be
+    # redeployed after generating the new key without a gap.
+    api_key_previous_version = db.Column(db.Integer, nullable=True)
+    api_key_grace_until = db.Column(db.DateTime, nullable=True)
     # Last accepted TOTP time-step, to reject replay of the same or an older
     # code within its validity window
     totp_last_counter = db.Column(db.Integer, nullable=True)
@@ -346,24 +360,98 @@ class UserModel(TraceAttributesModel):
 
         SessionModel.revoke_all_for_user(self.id)
 
-    def rotate_api_key(self):
+    def rotate_api_key(self, scope: str = None):
         """
-        Bumps the API key version so any previously issued personal API key
-        is invalidated (one active key per user), and commits. The new key
-        itself is signed afterwards by the auth layer with the new version.
+        Bumps the API key version so the previously issued personal API key is
+        superseded (one active key per user), records the issue timestamp and
+        the scope, and commits. The new key itself is signed afterwards by the
+        auth layer with the new version.
+
+        When a rotation grace window is configured the superseded key stays
+        valid for that long, so a key wired into running automation can be
+        replaced without a gap: generate first, redeploy after.
+
+        :param str scope: scope of the new key (API_KEY_SCOPE_FULL / _READ)
         """
-        self.api_key_version = (self.api_key_version or 0) + 1
+        previous_version = self.api_key_version or 0
+        grace_minutes = int(
+            current_app.config.get("API_KEY_ROTATION_GRACE_MINUTES", 0)
+        )
+        self.api_key_version = previous_version + 1
+        self.api_key_issued_at = datetime.now(timezone.utc)
+        self.api_key_scope = scope or API_KEY_SCOPE_FULL
+        self.api_key_expiry_notified = None
+        if grace_minutes > 0 and self.api_key_issued_at is not None:
+            self.api_key_previous_version = previous_version
+            self.api_key_grace_until = datetime.now(timezone.utc) + timedelta(
+                minutes=grace_minutes
+            )
+        else:
+            self.api_key_previous_version = None
+            self.api_key_grace_until = None
         db.session.add(self)
         db.session.commit()
 
     def revoke_api_keys(self):
         """
         Invalidates the user's personal API key without issuing a new one
-        (explicit disable, and on account lock / MFA reset).
+        (explicit disable, and on account lock / MFA reset). The rotation
+        grace does not apply here: an explicit revocation is immediate.
         """
         self.api_key_version = (self.api_key_version or 0) + 1
+        self.api_key_issued_at = None
+        self.api_key_scope = None
+        self.api_key_expiry_notified = None
+        self.api_key_previous_version = None
+        self.api_key_grace_until = None
         db.session.add(self)
         db.session.commit()
+
+    def api_key_expires_at(self):
+        """
+        Expiry instant of the active personal API key, or None when there is
+        no active key (or it was issued before the timestamp was tracked).
+
+        :rtype: datetime or None
+        """
+        if self.api_key_issued_at is None:
+            return None
+        issued_at = self.api_key_issued_at
+        if issued_at.tzinfo is None:
+            issued_at = issued_at.replace(tzinfo=timezone.utc)
+        return issued_at + timedelta(
+            days=int(current_app.config["API_KEY_DURATION_DAYS"])
+        )
+
+    def api_key_days_left(self):
+        """
+        Whole days left before the active API key expires (may be negative if
+        it already expired), or None when there is no active key.
+
+        :rtype: int or None
+        """
+        expires_at = self.api_key_expires_at()
+        if expires_at is None:
+            return None
+        delta = expires_at - datetime.now(timezone.utc)
+        return int(delta.total_seconds() // 86400)
+
+    def is_api_key_in_grace(self, version: int) -> bool:
+        """
+        Whether the given API key version is the one superseded by the current
+        key and is still inside the rotation grace window.
+
+        :param int version: the version claim of the presented key
+        :rtype: bool
+        """
+        if self.api_key_previous_version is None or self.api_key_grace_until is None:
+            return False
+        if int(version) != int(self.api_key_previous_version):
+            return False
+        grace_until = self.api_key_grace_until
+        if grace_until.tzinfo is None:
+            grace_until = grace_until.replace(tzinfo=timezone.utc)
+        return datetime.now(timezone.utc) <= grace_until
 
     def set_totp_secret(self, secret: str):
         """

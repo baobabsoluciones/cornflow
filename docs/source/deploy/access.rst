@@ -198,8 +198,19 @@ locally.
   when a phone is lost). With ``MFA_REQUIRED=1`` the user will enroll again
   at the next login.
 
-BI tokens
-************
+BI tokens (deprecated)
+*************************
+
+.. warning::
+   BI tokens are **deprecated** in favour of the **read-only personal API
+   keys** described above: those are individually revocable, expire per user,
+   can be renewed from the web client and get expiry notifications, while a BI
+   token can only be invalidated by rotating ``SECRET_BI_KEY`` — which
+   invalidates every BI token at once. They are kept for backwards
+   compatibility with deployments and external applications whose endpoints
+   still authenticate with ``BIAuth``; migrate those to ``Auth`` and issue
+   ``cornflow users api_key -u <user> --read-only`` instead. Support will be
+   removed in a future release.
 
 BI tokens are long-lived tokens for BI tools (e.g. Power BI) signed with a
 separate key (``SECRET_BI_KEY``). They are no longer permanent: they expire
@@ -240,10 +251,41 @@ either credential. It is meant for unattended automation.
   (``create_api_key()`` after ``login``), or the CLI
   (``cornflow users api_key -u <username>``, trusted by machine access — no
   TOTP). Shown only once.
-- **One active key per user.** Generating a new key revokes the previous
+- **One active key per user.** Generating a new key supersedes the previous
   one; it is also revoked explicitly (``DELETE /user/api-key/`` or the
   Settings screen), and automatically on account lock and MFA reset. A
   routine password change does NOT revoke it (automation continuity).
+  The key itself is never stored: revocation works because the key carries
+  the user's api-key version, which is compared against the database on every
+  request.
+- **Rotation grace window.** After generating a new key the superseded one
+  keeps working for ``API_KEY_ROTATION_GRACE_MINUTES`` (default 60, capped at
+  a day; 0 disables it), so a key wired into running automation can be
+  replaced without a gap: **generate first, redeploy after**. Only the
+  immediately superseded key benefits, and an explicit revocation is always
+  immediate.
+- **Scope: full or read-only.** A key can be minted read-only (``"scope":
+  "read"`` on the request, the *read-only* checkbox in the Settings screen,
+  ``create_api_key(read_only=True)`` in the library, or ``--read-only`` in the
+  CLI). A read-only key is refused on any request that is not a ``GET`` /
+  ``HEAD`` / ``OPTIONS`` (403 with ``error_code: api_key_read_only``),
+  whatever the user's own permissions are. This is the credential to hand to a
+  reporting or BI consumer.
+- **Expiry notifications.** ``cornflow tokens notify-expiry`` emails the key
+  owner **and every platform administrator** when a key is close to expiring
+  (``TOKEN_EXPIRY_NOTIFICATION_DAYS``, default ``30,7,3,2,1`` days; disable
+  with ``TOKEN_EXPIRY_NOTIFICATIONS_ENABLED=0``). Run it **once a day** from
+  cron or a Kubernetes CronJob — cornflow has no scheduler of its own::
+
+      0 7 * * *  cornflow tokens notify-expiry
+
+  The command is idempotent (running it repeatedly sends nothing extra) and
+  recovers from missed runs: it warns as soon as a threshold has been crossed,
+  and the email always states the real number of days left. It needs the SMTP
+  settings (``SERVICE_EMAIL_*``); without them it logs a warning and still
+  emits the ``apikey.expiry_notified`` audit event. Only keys generated after
+  this version are covered (the issue timestamp did not exist before);
+  regenerating a key starts the notifications for it.
 - **Not for account management.** An API key can not reach the
   security-sensitive endpoints (password change, MFA, API key
   management, user/role administration): a leaked key can not escalate.

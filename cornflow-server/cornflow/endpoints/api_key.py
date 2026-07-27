@@ -23,7 +23,11 @@ from cornflow.models import UserModel
 from cornflow.schemas.user import ApiKeyRequest, ApiKeyResponse
 from cornflow.shared.audit import audit
 from cornflow.shared.authentication import Auth, authenticate
-from cornflow.shared.const import ALL_DEFAULT_ROLES, TOKEN_TYPE_API_KEY
+from cornflow.shared.const import (
+    ALL_DEFAULT_ROLES,
+    API_KEY_SCOPE_FULL,
+    TOKEN_TYPE_API_KEY,
+)
 from cornflow.shared.exceptions import (
     EndpointNotImplemented,
     InvalidCredentials,
@@ -93,20 +97,22 @@ class UserApiKeyEndpoint(BaseMetaResource):
                     f"API key. The step-up TOTP code is missing or invalid.",
                 )
 
-        user.rotate_api_key()
-        api_key = self.auth_class.generate_api_key(user.id)
-        expires_at = datetime.now(timezone.utc) + timedelta(
-            days=int(current_app.config["API_KEY_DURATION_DAYS"])
+        scope = kwargs.get("scope") or API_KEY_SCOPE_FULL
+        user.rotate_api_key(scope=scope)
+        api_key = self.auth_class.generate_api_key(user.id, scope=scope)
+        expires_at = user.api_key_expires_at()
+        current_app.logger.info(
+            f"User {user.id} generated a personal API key (scope {scope})"
         )
-        current_app.logger.info(f"User {user.id} generated a personal API key")
         audit(
             "apikey.issued",
             actor_id=user.id,
             actor=user.username,
             source="ui",
+            scope=scope,
             expires_at=expires_at,
         )
-        return {"api_key": api_key, "expires_at": expires_at}, 201
+        return {"api_key": api_key, "expires_at": expires_at, "scope": scope}, 201
 
     @doc(description="Revoke the personal API key", tags=["Users"])
     @authenticate(auth_class=Auth())

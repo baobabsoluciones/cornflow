@@ -212,6 +212,23 @@ class DefaultConfig(object):
     # Require a fresh TOTP (step-up) when an MFA-enabled user generates an
     # API key through the API/UI. The CLI path is exempt (machine access).
     API_KEY_STEPUP_TOTP = int(os.getenv("API_KEY_STEPUP_TOTP", 1))
+    # Rotation grace window in minutes: after generating a new API key the
+    # previous one keeps working for this long, so a key wired into running
+    # automation can be replaced without a gap (generate, then redeploy).
+    # 0 disables the grace (the previous key dies immediately). Ceiling 1 day.
+    API_KEY_ROTATION_GRACE_MINUTES = _env_int_ceiling(
+        "API_KEY_ROTATION_GRACE_MINUTES", 60, 1440
+    )
+
+    # Expiry notifications for personal API keys. A daily run of
+    # `cornflow tokens notify-expiry` emails the key owner and the platform
+    # administrators when the key has this many days left or fewer.
+    TOKEN_EXPIRY_NOTIFICATIONS_ENABLED = int(
+        os.getenv("TOKEN_EXPIRY_NOTIFICATIONS_ENABLED", 1)
+    )
+    TOKEN_EXPIRY_NOTIFICATION_DAYS = os.getenv(
+        "TOKEN_EXPIRY_NOTIFICATION_DAYS", "30,7,3,2,1"
+    )
 
     # Password rotation time in days (ceiling: 365)
     PWD_ROTATION_TIME = _env_int_ceiling(
