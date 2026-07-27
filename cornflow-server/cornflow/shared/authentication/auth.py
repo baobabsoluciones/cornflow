@@ -316,7 +316,7 @@ class Auth:
             jwks_url = f"{provider_url.rstrip('/')}/.well-known/jwks.json"
 
         try:
-            response = requests.get(jwks_url)
+            response = requests.get(jwks_url, timeout=10)
             response.raise_for_status()
 
             # Convert JWK to RSA public keys using PyJWT's built-in method
