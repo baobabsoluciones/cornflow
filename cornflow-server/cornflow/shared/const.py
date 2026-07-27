@@ -198,9 +198,28 @@ PLANNER_ROLE = 2
 ADMIN_ROLE = 3
 # The service role is reserved for machine-to-machine service accounts
 SERVICE_ROLE = 4
+# Role id ranges:
+#   0-4      core client roles (above)
+#   5-899    free for the custom roles of external applications
+#   900-999  RESERVED for the cornflow platform roles (below)
+# The platform roles live in a reserved block so they can never collide with
+# the custom roles an external application has already registered (those
+# conventionally start right after the core roles). Each platform role is its
+# client counterpart + PLATFORM_ROLE_OFFSET, which keeps the pairs readable
+# (planner 2 -> platform planner 902). Registration refuses to start when a
+# custom role trespasses on the range, see check_reserved_role_ids.
+PLATFORM_ROLE_OFFSET = 900
+RESERVED_ROLE_RANGE = (900, 999)
+
 # Platform administrators operate the platform itself: they are the only
 # ones that can unlock accounts locked after too many failed login attempts
-PLATFORM_ADMIN_ROLE = 5
+PLATFORM_ADMIN_ROLE = ADMIN_ROLE + PLATFORM_ROLE_OFFSET  # 903
+# Platform counterparts of the client viewer/planner roles: same permissions
+# as their client equivalent, used to tell internal (platform operator) users
+# apart from external (client) ones. Only a platform administrator can grant
+# or revoke platform roles.
+PLATFORM_VIEWER_ROLE = VIEWER_ROLE + PLATFORM_ROLE_OFFSET  # 901
+PLATFORM_PLANNER_ROLE = PLANNER_ROLE + PLATFORM_ROLE_OFFSET  # 902
 
 ALL_DEFAULT_ROLES = [
     VIEWER_ROLE,
@@ -208,7 +227,27 @@ ALL_DEFAULT_ROLES = [
     ADMIN_ROLE,
     SERVICE_ROLE,
     PLATFORM_ADMIN_ROLE,
+    PLATFORM_VIEWER_ROLE,
+    PLATFORM_PLANNER_ROLE,
 ]
+
+# The internal (platform) roles. Granting or revoking any of these requires
+# the platform administrator role: a client admin must not be able to touch
+# the platform side (nor escalate themselves into it).
+PLATFORM_ROLES = [
+    PLATFORM_VIEWER_ROLE,
+    PLATFORM_PLANNER_ROLE,
+    PLATFORM_ADMIN_ROLE,
+]
+
+# Each platform role inherits every view its client counterpart can access,
+# so endpoint declarations only need to list the client roles (see
+# _role_has_view_access in commands/permissions.py).
+PLATFORM_ROLE_INHERITANCE = {
+    PLATFORM_VIEWER_ROLE: VIEWER_ROLE,
+    PLATFORM_PLANNER_ROLE: PLANNER_ROLE,
+    PLATFORM_ADMIN_ROLE: ADMIN_ROLE,
+}
 
 ACTIONS_MAP = {
     GET_ACTION: "can_get",
@@ -233,6 +272,8 @@ ROLES_MAP = {
     ADMIN_ROLE: "admin",
     SERVICE_ROLE: "service",
     PLATFORM_ADMIN_ROLE: "platform_admin",
+    PLATFORM_VIEWER_ROLE: "platform_viewer",
+    PLATFORM_PLANNER_ROLE: "platform_planner",
 }
 
 BASE_PERMISSION_ASSIGNATION = [
@@ -257,6 +298,13 @@ BASE_PERMISSION_ASSIGNATION = [
     (PLATFORM_ADMIN_ROLE, POST_ACTION),
     (PLATFORM_ADMIN_ROLE, PUT_ACTION),
     (PLATFORM_ADMIN_ROLE, DELETE_ACTION),
+    # Platform viewer/planner mirror their client counterparts' actions
+    (PLATFORM_VIEWER_ROLE, GET_ACTION),
+    (PLATFORM_PLANNER_ROLE, GET_ACTION),
+    (PLATFORM_PLANNER_ROLE, PATCH_ACTION),
+    (PLATFORM_PLANNER_ROLE, POST_ACTION),
+    (PLATFORM_PLANNER_ROLE, PUT_ACTION),
+    (PLATFORM_PLANNER_ROLE, DELETE_ACTION),
 ]
 
 EXTRA_PERMISSION_ASSIGNATION = [

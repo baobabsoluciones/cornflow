@@ -3,7 +3,12 @@ Model for the relationship between users and roles
 """
 from cornflow.models.meta_models import TraceAttributesModel
 from cornflow.shared import db
-from cornflow.shared.const import ADMIN_ROLE, PLATFORM_ADMIN_ROLE, SERVICE_ROLE
+from cornflow.shared.const import (
+    ADMIN_ROLE,
+    PLATFORM_ADMIN_ROLE,
+    PLATFORM_ROLES,
+    SERVICE_ROLE,
+)
 
 
 class UserRoleModel(TraceAttributesModel):
@@ -88,15 +93,21 @@ class UserRoleModel(TraceAttributesModel):
     @classmethod
     def is_admin(cls, user_id):
         """
-        Method that checks if a given user has the admin role assigned
+        Method that checks if a given user has administrator privileges.
+
+        The platform administrator is a superset of the client administrator,
+        so it also satisfies this check: otherwise a platform admin would be
+        treated as a plain user by the in-code administrator checks (editing
+        other users, resetting their MFA, seeing every object...) even though
+        the permission tables grant it those endpoints.
 
         :param int user_id: the ID of the user
-        :return: a boolean indicating if the user has the admin role assigned or not
+        :return: a boolean indicating if the user has administrator privileges
         :rtype: boolean
         """
         user_roles = cls.get_all_objects(user_id=user_id)
         for role in user_roles:
-            if role.role_id == ADMIN_ROLE:
+            if role.role_id in (ADMIN_ROLE, PLATFORM_ADMIN_ROLE):
                 return True
 
         return False
@@ -116,6 +127,40 @@ class UserRoleModel(TraceAttributesModel):
                 return True
 
         return False
+
+    @classmethod
+    def is_platform_user(cls, user_id):
+        """
+        Method that checks if a given user holds any of the internal platform
+        roles (platform_admin / platform_viewer / platform_planner).
+
+        :param int user_id: the ID of the user
+        :return: a boolean indicating if the user is a platform user
+        :rtype: boolean
+        """
+        return (
+            cls.query.filter(
+                cls.user_id == user_id, cls.role_id.in_(PLATFORM_ROLES)
+            ).first()
+            is not None
+        )
+
+    @classmethod
+    def get_platform_user_ids(cls):
+        """
+        Ids of every user holding a platform role. Used to keep the data
+        created by internal (platform) users out of the sight of client users.
+
+        :return: the list of platform users' ids
+        :rtype: list
+        """
+        rows = (
+            cls.query.with_entities(cls.user_id)
+            .filter(cls.role_id.in_(PLATFORM_ROLES))
+            .distinct()
+            .all()
+        )
+        return [row[0] for row in rows]
 
     @classmethod
     def is_platform_admin(cls, user_id):

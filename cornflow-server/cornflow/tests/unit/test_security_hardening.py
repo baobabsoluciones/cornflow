@@ -405,6 +405,168 @@ class TestRoleScoping(TestCase):
         self.assertIn(response.status_code, (200, 201))
 
 
+class TestPlatformRoles(TestCase):
+    """
+    Tests for the platform_viewer / platform_planner roles (internal
+    counterparts of the client viewer/planner) and for the guard that only a
+    platform administrator can grant or revoke platform roles.
+    """
+
+    def create_app(self):
+        return create_app("testing")
+
+    def setUp(self):
+        from cornflow.shared.const import (
+            PLATFORM_PLANNER_ROLE,
+            PLATFORM_VIEWER_ROLE,
+        )
+
+        db.create_all()
+        access_init_command(verbose=False)
+        register_deployed_dags_command_test(verbose=False)
+        self.admin_token = self.create_user_with_role(
+            "clientadmin", "clientadmin@test.com", ADMIN_ROLE
+        )
+        self.platform_token = self.create_user_with_role(
+            "platformadmin", "platformadmin@test.com", PLATFORM_ADMIN_ROLE
+        )
+        self.pviewer_token = self.create_user_with_role(
+            "platformviewer", "platformviewer@test.com", PLATFORM_VIEWER_ROLE
+        )
+        self.pplanner_token = self.create_user_with_role(
+            "platformplanner", "platformplanner@test.com", PLATFORM_PLANNER_ROLE
+        )
+        self.target_id = self._signup("sometarget", "sometarget@test.com")
+        register_dag_permissions_command(
+            open_deployment=int(current_app.config["OPEN_DEPLOYMENT"]), verbose=0
+        )
+
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
+
+    def _signup(self, username, email):
+        response = self.client.post(
+            SIGNUP_URL,
+            data=json.dumps(
+                {
+                    "username": username,
+                    "email": email,
+                    "password": STRONG_PASSWORD,
+                }
+            ),
+            headers=JSON_HEADER,
+        )
+        return response.json["id"]
+
+    def create_user_with_role(self, username, email, role_id):
+        # replace the default signup role (planner) so the user holds ONLY
+        # the role under test
+        user_id = self._signup(username, email)
+        UserRoleModel.query.filter_by(user_id=user_id).delete()
+        db.session.commit()
+        UserRoleModel({"user_id": user_id, "role_id": role_id}).save()
+        return self.client.post(
+            LOGIN_URL,
+            data=json.dumps({"username": username, "password": STRONG_PASSWORD}),
+            headers=JSON_HEADER,
+        ).json["token"]
+
+    def grant(self, token, role_id, user_id=None):
+        return self.client.post(
+            "/user/role/",
+            data=json.dumps(
+                {"user_id": user_id or self.target_id, "role_id": role_id}
+            ),
+            headers=auth_header(token),
+        )
+
+    def test_platform_viewer_mirrors_viewer(self):
+        # read access like a viewer...
+        response = self.client.get(
+            INSTANCE_URL, headers=auth_header(self.pviewer_token)
+        )
+        self.assertEqual(200, response.status_code)
+        # ...but no write permission (rejected by the permission layer)
+        response = self.client.post(
+            INSTANCE_URL,
+            data=json.dumps({}),
+            headers=auth_header(self.pviewer_token),
+        )
+        self.assertEqual(403, response.status_code)
+
+    def test_platform_planner_mirrors_planner(self):
+        response = self.client.get(
+            INSTANCE_URL, headers=auth_header(self.pplanner_token)
+        )
+        self.assertEqual(200, response.status_code)
+        # the write permission is granted: an empty payload gets past the
+        # permission layer and fails on schema validation instead (not 403)
+        response = self.client.post(
+            INSTANCE_URL,
+            data=json.dumps({}),
+            headers=auth_header(self.pplanner_token),
+        )
+        self.assertNotEqual(403, response.status_code)
+
+    def test_platform_viewer_planner_are_not_admins(self):
+        from cornflow.shared.const import PLATFORM_VIEWER_ROLE
+
+        for token in (self.pviewer_token, self.pplanner_token):
+            # no user administration
+            self.assertEqual(
+                403,
+                self.client.get(USER_URL, headers=auth_header(token)).status_code,
+            )
+            # no security-model endpoints
+            self.assertEqual(
+                403,
+                self.client.get(
+                    ROLES_URL, headers=auth_header(token)
+                ).status_code,
+            )
+            # no role granting
+            self.assertEqual(
+                403, self.grant(token, PLATFORM_VIEWER_ROLE).status_code
+            )
+
+    def test_client_admin_can_not_grant_platform_roles(self):
+        # Without this guard a client admin could escalate themselves (or
+        # anyone) into the platform side
+        from cornflow.shared.const import PLATFORM_ROLES
+
+        for role_id in PLATFORM_ROLES:
+            response = self.grant(self.admin_token, role_id)
+            self.assertEqual(
+                403,
+                response.status_code,
+                msg=f"client admin should not grant role {role_id}",
+            )
+
+    def test_client_admin_can_not_revoke_platform_roles(self):
+        from cornflow.shared.const import PLATFORM_VIEWER_ROLE
+
+        UserRoleModel(
+            {"user_id": self.target_id, "role_id": PLATFORM_VIEWER_ROLE}
+        ).save()
+        response = self.client.delete(
+            f"/user/role/{self.target_id}/{PLATFORM_VIEWER_ROLE}/",
+            headers=auth_header(self.admin_token),
+        )
+        self.assertEqual(403, response.status_code)
+
+    def test_platform_admin_manages_platform_roles(self):
+        from cornflow.shared.const import PLATFORM_PLANNER_ROLE
+
+        response = self.grant(self.platform_token, PLATFORM_PLANNER_ROLE)
+        self.assertIn(response.status_code, (200, 201))
+        response = self.client.delete(
+            f"/user/role/{self.target_id}/{PLATFORM_PLANNER_ROLE}/",
+            headers=auth_header(self.platform_token),
+        )
+        self.assertEqual(200, response.status_code)
+
+
 class TestBITokenExpiry(TestCase):
     """
     Tests that BI tokens now expire and that an expired one is rejected.

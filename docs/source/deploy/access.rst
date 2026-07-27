@@ -401,8 +401,10 @@ Roles definition
 
 In cornflow there is a differentiation between user roles with different characteristics::
 
-    Platform admin - platform operator: superset of the client admin. It is the only role that can manage roles and permissions (roles, permission, apiview and action endpoints), unlock locked accounts and revoke the admin role from a user
-    Admin - client administrator: manages the users of their own deployment (create/disable users, assign roles, manage DAG access) but can not manage the permission model nor revoke admin from another admin
+    Platform admin - platform operator: superset of the client admin. It is the only role that can manage roles and permissions (roles, permission, apiview and action endpoints), unlock locked accounts, revoke the admin role from a user and grant or revoke the platform roles
+    Platform planner - internal (platform operator) user with the same permissions as a client planner
+    Platform viewer - internal (platform operator) user with the same permissions as a client viewer
+    Admin - client administrator: manages the users of their own deployment (create/disable users, assign roles, manage DAG access) but can not manage the permission model, revoke admin from another admin, nor grant/revoke platform roles
     Service - service user role reserved for service accounts (cornflow and airflow communication)
     Viewer - read only user
     Planner - the general user of cornflow can create jobs and send models to solve
@@ -414,6 +416,46 @@ endpoints require the platform_admin role; so does unlocking an account and
 revoking the admin role from a user (a client admin can grant admin but only
 a platform admin can take it away). The platform admin inherits every
 client-admin permission on top of the platform-only ones.
+
+The **platform viewer** and **platform planner** roles exist to tell internal
+(platform operator) users apart from external (client) ones: they carry
+exactly the permissions of their client counterpart — each platform role
+inherits every view its client equivalent can access — and only differ in
+what they *are*, not in what they can do. **Granting or revoking any platform
+role requires the platform administrator**: a client admin can neither
+escalate a user (or themselves) into the platform side nor strip a platform
+role. Create these users with ``cornflow users create platform_viewer`` /
+``platform_planner`` or assign the role from the roles-management screen (the
+platform roles are only offered to platform administrators).
+
+**Data isolation.** The instances, executions and cases created by a platform
+user are **invisible to client users** — including client admins, who
+otherwise see every object of the deployment. This keeps the test data an
+operator produces out of sight on shared or staging environments. The reverse
+is not restricted: platform users are the operators and keep the visibility
+their role grants them (so a platform *planner*, being a regular non-admin
+user, still only sees its own objects, while a platform *admin* sees
+everything). Disable with ``PLATFORM_DATA_ISOLATION=0``.
+
+**Role ids.** Roles are identified by integer ids, allocated as follows::
+
+    0-4         core client roles (dummy, viewer, planner, admin, service)
+    5-8999      free for the custom roles of external applications
+    900-999     reserved for the cornflow platform roles
+
+Each platform role is its client counterpart **+ 900** (viewer ``1`` ->
+platform viewer ``901``, planner ``2`` -> platform planner ``902``, admin
+``3`` -> platform admin ``903``). Role registration **refuses to start** if a
+custom role declares an id inside the reserved range, or if a role already
+stored in the database occupies a platform-role id under a different name. That turns what would be a silent
+reassignment of existing role assignments into an explicit error naming the
+offending role.
+
+.. note::
+   A service account acts on behalf of a user, so an update it performs never
+   changes the owner of the affected object: when airflow writes back a
+   solution, checks or KPIs, the execution/instance keeps its original
+   ``user_id`` and stays visible to the user who created it.
 
 .. warning::
    A fresh deployment needs at least one platform administrator to manage

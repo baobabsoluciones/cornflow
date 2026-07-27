@@ -311,6 +311,13 @@ class DefaultConfig(object):
     REFERRER_POLICY = os.getenv("REFERRER_POLICY")
     PERMISSIONS_POLICY = os.getenv("PERMISSIONS_POLICY")
 
+    # Data isolation between internal (platform) and client users: when 1
+    # (default) the instances, executions and cases created by a user holding
+    # a platform role are invisible to client users — including client admins,
+    # who otherwise see every object of the deployment. Keeps operator test
+    # data out of sight on shared or staging environments.
+    PLATFORM_DATA_ISOLATION = int(os.getenv("PLATFORM_DATA_ISOLATION", 1))
+
     # Interactive API docs (Swagger UI at /swagger-ui/). Enabled by default,
     # but disabled in production (see the Production config) to shrink the
     # attack surface and keep the deny-by-default CSP.

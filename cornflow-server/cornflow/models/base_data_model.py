@@ -12,6 +12,48 @@ from cornflow.shared.const import USER_ACCESS_ALL_OBJECTS_NO
 from cornflow.shared.utils import hash_json_256
 
 
+def _hide_platform_objects(query, cls, user):
+    """
+    Keeps the data owned by internal (platform) users out of the sight of
+    client users.
+
+    Objects created by a user holding a platform role (platform_admin,
+    platform_viewer, platform_planner) are only visible to platform users. So
+    on a shared or staging deployment the test data an operator creates never
+    shows up for a client user — not even for a client admin, who otherwise
+    sees every object of the deployment.
+
+    The reverse is not restricted: platform users are the operators and keep
+    the visibility their role grants them.
+
+    :param query: the query being built
+    :param cls: the model class being queried
+    :param user: the user performing the query (may be None for internal calls)
+    :return: the query, filtered when applicable
+    """
+    if user is None:
+        return query
+    if not int(current_app.config.get("PLATFORM_DATA_ISOLATION", 1)):
+        return query
+    # Imported here to avoid a circular import at module load
+    from cornflow.models.user_role import UserRoleModel
+
+    if UserRoleModel.is_platform_user(user.id):
+        return query
+    # The platform users are the internal operators: a handful of rows, so
+    # the id list is materialised instead of correlating a subquery (keeps the
+    # filter portable across SQLAlchemy versions).
+    platform_user_ids = UserRoleModel.get_platform_user_ids()
+    if not platform_user_ids:
+        return query
+    return query.filter(
+        db.or_(
+            cls.user_id.is_(None),
+            ~cls.user_id.in_(platform_user_ids),
+        )
+    )
+
+
 class BaseDataModel(TraceAttributesModel):
     """ """
 
@@ -89,6 +131,9 @@ class BaseDataModel(TraceAttributesModel):
         ):
             query = query.filter(cls.user_id == user.id)
 
+        # Client users never see the objects of internal (platform) users
+        query = _hide_platform_objects(query, cls, user)
+
         if schema:
             query = query.filter(cls.schema == schema)
         if creation_date_gte:
@@ -126,4 +171,6 @@ class BaseDataModel(TraceAttributesModel):
         query = query.filter_by(id=idx, deleted_at=None)
         if not user.is_admin() and not user.is_service_user() and user_access == USER_ACCESS_ALL_OBJECTS_NO:
             query = query.filter_by(user_id=user.id)
+        # Client users never see the objects of internal (platform) users
+        query = _hide_platform_objects(query, cls, user)
         return query.first()

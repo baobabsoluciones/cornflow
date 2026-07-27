@@ -13,6 +13,7 @@ from cornflow.shared.const import (
     ADMIN_ROLE,
     BASE_PERMISSION_ASSIGNATION,
     PLATFORM_ADMIN_ROLE,
+    PLATFORM_ROLE_INHERITANCE,
 )
 
 
@@ -156,15 +157,17 @@ def get_permissions_to_register(permissions_tuples, permissions_in_db_keys):
 
 def _role_has_view_access(role, roles_with_access):
     """
-    Whether a role should get access to a view. The platform administrator
-    is a superset of the client administrator: it inherits access to every
-    view the client admin can reach, on top of the platform-only views where
-    it is listed explicitly. This keeps the endpoint declarations simple
-    (they only need to list ADMIN_ROLE) while platform_admin gets everything.
+    Whether a role should get access to a view. Each platform role is a
+    counterpart of a client role (platform_admin/admin, platform_viewer/
+    viewer, platform_planner/planner) and inherits access to every view its
+    client counterpart can reach, on top of the platform-only views where it
+    is listed explicitly. This keeps the endpoint declarations simple (they
+    only need to list the client roles) while the platform roles follow.
     """
     if role in roles_with_access:
         return True
-    if role == PLATFORM_ADMIN_ROLE and ADMIN_ROLE in roles_with_access:
+    client_counterpart = PLATFORM_ROLE_INHERITANCE.get(role)
+    if client_counterpart is not None and client_counterpart in roles_with_access:
         return True
     return False
 
@@ -184,10 +187,21 @@ def get_permissions_in_code_as_tuples(
             if _role_has_view_access(role, view["resource"].ROLES_WITH_ACCESS):
                 permissions_tuples.add((role, action, views_in_db[view["endpoint"]]))
 
-    # Add permissions from extra_permissions
+    # Add permissions from extra_permissions. Each platform role also gets the
+    # extras of its client counterpart, so the pair keeps exactly the same
+    # access — this covers the extras declared by an external application too,
+    # not only cornflow's own.
+    platform_counterparts = {
+        client_role: platform_role
+        for platform_role, client_role in PLATFORM_ROLE_INHERITANCE.items()
+    }
     for role, action, endpoint in extra_permissions:
-        if endpoint in views_in_db:
-            permissions_tuples.add((role, action, views_in_db[endpoint]))
+        if endpoint not in views_in_db:
+            continue
+        permissions_tuples.add((role, action, views_in_db[endpoint]))
+        platform_role = platform_counterparts.get(role)
+        if platform_role is not None:
+            permissions_tuples.add((platform_role, action, views_in_db[endpoint]))
 
     return permissions_tuples
 

@@ -6,7 +6,13 @@ from cornflow.commands import create_user_with_role
 from cornflow.models import UserModel
 from cornflow.shared.audit import audit
 from cornflow.shared.authentication.auth import BIAuth
-from cornflow.shared.const import PLATFORM_ADMIN_ROLE, SERVICE_ROLE, VIEWER_ROLE
+from cornflow.shared.const import (
+    PLATFORM_ADMIN_ROLE,
+    PLATFORM_PLANNER_ROLE,
+    PLATFORM_VIEWER_ROLE,
+    SERVICE_ROLE,
+    VIEWER_ROLE,
+)
 from cornflow.shared.exceptions import (
     ObjectDoesNotExist,
     NoPermission,
@@ -74,6 +80,50 @@ def create_platform_admin_user(username, password, email, verbose):
             password,
             "platform administrator",
             PLATFORM_ADMIN_ROLE,
+            verbose=verbose,
+        )
+
+
+@create.command(
+    name="platform_viewer",
+    help="Create a platform viewer user (internal, same permissions as a "
+    "client viewer)",
+)
+@username
+@password
+@email
+@verbose
+def create_platform_viewer_user(username, password, email, verbose):
+    app = get_app()
+    with app.app_context():
+        create_user_with_role(
+            username,
+            email,
+            password,
+            "platform viewer",
+            PLATFORM_VIEWER_ROLE,
+            verbose=verbose,
+        )
+
+
+@create.command(
+    name="platform_planner",
+    help="Create a platform planner user (internal, same permissions as a "
+    "client planner)",
+)
+@username
+@password
+@email
+@verbose
+def create_platform_planner_user(username, password, email, verbose):
+    app = get_app()
+    with app.app_context():
+        create_user_with_role(
+            username,
+            email,
+            password,
+            "platform planner",
+            PLATFORM_PLANNER_ROLE,
             verbose=verbose,
         )
 

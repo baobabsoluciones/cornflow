@@ -13,7 +13,7 @@ from cornflow.models import UserRoleModel
 from cornflow.schemas.user_role import UserRoleRequest, UserRoleResponse
 from cornflow.shared.audit import audit
 from cornflow.shared.authentication import Auth, authenticate
-from cornflow.shared.const import ADMIN_ROLE, AUTH_LDAP
+from cornflow.shared.const import ADMIN_ROLE, AUTH_LDAP, PLATFORM_ROLES
 from cornflow.shared.exceptions import (
     EndpointNotImplemented,
     NoPermission,
@@ -84,6 +84,21 @@ class UserRoleListEndpoint(BaseMetaResource):
                 err,
                 log_txt=f"Error while user {self.get_user()} tries to create a new role assignment. "
                 + err,
+            )
+
+        # Platform roles are internal: only a platform administrator can
+        # grant them. Without this check a client admin could escalate
+        # themselves (or anyone) into the platform side.
+        if (
+            kwargs.get("role_id") in PLATFORM_ROLES
+            and not self.get_user().is_platform_admin()
+        ):
+            raise NoPermission(
+                error="Only a platform administrator can grant a platform role",
+                log_txt=f"Error while user {self.get_user()} tries to grant "
+                f"platform role {kwargs.get('role_id')} to user "
+                f"{kwargs.get('user_id')}. Only platform administrators can "
+                f"grant platform roles.",
             )
 
         # Check if the assignation is disabled, or it does exist
@@ -168,14 +183,16 @@ class UserRoleDetailEndpoint(BaseMetaResource):
                 log_txt=f"Error while user {self.get_user()} tries to delete a user role assignment. "
                 + err,
             )
-        # A client admin can not strip the admin role from another admin;
-        # only a platform administrator can revoke admin
-        if role_id == ADMIN_ROLE and not self.get_user().is_platform_admin():
+        # A client admin can not strip the admin role from another admin nor
+        # touch the platform roles; only a platform administrator can
+        if (
+            role_id == ADMIN_ROLE or role_id in PLATFORM_ROLES
+        ) and not self.get_user().is_platform_admin():
             raise NoPermission(
-                error="Only a platform administrator can revoke the admin role",
-                log_txt=f"Error while user {self.get_user()} tries to remove the "
-                f"admin role of user {user_id}. Only platform administrators "
-                f"can revoke admin.",
+                error="Only a platform administrator can revoke this role",
+                log_txt=f"Error while user {self.get_user()} tries to remove "
+                f"role {role_id} of user {user_id}. Only platform "
+                f"administrators can revoke admin or platform roles.",
             )
         current_app.logger.info(
             f"User {self.get_user()} deletes user role assignment for user {user_id} and role {role_id}"
