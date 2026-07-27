@@ -3,6 +3,8 @@
 # Import from libraries
 import hashlib
 
+from sqlalchemy.orm import defer
+
 # Imported from internal models
 from cornflow.models.base_data_model import BaseDataModel
 from cornflow.shared import db
@@ -77,6 +79,32 @@ class InstanceModel(BaseDataModel):
                 db.session.add(execution)
 
         super().update(data)
+
+    @classmethod
+    def get_all_objects(cls, *args, **kwargs):
+        """
+        Query to get all instances from a user, deferring the heavy data/checks
+        columns since the list endpoints do not serialize them.
+
+        :return: The objects
+        :rtype: list(:class:`InstanceModel`)
+        """
+        kwargs.setdefault("options", [defer(cls.data), defer(cls.checks)])
+        return super().get_all_objects(*args, **kwargs)
+
+    @classmethod
+    def get_one_object(cls, user=None, idx=None, defer_data=False, **kwargs):
+        """
+        Query to get one instance from the user and the id.
+
+        :param UserModel user: user object performing the query
+        :param str or int idx: ID from the object to get
+        :param bool defer_data: whether to defer loading the heavy data/checks columns
+        :return: The object or None if it does not exist
+        :rtype: :class:`InstanceModel`
+        """
+        options = [defer(cls.data), defer(cls.checks)] if defer_data else None
+        return super().get_one_object(user=user, idx=idx, options=options, **kwargs)
 
     def __repr__(self):
         """
