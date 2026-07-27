@@ -5,6 +5,8 @@ import unittest
 import zipfile
 from unittest.mock import Mock, patch
 
+from openpyxl import load_workbook
+
 from cornflow_client import (
     ApplicationCore,
     CornFlow,
@@ -266,6 +268,23 @@ class TestExperimentExecutionFiles(unittest.TestCase):
         self.assertIn("solution.xlsx", names)
         self.assertIn("checks.xlsx", names)
         self.assertIn("solution_checks.xlsx", names)
+
+    def test_get_zip_file_includes_empty_tables_as_sheets(self):
+        """
+        Validates that empty tables are kept as (empty) sheets in default exports.
+        """
+        experiment = self._experiment(output_files={})
+
+        zip_file, status = experiment._get_zip_file({}, False, {}, False)
+
+        self.assertEqual(EXECUTION_FILES_STATUS_OK, status)
+        with zipfile.ZipFile(zip_file) as zf:
+            with zf.open("solution.xlsx") as solution_file:
+                workbook = load_workbook(io.BytesIO(solution_file.read()))
+        # The solution contains "an_empty_table": [], which must still get a sheet.
+        self.assertIn("an_empty_table", workbook.sheetnames)
+        self.assertEqual(1, workbook["an_empty_table"].max_row)
+        self.assertIsNone(workbook["an_empty_table"].cell(row=1, column=1).value)
 
     def test_get_zip_file_includes_default_kpis_file(self):
         """
@@ -529,6 +548,26 @@ class TestApplicationExecutionFiles(unittest.TestCase):
 
         self.assertIsNone(result[3])
         self.assertEqual(EXECUTION_FILES_STATUS_ERROR, result[4])
+
+
+    def test_validate_and_check_solution_handles_empty_solution(self):
+        """
+        Validates that a schema-valid but empty solution does not raise and reports
+        no solution errors (regression: solution_has_errors was previously unbound).
+        """
+        instance = ExecutionFilesInstance(self.instance_data)
+        # A solution whose schema validates but whose dict is falsy/empty.
+        solution = ExecutionFilesSolution({})
+        algo = ApplicationExecutionFilesSolver(instance, solution)
+
+        final_sol_dict, solution_checks, solution_has_errors, kpis = (
+            self.app._validate_and_check_solution(algo)
+        )
+
+        self.assertEqual({}, final_sol_dict)
+        self.assertFalse(solution_has_errors)
+        self.assertIsNone(solution_checks)
+        self.assertIsNone(kpis)
 
 
 if __name__ == "__main__":
