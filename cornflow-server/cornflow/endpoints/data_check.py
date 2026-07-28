@@ -219,7 +219,9 @@ class DataCheckInstanceEndpoint(BaseMetaResource):
         user = self.get_user()
         context_str = f"instance {idx}"
 
-        instance = InstanceModel.get_one_object(user=self.get_user(), idx=idx)
+        instance = InstanceModel.get_one_object(
+            user=self.get_user(), idx=idx, defer_data=True
+        )
         if instance is None:
             err = "The instance to check does not exist"
             raise ObjectDoesNotExist(

@@ -29,7 +29,7 @@ class DefaultConfig(object):
     AUTH_TYPE = int(os.getenv("AUTH_TYPE", AUTH_DB))
     DEFAULT_ROLE = int(os.getenv("DEFAULT_ROLE", PLANNER_ROLE))
     CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*")
-    SQLALCHEMY_TRACK_MODIFICATIONS = True
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
     DEBUG = True
     TESTING = True
     LOG_LEVEL = int(os.getenv("LOG_LEVEL", 20))
