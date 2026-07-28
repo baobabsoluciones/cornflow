@@ -57,7 +57,7 @@ class DefaultConfig(object):
     )
 
     # Open deployment (all dags accessible to all users)
-    OPEN_DEPLOYMENT = os.getenv("OPEN_DEPLOYMENT", 1)
+    OPEN_DEPLOYMENT = os.getenv("OPEN_DEPLOYMENT", 0)
 
     # Planner users can access objects of other users (1) or not(0).
     USER_ACCESS_ALL_OBJECTS = os.getenv(
