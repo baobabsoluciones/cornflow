@@ -273,7 +273,7 @@ def register_dag_permissions_command(
             if (dag.id, user.id) not in existing_permissions and user.is_service_user()
         ]
 
-    if len(permissions) > 1:
+    if len(permissions) >= 1:
         db.session.bulk_save_objects(permissions)
 
     try:
@@ -300,7 +300,7 @@ def register_dag_permissions_command(
 
     if verbose:
         click.echo(f"Workflow permissions registered")
-        if len(permissions) > 1:
+        if len(permissions) >= 1:
             current_app.logger.info(
                 f"Workflow permissions registered: {len(permissions)}"
             )
