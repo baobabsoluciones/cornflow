@@ -150,6 +150,18 @@ class ExecutionDetailsWithIndicatorsAndLogResponse(
 ):
     log = fields.Nested(BasicLogSchema, attribute="log_json")
 
+    class Meta:
+        # Exclude 'indicators' from the list endpoint schema: data is deferred in
+        # get_all_objects, so accessing obj.data here would trigger N+1 lazy loads.
+        exclude = ("indicators",)
+
+
+class ExecutionDetailsEndpointNoDataResponse(ExecutionDetailsEndpointWithIndicatorsResponse):
+    class Meta:
+        # Exclude 'indicators': data/log_text/log_json are deferred in get_one_object,
+        # so accessing obj.data here would trigger an extra load of those columns.
+        exclude = ("indicators",)
+
 
 class ExecutionStatusEndpointResponse(Schema):
     id = fields.Str()
