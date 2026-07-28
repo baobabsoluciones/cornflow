@@ -8,6 +8,7 @@ These endpoints hve different access url, but manage the same data entities
 from datetime import datetime, timedelta, timezone
 from flask import request, current_app, make_response, send_file
 from flask_apispec import marshal_with, use_kwargs, doc
+from sqlalchemy import cast
 
 import os
 import time
@@ -20,6 +21,7 @@ from cornflow_client.constants import INSTANCE_SCHEMA, CONFIG_SCHEMA, SOLUTION_S
 
 # Import from internal modules
 from cornflow.endpoints.meta_resource import BaseMetaResource
+from cornflow.endpoints.raw_json import raw_json_object_response, restrict_to_owner
 from cornflow.models import InstanceModel, DeployedWorkflow, ExecutionModel
 from cornflow.schemas.execution import (
     ExecutionDetailsEndpointResponse,
@@ -36,6 +38,8 @@ from cornflow.schemas.execution import (
     ExecutionDetailsWithIndicatorsAndLogResponse,
     ExecutionFilesPostRequest,
 )
+from cornflow.schemas.solution_log import BasicLogSchema
+from cornflow.shared import db
 from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.compress import compressed
 from cornflow.shared.const import (
@@ -721,7 +725,10 @@ class ExecutionStatusEndpoint(OrchestratorMixin):
 
 class ExecutionDataEndpoint(ExecutionDetailsEndpointBase):
     """
-    Endpoint used to get the solution of a certain execution.
+    DEPRECATED: superseded by :class:`ExecutionDataEndpointRaw`, which is
+    now routed at this endpoint's former URL. Not routed anymore -- kept
+    only for the benchmark scripts in ``cornflow.tests.load`` that compare
+    it against the optimized variant.
     """
 
     @doc(
@@ -743,6 +750,108 @@ class ExecutionDataEndpoint(ExecutionDetailsEndpointBase):
         """
         current_app.logger.info(f"User {self.get_user()} gets data of execution {idx}")
         return self.get_detail(user=self.get_user(), idx=idx)
+
+
+class ExecutionDataEndpointRaw(ExecutionDataEndpoint):
+    """
+    Raw-JSON-passthrough variant of :class:`ExecutionDataEndpoint`'s GET,
+    now routed at ``/execution/<idx>/data/`` in place of it.
+
+    ``data``, ``checks`` and ``kpis`` are returned completely verbatim, so
+    this variant casts them to text at the SQL layer -- skipping the
+    normal JSON decode -- and splices that already-valid JSON text
+    directly into a hand-built response body via
+    :func:`raw_json_object_response`.
+
+    ``log`` is derived from ``log_json`` by filtering it down to a handful
+    of known keys (see `BasicLogSchema`), so it must stay decoded -- there
+    is nothing to skip there. ``log_text`` isn't part of this endpoint's
+    response at all, so it is never even selected.
+    """
+
+    @doc(
+        description="Get solution data of an execution (raw JSON passthrough)",
+        tags=["Executions"],
+        inherit=False,
+    )
+    @authenticate(auth_class=Auth())
+    @compressed
+    def get(self, idx):
+        """
+        Same response contract as :meth:`ExecutionDataEndpoint.get`.
+
+        :param str idx: ID of the execution.
+        :return: the execution data (body) and an integer HTTP status code
+        :rtype: `flask.Response`
+        """
+        query = db.session.query(
+            ExecutionModel.id,
+            ExecutionModel.name,
+            ExecutionModel.description,
+            ExecutionModel.created_at,
+            ExecutionModel.user_id,
+            ExecutionModel.data_hash,
+            ExecutionModel.schema,
+            ExecutionModel.config,
+            ExecutionModel.instance_id,
+            ExecutionModel.state,
+            ExecutionModel.state_message,
+            ExecutionModel.log_json,
+            cast(ExecutionModel.data, db.Text),
+            cast(ExecutionModel.checks, db.Text),
+            cast(ExecutionModel.kpis, db.Text),
+        ).filter(
+            ExecutionModel.id == idx,
+            ExecutionModel.deleted_at.is_(None),
+        )
+        query = restrict_to_owner(query, ExecutionModel, self.get_user())
+        row = query.first()
+        if row is None:
+            raise ObjectDoesNotExist()
+        (
+            execution_id,
+            name,
+            description,
+            created_at,
+            user_id,
+            data_hash,
+            schema,
+            config,
+            instance_id,
+            state,
+            state_message,
+            log_json,
+            data_raw,
+            checks_raw,
+            kpis_raw,
+        ) = row
+        current_app.logger.info(f"User {self.get_user()} gets data of execution {idx}")
+        small_fields = ExecutionDataEndpointResponse(
+            exclude=("data", "checks", "kpis")
+        ).dump(
+            dict(
+                id=execution_id,
+                name=name,
+                description=description,
+                created_at=created_at,
+                user_id=user_id,
+                data_hash=data_hash,
+                schema=schema,
+                config=config,
+                instance_id=instance_id,
+                state=state,
+                state_message=state_message,
+                log_json=log_json,
+            )
+        )
+        return raw_json_object_response(
+            [(key, value, False) for key, value in small_fields.items()]
+            + [
+                ("data", data_raw, True),
+                ("checks", checks_raw, True),
+                ("kpis", kpis_raw, True),
+            ]
+        )
 
 
 class ExecutionLogEndpoint(ExecutionDetailsEndpointBase):

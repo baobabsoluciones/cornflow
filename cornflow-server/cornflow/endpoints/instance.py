@@ -12,10 +12,12 @@ from flask_inflate import inflate
 from marshmallow.exceptions import ValidationError
 import os
 import pulp
+from sqlalchemy import cast
 from werkzeug.utils import secure_filename
 
 # Import from internal modules
 from cornflow.endpoints.meta_resource import BaseMetaResource
+from cornflow.endpoints.raw_json import raw_json_object_response, restrict_to_owner
 from cornflow.models import InstanceModel, DeployedWorkflow
 from cornflow.schemas.instance import (
     InstanceSchema,
@@ -28,9 +30,10 @@ from cornflow.schemas.instance import (
     QueryFiltersInstance,
 )
 
+from cornflow.shared import db
 from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.compress import compressed
-from cornflow.shared.exceptions import InvalidUsage, InvalidData
+from cornflow.shared.exceptions import InvalidUsage, InvalidData, ObjectDoesNotExist
 from cornflow.shared.validators import json_schema_validate_as_string
 
 
@@ -206,7 +209,10 @@ class InstanceDetailsEndpoint(InstanceDetailsEndpointBase):
 
 class InstanceDataEndpoint(InstanceDetailsEndpointBase):
     """
-    Endpoint used to get the information o fa single instance, edit it or delete it
+    DEPRECATED: superseded by :class:`InstanceDataEndpointRaw`, which is
+    now routed at this endpoint's former URL. Not routed anymore -- kept
+    only for the benchmark scripts in ``cornflow.tests.load`` that compare
+    it against the optimized variant.
     """
 
     def __init__(self):
@@ -234,6 +240,84 @@ class InstanceDataEndpoint(InstanceDetailsEndpointBase):
             f"User {self.get_user()} gets the data of instance {idx}"
         )
         return response
+
+
+class InstanceDataEndpointRaw(InstanceDataEndpoint):
+    """
+    Raw-JSON-passthrough variant of :class:`InstanceDataEndpoint`'s GET,
+    now routed at ``/instance/<idx>/data/`` in place of it.
+
+    ``data`` and ``checks`` are returned completely verbatim, so this
+    variant casts them to text at the SQL layer -- skipping the normal
+    JSON decode -- and splices that already-valid JSON text directly
+    into a hand-built response body via :func:`raw_json_object_response`.
+    """
+
+    @doc(
+        description="Get input data of an instance (raw JSON passthrough)",
+        tags=["Instances"],
+        inherit=False,
+    )
+    @authenticate(auth_class=Auth())
+    @compressed
+    def get(self, idx):
+        """
+        Same response contract as :meth:`InstanceDataEndpoint.get`.
+
+        :param str idx: ID of the instance
+        :return: the instance data (body) and an integer HTTP status code
+        :rtype: `flask.Response`
+        """
+        query = db.session.query(
+            InstanceModel.id,
+            InstanceModel.name,
+            InstanceModel.description,
+            InstanceModel.created_at,
+            InstanceModel.user_id,
+            InstanceModel.data_hash,
+            InstanceModel.schema,
+            cast(InstanceModel.data, db.Text),
+            cast(InstanceModel.checks, db.Text),
+        ).filter(
+            InstanceModel.id == idx,
+            InstanceModel.deleted_at.is_(None),
+        )
+        query = restrict_to_owner(query, InstanceModel, self.get_user())
+        row = query.first()
+        if row is None:
+            raise ObjectDoesNotExist()
+        (
+            instance_id,
+            name,
+            description,
+            created_at,
+            user_id,
+            data_hash,
+            schema,
+            data_raw,
+            checks_raw,
+        ) = row
+        current_app.logger.info(
+            f"User {self.get_user()} gets the data of instance {idx}"
+        )
+        small_fields = InstanceEndpointResponse().dump(
+            dict(
+                id=instance_id,
+                name=name,
+                description=description,
+                created_at=created_at,
+                user_id=user_id,
+                data_hash=data_hash,
+                schema=schema,
+            )
+        )
+        return raw_json_object_response(
+            [(key, value, False) for key, value in small_fields.items()]
+            + [
+                ("data", data_raw, True),
+                ("checks", checks_raw, True),
+            ]
+        )
 
 
 class InstanceFileEndpoint(BaseMetaResource):

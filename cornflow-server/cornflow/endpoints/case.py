@@ -5,16 +5,22 @@ These endpoints have different access url, but manage the same data entities
 """
 
 # Import from libraries
+import json
+from types import SimpleNamespace
+
 from cornflow_client.constants import INSTANCE_SCHEMA, SOLUTION_SCHEMA
 from flask import current_app
 from flask_apispec import marshal_with, use_kwargs, doc
 from flask_inflate import inflate
 import jsonpatch
+from sqlalchemy import cast
 
 
 # Import from internal modules
 from cornflow.endpoints.meta_resource import BaseMetaResource
+from cornflow.endpoints.raw_json import raw_json_object_response, restrict_to_owner
 from cornflow.models import CaseModel, ExecutionModel, DeployedWorkflow, InstanceModel
+from cornflow.shared import db
 from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.compress import compressed
 from cornflow.shared.const import VIEWER_ROLE, PLANNER_ROLE, ADMIN_ROLE
@@ -313,7 +319,12 @@ class CaseDetailsEndpoint(BaseMetaResource):
 
 class CaseDataEndpoint(CaseDetailsEndpoint):
     """
-    Endpoint used to get the data of a given case
+    DEPRECATED: superseded by :class:`CaseDataEndpointRaw`, which is now
+    routed at this endpoint's former URL. Not routed anymore -- kept
+    around because :class:`CaseDataEndpointRaw` inherits its ``put``,
+    ``delete`` and ``patch`` from here (via :class:`CaseDetailsEndpoint`
+    and this class respectively), and for the benchmark scripts in
+    ``cornflow.tests.load`` that compare it against the optimized variant.
     """
 
     ROLES_WITH_ACCESS = [VIEWER_ROLE, PLANNER_ROLE, ADMIN_ROLE]
@@ -346,6 +357,114 @@ class CaseDataEndpoint(CaseDetailsEndpoint):
         response = self.patch_detail(data=kwargs, idx=idx, user=self.get_user())
         current_app.logger.info(f"User {self.get_user()} patches case {idx}")
         return response
+
+
+class CaseDataEndpointRaw(CaseDataEndpoint):
+    """
+    Raw-JSON-passthrough variant of :class:`CaseDataEndpoint`'s GET, now
+    routed at ``/case/<idx>/data/`` in place of it. Inherits ``put``,
+    ``delete`` and ``patch`` unchanged from :class:`CaseDataEndpoint`.
+
+    ``data``, ``checks``, ``solution_checks`` and ``kpis`` are returned
+    completely verbatim, so those are cast to text at the SQL layer and
+    spliced straight into the response, skipping decode+re-encode of them
+    entirely.
+
+    ``solution`` still needs to be decoded once, since ``indicators`` is
+    derived from ``solution["indicators"]`` -- but the already-fetched raw
+    text is spliced back in for the ``solution`` field itself rather than
+    re-serializing the decoded dict, so the re-encode half of the round
+    trip is still skipped.
+    """
+
+    ROLES_WITH_ACCESS = [VIEWER_ROLE, PLANNER_ROLE, ADMIN_ROLE]
+
+    @doc(
+        description="Get data of a case (raw JSON passthrough)",
+        tags=["Cases"],
+        inherit=False,
+    )
+    @authenticate(auth_class=Auth())
+    @compressed
+    def get(self, idx):
+        """
+        Same response contract as :meth:`CaseDataEndpoint.get`.
+
+        :param int idx: ID of the case
+        :return: the case data (body) and an integer HTTP status code
+        :rtype: `flask.Response`
+        """
+        query = db.session.query(
+            CaseModel.id,
+            CaseModel.name,
+            CaseModel.description,
+            CaseModel.created_at,
+            CaseModel.updated_at,
+            CaseModel.user_id,
+            CaseModel.data_hash,
+            CaseModel.schema,
+            CaseModel.path,
+            CaseModel.solution_hash,
+            cast(CaseModel.data, db.Text),
+            cast(CaseModel.checks, db.Text),
+            cast(CaseModel.solution, db.Text),
+            cast(CaseModel.solution_checks, db.Text),
+            cast(CaseModel.kpis, db.Text),
+        ).filter(CaseModel.id == idx, CaseModel.deleted_at.is_(None))
+        query = restrict_to_owner(query, CaseModel, self.get_user())
+        row = query.first()
+        if row is None:
+            raise ObjectDoesNotExist()
+        (
+            case_id,
+            name,
+            description,
+            created_at,
+            updated_at,
+            user_id,
+            data_hash,
+            schema,
+            path,
+            solution_hash,
+            data_raw,
+            checks_raw,
+            solution_raw,
+            solution_checks_raw,
+            kpis_raw,
+        ) = row
+
+        solution_decoded = (
+            json.loads(solution_raw) if solution_raw is not None else None
+        )
+        current_app.logger.info(f"User {self.get_user()} gets case {idx}")
+        small_fields = CaseListAllWithIndicators().dump(
+            SimpleNamespace(
+                id=case_id,
+                name=name,
+                description=description,
+                created_at=created_at,
+                updated_at=updated_at,
+                user_id=user_id,
+                data_hash=data_hash,
+                schema=schema,
+                path=path,
+                solution_hash=solution_hash,
+                # only used by is_dir's `obj.data is None` check
+                data=data_raw,
+                # used by indicators' `obj.solution[...]` access
+                solution=solution_decoded,
+            )
+        )
+        return raw_json_object_response(
+            [(key, value, False) for key, value in small_fields.items()]
+            + [
+                ("data", data_raw, True),
+                ("checks", checks_raw, True),
+                ("solution", solution_raw, True),
+                ("solution_checks", solution_checks_raw, True),
+                ("kpis", kpis_raw, True),
+            ]
+        )
 
 
 class CaseToInstance(BaseMetaResource):
