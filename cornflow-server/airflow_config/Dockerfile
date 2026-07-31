@@ -1,6 +1,6 @@
-# AIRFLOW VERSION 2.9.1
+#AIRFLOW VERSION 3.2.2
 # AUTHOR: cornflow@baobabsoluciones.es
-# DESCRIPTION: Airflow 2.9.1 image personalized for use with Cornflow (from baobabsoluciones/pysolver image)
+# DESCRIPTION: Airflow 3.2.2 image personalized for use with Cornflow (from baobabsoluciones/pysolver image)
 # baobab code version is 1.3.8rc3
 
 FROM baobabsoluciones/pysolver:1.1
@@ -11,16 +11,18 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV TERM=linux
 
 # Airflow vars
-ARG AIRFLOW_VERSION=2.9.1
+ARG AIRFLOW_VERSION=3.2.2
 ARG AIRFLOW_USER_HOME=/usr/local/airflow
 ARG CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-3.10.txt"
 ARG AIRFLOW__CORE__LOAD_EXAMPLES=False
 ENV AIRFLOW_HOME=${AIRFLOW_USER_HOME}
 
-# install Airflow and extras: celery,postgres and redis
-RUN pip install "apache-airflow[amazon,celery,google,postgres,redis,sendgrid]==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
+# install Airflow and extras: celery, postgres, redis and fab (FabAuthManager + LDAP webserver
+# config + `airflow users create` CLI moved out of core into apache-airflow-providers-fab in
+# Airflow 3, see helm-charts/cornflow/values.yaml airflow.env AIRFLOW__CORE__AUTH_MANAGER)
+RUN pip install "apache-airflow[amazon,celery,fab,google,postgres,redis,sendgrid]==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
 # We add these overruns due to security reasons as suggested here: https://airflow.apache.org/docs/apache-airflow/stable/installation/installing-from-pypi.html#upgrading-and-installing-dependencies-including-providers
-RUN pip install "apache-airflow[amazon,celery,google,postgres,redis,sendgrid]==${AIRFLOW_VERSION}" "cryptography==48.0.1" "requests==2.31.0" "Werkzeug==2.3.8" "click==8.1.7"
+RUN pip install "apache-airflow[amazon,celery,fab,google,postgres,redis,sendgrid]==${AIRFLOW_VERSION}" "cryptography==48.0.1" "requests==2.31.0" "Werkzeug==2.3.8" "click==8.1.7"
 
 # copy init script and config to container
 COPY scripts ${AIRFLOW_HOME}/scripts
