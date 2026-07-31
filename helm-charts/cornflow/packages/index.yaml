@@ -1,0 +1,214 @@
+apiVersion: v1
+entries:
+  cornflow:
+  - annotations:
+      category: Application
+      licenses: Apache-2.0
+      repository: https://storage.googleapis.com/cornflow-public-artifacts/
+      support: https://github.com/baobabsoluciones/cornflow/issues
+    apiVersion: v2
+    appVersion: 1.3.6
+    created: "2026-07-07T10:20:51.34775291+02:00"
+    dependencies:
+    - condition: airflow.enabled
+      name: airflow
+      repository: https://airflow.apache.org
+      version: ~1.16.0
+    description: A Helm chart for Cornflow - Open source optimization platform
+    digest: f68fc4e842efff5e2e6f185878009e8870e5cdd659a22153848abc1e30d83876
+    home: https://github.com/baobabsoluciones/cornflow
+    icon: https://avatars.githubusercontent.com/u/57220975?s=48&v=4
+    keywords:
+    - optimization
+    - operations-research
+    - decision-ops
+    - workflow
+    - kubernetes
+    - helm
+    maintainers:
+    - email: cornflow@baobabsoluciones.es
+      name: Baobab Soluciones
+      url: https://baobabsoluciones.es
+    name: cornflow
+    sources:
+    - https://github.com/baobabsoluciones/cornflow
+    type: application
+    urls:
+    - https://storage.googleapis.com/cornflow-public-artifacts/cornflow-1.3.6.tgz
+    version: 1.3.6
+  - annotations:
+      category: Application
+      licenses: Apache-2.0
+      repository: https://storage.googleapis.com/cornflow-public-artifacts/
+      support: https://github.com/baobabsoluciones/cornflow/issues
+    apiVersion: v2
+    appVersion: 1.3.6
+    created: "2026-07-10T16:04:02.134577402+02:00"
+    dependencies:
+    - condition: airflow.enabled
+      name: airflow
+      repository: https://airflow.apache.org
+      version: ~1.22.0
+    description: A Helm chart for Cornflow - Open source optimization platform
+    digest: 89318a242f29861202006f7aa688c0f19e1984abec24b62c72d9f29946a81e83
+    home: https://github.com/baobabsoluciones/cornflow
+    icon: https://avatars.githubusercontent.com/u/57220975?s=48&v=4
+    keywords:
+    - optimization
+    - operations-research
+    - decision-ops
+    - workflow
+    - kubernetes
+    - helm
+    maintainers:
+    - email: cornflow@baobabsoluciones.es
+      name: Baobab Soluciones
+      url: https://baobabsoluciones.es
+    name: cornflow
+    sources:
+    - https://github.com/baobabsoluciones/cornflow
+    type: application
+    urls:
+    - https://storage.googleapis.com/cornflow-public-artifacts/cornflow-1.3.6-rc.tgz
+    version: 1.3.6-rc
+  - annotations:
+      category: Application
+      licenses: Apache-2.0
+      repository: https://storage.googleapis.com/cornflow-public-artifacts/
+      support: https://github.com/baobabsoluciones/cornflow/issues
+    apiVersion: v2
+    appVersion: 1.3.5
+    created: "2026-06-10T11:00:32.396342054+02:00"
+    dependencies:
+    - condition: airflow.enabled
+      name: airflow
+      repository: https://airflow.apache.org
+      version: ~1.16.0
+    description: A Helm chart for Cornflow - Open source optimization platform
+    digest: 53e84d2d2ba90e6819fff7c6441353383e787f18a0e2602ef3ef4074a07317ea
+    home: https://github.com/baobabsoluciones/cornflow
+    icon: https://avatars.githubusercontent.com/u/57220975?s=48&v=4
+    keywords:
+    - optimization
+    - operations-research
+    - decision-ops
+    - workflow
+    - kubernetes
+    - helm
+    maintainers:
+    - email: cornflow@baobabsoluciones.es
+      name: Baobab Soluciones
+      url: https://baobabsoluciones.es
+    name: cornflow
+    sources:
+    - https://github.com/baobabsoluciones/cornflow
+    type: application
+    urls:
+    - https://storage.googleapis.com/cornflow-public-artifacts/cornflow-1.3.5.tgz
+    version: 1.3.5
+  - annotations:
+      category: Application
+      licenses: Apache-2.0
+      repository: https://storage.googleapis.com/cornflow-public-artifacts/
+      support: https://github.com/baobabsoluciones/cornflow/issues
+    apiVersion: v2
+    appVersion: 1.3.4
+    created: "2026-06-10T11:00:32.372268467+02:00"
+    dependencies:
+    - condition: airflow.enabled
+      name: airflow
+      repository: https://airflow.apache.org
+      version: ~1.16.0
+    description: A Helm chart for Cornflow - Open source optimization platform
+    digest: 2c2b3c3bac7ebdd460e73a702a49e5edb816f3a9ec3cffb01786c2e1d1fbd8b5
+    home: https://github.com/baobabsoluciones/cornflow
+    icon: https://avatars.githubusercontent.com/u/57220975?s=48&v=4
+    keywords:
+    - optimization
+    - operations-research
+    - decision-ops
+    - workflow
+    - kubernetes
+    - helm
+    maintainers:
+    - email: cornflow@baobabsoluciones.es
+      name: Baobab Soluciones
+      url: https://baobabsoluciones.es
+    name: cornflow
+    sources:
+    - https://github.com/baobabsoluciones/cornflow
+    type: application
+    urls:
+    - https://storage.googleapis.com/cornflow-public-artifacts/cornflow-1.3.4.tgz
+    version: 1.3.4
+  - annotations:
+      category: Application
+      licenses: Apache-2.0
+      repository: https://storage.googleapis.com/cornflow-public-artifacts/
+      support: https://github.com/baobabsoluciones/cornflow/issues
+    apiVersion: v2
+    appVersion: 1.3.3
+    created: "2026-06-10T11:00:32.346258302+02:00"
+    dependencies:
+    - condition: airflow.enabled
+      name: airflow
+      repository: https://airflow.apache.org
+      version: ~1.16.0
+    description: A Helm chart for Cornflow - Open source optimization platform
+    digest: d3fa2c16e29c52ed7cbbb7bccb26a6742e497c7809472da585cf8ffb95e8056f
+    home: https://github.com/baobabsoluciones/cornflow
+    icon: https://avatars.githubusercontent.com/u/57220975?s=48&v=4
+    keywords:
+    - optimization
+    - operations-research
+    - decision-ops
+    - workflow
+    - kubernetes
+    - helm
+    maintainers:
+    - email: cornflow@baobabsoluciones.es
+      name: Baobab Soluciones
+      url: https://baobabsoluciones.es
+    name: cornflow
+    sources:
+    - https://github.com/baobabsoluciones/cornflow
+    type: application
+    urls:
+    - https://storage.googleapis.com/cornflow-public-artifacts/cornflow-1.3.3.tgz
+    version: 1.3.3
+  - annotations:
+      category: Application
+      licenses: Apache-2.0
+      repository: https://storage.googleapis.com/cornflow-public-artifacts/
+      support: https://github.com/baobabsoluciones/cornflow/issues
+    apiVersion: v2
+    appVersion: 1.2.4
+    created: "2026-06-10T11:00:32.317122052+02:00"
+    dependencies:
+    - condition: airflow.enabled
+      name: airflow
+      repository: https://airflow.apache.org
+      version: ~1.16.0
+    description: A Helm chart for Cornflow - Open source optimization platform
+    digest: defbc5f3cd8a956b31f4bf1cfc6b8d5968cee331085be33c80dae2df9004146e
+    home: https://github.com/baobabsoluciones/cornflow
+    icon: https://avatars.githubusercontent.com/u/57220975?s=48&v=4
+    keywords:
+    - optimization
+    - operations-research
+    - decision-ops
+    - workflow
+    - kubernetes
+    - helm
+    maintainers:
+    - email: cornflow@baobabsoluciones.es
+      name: Baobab Soluciones
+      url: https://baobabsoluciones.es
+    name: cornflow
+    sources:
+    - https://github.com/baobabsoluciones/cornflow
+    type: application
+    urls:
+    - https://storage.googleapis.com/cornflow-public-artifacts/cornflow-1.2.4.tgz
+    version: 1.2.4
+generated: "2026-07-10T16:04:02.121174761+02:00"

@@ -29,7 +29,7 @@ version: "3.8"
 x-airflow-common: &airflow-common
   # In order to add custom dependencies or upgrade provider packages you can use your extended image.
   # Comment the image line and uncomment the "build" and "context" lines below, Then run `docker-compose build` to build the images.
-  image: baobabsoluciones/airflow:release-v1.3.7rc1
+  image: baobabsoluciones/airflow:release-v1.3.8rc3
   platform: linux/amd64
   #build:
   #context: ./cornflow-server/airflow_config
@@ -41,8 +41,14 @@ x-airflow-common: &airflow-common
     AIRFLOW_DB_USER: airflow
     AIRFLOW_DB_PASSWORD: airflow
     AIRFLOW_DB: airflow
-    AIRFLOW__WEBSERVER__INSTANCE_NAME: CornflowEnv
-    AIRFLOW__WEBSERVER__NAVBAR_COLOR: "#0693e3"
+    # Airflow 3 moved instance_name from [webserver] to [api]; navbar_color has no equivalent
+    # in the new React-based UI and was dropped.
+    AIRFLOW__API__INSTANCE_NAME: CornflowEnv
+    # Airflow 3: AUTH_BACKENDS (plural) replaces AUTH_BACKEND (singular)
+    AIRFLOW__API__AUTH_BACKENDS: airflow.api.auth.backend.basic_auth
+    # Airflow 3: the auth manager is now explicit (FAB moved out of core into
+    # apache-airflow-providers-fab); it's what backs `airflow users create` and LDAP below
+    AIRFLOW__CORE__AUTH_MANAGER: airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
   volumes:
     - ./cornflow-dags/DAG:/usr/local/airflow/dags
     - ./cornflow-dags/requirements.txt:/requirements.txt
@@ -56,7 +62,7 @@ x-airflow-common: &airflow-common
 x-cornflow-common: &cornflow-common
   # In order to add custom dependencies or upgrade provider packages you can use your extended image.
   # Comment the image line and uncomment the "build" and "context" lines below, Then run `docker-compose build` to build the images.
-  image: baobabsoluciones/cornflow:release-v1.3.7rc1
+  image: baobabsoluciones/cornflow:release-v1.3.8rc3
   platform: linux/amd64
   #build:
   #context: ./cornflow-server
@@ -127,7 +133,10 @@ services:
     ports:
       - 8080:8080
     healthcheck:
-      test: ["CMD-SHELL", "[ -f /usr/local/airflow/airflow-webserver.pid ]"]
+      # Airflow 3's webserver process is now `airflow api-server`; check its health endpoint
+      # instead of a pid file (the pid file it writes is no longer guaranteed to be named
+      # airflow-webserver.pid).
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:8080/api/v2/monitor/health"]
       interval: 30s
       timeout: 30s
       retries: 5
