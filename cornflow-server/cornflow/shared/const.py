@@ -7,7 +7,7 @@ AIRFLOW_BACKEND = 1
 DATABRICKS_BACKEND = 2
 
 
-CORNFLOW_VERSION = "1.3.7rc1"
+CORNFLOW_VERSION = "1.3.9rc1"
 INTERNAL_TOKEN_ISSUER = "cornflow"
 
 # ---------------------------------------------------------------------------
