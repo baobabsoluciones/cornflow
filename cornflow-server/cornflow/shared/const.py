@@ -7,8 +7,110 @@ AIRFLOW_BACKEND = 1
 DATABRICKS_BACKEND = 2
 
 
-CORNFLOW_VERSION = "1.3.7rc1"
+CORNFLOW_VERSION = "1.3.9rc1"
 INTERNAL_TOKEN_ISSUER = "cornflow"
+
+# ---------------------------------------------------------------------------
+# Password policy (CCN-STIC-807)
+# ---------------------------------------------------------------------------
+# These are the single source of truth for the policy defaults. config.py
+# reads the environment using them as fallbacks (and clamps them to their
+# security floor/ceiling); validators.py uses them when there is no
+# application context (e.g. some CLI usages).
+DEFAULT_PWD_MIN_LENGTH = 12
+DEFAULT_PWD_MIN_ZXCVBN_SCORE = 3
+DEFAULT_PWD_HISTORY_SIZE = 10
+DEFAULT_PWD_MAX_SIMILARITY = 0.8
+DEFAULT_PWD_ROTATION_TIME = 120
+
+# Personal data (username, names, email local part) shorter than this is not
+# searched for inside the password, to avoid false positives with very short
+# names.
+MIN_PERSONAL_TOKEN_LENGTH = 3
+
+# A password can not contain a run of this many consecutive digits or more
+# (blocks dates, phone numbers...).
+PWD_FORBIDDEN_DIGIT_SEQUENCE_LENGTH = 6
+
+# Characters accepted as "special" for the password policy and used by the
+# random password generator.
+PASSWORD_SPECIAL_CHARACTERS = "!¡?¿#$%&'()*+-_./:;,<>=@[]^`{}|~\"\\"
+
+# Pattern used to validate email addresses. Bounded to avoid catastrophic
+# backtracking.
+EMAIL_PATTERN = r"\b[A-Za-z0-9._-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
+
+# Purpose claims used on temporary restricted tokens. Tokens carrying a
+# purpose claim are only accepted by the endpoints mapped below:
+# - mfa_setup: issued during login when a user still has to enroll in
+#   two-factor authentication
+# - pwd_reset: carried inside the password reset link sent by email
+TOKEN_PURPOSE_MFA_SETUP = "mfa_setup"
+TOKEN_PURPOSE_PWD_RESET = "pwd_reset"
+
+# Endpoint names (as registered on the api) each purpose token can access
+TOKEN_PURPOSE_ALLOWED_ENDPOINTS = {
+    TOKEN_PURPOSE_MFA_SETUP: ["mfa-setup", "mfa-verify"],
+    TOKEN_PURPOSE_PWD_RESET: ["reset-password"],
+}
+
+# Personal API key: a long-lived bearer token, alternative to the session
+# JWT, minted behind full authentication (password + TOTP). Its tokens carry
+# this type claim and an api-key version that is bumped to revoke previous
+# keys (one active key per user).
+TOKEN_TYPE_API_KEY = "api_key"
+
+# Scope of a personal API key, carried in its "scp" claim:
+# - full: every endpoint the user can reach (minus the forbidden ones below)
+# - read: read-only, the key is refused on any request that is not a safe
+#   method. Meant for reporting / BI consumers.
+API_KEY_SCOPE_FULL = "full"
+API_KEY_SCOPE_READ = "read"
+API_KEY_SCOPES = [API_KEY_SCOPE_FULL, API_KEY_SCOPE_READ]
+
+# HTTP methods a read-only credential may use
+READ_ONLY_HTTP_METHODS = ["GET", "HEAD", "OPTIONS"]
+
+# Interactive session tokens are split in two (ENS op.acc — session
+# management): a short-lived ACCESS token sent on every request, and a
+# longer-lived REFRESH token used only against the refresh endpoint to obtain
+# a new access token. The refresh token is rejected on every normal endpoint.
+TOKEN_TYPE_ACCESS = "access"
+TOKEN_TYPE_REFRESH = "refresh"
+
+# Security-sensitive endpoints (name -> methods) that an API key can NOT
+# reach: a leaked key must not be able to change the password, manage MFA,
+# mint or revoke API keys, or touch user/role administration. It is meant
+# for data and automation access, not account/security self-management.
+API_KEY_FORBIDDEN_ENDPOINTS = {
+    "user-api-key": ["POST", "DELETE"],
+    "mfa-setup": ["POST"],
+    "mfa-verify": ["POST"],
+    "user-mfa": ["DELETE"],
+    "reset-password": ["PUT"],
+    "user-detail": ["PUT", "DELETE"],
+    "user-admin": ["PUT"],
+    "user-unlock": ["PUT"],
+    "signup": ["POST"],
+    "roles": ["POST"],
+    "roles-detail": ["PUT", "DELETE"],
+    "permissions": ["POST"],
+    "permission-detail": ["PUT", "DELETE"],
+    "user-roles": ["POST"],
+    "user-roles-detail": ["DELETE"],
+}
+
+# Endpoints (name -> allowed methods) that stay reachable when the user's
+# password has expired and password rotation is enforced: the user can check
+# their token, review their own profile (and roles, needed by the web client
+# to render the settings screen) and change their password.
+PWD_ROTATION_ALLOWED_ENDPOINTS = {
+    "user-detail": ["GET", "PUT"],
+    "token": ["GET"],
+    "user-roles": ["GET"],
+    "login": ["POST"],
+    "signup": ["POST"],
+}
 
 # endpoints responses for health check
 STATUS_HEALTHY = "healthy"
@@ -102,10 +204,61 @@ ALL_DEFAULT_ACTIONS = [GET_ACTION, PATCH_ACTION, POST_ACTION, PUT_ACTION, DELETE
 DUMMY_ROLE = 0
 VIEWER_ROLE = 1
 PLANNER_ROLE = 2
+# The admin role is meant for client administrators (they manage the users
+# and data of their own deployment)
 ADMIN_ROLE = 3
+# The service role is reserved for machine-to-machine service accounts
 SERVICE_ROLE = 4
+# Role id ranges:
+#   0-4      core client roles (above)
+#   5-899    free for the custom roles of external applications
+#   900-999  RESERVED for the cornflow platform roles (below)
+# The platform roles live in a reserved block so they can never collide with
+# the custom roles an external application has already registered (those
+# conventionally start right after the core roles). Each platform role is its
+# client counterpart + PLATFORM_ROLE_OFFSET, which keeps the pairs readable
+# (planner 2 -> platform planner 902). Registration refuses to start when a
+# custom role trespasses on the range, see check_reserved_role_ids.
+PLATFORM_ROLE_OFFSET = 900
+RESERVED_ROLE_RANGE = (900, 999)
 
-ALL_DEFAULT_ROLES = [VIEWER_ROLE, PLANNER_ROLE, ADMIN_ROLE, SERVICE_ROLE]
+# Platform administrators operate the platform itself: they are the only
+# ones that can unlock accounts locked after too many failed login attempts
+PLATFORM_ADMIN_ROLE = ADMIN_ROLE + PLATFORM_ROLE_OFFSET  # 903
+# Platform counterparts of the client viewer/planner roles: same permissions
+# as their client equivalent, used to tell internal (platform operator) users
+# apart from external (client) ones. Only a platform administrator can grant
+# or revoke platform roles.
+PLATFORM_VIEWER_ROLE = VIEWER_ROLE + PLATFORM_ROLE_OFFSET  # 901
+PLATFORM_PLANNER_ROLE = PLANNER_ROLE + PLATFORM_ROLE_OFFSET  # 902
+
+ALL_DEFAULT_ROLES = [
+    VIEWER_ROLE,
+    PLANNER_ROLE,
+    ADMIN_ROLE,
+    SERVICE_ROLE,
+    PLATFORM_ADMIN_ROLE,
+    PLATFORM_VIEWER_ROLE,
+    PLATFORM_PLANNER_ROLE,
+]
+
+# The internal (platform) roles. Granting or revoking any of these requires
+# the platform administrator role: a client admin must not be able to touch
+# the platform side (nor escalate themselves into it).
+PLATFORM_ROLES = [
+    PLATFORM_VIEWER_ROLE,
+    PLATFORM_PLANNER_ROLE,
+    PLATFORM_ADMIN_ROLE,
+]
+
+# Each platform role inherits every view its client counterpart can access,
+# so endpoint declarations only need to list the client roles (see
+# _role_has_view_access in commands/permissions.py).
+PLATFORM_ROLE_INHERITANCE = {
+    PLATFORM_VIEWER_ROLE: VIEWER_ROLE,
+    PLATFORM_PLANNER_ROLE: PLANNER_ROLE,
+    PLATFORM_ADMIN_ROLE: ADMIN_ROLE,
+}
 
 ACTIONS_MAP = {
     GET_ACTION: "can_get",
@@ -129,6 +282,9 @@ ROLES_MAP = {
     VIEWER_ROLE: "viewer",
     ADMIN_ROLE: "admin",
     SERVICE_ROLE: "service",
+    PLATFORM_ADMIN_ROLE: "platform_admin",
+    PLATFORM_VIEWER_ROLE: "platform_viewer",
+    PLATFORM_PLANNER_ROLE: "platform_planner",
 }
 
 BASE_PERMISSION_ASSIGNATION = [
@@ -148,6 +304,18 @@ BASE_PERMISSION_ASSIGNATION = [
     (SERVICE_ROLE, PUT_ACTION),
     (SERVICE_ROLE, DELETE_ACTION),
     (SERVICE_ROLE, POST_ACTION),
+    (PLATFORM_ADMIN_ROLE, GET_ACTION),
+    (PLATFORM_ADMIN_ROLE, PATCH_ACTION),
+    (PLATFORM_ADMIN_ROLE, POST_ACTION),
+    (PLATFORM_ADMIN_ROLE, PUT_ACTION),
+    (PLATFORM_ADMIN_ROLE, DELETE_ACTION),
+    # Platform viewer/planner mirror their client counterparts' actions
+    (PLATFORM_VIEWER_ROLE, GET_ACTION),
+    (PLATFORM_PLANNER_ROLE, GET_ACTION),
+    (PLATFORM_PLANNER_ROLE, PATCH_ACTION),
+    (PLATFORM_PLANNER_ROLE, POST_ACTION),
+    (PLATFORM_PLANNER_ROLE, PUT_ACTION),
+    (PLATFORM_PLANNER_ROLE, DELETE_ACTION),
 ]
 
 EXTRA_PERMISSION_ASSIGNATION = [
@@ -161,6 +329,16 @@ EXTRA_PERMISSION_ASSIGNATION = [
     (VIEWER_ROLE, GET_ACTION, "execution-files"),
     (PLANNER_ROLE, GET_ACTION, "execution-files"),
     (ADMIN_ROLE, GET_ACTION, "execution-files"),
+    (VIEWER_ROLE, POST_ACTION, "mfa-setup"),
+    (VIEWER_ROLE, POST_ACTION, "mfa-verify"),
+    (VIEWER_ROLE, DELETE_ACTION, "user-mfa"),
+    (VIEWER_ROLE, PUT_ACTION, "reset-password"),
+    (DUMMY_ROLE, PUT_ACTION, "reset-password"),
+    # Any authenticated user can manage their own personal API key
+    (DUMMY_ROLE, POST_ACTION, "user-api-key"),
+    (DUMMY_ROLE, DELETE_ACTION, "user-api-key"),
+    (VIEWER_ROLE, POST_ACTION, "user-api-key"),
+    (VIEWER_ROLE, DELETE_ACTION, "user-api-key"),
 ]
 
 # are there execution files?

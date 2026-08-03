@@ -2,13 +2,22 @@ def create_user_with_role(
     username, email, password, role_name, role, verbose: bool = False
 ):
     from cornflow.models import UserModel, UserRoleModel, RoleModel
+    from cornflow.shared.exceptions import InvalidCredentials
     from flask import current_app
 
     user = UserModel.get_one_user_by_username(username)
 
     if user is None:
         data = dict(username=username, email=email, password=password)
-        user = UserModel(data=data)
+        try:
+            user = UserModel(data=data)
+        except InvalidCredentials as err:
+            current_app.logger.error(
+                f"Could not create user {username}: {err.error} "
+                f"Set a password that complies with the password policy "
+                f"through the corresponding environment variable."
+            )
+            raise
         user.save()
         user_role = UserRoleModel({"user_id": user.id, "role_id": role})
         user_role.save()

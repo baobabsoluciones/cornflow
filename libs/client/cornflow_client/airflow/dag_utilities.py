@@ -73,9 +73,15 @@ def get_requirements(path):
 
 def connect_to_cornflow(secrets):
     """
-    Create a connection to cornflow and log in with airflow admin user.
+    Create a connection to cornflow for the service account.
 
-    :return: A logged and connected cornflow client class instance
+    If a personal API key is provided through the CORNFLOW_SERVICE_API_KEY
+    environment variable, it is used as the credential (a long-lived bearer
+    token, so the connection is not affected by the short session-token
+    expiry and needs no re-login). Otherwise it falls back to logging in with
+    the username and password from the CF_URI connection.
+
+    :return: A connected cornflow client class instance
     """
     # This secret comes from airflow configuration
     print("Getting connection information from ENV VAR=CF_URI")
@@ -90,7 +96,12 @@ def connect_to_cornflow(secrets):
     if conn.path:
         url = urljoin(url, conn.path)
     airflow_user = CornFlow(url=url)
-    airflow_user.login(username=conn.username, pwd=conn.password)
+    api_key = os.getenv("CORNFLOW_SERVICE_API_KEY")
+    if api_key:
+        # Long-lived credential: no login and no session expiry to worry about
+        airflow_user.set_api_key(api_key)
+    else:
+        airflow_user.login(username=conn.username, pwd=conn.password)
     return airflow_user
 
 

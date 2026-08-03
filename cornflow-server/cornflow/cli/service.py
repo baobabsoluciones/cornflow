@@ -34,6 +34,7 @@ from cornflow.shared.const import (
     AUTH_LDAP,
     AUTH_OID,
     ADMIN_ROLE,
+    PLATFORM_ADMIN_ROLE,
     SERVICE_ROLE,
     PLANNER_ROLE,
     DATABRICKS_BACKEND,
@@ -352,6 +353,32 @@ def _create_initial_users(
             SERVICE_ROLE,
             verbose=True,
         )
+        # Optionally create a platform administrator (needed to manage roles
+        # and unlock accounts). Only created when its credentials are
+        # provided, so we do not ship a weak default that would fail the
+        # password policy anyway.
+        platform_admin_user = os.getenv("CORNFLOW_PLATFORM_ADMIN_USER")
+        platform_admin_pwd = os.getenv("CORNFLOW_PLATFORM_ADMIN_PWD")
+        platform_admin_email = os.getenv(
+            "CORNFLOW_PLATFORM_ADMIN_EMAIL", "platform_admin@cornflow.com"
+        )
+        if platform_admin_user and platform_admin_pwd:
+            create_user_with_role(
+                platform_admin_user,
+                platform_admin_email,
+                platform_admin_pwd,
+                "platform_admin",
+                PLATFORM_ADMIN_ROLE,
+                verbose=True,
+            )
+        else:
+            logger.info(
+                "No platform administrator created (set "
+                "CORNFLOW_PLATFORM_ADMIN_USER and CORNFLOW_PLATFORM_ADMIN_PWD "
+                "to create one, or run `cornflow users create platform_admin`). "
+                "A platform administrator is required to manage roles and "
+                "unlock accounts."
+            )
 
 
 def _sync_with_airflow(

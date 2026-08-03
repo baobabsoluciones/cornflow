@@ -11,14 +11,22 @@ from cornflow.endpoints.meta_resource import BaseMetaResource
 from cornflow.models import UserModel, UserRoleModel
 from cornflow.schemas.user import (
     RecoverPasswordRequest,
+    ResetPasswordRequest,
     UserDetailsEndpointResponse,
     UserEditRequest,
     UserEndpointResponse,
     UserSchema,
 )
 from cornflow.shared import db
+from cornflow.shared.audit import audit
 from cornflow.shared.authentication import Auth, authenticate
-from cornflow.shared.const import ADMIN_ROLE, AUTH_LDAP, ALL_DEFAULT_ROLES, AUTH_OID
+from cornflow.shared.const import (
+    ADMIN_ROLE,
+    ALL_DEFAULT_ROLES,
+    AUTH_LDAP,
+    AUTH_OID,
+    PLATFORM_ADMIN_ROLE,
+)
 from cornflow.shared.exceptions import (
     ConfigurationError,
     EndpointNotImplemented,
@@ -27,8 +35,22 @@ from cornflow.shared.exceptions import (
     NoPermission,
     ObjectDoesNotExist,
 )
-from cornflow.shared.email import get_password_recover_email, send_email_to
-from cornflow.shared.validators import check_email_pattern, check_password_pattern
+from cornflow.shared.const import TOKEN_PURPOSE_PWD_RESET
+from cornflow.shared.email import (
+    get_password_recover_email,
+    get_password_reset_link_email,
+    send_email_to,
+)
+from cornflow.shared.rate_limit import (
+    limiter,
+    recover_rate_limit,
+    RATE_LIMIT_MESSAGE,
+)
+from cornflow.shared.validators import (
+    check_email_pattern,
+    check_password_pattern,
+    passwords_too_similar,
+)
 
 
 class UserEndpoint(BaseMetaResource):
@@ -37,7 +59,7 @@ class UserEndpoint(BaseMetaResource):
     Including their instances and executions
     """
 
-    ROLES_WITH_ACCESS = [ADMIN_ROLE]
+    ROLES_WITH_ACCESS = [ADMIN_ROLE, PLATFORM_ADMIN_ROLE]
 
     def __init__(self):
         super().__init__()
@@ -170,14 +192,39 @@ class UserDetailsEndpoint(BaseMetaResource):
                 f"To edit a user, go to the OID provider.",
             )
 
-        if data.get("password") is not None:
-            check, msg = check_password_pattern(data.get("password"))
+        current_password = data.pop("current_password", None)
+        new_password = data.get("password")
+        if new_password is not None:
+            user_context = {
+                key: data.get(key) or user_obj.get(key)
+                for key in ("username", "first_name", "last_name", "email")
+            }
+            check, msg = check_password_pattern(new_password, user_data=user_context)
             if not check:
                 raise InvalidCredentials(
                     msg,
                     log_txt=f"Error while user {self.get_user()} tries to edit user {user_id}. "
                     f"The new password is not valid.",
                 )
+            if self.get_user_id() == user_id:
+                # A user changing their own password must confirm the one in use
+                if not current_password or not user_obj.check_hash(current_password):
+                    raise InvalidCredentials(
+                        "The current password is missing or incorrect",
+                        log_txt=f"Error while user {self.get_user()} tries to change "
+                        f"their password. The current password is missing or incorrect.",
+                    )
+                if passwords_too_similar(new_password, current_password):
+                    raise InvalidCredentials(
+                        "The new password is too similar to the current one",
+                        log_txt=f"Error while user {self.get_user()} tries to change "
+                        f"their password. The new password is too similar to the "
+                        f"current one.",
+                    )
+            else:
+                # A password set by an admin is temporary: the user must
+                # change it at their next access
+                data["pwd_change_required"] = True
 
         if data.get("email") is not None:
             check, msg = check_email_pattern(data.get("email"))
@@ -189,7 +236,53 @@ class UserDetailsEndpoint(BaseMetaResource):
                 )
 
         current_app.logger.info(f"User {user_id} was edited by user {self.get_user()}")
+        if new_password is not None:
+            audit(
+                "password.changed",
+                target_id=user_id,
+                target=user_obj.username,
+                admin_set=(self.get_user_id() != user_id) or None,
+            )
         return self.put_detail(data=data, idx=user_id, track_user=False)
+
+
+class UserUnlockEndpoint(BaseMetaResource):
+    """
+    Endpoint to unlock an account locked after too many failed login
+    attempts. Only platform administrators can unlock accounts.
+    """
+
+    ROLES_WITH_ACCESS = [PLATFORM_ADMIN_ROLE]
+
+    def __init__(self):
+        super().__init__()
+        self.data_model = UserModel
+
+    @doc(description="Unlock a locked user account", tags=["Users"])
+    @authenticate(auth_class=Auth())
+    def put(self, user_id):
+        """
+        API method to unlock an account that was locked after too many
+        failed login attempts.
+
+        :param int user_id: id of the user to unlock
+        :return: A dictionary with a message and an integer with the HTTP
+          status code.
+        :rtype: Tuple(dict, integer)
+        """
+        user_obj = UserModel.get_one_user(user_id)
+        if user_obj is None:
+            raise ObjectDoesNotExist(
+                log_txt=f"Error while user {self.get_user()} tries to unlock "
+                f"user {user_id}. The user does not exist."
+            )
+        user_obj.unlock_account()
+        current_app.logger.info(
+            f"User {user_id} was unlocked by platform administrator "
+            f"{self.get_user()}"
+        )
+        audit("account.unlocked", target_id=user_id, target=user_obj.username)
+        return {"message": "The user account has been unlocked"}, 200
 
 
 class ToggleUserAdmin(BaseMetaResource):
@@ -223,9 +316,31 @@ class ToggleUserAdmin(BaseMetaResource):
         if make_admin:
             UserRoleModel(data={"user_id": user_id, "role_id": ADMIN_ROLE}).save()
             current_app.logger.info(f"User {user_id} was made into an admin")
+            audit(
+                "role.granted",
+                target_id=user_id,
+                target=user_obj.username,
+                role="admin",
+            )
         else:
+            # A client admin can not revoke the admin role from another admin;
+            # only a platform administrator can do it
+            if not self.get_user().is_platform_admin():
+                raise NoPermission(
+                    error="Only a platform administrator can revoke the admin "
+                    "role from a user",
+                    log_txt=f"Error while user {self.get_user()} tries to revoke "
+                    f"the admin role of user {user_id}. Only platform "
+                    f"administrators can revoke admin.",
+                )
             UserRoleModel.query.filter_by(user_id=user_id, role_id=ADMIN_ROLE).delete()
             current_app.logger.info(f"User {user_id} was removed admin role")
+            audit(
+                "role.revoked",
+                target_id=user_id,
+                target=user_obj.username,
+                role="admin",
+            )
             try:
                 db.session.commit()
             except IntegrityError as e:
@@ -237,10 +352,55 @@ class ToggleUserAdmin(BaseMetaResource):
         return user_obj, 200
 
 
+class ResetPassword(BaseMetaResource):
+    """
+    Endpoint to set a new password using the time-limited, single-use token
+    carried in the password reset link sent by email. The token only grants
+    access to this endpoint; once the password changes the token (and every
+    other session of the user) is revoked.
+    """
+
+    ROLES_WITH_ACCESS = ALL_DEFAULT_ROLES
+    decorators = [limiter.limit(recover_rate_limit, error_message=RATE_LIMIT_MESSAGE)]
+
+    def __init__(self):
+        super().__init__()
+        self.data_model = UserModel
+
+    @doc(description="Set a new password with a reset token", tags=["Users"])
+    @authenticate(auth_class=Auth())
+    @use_kwargs(ResetPasswordRequest, location="json")
+    def put(self, **data):
+        """
+        API method to set a new password using a reset token.
+
+        :return: A dictionary with a message and an integer with the HTTP
+          status code.
+        :rtype: Tuple(dict, integer)
+        """
+        user_obj = self.get_user()
+        new_password = data.get("password")
+        # The pattern, history and reuse checks run inside the model update;
+        # the update also revokes the reset token and any open session
+        user_obj.update({"password": new_password})
+        current_app.logger.info(
+            f"User {user_obj.id} set a new password through a reset link"
+        )
+        audit(
+            "password.reset",
+            actor_id=user_obj.id,
+            actor=user_obj.username,
+            method="reset_link",
+        )
+        return {"message": "The password has been updated"}, 200
+
+
 class RecoverPassword(BaseMetaResource):
     """
     Endpoint to recover the password
     """
+
+    decorators = [limiter.limit(recover_rate_limit, error_message=RATE_LIMIT_MESSAGE)]
 
     def __init__(self):
         super().__init__()
@@ -274,8 +434,59 @@ class RecoverPassword(BaseMetaResource):
 
         user_obj = self.data_model({"email": receiver})
         if not user_obj.check_email_in_use():
+            # Logged to the trusted audit channel only; the response stays
+            # neutral so it never reveals whether the email is registered.
+            audit(
+                "password.recovery_requested",
+                target=receiver,
+                found=False,
+            )
             return {"message": message}, 200
 
+        user_obj = self.data_model.get_one_user_by_email(receiver)
+        ui_url = current_app.config.get("CORNFLOW_UI_URL")
+
+        if ui_url:
+            # Preferred flow: a time-limited, single-use reset link that
+            # points to the web client. The token can only be used on the
+            # reset-password endpoint and dies as soon as the password
+            # changes.
+            token = Auth.generate_token(
+                user_obj.id, purpose=TOKEN_PURPOSE_PWD_RESET
+            )
+            reset_url = f"{ui_url.rstrip('/')}/reset-password?token={token}"
+            text_email = get_password_reset_link_email(
+                reset_url=reset_url,
+                expiry_minutes=int(
+                    current_app.config.get("PWD_RESET_TOKEN_DURATION_MINUTES", 30)
+                ),
+                service_name=service_name,
+                sender=sender,
+                receiver=receiver,
+            )
+            send_email_to(
+                email=text_email,
+                smtp_server=smtp_server,
+                port=port,
+                sender=sender,
+                password=password,
+                receiver=receiver,
+            )
+            current_app.logger.info(
+                f"User with email {receiver} has requested a password reset link"
+            )
+            audit(
+                "password.recovery_requested",
+                target_id=user_obj.id,
+                target=user_obj.username,
+                found=True,
+                method="reset_link",
+            )
+            return {"message": message}, 200
+
+        # Legacy fallback (CORNFLOW_UI_URL not configured, e.g. API-only
+        # deployments): a temporary password that must be changed at the
+        # next login
         new_password = self.data_model.generate_random_password()
 
         text_email = get_password_recover_email(
@@ -294,11 +505,18 @@ class RecoverPassword(BaseMetaResource):
             receiver=receiver,
         )
 
-        data = {"password": new_password}
-        user_obj = self.data_model.get_one_user_by_email(receiver)
+        # The temporary password must be changed at the next login
+        data = {"password": new_password, "pwd_change_required": True}
         user_obj.update(data)
 
         current_app.logger.info(
             f"User with email {receiver} has requested a new password"
+        )
+        audit(
+            "password.recovery_requested",
+            target_id=user_obj.id,
+            target=user_obj.username,
+            found=True,
+            method="temp_password",
         )
         return {"message": message}, 200

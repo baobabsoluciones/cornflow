@@ -35,7 +35,7 @@ def _get_file(relative_path):
 class TestRawCornflowClientUser(TestCase):
     def setUp(self):
         self.client = CornFlow(url="http://127.0.0.1:5050/")
-        login_result = self.client.raw.login("user", "UserPassword1!")
+        login_result = self.client.raw.login("user", "Zc4-hJm.Bt6Vx9")
         data = login_result.json()
         self.assertEqual(login_result.status_code, 200)
         self.assertIn("id", data.keys())
@@ -80,7 +80,7 @@ class TestRawCornflowClientUser(TestCase):
 
     def test_sign_up(self):
         response = self.client.raw.sign_up(
-            "test_username_2", "test_username_2@cornflow.org", "TestPassword2!"
+            "test_username_2", "test_username_2@cornflow.org", "Hn7-wKp.Rb4Vt9"
         )
         data = response.json()
         self.assertIn("id", data.keys())
@@ -609,11 +609,11 @@ class TestRawCornflowClientUser(TestCase):
 class TestRawCornflowClientAdmin(TestCase):
     def setUp(self):
         self.client = CornFlow(url="http://127.0.0.1:5050/")
-        login_result = self.client.login("admin", "Adminpassword1!")
+        login_result = self.client.login("admin", "Kd8-rVt.Nq2Wp5")
         self.assertIn("id", login_result.keys())
         self.assertIn("token", login_result.keys())
         self.base_user_id = CornFlow(url="http://127.0.0.1:5050/").login(
-            "user", "UserPassword1!"
+            "user", "Zc4-hJm.Bt6Vx9"
         )["id"]
 
     def tearDown(self):
@@ -639,7 +639,7 @@ class TestRawCornflowClientAdmin(TestCase):
 class TestRawCornflowClientService(TestCase):
     def setUp(self):
         self.client = CornFlow(url="http://127.0.0.1:5050/")
-        login_result = self.client.login("airflow", "Airflow_test_password1")
+        login_result = self.client.login("airflow", "Xq7-mBv.Ld9Rn2")
         self.assertIn("id", login_result.keys())
         self.assertIn("token", login_result.keys())
 
@@ -648,7 +648,7 @@ class TestRawCornflowClientService(TestCase):
 
     def test_get_execution_data(self):
         client = CornFlow(url="http://127.0.0.1:5050/")
-        _ = client.login("user", "UserPassword1!")
+        _ = client.login("user", "Zc4-hJm.Bt6Vx9")
         data = _load_file(PULP_EXAMPLE)
         instance = client.raw.create_instance(
             data, "test_example", "test_description"
@@ -674,7 +674,7 @@ class TestRawCornflowClientService(TestCase):
 
     def test_write_execution_solution(self):
         client = CornFlow(url="http://127.0.0.1:5050/")
-        _ = client.login("user", "UserPassword1!")
+        _ = client.login("user", "Zc4-hJm.Bt6Vx9")
         data = _load_file(PULP_EXAMPLE)
         instance = client.raw.create_instance(
             data, "test_example", "test_description"

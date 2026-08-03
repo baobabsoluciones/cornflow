@@ -35,7 +35,7 @@ def _get_file(relative_path):
 class TestCornflowClientUser(TestCase):
     def setUp(self):
         self.client = CornFlow(url="http://127.0.0.1:5050/")
-        login_result = self.client.login("user", "UserPassword1!")
+        login_result = self.client.login("user", "Zc4-hJm.Bt6Vx9")
         self.assertIn("id", login_result.keys())
         self.assertIn("token", login_result.keys())
         self.user_id = login_result["id"]
@@ -58,9 +58,23 @@ class TestCornflowClientUser(TestCase):
         self.assertEqual(response["cornflow_status"], "healthy")
         self.assertEqual(response["backend_status"], "healthy")
 
+    def test_refresh_and_logout(self):
+        # the interactive login returned a refresh token
+        self.assertIsNotNone(self.client.refresh_token)
+        old_token = self.client.token
+        # refresh rotates the access + refresh token and keeps the session
+        result = self.client.refresh()
+        self.assertIn("token", result)
+        self.assertNotEqual(old_token, self.client.token)
+        # the new access token works on an authenticated endpoint
+        self.assertEqual("user", self.client.get_one_user(self.user_id)["username"])
+        # logout revokes the session: a further refresh is no longer possible
+        self.client.logout()
+        self.assertIsNone(self.client.refresh_token)
+
     def test_sign_up(self):
         response = self.client.sign_up(
-            "test_username", "test_username@cornflow.org", "TestPassword2!"
+            "test_username", "test_username@cornflow.org", "Hn7-wKp.Rb4Vt9"
         )
         self.assertIn("id", response.keys())
         self.assertIn("token", response.keys())
@@ -548,11 +562,11 @@ class TestCornflowClientUser(TestCase):
 class TestCornflowClientAdmin(TestCase):
     def setUp(self):
         self.client = CornFlow(url="http://127.0.0.1:5050/")
-        login_result = self.client.login("admin", "Adminpassword1!")
+        login_result = self.client.login("admin", "Kd8-rVt.Nq2Wp5")
         self.assertIn("id", login_result.keys())
         self.assertIn("token", login_result.keys())
         self.base_user_id = CornFlow(url="http://127.0.0.1:5050/").login(
-            "user", "UserPassword1!"
+            "user", "Zc4-hJm.Bt6Vx9"
         )["id"]
 
     def tearDown(self):
@@ -577,7 +591,7 @@ class TestCornflowClientAdmin(TestCase):
 class TestCornflowClientService(TestCase):
     def setUp(self):
         self.client = CornFlow(url="http://127.0.0.1:5050/")
-        login_result = self.client.login("airflow", "Airflow_test_password1")
+        login_result = self.client.login("airflow", "Xq7-mBv.Ld9Rn2")
         self.assertIn("id", login_result.keys())
         self.assertIn("token", login_result.keys())
 
@@ -586,7 +600,7 @@ class TestCornflowClientService(TestCase):
 
     def test_get_execution_data(self):
         client = CornFlow(url="http://127.0.0.1:5050/")
-        _ = client.login("user", "UserPassword1!")
+        _ = client.login("user", "Zc4-hJm.Bt6Vx9")
         data = _load_file(PULP_EXAMPLE)
         instance = client.create_instance(data, "test_example", "test_description")
         execution = client.create_execution(
@@ -608,7 +622,7 @@ class TestCornflowClientService(TestCase):
 
     def test_write_execution_solution(self):
         client = CornFlow(url="http://127.0.0.1:5050/")
-        _ = client.login("user", "UserPassword1!")
+        _ = client.login("user", "Zc4-hJm.Bt6Vx9")
         data = _load_file(PULP_EXAMPLE)
         instance = client.create_instance(data, "test_example", "test_description")
         execution = client.create_execution(

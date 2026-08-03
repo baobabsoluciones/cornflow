@@ -108,7 +108,7 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
         payload = {
             "username": "testuser",
             "email": "testemail@example.org",
-            "password": "Testpassword1!",
+            "password": "Kx9#tR2m!Qw7Zp",
         }
         response = self.client.post(
             SIGNUP_URL,

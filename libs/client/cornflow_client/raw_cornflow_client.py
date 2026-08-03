@@ -16,13 +16,29 @@ class RawCornFlow(object):
     def __init__(self, url, token=None):
         self.url = url
         self.token = token
+        # Refresh token from an interactive login (None when authenticating
+        # with an API key). Used by refresh() to renew the short-lived access
+        # token; long-running automation should prefer a personal API key.
+        self.refresh_token = None
 
     def ask_token(func):
         @wraps(func)
         def wrapper(self, *args, **kwargs):
             if not self.token:
                 raise CornFlowApiError("Need to login first!")
-            return func(self, *args, **kwargs)
+            response = func(self, *args, **kwargs)
+            # Interactive sessions use a short-lived access token: on a 401
+            # renew it once with the stored refresh token and retry the call
+            # transparently, so long-running scripts keep working. API-key
+            # sessions have no refresh token and are returned as-is.
+            if (
+                getattr(response, "status_code", None) == 401
+                and self.refresh_token
+            ):
+                refresh_response = self.refresh()
+                if refresh_response.status_code == 200:
+                    response = func(self, *args, **kwargs)
+            return response
 
         return wrapper
 
@@ -214,24 +230,124 @@ class RawCornFlow(object):
         return requests.get(urljoin(self.url, "health/"))
 
     @prepare_encoding
-    def login(self, username, pwd, encoding=None):
+    def login(self, username, pwd, totp_code=None, encoding=None):
         """
         Log-in to the server.
 
         :param str username: username
         :param str pwd: password
+        :param str totp_code: the TOTP (or backup) code from the
+          authenticator app, needed when the user has two-factor
+          authentication enabled
         :param str encoding: the type of encoding used in the call. Defaults to 'br'
 
         :return: a dictionary with a token inside
         """
+        payload = {"username": username, "password": pwd}
+        if totp_code is not None:
+            payload["totp_code"] = totp_code
         response = requests.post(
             urljoin(self.url, "login/"),
-            json={"username": username, "password": pwd},
+            json=payload,
             headers={"Content-Encoding": encoding},
         )
-        if response.status_code == 200:
-            self.token = response.json()["token"]
+        # When two-factor authentication is pending the response is a 200
+        # without a token (mfa_required / mfa_setup_required flags instead)
+        if response.status_code == 200 and "token" in response.json():
+            body = response.json()
+            self.token = body["token"]
+            # Interactive logins also return a refresh token (service users
+            # and refresh-disabled deployments return only the access token)
+            self.refresh_token = body.get("refresh_token")
         return response
+
+    def refresh(self, encoding=None):
+        """
+        Renews the short-lived access token using the stored refresh token
+        (interactive sessions). On success the access token and the rotated
+        refresh token are stored for subsequent calls.
+
+        :param str encoding: the type of encoding used in the call
+        :return: the requests response; on success its json has a new 'token'
+        """
+        if not self.refresh_token:
+            raise CornFlowApiError(
+                "No refresh token available: log in again (or use an API key)."
+            )
+        response = requests.post(
+            urljoin(self.url, "token/refresh/"),
+            json={"refresh_token": self.refresh_token},
+            headers={"Content-Encoding": encoding},
+        )
+        if response.status_code == 200 and "token" in response.json():
+            body = response.json()
+            self.token = body["token"]
+            self.refresh_token = body.get("refresh_token")
+        return response
+
+    def logout(self, encoding=None):
+        """
+        Revokes the current refresh-token session on the server and clears the
+        locally stored tokens. Idempotent when there is nothing to revoke.
+
+        :param str encoding: the type of encoding used in the call
+        :return: the requests response, or None when there was no session
+        """
+        response = None
+        if self.refresh_token:
+            response = requests.post(
+                urljoin(self.url, "logout/"),
+                json={"refresh_token": self.refresh_token},
+                headers={"Content-Encoding": encoding},
+            )
+        self.token = None
+        self.refresh_token = None
+        return response
+
+    def set_api_key(self, api_key):
+        """
+        Uses a personal API key as the credential for subsequent calls,
+        instead of a session token obtained through login(). The API key is a
+        long-lived bearer token that must have been generated beforehand
+        (through the UI, create_api_key() or the `cornflow users api_key` CLI).
+
+        :param str api_key: the personal API key
+        """
+        self.token = api_key
+        # An API-key session is not refreshable
+        self.refresh_token = None
+
+    @ask_token
+    @prepare_encoding
+    def create_api_key(self, totp_code=None, read_only=False, encoding=None):
+        """
+        Generates a personal API key for the currently logged-in user (a
+        prior login() with password and, if required, TOTP is needed). The
+        key is a long-lived bearer credential returned only once. Generating
+        a new key revokes the previous one.
+
+        :param str totp_code: a fresh TOTP code, required when the user has
+          two-factor authentication enabled and the server enforces the
+          step-up (API_KEY_STEPUP_TOTP)
+        :param bool read_only: request a read-only key, refused by the server
+          on any request that is not a GET (for reporting / BI consumers)
+        :param str encoding: the type of encoding used in the call. Defaults to 'br'
+
+        :return: the requests response; on success its json has 'api_key'
+        """
+        payload = {}
+        if totp_code is not None:
+            payload["totp_code"] = totp_code
+        if read_only:
+            payload["scope"] = "read"
+        return requests.post(
+            urljoin(self.url, "user/api-key/"),
+            json=payload,
+            headers={
+                "Authorization": f"Bearer {self.token}",
+                "Content-Encoding": encoding,
+            },
+        )
 
     @ask_token
     @log_call

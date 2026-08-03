@@ -145,12 +145,40 @@ class BaseMetaResource(Resource, MethodResource):
 
         data = dict(data)
 
-        if track_user:
+        if track_user and self._should_track_user(item):
             user_id = kwargs.get("user").get("id") or self.get_user_id()
             data["user_id"] = user_id
 
         item.update(data)
         return {"message": "Updated correctly"}, 200
+
+    def _should_track_user(self, item) -> bool:
+        """
+        Whether an update should be attributed to the caller.
+
+        A service account acts on behalf of the platform (airflow writing back
+        a solution, checks or KPIs), never on its own behalf: attributing the
+        change to it would transfer the ownership of an object away from the
+        user who created it — and, with per-user visibility, hide the object
+        from its owner. So the owner is preserved whenever the caller is a
+        service user and the object already belongs to somebody.
+
+        :param item: the object being updated
+        :return: True when the caller may be recorded as the object's user
+        :rtype: bool
+        """
+        user = self.get_user()
+        if user is None or not user.is_service_user():
+            return True
+        if getattr(item, "user_id", None) is None:
+            # Nothing to preserve (the object has no owner yet)
+            return True
+        current_app.logger.debug(
+            f"Update of {type(item).__name__} {getattr(item, 'id', '')} by "
+            f"service user {user.id} keeps its original owner "
+            f"{item.user_id}"
+        )
+        return False
 
     def patch_detail(self, data, track_user: bool = True, **kwargs):
         """
@@ -168,7 +196,7 @@ class BaseMetaResource(Resource, MethodResource):
 
         data = dict(data)
 
-        if track_user:
+        if track_user and self._should_track_user(item):
             user_id = kwargs.get("user").get("id") or self.get_user_id()
             data["user_id"] = user_id
 

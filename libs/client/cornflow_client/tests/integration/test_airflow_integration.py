@@ -58,7 +58,7 @@ class TestAirflowClient(TestCase):
     def test_run_workflow(self):
         data = _load_file(PULP_EXAMPLE)
         cf_client = CornFlow(url="http://127.0.0.1:5050/")
-        cf_login = cf_client.login("admin", "Adminpassword1!")
+        cf_login = cf_client.login("admin", "Kd8-rVt.Nq2Wp5")
         instance = cf_client.create_instance(data, "test_example", "test_description")
         execution = cf_client.create_execution(
             instance_id=instance["id"],

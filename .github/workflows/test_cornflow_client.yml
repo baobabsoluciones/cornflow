@@ -105,7 +105,7 @@ jobs:
           AIRFLOW__API__AUTH_BACKEND: airflow.api.auth.backend.basic_auth
           AIRFLOW__WEBSERVER__SECRET_KEY: e9adafa751fd35adfc1fdd3285019be15eea0758f76e38e1e37a1154fb36
           AIRFLOW__CORE__LOAD_EXAMPLES: 0
-          AIRFLOW_CONN_CF_URI: http://airflow:Airflow_test_password1@localhost:5050
+          AIRFLOW_CONN_CF_URI: http://airflow:Xq7-mBv.Ld9Rn2@localhost:5050
       - name: Run cornflow
         run: |
           cd ..
@@ -120,9 +120,9 @@ jobs:
           flask db upgrade -d cornflow/migrations/
           flask access_init
           flask register_deployed_dags -r http://127.0.0.1:8080 -u admin -p admin
-          flask create_admin_user -u admin -e admin@cornflow.org -p Adminpassword1!
-          flask create_service_user -u airflow -e airflow@cornflow.org -p Airflow_test_password1
-          flask create_base_user -u user -e user@cornflow.org -p UserPassword1!
+          flask create_admin_user -u admin -e admin@cornflow.org -p Kd8-rVt.Nq2Wp5
+          flask create_service_user -u airflow -e airflow@cornflow.org -p Xq7-mBv.Ld9Rn2
+          flask create_base_user -u user -e user@cornflow.org -p Zc4-hJm.Bt6Vx9
           flask register_dag_permissions -o 1
           flask run -p 5050 &
           deactivate
@@ -133,12 +133,19 @@ jobs:
           AIRFLOW_URL: http://127.0.0.1:8080
           AIRFLOW_USER: admin
           AIRFLOW_PWD: admin
-          SECRET_KEY: THISNEEDSTOBECHANGED
+          SECRET_KEY: THISNEEDSTOBECHANGED_THISNEEDSTOBECHANGED
+          SECRET_BI_KEY: THISNEEDSTOBECHANGED_THISNEEDSTOBECHANGED_BI
           OPEN_DEPLOYMENT: 1
           AUTH_TYPE: 1
           LOG_LEVEL: 10
           CORNFLOW_SERVICE_USER: airflow
           SIGNUP_ACTIVATED: 1
+          # The client integration tests exercise the API, not the security
+          # policies: the server (started with `flask run`, i.e. the factory's
+          # default "development" config) must not require MFA nor rate-limit
+          # the repeated logins these tests perform.
+          MFA_REQUIRED: 0
+          RATELIMIT_ENABLED: 0
       - name: Run unit tests
         run: |
           coverage run --source=./cornflow_client/ --rcfile=./.coveragerc -m unittest discover -s cornflow_client/tests/unit

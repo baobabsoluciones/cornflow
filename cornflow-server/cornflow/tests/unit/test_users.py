@@ -35,6 +35,7 @@ from cornflow.shared.const import (
     DUMMY_ROLE,
     SERVICE_ROLE,
     PLANNER_ROLE,
+    PLATFORM_ADMIN_ROLE,
     VIEWER_ROLE,
 )
 from cornflow.tests.const import (
@@ -64,41 +65,47 @@ class TestUserEndpoint(TestCase):
         self.model = UserModel
 
         self.viewer = dict(
-            username="aViewer", email="viewer@test.com", password="Testpassword1!"
+            username="aViewer", email="viewer@test.com", password="Kx9#tR2m!Qw7Zp"
         )
 
         self.planner = dict(
             username="aPlanner",
             email="test@test.com",
-            password="Testpassword1!",
+            password="Kx9#tR2m!Qw7Zp",
             first_name="first_planner",
             last_name="last_planner",
         )
 
         self.planner_2 = dict(
-            username="aSecondPlanner", email="test2@test.com", password="Testpassword2!"
+            username="aSecondPlanner", email="test2@test.com", password="Lv8$uS3n!Rx6Ya"
         )
 
         self.admin = dict(
-            username="anAdminUser", email="admin@admin.com", password="Testpassword1!"
+            username="anAdminUser", email="admin@admin.com", password="Kx9#tR2m!Qw7Zp"
         )
 
         self.admin_2 = dict(
             username="aSecondAdmin",
             email="admin2@admin2.com",
-            password="Testpassword2!",
+            password="Lv8$uS3n!Rx6Ya",
+        )
+
+        self.platform_admin = dict(
+            username="aPlatformAdmin",
+            email="platform@test.com",
+            password="Kx9#tR2m!Qw7Zp",
         )
 
         self.service_user = dict(
             username="aServiceUser",
             email="service_user@test.com",
-            password="Tpass_service_user1",
+            password="Sv7&kM2x!Bd5Ln",
         )
 
         self.dummy = dict(
             username="aDummyUser",
             email="dummy@test.com",
-            password="Testpassword1!",
+            password="Kx9#tR2m!Qw7Zp",
         )
 
         self.login_keys = ["username", "password"]
@@ -117,6 +124,7 @@ class TestUserEndpoint(TestCase):
             self.planner_2,
             self.admin,
             self.admin_2,
+            self.platform_admin,
             self.service_user,
             self.dummy,
         ]
@@ -146,6 +154,12 @@ class TestUserEndpoint(TestCase):
             if "admin" in u_data["email"]:
                 user_role = UserRoleModel(
                     {"user_id": u_data["id"], "role_id": ADMIN_ROLE}
+                )
+                user_role.save()
+
+            if "platform" in u_data["email"]:
+                user_role = UserRoleModel(
+                    {"user_id": u_data["id"], "role_id": PLATFORM_ADMIN_ROLE}
                 )
                 user_role.save()
 
@@ -293,9 +307,15 @@ class TestUserEndpoint(TestCase):
         self.assertEqual(True, UserRoleModel.is_admin(self.planner["id"]))
 
     def test_admin_takes_someone_admin(self):
+        # A client admin can no longer revoke the admin role
         response = self.make_admin(self.admin, self.admin_2, 0)
+        self.assertEqual(403, response.status_code)
+        self.assertEqual(True, UserRoleModel.is_admin(self.admin_2["id"]))
+
+        # Only a platform administrator can revoke the admin role
+        response = self.make_admin(self.platform_admin, self.admin_2, 0)
         self.assertEqual(200, response.status_code)
-        self.assertEqual(False, UserRoleModel.is_admin(self.planner["id"]))
+        self.assertEqual(False, UserRoleModel.is_admin(self.admin_2["id"]))
 
     def test_user_deletes_admin(self):
         response = self.delete_user(self.planner, self.admin)
@@ -362,7 +382,10 @@ class TestUserEndpoint(TestCase):
         self.assertEqual(403, response.status_code)
 
     def test_change_password(self):
-        payload = {"password": "Newtestpassword1!"}
+        payload = {
+            "password": "Nw5@rT8y!Kd3Zx",
+            "current_password": self.planner["password"],
+        }
         response = self.modify_info(self.planner, self.planner, payload)
         self.assertEqual(200, response.status_code)
         self.planner["password"] = payload["password"]
@@ -370,13 +393,56 @@ class TestUserEndpoint(TestCase):
         self.assertEqual(200, response.status_code)
         self.assertIsNotNone(response.json["token"])
 
+    def test_change_password_requires_current_password(self):
+        payload = {"password": "Nw5@rT8y!Kd3Zx"}
+        response = self.modify_info(self.planner, self.planner, payload)
+        self.assertEqual(400, response.status_code)
+        self.assertIn("current password", response.json["error"].lower())
+
+    def test_change_password_wrong_current_password(self):
+        payload = {
+            "password": "Nw5@rT8y!Kd3Zx",
+            "current_password": "Wrong#Current9!Pwd",
+        }
+        response = self.modify_info(self.planner, self.planner, payload)
+        self.assertEqual(400, response.status_code)
+
+    def test_change_password_too_similar(self):
+        # Only rotating one character of the current password is not allowed
+        new_password = self.planner["password"][:-1] + "9"
+        payload = {
+            "password": new_password,
+            "current_password": self.planner["password"],
+        }
+        response = self.modify_info(self.planner, self.planner, payload)
+        self.assertEqual(400, response.status_code)
+        self.assertIn("similar", response.json["error"].lower())
+
+    def test_change_password_reuse_forbidden(self):
+        first_password = self.planner["password"]
+        payload = {
+            "password": "Nw5@rT8y!Kd3Zx",
+            "current_password": first_password,
+        }
+        response = self.modify_info(self.planner, self.planner, payload)
+        self.assertEqual(200, response.status_code)
+        self.planner["password"] = payload["password"]
+        # Going back to the first password must be rejected
+        payload = {
+            "password": first_password,
+            "current_password": self.planner["password"],
+        }
+        response = self.modify_info(self.planner, self.planner, payload)
+        self.assertEqual(400, response.status_code)
+        self.assertIn("last", response.json["error"].lower())
+
     def test_change_other_user_password(self):
-        payload = {"password": "Newtestpassword_2"}
+        payload = {"password": "Mb2&hF6j!Vc9Qs"}
         response = self.modify_info(self.planner_2, self.planner, payload)
         self.assertEqual(403, response.status_code)
 
     def test_admin_change_password(self):
-        payload = {"password": "Newtestpassword_3"}
+        payload = {"password": "Gd7!pW3k#Xn4Tf"}
         response = self.modify_info(self.admin, self.planner, payload)
         self.assertEqual(200, response.status_code)
         self.planner["password"] = payload["password"]
@@ -385,12 +451,15 @@ class TestUserEndpoint(TestCase):
         self.assertIsNotNone(response.json["token"])
 
     def test_service_user_change_password(self):
-        payload = {"password": "Newtestpassword_4"}
+        payload = {"password": "Hs4$jL9v!Zm2Wq"}
         response = self.modify_info(self.service_user, self.planner, payload)
         self.assertEqual(403, response.status_code)
 
     def test_viewer_user_change_password(self):
-        payload = {"password": "Newtestpassword_5"}
+        payload = {
+            "password": "Ct6#dN8b!Yh3Rk",
+            "current_password": self.viewer["password"],
+        }
         response = self.modify_info(self.viewer, self.viewer, payload)
         self.assertEqual(200, response.status_code)
         self.viewer["password"] = payload["password"]
@@ -408,9 +477,13 @@ class TestUserEndpoint(TestCase):
         response = self.log_in(self.planner)
         self.assertEqual(True, response.json["change_password"])
 
-        payload = {"password": "Newtestpassword1!"}
-        self.modify_info(self.planner, self.planner, payload)
-        self.planner.update(payload)
+        payload = {
+            "password": "Nw5@rT8y!Kd3Zx",
+            "current_password": self.planner["password"],
+        }
+        response = self.modify_info(self.planner, self.planner, payload)
+        self.assertEqual(200, response.status_code)
+        self.planner["password"] = payload["password"]
 
         response = self.log_in(self.planner)
         self.assertEqual(False, response.json["change_password"])
@@ -498,7 +571,7 @@ class TestUserModel(TestCase):
         self.model = UserModel
 
         self.admin = dict(
-            username="anAdminUser", email="admin@admin.com", password="Testpassword1!"
+            username="anAdminUser", email="admin@admin.com", password="Kx9#tR2m!Qw7Zp"
         )
 
         response = self.client.post(
@@ -517,7 +590,7 @@ class TestUserModel(TestCase):
         self.login_keys = ["username", "password"]
 
         self.viewer = dict(
-            username="aViewer", email="viewer@test.com", password="Testpassword1!"
+            username="aViewer", email="viewer@test.com", password="Kx9#tR2m!Qw7Zp"
         )
 
         response = self.client.post(
@@ -732,7 +805,7 @@ class TestUserModel(TestCase):
         self.model = UserModel
 
         self.user = dict(
-            username="aViewer", email="cornflow.user.test@gmail.com", password="Testpassword1!"
+            username="aViewer", email="cornflow.user.test@gmail.com", password="Kx9#tR2m!Qw7Zp"
         )
 
         response = self.client.post(

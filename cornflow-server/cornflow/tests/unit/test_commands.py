@@ -96,7 +96,7 @@ class TestCommands(TestCase):
         db.create_all()
         self.payload = {
             "email": "testemail@test.org",
-            "password": "Testpassword1!",
+            "password": "Kx9#tR2m!Qw7Zp",
         }
         resources = get_resources()
         self.resources = resources + alarms_resources
