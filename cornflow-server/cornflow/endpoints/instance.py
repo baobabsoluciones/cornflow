@@ -16,7 +16,7 @@ from werkzeug.utils import secure_filename
 
 # Import from internal modules
 from cornflow.endpoints.meta_resource import BaseMetaResource
-from cornflow.models import InstanceModel, DeployedDAG
+from cornflow.models import InstanceModel, DeployedWorkflow
 from cornflow.schemas.instance import (
     InstanceSchema,
     InstanceEndpointResponse,
@@ -91,7 +91,7 @@ class InstanceEndpoint(BaseMetaResource):
         # We validate the instance data
         config = current_app.config
 
-        instance_schema = DeployedDAG.get_one_schema(
+        instance_schema = DeployedWorkflow.get_one_schema(
             config, data_schema, INSTANCE_SCHEMA
         )
         instance_errors = json_schema_validate_as_string(
@@ -139,7 +139,7 @@ class InstanceDetailsEndpointBase(BaseMetaResource):
         :rtype: Tuple(dict, integer)
         """
         current_app.logger.info(f"User {self.get_user()} gets instance {idx}")
-        return self.get_detail(user=self.get_user(), idx=idx)
+        return self.get_detail(user=self.get_user(), idx=idx, defer_data=True)
 
 
 class InstanceDetailsEndpoint(InstanceDetailsEndpointBase):
@@ -157,7 +157,9 @@ class InstanceDetailsEndpoint(InstanceDetailsEndpointBase):
         :return: A dictionary with a confirmation message and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
-        schema = InstanceModel.get_one_object(user=self.get_user(), idx=idx).schema
+        schema = InstanceModel.get_one_object(
+            user=self.get_user(), idx=idx, defer_data=True
+        ).schema
 
         if kwargs.get("data") is not None and schema is not None:
             if schema == "pulp":
@@ -166,7 +168,7 @@ class InstanceDetailsEndpoint(InstanceDetailsEndpointBase):
 
             config = current_app.config
 
-            instance_schema = DeployedDAG.get_one_schema(
+            instance_schema = DeployedWorkflow.get_one_schema(
                 config, schema, INSTANCE_SCHEMA
             )
             instance_errors = json_schema_validate_as_string(

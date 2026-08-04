@@ -55,7 +55,7 @@ class TestAirflowClient(TestCase):
         response = self.client.update_dag_registry()
         self.assertEqual(200, response.status_code)
 
-    def test_run_dag(self):
+    def test_run_workflow(self):
         data = _load_file(PULP_EXAMPLE)
         cf_client = CornFlow(url="http://127.0.0.1:5050/")
         cf_login = cf_client.login("admin", "Adminpassword1!")
@@ -74,7 +74,7 @@ class TestAirflowClient(TestCase):
         self.assertEqual(-4, status["state"])
 
         # Run the execution
-        response = self.client.run_dag(execution_id=execution["id"])
+        response = self.client.run_workflow(execution_id=execution["id"])
         self.assertEqual(200, response.status_code)
         self.assertIn("dag_run_id", response.json().keys())
 

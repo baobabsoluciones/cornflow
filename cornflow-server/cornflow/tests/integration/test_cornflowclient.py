@@ -1,6 +1,7 @@
 """
 
 """
+
 # Full imports
 import json
 import pulp
@@ -279,7 +280,7 @@ class TestCornflowClientOpen(TestCornflowClientBasic):
     def test_server_alive(self):
         data = self.client.is_alive()
         cf_status = data["cornflow_status"]
-        af_status = data["airflow_status"]
+        af_status = data["backend_status"]
         self.assertEqual(str, type(cf_status))
         self.assertEqual(str, type(af_status))
         self.assertEqual(cf_status, STATUS_HEALTHY)
@@ -474,7 +475,9 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
     def test_check_execution(self):
         execution = self.create_instance_and_execution()
         time.sleep(20)
-        data_check_execution = self.client.create_execution_data_check(execution["id"])
+        data_check_execution = self.client.create_execution_data_check_kpis(
+            execution["id"]
+        )
         self.assertEqual(data_check_execution["id"], execution["id"])
         status = self.client.get_status(data_check_execution["id"])
         self.assertTrue(
@@ -490,7 +493,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
             payload = json.load(f)
         payload.pop("solution")
         case = self.client.create_case(**payload)
-        data_check_execution = self.client.create_case_data_check(case["id"])
+        data_check_execution = self.client.create_case_data_check_kpis(case["id"])
         status = self.client.get_status(data_check_execution["id"])
         self.assertTrue(
             status["state"] == EXEC_STATE_RUNNING

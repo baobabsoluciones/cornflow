@@ -24,7 +24,7 @@ from cornflow.commands.access import access_init_command
 from cornflow.commands.dag import register_deployed_dags_command_test
 from cornflow.commands.permissions import register_dag_permissions_command
 from cornflow.shared.const import ADMIN_ROLE, SERVICE_ROLE
-from cornflow.models import DeployedDAG, PermissionsDAG, UserModel, UserRoleModel
+from cornflow.models import DeployedWorkflow, PermissionsDAG, UserModel, UserRoleModel
 from cornflow.shared.const import EXEC_STATE_CORRECT, EXEC_STATE_MANUAL
 from cornflow.shared import db
 from cornflow.tests.const import (
@@ -38,7 +38,7 @@ from cornflow.tests.const import (
     USER_URL,
     EXECUTION_URL,
 )
-from cornflow.tests.unit.test_executions import TestExecutionsDetailEndpointMock
+from cornflow.tests.base_test_execution import TestExecutionsDetailEndpointMock
 from cornflow_client import get_pulp_jsonschema, get_empty_schema
 
 
@@ -350,7 +350,7 @@ class TestDeployedDAG(TestCase):
         """
         before = PermissionsDAG.get_user_dag_permissions(self.admin["id"])
         self.assertIsNotNone(before)
-        dag = DeployedDAG.query.get("solve_model_dag")
+        dag = DeployedWorkflow.query.get("solve_model_dag")
         dag.delete()
         after = PermissionsDAG.get_user_dag_permissions(self.admin["id"])
         self.assertNotEqual(before, after)
@@ -386,6 +386,7 @@ class TestDeployedDAG(TestCase):
                 "config_schema": get_empty_schema(solvers=["cbc", "PULP_CBC_CMD"]),
                 "instance_checks_schema": {},
                 "solution_checks_schema": {},
+                "kpis_schema": {},
             },
         )
         self.assertEqual(response.json[1]["id"], "gc")
@@ -420,6 +421,7 @@ class TestDeployedDAG(TestCase):
             "instance_checks_schema": {},
             "solution_checks_schema": {},
             "config_schema": {},
+            "kpis_schema": {},
         }
         response = self.client.post(
             DEPLOYED_DAG_URL,

@@ -29,7 +29,7 @@ class DAGTests(unittest.TestCase):
         finished = False
         while not finished:
             time.sleep(2)
-            status = client.get_dag_run_status("update_all_schemas", data["dag_run_id"])
+            status = client.get_run_status("update_all_schemas", data["dag_run_id"])
             state = status.json()["state"]
             finished = state != "running"
             print("STATUS OF update_all_variables: {}".format(state))

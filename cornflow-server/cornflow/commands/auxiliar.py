@@ -87,8 +87,8 @@ def get_new_roles_to_add(extra_permissions, resources_roles_with_access):
 
     for role_id in roles_with_access:
         if role_id not in existing_roles:
-            if role_id in ALL_DEFAULT_ROLES:
-                # Create standard role with predefined name
+            if role_id in ROLES_MAP:
+                # Create role with its predefined name from ROLES_MAP
                 role_name = ROLES_MAP[role_id]
                 new_role = RoleModel(
                     {

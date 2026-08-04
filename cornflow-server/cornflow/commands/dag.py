@@ -10,7 +10,7 @@ def register_deployed_dags_command(
 
     # Internal modules imports
     from cornflow_client.airflow.api import Airflow
-    from cornflow.models import DeployedDAG
+    from cornflow.models import DeployedWorkflow
     from cornflow.shared import db
     from cornflow.shared.const import AIRFLOW_NOT_REACHABLE_MSG
 
@@ -28,7 +28,7 @@ def register_deployed_dags_command(
             current_app.logger.info(f"{AIRFLOW_NOT_REACHABLE_MSG}")
         return False
 
-    dags_registered = [dag.id for dag in DeployedDAG.get_all_objects()]
+    dags_registered = [dag.id for dag in DeployedWorkflow.get_all_objects()]
 
     response = af_client.get_model_dags()
     dag_list = response.json()["dags"]
@@ -40,7 +40,7 @@ def register_deployed_dags_command(
     }
 
     processed_dags = [
-        DeployedDAG(
+        DeployedWorkflow(
             {
                 "id": dag["dag_id"],
                 "description": dag["description"],
@@ -49,6 +49,7 @@ def register_deployed_dags_command(
                 "instance_checks_schema": schemas[dag["dag_id"]]["instance_checks"],
                 "solution_checks_schema": schemas[dag["dag_id"]]["solution_checks"],
                 "config_schema": schemas[dag["dag_id"]]["config"],
+                "kpis_schema": schemas[dag["dag_id"]]["kpis"],
             }
         )
         for dag in dag_list
@@ -76,15 +77,15 @@ def register_deployed_dags_command(
 
 
 def register_deployed_dags_command_test(dags: list = None, verbose: bool = False):
-    from cornflow.models import DeployedDAG
+    from cornflow.models import DeployedWorkflow
     from flask import current_app
     from cornflow_client import get_pulp_jsonschema, get_empty_schema
 
     if dags is None:
-        dags = ["solve_model_dag", "gc", "timer"]
+        dags = ["solve_model_dag", "gc", "timer", "979073949072767"]
 
     deployed_dag = [
-        DeployedDAG(
+        DeployedWorkflow(
             {
                 "id": "solve_model_dag",
                 "description": None,
@@ -92,11 +93,12 @@ def register_deployed_dags_command_test(dags: list = None, verbose: bool = False
                 "solution_schema": get_pulp_jsonschema(),
                 "instance_checks_schema": dict(),
                 "solution_checks_schema": dict(),
+                "kpis_schema": dict(),
                 "config_schema": get_empty_schema(solvers=["cbc", "PULP_CBC_CMD"]),
             }
         )
     ] + [
-        DeployedDAG(
+        DeployedWorkflow(
             {
                 "id": dag,
                 "description": None,
@@ -104,6 +106,7 @@ def register_deployed_dags_command_test(dags: list = None, verbose: bool = False
                 "solution_schema": dict(),
                 "instance_checks_schema": dict(),
                 "solution_checks_schema": dict(),
+                "kpis_schema": dict(),
                 "config_schema": dict(),
             }
         )

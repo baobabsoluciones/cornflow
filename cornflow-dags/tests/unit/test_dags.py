@@ -64,6 +64,9 @@ class BaseDAGTests:
                         solution_test,
                         solution_check,
                         inst_check,
+                        kpis,
+                        execution_zip_file,
+                        zip_file_status,
                         log,
                         log_dict,
                     ) = self.app.solve(instance_data, config, solution_data)
@@ -73,6 +76,9 @@ class BaseDAGTests:
                         solution_test,
                         solution_check,
                         inst_check,
+                        kpis,
+                        execution_zip_file,
+                        zip_file_status,
                         log,
                         log_dict,
                     ) = self.app.solve(instance_data, config)

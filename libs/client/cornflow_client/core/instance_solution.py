@@ -448,6 +448,7 @@ class CheckCore:
             and callable(getattr(self, m))
             and m != "check_schema"
             and m != "check_solution"
+            and m != "check_kpis"
         ]
         return check_methods
 

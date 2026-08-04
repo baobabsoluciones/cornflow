@@ -1,0 +1,57 @@
+{
+  "objective": {
+    "name": "maximize_profit",
+    "coefficients": [
+      { "name": "x1", "value": 12.0 },
+      { "name": "x2", "value": 7.5 }
+    ]
+  },
+  "constraints": [
+    {
+      "name": "material_limit",
+      "sense": 1,
+      "pi": 2.0,
+      "constant": 100.0,
+      "coefficients": [
+        { "name": "x1", "value": 3.0 },
+        { "name": "x2", "value": 2.0 }
+      ]
+    },
+    {
+      "name": "labor_limit",
+      "sense": -1,
+      "pi": 1.5,
+      "constant": 80.0,
+      "coefficients": [
+        { "name": "x1", "value": 4.0 },
+        { "name": "x2", "value": 1.0 }
+      ]
+    }
+  ],
+  "variables": [
+    {
+      "name": "x1",
+      "lowBound": 0.0,
+      "upBound": 100.0,
+      "cat": "Continuous",
+      "varValue": 25.0,
+      "dj": 0.0
+    },
+    {
+      "name": "x2",
+      "lowBound": 0.0,
+      "upBound": 50.0,
+      "cat": "Integer",
+      "varValue": 10.0,
+      "dj": 1.2
+    }
+  ],
+  "parameters": {
+    "name": "production_model",
+    "sense": 1,
+    "status": 0,
+    "sol_status": 1
+  },
+  "sos1": [],
+  "sos2": []
+}

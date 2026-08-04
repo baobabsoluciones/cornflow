@@ -1,6 +1,4 @@
-"""
-
-"""
+""" """
 
 from flask import current_app
 from sqlalchemy import desc
@@ -10,6 +8,7 @@ from sqlalchemy.ext.declarative import declared_attr
 
 from cornflow.models.meta_models import TraceAttributesModel
 from cornflow.shared import db
+from cornflow.shared.const import USER_ACCESS_ALL_OBJECTS_NO
 from cornflow.shared.utils import hash_json_256
 
 
@@ -59,6 +58,7 @@ class BaseDataModel(TraceAttributesModel):
         offset=0,
         limit=10,
         user=None,
+        options=None,
     ):
         """
         Query to get all objects from a user
@@ -73,10 +73,13 @@ class BaseDataModel(TraceAttributesModel):
         :param string update_date_lte: update_at needs to be smaller or equal to this
         :param int offset: query offset for pagination
         :param int limit: query size limit
+        :param list options: extra SQLAlchemy loader options (e.g. defer()) to apply to the query
         :return: The objects
         :rtype: list(:class:`BaseDataModel`)
         """
         query = cls.query.filter(cls.deleted_at == None)
+        if options:
+            query = query.options(*options)
         user_access = int(current_app.config["USER_ACCESS_ALL_OBJECTS"])
         if (
             user is not None
@@ -104,19 +107,23 @@ class BaseDataModel(TraceAttributesModel):
         return query.order_by(desc(cls.created_at)).offset(offset).limit(limit).all()
 
     @classmethod
-    def get_one_object(cls, user=None, idx=None, **kwargs):
+    def get_one_object(cls, user=None, idx=None, options=None, **kwargs):
         """
         Query to get one object from the user and the id.
 
         :param UserModel user: user object performing the query
         :param str or int idx: ID from the object to get
+        :param list options: extra SQLAlchemy loader options (e.g. defer()) to apply to the query
         :return: The object or None if it does not exist
         :rtype: :class:`BaseDataModel`
         """
         user_access = int(current_app.config["USER_ACCESS_ALL_OBJECTS"])
         if user is None:
             return super().get_one_object(idx=idx)
-        query = cls.query.filter_by(id=idx, deleted_at=None)
-        if not user.is_admin() and not user.is_service_user() and user_access == 0:
+        query = cls.query
+        if options:
+            query = query.options(*options)
+        query = query.filter_by(id=idx, deleted_at=None)
+        if not user.is_admin() and not user.is_service_user() and user_access == USER_ACCESS_ALL_OBJECTS_NO:
             query = query.filter_by(user_id=user.id)
         return query.first()

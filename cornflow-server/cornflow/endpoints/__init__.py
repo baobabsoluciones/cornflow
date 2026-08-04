@@ -27,9 +27,9 @@ from .dag import (
     DeployedDagDetailEndpoint,
 )
 from .data_check import (
-    DataCheckExecutionEndpoint,
+    DataCheckKPIsExecutionEndpoint,
     DataCheckInstanceEndpoint,
-    DataCheckCaseEndpoint,
+    DataCheckCaseKPIsEndpoint,
 )
 from .example_data import ExampleDataListEndpoint, ExampleDataDetailEndpoint
 from .execution import (
@@ -39,6 +39,8 @@ from .execution import (
     ExecutionDataEndpoint,
     ExecutionLogEndpoint,
     ExecutionRelaunchEndpoint,
+    ExecutionFilesEndpoint,
+    ExecutionFilesCleanupEndpoint
 )
 from .health import HealthEndpoint
 from .instance import (
@@ -73,9 +75,19 @@ resources = [
         resource=InstanceFileEndpoint, urls="/instancefile/", endpoint="instance-file"
     ),
     dict(
-        resource=DataCheckExecutionEndpoint,
+        resource=DataCheckKPIsExecutionEndpoint,
+        urls="/data-check-kpis/execution/<string:idx>/",
+        endpoint="data-check-kpis-execution",
+    ),
+    dict(
+        resource=DataCheckKPIsExecutionEndpoint,
         urls="/data-check/execution/<string:idx>/",
         endpoint="data-check-execution",
+    ),
+    dict(
+        resource=DataCheckInstanceEndpoint,
+        urls="/data-check-kpis/instance/<string:idx>/",
+        endpoint="data-check-kpis-instance",
     ),
     dict(
         resource=DataCheckInstanceEndpoint,
@@ -83,7 +95,12 @@ resources = [
         endpoint="data-check-instance",
     ),
     dict(
-        resource=DataCheckCaseEndpoint,
+        resource=DataCheckCaseKPIsEndpoint,
+        urls="/data-check-kpis/case/<int:idx>/",
+        endpoint="data-check-kpis-case",
+    ),
+    dict(
+        resource=DataCheckCaseKPIsEndpoint,
         urls="/data-check/case/<int:idx>/",
         endpoint="data-check-case",
     ),
@@ -113,6 +130,8 @@ resources = [
         endpoint="execution-relaunch",
     ),
     dict(resource=ExecutionEndpoint, urls="/execution/", endpoint="execution"),
+    dict(resource=ExecutionFilesEndpoint, urls="/execution/files/<string:idx>/", endpoint="execution-files"),
+    dict(resource=ExecutionFilesCleanupEndpoint, urls="/execution/files/cleanup/", endpoint="execution-files-cleanup"),
     dict(resource=DAGDetailEndpoint, urls="/dag/<string:idx>/", endpoint="dag"),
     dict(resource=DAGEndpointManual, urls="/dag/", endpoint="dag-manual"),
     dict(

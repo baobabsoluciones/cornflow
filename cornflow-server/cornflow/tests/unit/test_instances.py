@@ -16,8 +16,9 @@ from cornflow.tests.const import (
     INSTANCE_URL,
     INSTANCES_LIST,
     INSTANCE_PATH,
-    EMPTY_INSTANCE_PATH
+    EMPTY_INSTANCE_PATH,
 )
+from cornflow.shared.const import USER_ACCESS_ALL_OBJECTS_YES
 from cornflow.tests.custom_test_case import CustomTestCase, BaseTestCases
 from flask import current_app
 
@@ -256,7 +257,7 @@ class TestAccessPlannerUsers(CustomTestCase):
     def setUp(self):
         super().setUp()
 
-        current_app.config["USER_ACCESS_ALL_OBJECTS"] = 1
+        current_app.config["USER_ACCESS_ALL_OBJECTS"] = USER_ACCESS_ALL_OBJECTS_YES
         with open(INSTANCE_PATH) as f:
             self.payload = json.load(f)
         self.url = INSTANCE_URL

@@ -11,6 +11,7 @@ class SchemaOneApp(SchemaListApp):
     config = fields.Raw(required=True)
     instance_checks = fields.Raw(required=True)
     solution_checks = fields.Raw(required=True)
+    kpis = fields.Raw(required=True)
 
 
 class SchemaRequest(Schema):

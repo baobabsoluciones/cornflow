@@ -1,3 +1,299 @@
+version 1.3.5
+--------------
+- released: 2026-06-03
+- description: KPIs in data checks, execution output files and new role
+- changelog:
+    - KPIs in data checks
+        Executions and cases can now generate/re-generate and validate KPIs as part of the data-check flow. Solvers
+        can define a KPI schema for their solutions, and the result is validated against it. The rostering
+        example includes an implementation. New KPI-aware data-check endpoints are added alongside the
+        existing data-check endpoints, which remain available.
+
+    - Execution output files
+        Adds the ability to generate output files for executions. These files are produced as part of the
+        workflow run in Airflow, which follows the sequence:
+
+        instance checks → solve → solution checks → KPIs → output files
+
+        Each step gates the next:
+        - **Instance checks** run first. If they report critical errors, the solver is not run and **no
+          output files are generated**.
+        - The **solver** runs. If no solution is found, output files are still produced based on the
+          available data (instance checks).
+        - **Solution checks** run on the solution. **KPIs are only generated when the solution checks
+          report no errors**; if the solution has errors, KPIs are skipped.
+        - **Output files** are then generated from the instance checks, solution, solution checks, and
+          KPIs. Whether files are produced depends on the solver's `generate_output_files`
+          implementation — if it returns nothing, files are reported as not generated.
+
+        Each execution tracks the status of its files (not generated, ready/OK, out of date, deleted, or
+        error), each with an associated message. If file generation fails at any point, the status is set
+        to error. New endpoints let clients fetch these files and trigger regeneration, and a scheduled
+        cleanup job removes stale execution files from the backend. Database migrations are included for
+        the new fields.
+
+    - Roles
+        Adds a new "dummy" role with a limited set of permissions (read/update user detail, read user
+        roles).
+
+    -  Other changes
+        Expanded test coverage for the new features.
+
+version 1.3.4
+--------------
+
+- released: 2026-04-20
+- description: Each user can get their role
+- changelog:
+    - Each user can get their role
+
+version 1.3.3
+--------------
+
+- released: 2026-03-18
+- description: Security release
+- changelog:
+    - updated some requirements
+
+version 1.3.1
+--------------
+
+- released: 2026-03-05
+- description: Security release
+- changelog:
+    - fixed versions in requirements, no more ranges
+    - updated some requirements
+
+version 1.3.0
+--------------
+
+- released: 2026-02-12
+- description: new version of cornflow with new features and bug fixes.
+- changelog:
+    - added support for Databricks as an execution backend.
+    - added support for Microsoft Azure AD / Entra ID authentication.
+    - changed health check endpoint to return ``backend_status`` instead of ``airflow_status``.
+    - changed execution details to show ``run_id`` instead of ``dag_run_id``.
+    - renamed ``DeployedDAG`` model to ``DeployedWorkflow``.
+
+What's New for Users
+~~~~~~~~~~~~~~~~~~~~
+
+Major New Feature: Databricks Support
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Cornflow now supports **Databricks** as an execution backend, giving you more flexibility in where your optimization models run.
+
+**What this means for you:**
+
+- You can now choose between Airflow or Databricks to execute your optimization models
+- Both backends offer the same core functionality
+- Existing Airflow users: nothing changes unless you want to switch
+- Your data (instances) works with both backends
+
+**How to use it:**
+
+- Your system administrator configures which backend to use
+- The Cornflow interface remains the same
+- All your existing workflows continue to work
+
+Changes You'll Notice
+~~~~~~~~~~~~~~~~~~~~~
+
+1. Health Check Response
+^^^^^^^^^^^^^^^^^^^^^^^
+
+**What changed:**
+
+- The health check endpoint now returns ``backend_status`` instead of ``airflow_status``
+
+**Why it matters:**
+
+- More accurate naming that reflects the multi-backend architecture
+- You'll see which execution backend (Airflow or Databricks) is healthy
+
+**Example:**
+
+.. code-block:: json
+
+   {
+     "cornflow_status": "healthy",
+     "backend_status": "healthy",  // ← Changed from "airflow_status"
+     "cornflow_version": "1.3.0"
+   }
+
+**What you need to do:**
+
+- If you're checking the health endpoint in your code, update ``airflow_status`` → ``backend_status``
+
+2. Execution Information
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+**What changed:**
+
+- Execution details now show ``run_id`` instead of ``dag_run_id``
+
+**Why it matters:**
+
+- More generic naming that works with both Airflow and Databricks
+- Same information, just a clearer name
+
+**Example:**
+
+.. code-block:: json
+
+   {
+     "id": "abc123",
+     "run_id": "456789",  // ← Changed from "dag_run_id"
+     "state": 1,
+     "message": "Execution completed successfully"
+   }
+
+**What you need to do:**
+
+- If you're reading execution data in your code, update ``dag_run_id`` → ``run_id``
+
+3. Improved Azure AD Authentication
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**What changed:**
+
+- Better support for Microsoft Azure AD / Entra ID authentication
+
+**Why it matters:**
+
+- More reliable login for organizations using Azure AD
+- Automatic detection of Azure endpoints
+- Fewer authentication errors
+
+**What you need to do:**
+
+- Nothing! If you use Azure AD, authentication will just work better
+
+4. Changed Model Class Names
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you're extending or integrating with the server, some model names have changed:
+
+**Model Classes:**
+
++-----------------------------------------------+-----------------------------------------------+-------------------+
+| Old Import                                    | New Import                                    | Status            |
++===============================================+===============================================+===================+
+| ``from cornflow.models import DeployedDAG``   | ``from cornflow.models import DeployedWorkflow`` | ⚠️ Old name removed |
++-----------------------------------------------+-----------------------------------------------+-------------------+
+
+**Example:**
+
+.. code-block:: python
+
+   # Old way (will cause ImportError)
+   from cornflow.models import DeployedDAG
+   dag = DeployedDAG.get_one_object("solve_model_dag")
+
+   # New way (required)
+   from cornflow.models import DeployedWorkflow
+   workflow = DeployedWorkflow.get_one_object("solve_model_dag")
+
+**What you need to do:**
+
+- **Required:** Update imports from ``DeployedDAG`` to ``DeployedWorkflow``
+- This is a breaking change - the old name no longer exists
+
+Features Not Yet Available in Databricks
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If your system is configured to use Databricks, these features are not yet supported:
+
+1. **Stop Execution**
+
+   - You cannot manually stop a running execution
+   - Trying to stop will return an error message
+   - Available only with Airflow backend for now
+
+2. **Example Data**
+
+   - Viewing example instances and solutions through the API
+   - Coming in a future update
+
+What Still Works Exactly the Same
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+These features work identically regardless of your backend:
+
+- Creating and managing instances
+- Creating and running executions
+- Viewing execution results
+- Managing cases
+- Comparing cases
+- User authentication and permissions
+- Data validation and checks
+- All optimization solvers
+
+For System Administrators
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+New Configuration Options
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you're setting up or maintaining a Cornflow installation:
+
+**Backend Selection:**
+
+.. code-block:: bash
+
+   # Use Airflow (default - no change needed)
+   CORNFLOW_BACKEND=1
+
+   # Use Databricks (new option)
+   CORNFLOW_BACKEND=2
+
+**Database Migration:**
+
+If you're upgrading from v1.2.x, run:
+
+.. code-block:: bash
+
+   flask db upgrade
+
+This updates:
+
+- Table names to use "workflow" terminology
+- Execution tracking fields
+
+**See:** ``Migration_guide.md`` for detailed administrator instructions
+
+Need Help?
+~~~~~~~~~~
+
+Common Questions
+^^^^^^^^^^^^^^^^^
+
+**Q: Do I need to do anything to upgrade?**
+
+A: If you only use the web interface or API, very little:
+
+   - Update any code that checks ``airflow_status`` → ``backend_status``
+   - Update any code that uses ``dag_run_id`` → ``run_id``
+   - Update imports from ``DeployedDAG`` to ``DeployedWorkflow`` if you're extending the server
+   - Optionally update Python client method names (old ones still work)
+
+**Q: Will my existing instances and executions still work?**
+
+A: Yes! All your data is preserved and continues to work.
+
+**Q: Can I switch between Airflow and Databricks?**
+
+A: Your system administrator can switch backends by changing configuration. Your data remains accessible with either backend.
+
+**Q: Do I need to change my optimization models?**
+
+A: No! Models run the same way regardless of backend.
+
+**Q: I'm seeing deprecation warnings in my Python code**
+
+A: Update the method names as shown in the cornflow-client changelog. The old methods still work for now.
+
 version 1.2.6
 --------------
 

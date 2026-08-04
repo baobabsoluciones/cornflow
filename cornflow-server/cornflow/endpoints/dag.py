@@ -10,9 +10,9 @@ from flask_apispec import use_kwargs, doc, marshal_with
 
 # Import from internal modules
 from cornflow.endpoints.meta_resource import BaseMetaResource
-from cornflow.models import DeployedDAG, ExecutionModel, InstanceModel, CaseModel
+from cornflow.models import DeployedWorkflow, ExecutionModel, InstanceModel, CaseModel
 from cornflow.schemas import DeployedDAGSchema, DeployedDAGEditSchema
-from cornflow.schemas.case import CaseCheckRequest
+from cornflow.schemas.case import CaseChecksKPIsRequest
 from cornflow.schemas.instance import InstanceCheckRequest
 from cornflow.schemas.execution import (
     ExecutionDagPostRequest,
@@ -109,6 +109,7 @@ class DAGDetailEndpoint(BaseMetaResource):
         # Check data format
         data = kwargs.get("data")
         checks = kwargs.get("checks")
+        kpis = kwargs.get("kpis")
         if data is None:
             # only check format if executions_results exist
             solution_schema = None
@@ -118,7 +119,7 @@ class DAGDetailEndpoint(BaseMetaResource):
         if solution_schema is not None:
             config = current_app.config
 
-            solution_schema = DeployedDAG.get_one_schema(
+            solution_schema = DeployedWorkflow.get_one_schema(
                 config, solution_schema, SOLUTION_SCHEMA
             )
             solution_errors = json_schema_validate_as_string(solution_schema, data)
@@ -143,6 +144,8 @@ class DAGDetailEndpoint(BaseMetaResource):
             new_data["data"] = data
         if checks is not None:
             new_data["checks"] = checks
+        if kpis is not None:
+            new_data["kpis"] = kpis
         kwargs.update(new_data)
         execution.update(kwargs)
 
@@ -174,7 +177,7 @@ class DAGInstanceEndpoint(BaseMetaResource):
 
 class DAGCaseEndpoint(BaseMetaResource):
     """
-    Endpoint used by airflow to write case checks
+    Endpoint used by airflow to write case checks and KPIs
     """
 
     ROLES_WITH_ACCESS = [ADMIN_ROLE, SERVICE_ROLE]
@@ -184,13 +187,13 @@ class DAGCaseEndpoint(BaseMetaResource):
         self.data_model = CaseModel
 
     @doc(
-        description="Endpoint to save case checks performed on the DAG",
+        description="Endpoint to save case checks and KPIs performed on the DAG",
         tags=["DAGs"],
     )
     @authenticate(auth_class=Auth())
-    @use_kwargs(CaseCheckRequest, location="json")
+    @use_kwargs(CaseChecksKPIsRequest, location="json")
     def put(self, idx, **req_data):
-        current_app.logger.info(f"Case checks saved for instance {idx}")
+        current_app.logger.info(f"Case checks and KPIs saved for instance {idx}")
         return self.put_detail(data=req_data, idx=idx, track_user=False)
 
 
@@ -215,7 +218,7 @@ class DAGEndpointManual(BaseMetaResource):
             solution_schema = "solve_model_dag"
         if solution_schema is not None:
             config = current_app.config
-            solution_schema = DeployedDAG.get_one_schema(
+            solution_schema = DeployedWorkflow.get_one_schema(
                 config, solution_schema, SOLUTION_SCHEMA
             )
             solution_errors = json_schema_validate_as_string(solution_schema, data)
@@ -246,7 +249,7 @@ class DeployedDAGEndpoint(BaseMetaResource):
 
     def __init__(self):
         super().__init__()
-        self.data_model = DeployedDAG
+        self.data_model = DeployedWorkflow
 
     @doc(
         description="Get list of deployed dags registered on the data base",
@@ -270,7 +273,7 @@ class DeployedDagDetailEndpoint(BaseMetaResource):
 
     def __init__(self):
         super().__init__()
-        self.data_model = DeployedDAG
+        self.data_model = DeployedWorkflow
 
     @doc(
         description="Endpoint to update the schemas of a deployed DAG",

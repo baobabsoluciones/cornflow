@@ -18,6 +18,10 @@ from cornflow.shared.exceptions import EndpointNotImplemented, ObjectAlreadyExis
 
 class UserRoleListEndpoint(BaseMetaResource):
     ROLES_WITH_ACCESS = [ADMIN_ROLE]
+    # Other roles can get their own roles, but not all roles
+    # This is because the admin role is the only one that can get all roles
+    # and the other roles can only get their own roles
+
     DESCRIPTION = (
         "Endpoint to get the list of roles assigned to users and create new assignments"
     )
@@ -34,16 +38,22 @@ class UserRoleListEndpoint(BaseMetaResource):
         API method to get the assigned roles to the users defined in the application.
         It requires authentication to be passed in the form of a token that has to be linked to
         an existing session (login) made by a user.
+        Admin users receive every assignment; other users receive only their own.
 
         :return: A dictionary with the response (data of the user assigned roles or an error message)
         and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
 
         """
+        if self.is_admin():
+            current_app.logger.info(
+                f"User {self.get_user()} gets all user roles assignments"
+            )
+            return self.get_list()
         current_app.logger.info(
-            f"User {self.get_user()} gets all user roles assignments"
+            f"User {self.get_user()} gets their own user role assignments"
         )
-        return self.get_list()
+        return self.get_list(user_id=self.get_user_id())
 
     @doc(description="Creates a new role assignment", tags=["User roles"])
     @authenticate(auth_class=Auth())

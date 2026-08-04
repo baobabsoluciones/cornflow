@@ -41,7 +41,7 @@ import zlib
 
 
 # Import from internal modules
-from cornflow.models import CaseModel, ExecutionModel, InstanceModel, UserModel
+from cornflow.models import CaseModel, ExecutionModel, InstanceModel
 from cornflow.shared.const import DATA_DOES_NOT_EXIST_MSG
 from cornflow.shared.utils import hash_json_256
 from cornflow.tests.const import (
@@ -985,6 +985,7 @@ class TestCaseDataEndpoint(CustomTestCase):
             "name",
             "checks",
             "created_at",
+            "kpis",
         ]
         self.get_one_row(
             self.url + str(self.payload["id"]) + "/data/",

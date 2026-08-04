@@ -56,7 +56,7 @@ class TestCornflowClientUser(TestCase):
     def test_health_endpoint(self):
         response = self.client.is_alive()
         self.assertEqual(response["cornflow_status"], "healthy")
-        self.assertEqual(response["airflow_status"], "healthy")
+        self.assertEqual(response["backend_status"], "healthy")
 
     def test_sign_up(self):
         response = self.client.sign_up(
@@ -183,7 +183,7 @@ class TestCornflowClientUser(TestCase):
         statuses = self.check_execution_statuses(exec_to_check["id"])
 
         exec_to_check_id = exec_to_check["id"]
-        execution = self.client.create_execution_data_check(exec_to_check_id)
+        execution = self.client.create_execution_data_check_kpis(exec_to_check_id)
         self.assertEqual(STATUS_QUEUED, execution["state"])
         return execution
 
@@ -202,7 +202,7 @@ class TestCornflowClientUser(TestCase):
         self.assertEqual(STATUS_QUEUED, execution["state"])
         config = execution.get("config")
         self.assertIsInstance(config, dict)
-        self.assertTrue(config.get("checks_only"))
+        self.assertTrue(config.get("checks_and_kpis_only"))
         self.assertEqual(execution.get("schema"), "solve_model_dag")
         self.assertEqual(execution.get("instance_id"), inst_to_check_id)
         return execution
@@ -652,6 +652,7 @@ class TestCornflowClientService(TestCase):
             solution_schema=dict(),
             solution_checks_schema=dict(),
             config_schema=dict(),
+            kpis_schema=dict(),
         )
 
         items = ["id", "description"]

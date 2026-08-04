@@ -7,6 +7,7 @@ import jsonpatch
 from flask import current_app
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.exc import DBAPIError, IntegrityError
+from sqlalchemy.orm import defer
 
 # Import from internal modules
 from cornflow.models.base_data_model import BaseDataModel
@@ -35,7 +36,7 @@ SEPARATOR = "/"
 
 class CaseModel(BaseDataModel):
     """
-    Model class for the Cases. 
+    Model class for the Cases.
     It inherits from :class:`BaseDataModel<cornflow.models.base_data_model.BaseDataModel>` to have the trace fields and user field.
 
     - **id**: int, the primary key for the cases, is an autoincrement.
@@ -48,6 +49,7 @@ class CaseModel(BaseDataModel):
     - **solution**: dict (JSON), the solution of the instance of the case.
     - **solution_hash**: str, the hash of the solution of the instance of the case.
     - **solution_checks**: dict (JSON), the checks of the solution of the instance of the case.
+    - **kpis**: dict (JSON), the KPIs of the instance of the case.
     - **schema**: str, the schema of the instance of the case.
     - **user_id**: int, the foreign key for the user (:class:`UserModel<cornflow.models.UserModel>`). It links the case to its owner.
     - **created_at**: datetime, the datetime when the case was created (in UTC).
@@ -58,7 +60,6 @@ class CaseModel(BaseDataModel):
 
     """
 
-
     __tablename__ = "cases"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -66,7 +67,7 @@ class CaseModel(BaseDataModel):
     solution = db.Column(JSON, nullable=True)
     solution_hash = db.Column(db.String(256), nullable=False)
     solution_checks = db.Column(JSON, nullable=True)
-
+    kpis = db.Column(JSON, nullable=True)
 
     # To find the descendants of this node, we look for nodes whose path
     # starts with this node's path.
@@ -79,7 +80,6 @@ class CaseModel(BaseDataModel):
             path.concat(id).concat(SEPARATOR + "%")
         ),
     )
-    
 
     # TODO: maybe implement this while making it compatible with sqlite:
     # Finding the ancestors is a little bit trickier. We need to create a fake
@@ -125,6 +125,22 @@ class CaseModel(BaseDataModel):
         self.solution = data.get("solution", None)
         self.solution_hash = hash_json_256(self.solution)
         self.solution_checks = data.get("solution_checks", None)
+        self.kpis = data.get("kpis", None)
+
+    @classmethod
+    def get_all_objects(cls, *args, **kwargs):
+        """
+        Query to get all cases from a user, deferring the checks/solution_checks/kpis
+        columns since the list endpoint does not serialize them (only data and solution
+        are used, for the is_dir flag and the indicators).
+
+        :return: The objects
+        :rtype: list(:class:`CaseModel`)
+        """
+        kwargs.setdefault(
+            "options", [defer(cls.checks), defer(cls.solution_checks), defer(cls.kpis)]
+        )
+        return super().get_all_objects(*args, **kwargs)
 
     @classmethod
     def from_parent_id(cls, user, data):
@@ -138,7 +154,7 @@ class CaseModel(BaseDataModel):
         :return: the new case
         :rtype: :class:`CaseModel<cornflow.models.CaseModel>`
         """
-        
+
         if data.get("parent_id") is None:
             # we assume at root
             return cls(data, parent=None)
@@ -170,12 +186,16 @@ class CaseModel(BaseDataModel):
             # Delete the checks if the data has been modified since they are probably no longer valid
             self.checks = None
             self.solution_checks = None
+            # Same for the KPIs
+            self.kpis = None
         if "solution_patch" in data:
             self.solution, self.solution_hash = self.apply_patch(
                 self.solution, data["solution_patch"]
             )
             # Delete the solution checks if the solution has been modified since they are probably no longer valid
             self.solution_checks = None
+            # Same for the KPIs
+            self.kpis = None
 
         self.user_id = data.get("user_id")
         super().update(data)
@@ -188,12 +208,14 @@ class CaseModel(BaseDataModel):
         :return: None
         :rtype: None
         """
-        # Delete the checks if the data has been modified since they are probably not valid anymore
+        # Delete the checks and KPIs if the data has been modified since they are probably not valid anymore
         if "data" in data.keys():
             self.checks = None
             self.solution_checks = None
+            self.kpis = None
         if "solution" in data.keys():
             self.solution_checks = None
+            self.kpis = None
 
         super().update(data)
 

@@ -1,13 +1,13 @@
-"""
+""" """
 
-"""
 # Import from libraries
 from cornflow_client.airflow.api import Airflow
 from cornflow_client.constants import (
     INSTANCE_SCHEMA,
     SOLUTION_SCHEMA,
     INSTANCE_CHECKS_SCHEMA,
-    SOLUTION_CHECKS_SCHEMA
+    SOLUTION_CHECKS_SCHEMA,
+    KPIS_SCHEMA,
 )
 from sqlalchemy.dialects.postgresql import TEXT, JSON
 
@@ -17,12 +17,12 @@ from cornflow.shared import db
 from cornflow.shared.exceptions import ObjectDoesNotExist
 
 
-class DeployedDAG(TraceAttributesModel):
+class DeployedWorkflow(TraceAttributesModel):
     """
     This model contains the registry of the DAGs that are deployed on the corresponding Airflow server
     """
 
-    __tablename__ = "deployed_dags"
+    __tablename__ = "deployed_workflows"
     id = db.Column(db.String(128), primary_key=True)
     description = db.Column(TEXT, nullable=True)
     instance_schema = db.Column(JSON, nullable=True)
@@ -30,12 +30,13 @@ class DeployedDAG(TraceAttributesModel):
     config_schema = db.Column(JSON, nullable=True)
     instance_checks_schema = db.Column(JSON, nullable=True)
     solution_checks_schema = db.Column(JSON, nullable=True)
+    kpis_schema = db.Column(JSON, nullable=True)
 
     dag_permissions = db.relationship(
         "PermissionsDAG",
         cascade="all,delete",
-        backref="deployed_dags",
-        primaryjoin="and_(DeployedDAG.id==PermissionsDAG.dag_id)",
+        backref="deployed_workflows",
+        primaryjoin="and_(DeployedWorkflow.id==PermissionsDAG.dag_id)",
     )
 
     def __init__(self, data):
@@ -47,20 +48,21 @@ class DeployedDAG(TraceAttributesModel):
         self.instance_checks_schema = data.get("instance_checks_schema", None)
         self.solution_checks_schema = data.get("solution_checks_schema", None)
         self.config_schema = data.get("config_schema", None)
+        self.kpis_schema = data.get("kpis_schema", None)
 
     def __repr__(self):
         return f"<DAG {self.id}>"
 
     @staticmethod
     def get_one_schema(config, dag_name, schema=INSTANCE_SCHEMA):
-        item = DeployedDAG.get_one_object(dag_name)
+        item = DeployedWorkflow.get_one_object(dag_name)
 
         if item is None:
             err = f"The DAG {dag_name} does not exist in the database."
             raise ObjectDoesNotExist(
                 err,
                 log_txt=f"Error while user tries to register data for DAG {dag_name} "
-                            f"from instance and execution. " + err
+                f"from instance and execution. " + err,
             )
 
         if schema == INSTANCE_SCHEMA:
@@ -71,7 +73,8 @@ class DeployedDAG(TraceAttributesModel):
             jsonschema = item.instance_checks_schema
         elif schema == SOLUTION_CHECKS_SCHEMA:
             jsonschema = item.solution_checks_schema
-        # schema == CONFIG_SCHEMA
+        elif schema == KPIS_SCHEMA:
+            jsonschema = item.kpis_schema
         else:
             jsonschema = item.config_schema
 

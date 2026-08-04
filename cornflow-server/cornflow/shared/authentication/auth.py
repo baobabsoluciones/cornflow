@@ -25,6 +25,7 @@ from cornflow.shared.const import (
     AUTH_OID,
     PERMISSION_METHOD_MAP,
     INTERNAL_TOKEN_ISSUER,
+    OID_PROVIDER_AZURE,
 )
 from cornflow.shared.exceptions import (
     CommunicationError,
@@ -301,17 +302,19 @@ class Auth:
         """
         # Fetch keys from provider
         # For Azure AD, we need to use the discovery endpoint to get the jwks_uri
-        if provider_url.startswith("https://login.microsoftonline.com/"):
-            tenant_id = provider_url.split("/")[
-                3
-            ]  
+        oid_provider_type = current_app.config["OID_PROVIDER_TYPE"]
+        if oid_provider_type == OID_PROVIDER_AZURE:
+            # Azure AD uses a different endpoint for JWKS
             # Extract tenant ID from provider URL
+            tenant_id = provider_url.split("/")[3]
             jwks_url = (
                 f"https://login.microsoftonline.com/{tenant_id}/discovery/v2.0/keys"
             )
         else:
+            # AWS Cognito uses the standard well-known endpoint
             # For other providers, use the standard well-known endpoint
             jwks_url = f"{provider_url.rstrip('/')}/.well-known/jwks.json"
+
         try:
             response = requests.get(jwks_url)
             response.raise_for_status()

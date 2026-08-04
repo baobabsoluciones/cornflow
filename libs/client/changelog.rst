@@ -1,3 +1,155 @@
+version 1.3.5
+--------------
+- released: 2026-06-03
+- description: KPIs in data checks, execution output files and new role
+- changelog:
+    - KPIs in data checks
+        Executions and cases can now generate/re-generate and validate KPIs as part of the data-check flow. Solvers
+        can define a KPI schema for their solutions, and the result is validated against it. The rostering
+        example includes an implementation. New KPI-aware data-check endpoints are added alongside the
+        existing data-check endpoints, which remain available.
+
+    - Execution output files
+        Adds the ability to generate output files for executions. These files are produced as part of the
+        workflow run in Airflow, which follows the sequence:
+
+        instance checks → solve → solution checks → KPIs → output files
+
+        Each step gates the next:
+        - **Instance checks** run first. If they report critical errors, the solver is not run and **no
+          output files are generated**.
+        - The **solver** runs. If no solution is found, output files are still produced based on the
+          available data (instance checks).
+        - **Solution checks** run on the solution. **KPIs are only generated when the solution checks
+          report no errors**; if the solution has errors, KPIs are skipped.
+        - **Output files** are then generated from the instance checks, solution, solution checks, and
+          KPIs. Whether files are produced depends on the solver's `generate_output_files`
+          implementation — if it returns nothing, files are reported as not generated.
+
+        Each execution tracks the status of its files (not generated, ready/OK, out of date, deleted, or
+        error), each with an associated message. If file generation fails at any point, the status is set
+        to error. New endpoints let clients fetch these files and trigger regeneration, and a scheduled
+        cleanup job removes stale execution files from the backend. Database migrations are included for
+        the new fields.
+
+    - Roles
+        Adds a new "dummy" role with a limited set of permissions (read/update user detail, read user
+        roles).
+
+    -  Other changes
+        Expanded test coverage for the new features.
+
+version 1.3.4
+--------------
+
+- released: 2026-04-20
+- description: Each user can get their role
+- changelog:
+    - Each user can get their role
+
+
+version 1.3.3
+--------------
+
+- released: 2026-03-18
+- description: Security release
+- changelog:
+    - updated some requirements
+
+version 1.3.1
+--------------
+
+- released: 2026-03-05
+- description: Security release
+- changelog:
+    - fixed versions in requirements, no more ranges
+    - updated some requirements
+
+
+version 1.3.0
+--------------
+
+- released: 2026-02-12
+- description: new version of cornflow with new features and bug fixes.
+- changelog:
+    - added new method names that are clearer and more generic.
+    - added new exception classes for better error handling.
+
+Cornflow Client Updates (Python Library)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+1. New Method Names Available
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you use the Cornflow Python client (``cornflow-client``), we've added new method names that are clearer and more generic:
+
++---------------------------+------------------------------+----------------------------------+
+| What You Used Before      | What You Can Use Now         | Status                           |
++===========================+==============================+==================================+
+| ``get_dag_info()``        | ``get_workflow_info()``      | ✅ Both work (old shows warning) |
++---------------------------+------------------------------+----------------------------------+
+| ``run_dag()``             | ``run_workflow()``           | ✅ Both work (old shows warning) |
++---------------------------+------------------------------+----------------------------------+
+| ``get_dag_run_status()``  | ``get_run_status()``         | ✅ Both work (old shows warning) |
++---------------------------+------------------------------+----------------------------------+
+
+**Example of the change:**
+
+.. code-block:: python
+
+   # Old way (still works but shows warning)
+   client.run_dag(execution_id="123", dag_name="solve_model_dag")
+
+   # New way (recommended)
+   client.run_workflow(execution_id="123", workflow_name="solve_model_dag")
+
+**What you need to do:**
+
+- **Optional:** Update to the new method names when convenient
+- **Required eventually:** The old names will be removed in a future major version (2.0.0)
+- For now, both work - you'll just see deprecation warnings with the old names
+
+2. Changed Exception Classes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Exception Classes:**
+
++--------------------------------------------------------+--------------------------------------------------------+-------------------+
+| Old Import                                             | New Import                                             | Status            |
++========================================================+========================================================+===================+
+| ``from cornflow_client.constants import AirflowError`` | Still works (no change needed)                         | ✅ Still available |
++--------------------------------------------------------+--------------------------------------------------------+-------------------+
+| N/A                                                    | ``from cornflow_client.constants import DatabricksError`` | ✨ New class      |
++--------------------------------------------------------+--------------------------------------------------------+-------------------+
+| N/A                                                    | ``from cornflow_client.constants import OrchError``    | ✨ New base class |
++--------------------------------------------------------+--------------------------------------------------------+-------------------+
+
+**Example:**
+
+.. code-block:: python
+
+   # If you were catching AirflowError
+   from cornflow_client.constants import AirflowError
+
+   try:
+       client.run_workflow(...)
+   except AirflowError as e:
+       print(f"Execution failed: {e}")
+
+   # New: You can also catch the base class for both backends
+   from cornflow_client.constants import OrchError
+
+   try:
+       client.run_workflow(...)
+   except OrchError as e:  # Catches both AirflowError and DatabricksError
+       print(f"Execution failed: {e}")
+
+**What you need to do:**
+
+- **Optional:** Consider catching ``OrchError`` instead of ``AirflowError`` if you want to handle both backends
+- ``AirflowError`` still works and is not deprecated
+- ``DatabricksError`` is available if you need backend-specific error handling
+
 version 1.2.6
 --------------
 
