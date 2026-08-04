@@ -25,6 +25,7 @@ from cornflow_client.databricks.api import Databricks
 from cornflow.shared.exceptions import EndpointNotImplemented
 
 
+
 class HealthEndpoint(BaseMetaResource):
     @doc(description="Health check", tags=["Health"])
     @marshal_with(HealthResponse)
