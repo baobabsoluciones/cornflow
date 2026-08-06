@@ -8,7 +8,6 @@ from warnings import warn
 from airflow import DAG
 from airflow.models import Variable
 from airflow.operators.python import PythonOperator
-from airflow.utils.db import create_session
 from cornflow_client import ApplicationCore
 from cornflow_client.airflow.dag_utilities import callback_email
 
@@ -34,30 +33,60 @@ def get_new_apps() -> List[ApplicationCore]:
     return [app_class() for app_class in new_apps]
 
 
+def _load_ignore_patterns():
+    """
+    Load ignore patterns from .dagignore if it exists, else use defaults. Always include default patterns.
+    """
+    default_patterns = ["scripts", "documentation", "tests", "activate_dags", ".", "__"]
+
+    _dir = os.path.dirname(__file__)
+    dagignore_path = os.path.join(_dir, ".dagignore")
+
+    ignore_patterns = set(default_patterns)
+
+    if os.path.exists(dagignore_path):
+        try:
+            with open(dagignore_path, "r") as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith("#"):
+                        ignore_patterns.add(line)
+            print(f"Loaded ignore patterns from {dagignore_path}")
+        except FileNotFoundError:
+            print(f"Warning: Could not read .dagignore file: {FileNotFoundError}")
+            print("Using default ignore patterns")
+    else:
+        print("No .dagignore file found, using default ignore patterns")
+
+    return list(ignore_patterns)
+
+
+def _should_ignore_file(filename, ignore_patterns):
+    """
+    Check if a filename should be ignored based on the ignore patterns.
+    """
+    return any(filename.startswith(pattern) for pattern in ignore_patterns)
+
+
 def import_dags():
     sys.path.append(os.path.dirname(__file__))
     _dir = os.path.dirname(__file__)
     print(f"looking for apps in dir={_dir}")
+
+    ignore_patterns = _load_ignore_patterns()
+
     files = os.listdir(_dir)
     print(f"Files are: {files}")
-    # we go file by file and try to import it if matches the filters
-    # TODO: here we should implement a .dagignore file to avoid files that could be on the folder
+
+    # Process each file in the directory
     for dag_module in files:
         filename, ext = os.path.splitext(dag_module)
 
         if ext not in [".py", ""]:
             continue
 
-        if filename.startswith(
-            (
-                ".",
-                "__",
-                "scripts",
-                "documentation",
-                "tests",
-                "activate_dags",
-            )
-        ):
+        if _should_ignore_file(filename, ignore_patterns):
+            print(f"Ignored file due to pattern match: {filename}")
             continue
 
         try:
@@ -124,6 +153,8 @@ def get_all_example_data(apps):
 def update_all_schemas(**kwargs):
     sys.setrecursionlimit(250)
 
+    from airflow.utils.db import create_session
+
     # first we delete all variables (this helps to keep it clean)
     with create_session() as session:
         current_vars = set(var.key for var in session.query(Variable))
@@ -159,7 +190,6 @@ update_schema2 = PythonOperator(
     dag=dag,
     on_failure_callback=callback_email,
 )
-
 
 if __name__ == "__main__":
     update_all_schemas()
