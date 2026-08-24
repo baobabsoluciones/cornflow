@@ -19,7 +19,7 @@ from cornflow.commands.access import access_init_command
 from cornflow.commands.auxiliar import check_reserved_role_ids
 from cornflow.commands.dag import register_deployed_dags_command_test
 from cornflow.commands.permissions import register_dag_permissions_command
-from cornflow.models import InstanceModel, RoleModel, UserRoleModel
+from cornflow.models import ExecutionModel, InstanceModel, RoleModel, UserRoleModel
 from cornflow.shared import db
 from cornflow.shared.const import (
     ADMIN_ROLE,
@@ -161,6 +161,76 @@ class TestPlatformDataIsolation(TestCase, _RoleUserMixin):
         visible = self.list_instances(self.platform_token)
         self.assertIn(own_instance, visible)
         self.assertNotIn(client_instance, visible)
+
+    def make_execution(self, token, owner_id):
+        """Creates an execution owned by `owner_id` over a new instance."""
+        instance_id = self.create_instance(token)
+        execution = ExecutionModel(
+            {
+                "user_id": owner_id,
+                "instance_id": instance_id,
+                "name": "platform execution",
+                "description": "",
+                "schema": "solve_model_dag",
+                "config": {"solver": "cbc"},
+            }
+        )
+        execution.save()
+        return execution.id
+
+    def list_executions(self, token):
+        response = self.client.get("/execution/", headers=auth_header(token))
+        self.assertEqual(200, response.status_code)
+        return [item["id"] for item in response.json]
+
+    def test_client_admin_does_not_list_platform_executions(self):
+        # UAT 7.12: the executions list is built by ExecutionModel with its own
+        # query, so it has to apply the same isolation as the detail view —
+        # otherwise the object shows up in the list and 404s when opened
+        platform_execution = self.make_execution(
+            self.platform_token, self.platform_id
+        )
+        client_execution = self.make_execution(self.client_token, self.client_id)
+
+        visible = self.list_executions(self.admin_token)
+        self.assertIn(client_execution, visible)
+        self.assertNotIn(platform_execution, visible)
+
+    def test_client_user_does_not_list_platform_executions(self):
+        platform_execution = self.make_execution(
+            self.platform_token, self.platform_id
+        )
+        own_execution = self.make_execution(self.client_token, self.client_id)
+
+        visible = self.list_executions(self.client_token)
+        self.assertIn(own_execution, visible)
+        self.assertNotIn(platform_execution, visible)
+
+    def test_the_execution_list_and_detail_agree(self):
+        # the two paths must never disagree: whatever the list hides, the
+        # detail must refuse, and the other way round
+        platform_execution = self.make_execution(
+            self.platform_token, self.platform_id
+        )
+        self.assertNotIn(
+            platform_execution, self.list_executions(self.admin_token)
+        )
+        detail = self.client.get(
+            f"/execution/{platform_execution}/",
+            headers=auth_header(self.admin_token),
+        )
+        self.assertEqual(404, detail.status_code)
+
+    def test_platform_admin_lists_platform_executions(self):
+        platform_admin_token, _ = self.user_with_role(
+            "padminexec", "padminexec@test.com", PLATFORM_ADMIN_ROLE
+        )
+        platform_execution = self.make_execution(
+            self.platform_token, self.platform_id
+        )
+        self.assertIn(
+            platform_execution, self.list_executions(platform_admin_token)
+        )
 
     def test_isolation_can_be_disabled(self):
         platform_instance = self.create_instance(self.platform_token)
