@@ -415,7 +415,9 @@ class TestLogInOpenAuth(CustomTestCase):
             },
         )
 
-        self.assertEqual(400, response.status_code)
+        # 401: an expired credential is an authentication failure, and it is
+        # what tells a client to renew the session instead of failing
+        self.assertEqual(401, response.status_code)
         self.assertEqual(
             "The token has expired, please login again", response.json["error"]
         )

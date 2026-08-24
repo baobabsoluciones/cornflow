@@ -8,6 +8,33 @@ from urllib.parse import urljoin
 import requests
 
 
+
+def _is_expired_token(response) -> bool:
+    """
+    Whether a response says the access token has expired and the call is worth
+    retrying after renewing the session.
+
+    A current server answers 401. Older ones answered 400 with the expiry
+    message, so that is accepted too: otherwise a script talking to a server
+    that has not been updated would fail instead of renewing.
+
+    :param response: the requests response to inspect
+    :rtype: bool
+    """
+    status = getattr(response, "status_code", None)
+    if status == 401:
+        return True
+    if status != 400:
+        return False
+    try:
+        body = response.json()
+    except Exception:
+        return False
+    if not isinstance(body, dict):
+        return False
+    return "expired" in str(body.get("error", "")).lower()
+
+
 class RawCornFlow(object):
     """
     Base class to access cornflow-server
@@ -27,14 +54,11 @@ class RawCornFlow(object):
             if not self.token:
                 raise CornFlowApiError("Need to login first!")
             response = func(self, *args, **kwargs)
-            # Interactive sessions use a short-lived access token: on a 401
-            # renew it once with the stored refresh token and retry the call
-            # transparently, so long-running scripts keep working. API-key
-            # sessions have no refresh token and are returned as-is.
-            if (
-                getattr(response, "status_code", None) == 401
-                and self.refresh_token
-            ):
+            # Interactive sessions use a short-lived access token: when it has
+            # expired, renew it once with the stored refresh token and retry
+            # the call transparently, so long-running scripts keep working.
+            # API-key sessions have no refresh token and are returned as-is.
+            if self.refresh_token and _is_expired_token(response):
                 refresh_response = self.refresh()
                 if refresh_response.status_code == 200:
                     response = func(self, *args, **kwargs)

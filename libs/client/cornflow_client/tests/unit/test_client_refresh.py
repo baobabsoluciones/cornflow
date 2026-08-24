@@ -82,6 +82,38 @@ class TestRawClientRefresh(TestCase):
         retry_headers = req.call_args[1]["headers"]
         self.assertEqual("Bearer access-2", retry_headers["Authorization"])
 
+    def test_expired_token_reported_as_400_is_also_renewed(self):
+        # UAT 12.5: the server used to answer 400 (not 401) when the access
+        # token expired, so a retry that only looked at 401 never fired and the
+        # script died after ~15 minutes. Servers that still do must work.
+        self.login({"token": "access-1", "refresh_token": "refresh-1", "id": 1})
+        with mock.patch(
+            "cornflow_client.raw_cornflow_client.requests.request",
+            side_effect=[
+                _response(400, {"error": "The token has expired, please login again"}),
+                _response(200, [{"id": "instance-1"}]),
+            ],
+        ) as req, mock.patch(
+            "cornflow_client.raw_cornflow_client.requests.post",
+            return_value=_response(
+                200, {"token": "access-2", "refresh_token": "refresh-2", "id": 1}
+            ),
+        ):
+            response = self.client.get_all_instances()
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(2, req.call_count)
+
+    def test_an_ordinary_400_is_not_retried(self):
+        # only an expiry justifies renewing: a plain bad request must surface
+        self.login({"token": "access-1", "refresh_token": "refresh-1", "id": 1})
+        with mock.patch(
+            "cornflow_client.raw_cornflow_client.requests.request",
+            return_value=_response(400, {"error": "Invalid payload"}),
+        ) as req:
+            response = self.client.get_all_instances()
+        self.assertEqual(400, response.status_code)
+        self.assertEqual(1, req.call_count)
+
     def test_401_without_refresh_token_is_returned_as_is(self):
         # API-key style session: no refresh token, the 401 is not retried
         self.client.set_api_key("an-api-key")
