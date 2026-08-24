@@ -11,7 +11,7 @@ from sqlalchemy.orm import defer
 from sqlalchemy.sql.expression import false
 
 # Imports from internal modules
-from cornflow.models.base_data_model import BaseDataModel
+from cornflow.models.base_data_model import BaseDataModel, apply_visibility
 from cornflow.shared import db
 from cornflow.shared.const import (
     DEFAULT_EXECUTION_CODE,
@@ -204,14 +204,9 @@ class ExecutionModel(BaseDataModel):
         :rtype: list(:class:`BaseDataModel`)
         """
         query = cls.query.options(defer(cls.data), defer(cls.checks)).filter(cls.deleted_at == None)
-        user_access = int(current_app.config["USER_ACCESS_ALL_OBJECTS"])
-        if (
-            user is not None
-            and not user.is_admin()
-            and not user.is_service_user()
-            and user_access == 0
-        ):
-            query = query.filter(cls.user_id == user.id)
+        # Shared with the base model so the list and the detail view can not
+        # disagree on who may see what
+        query = apply_visibility(query, cls, user)
 
         if schema:
             query = query.filter(cls.schema == schema)
