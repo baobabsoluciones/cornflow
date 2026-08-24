@@ -520,6 +520,12 @@ class Auth:
                 f"session expired (inactivity or absolute cap).",
             )
         session.rotate()
+        audit(
+            "session.refreshed",
+            actor_id=user.id,
+            actor=user.username,
+            session_id=session.session_id,
+        )
         return {
             "token": Auth.generate_access_token(user.id, session=session),
             "refresh_token": Auth.generate_refresh_token(user.id, session),
@@ -532,19 +538,29 @@ class Auth:
         Revokes the session behind a refresh token (logout). Idempotent: an
         invalid, expired or already-revoked token is a no-op.
 
+        Returns the owner of the closed session so the caller can attribute the
+        event: a logout is not authenticated (the client only sends the refresh
+        token), so without this the audit record would say when and from where
+        but never who.
+
         :param str refresh_token: the refresh token whose session to revoke
+        :return: the user whose session was closed, or None when there was
+          nothing to close
+        :rtype: :class:`UserModel` or None
         """
         if not refresh_token:
-            return
+            return None
         try:
             payload = Auth.decode_token(refresh_token)
         except InvalidCredentials:
-            return
+            return None
         if not isinstance(payload, dict) or payload.get("type") != TOKEN_TYPE_REFRESH:
-            return
+            return None
         session = SessionModel.get_active(payload.get("sid"))
-        if session is not None:
-            session.revoke()
+        if session is None:
+            return None
+        session.revoke()
+        return UserModel.get_one_user(session.user_id)
 
     @staticmethod
     def generate_api_key(user_id: int = None, scope: str = None) -> str:
@@ -621,7 +637,11 @@ class Auth:
             raise InvalidCredentials(
                 "The token has expired, please login again",
                 log_txt="Error while trying to decode token. The token has expired.",
-                status_code=400,
+                # 401 and not 400: an expired credential is an authentication
+                # failure, and it is the status every client (the web app, the
+                # cornflow-client library) uses to decide to renew the session
+                # instead of surfacing the error.
+                status_code=401,
             )
         except (
             jwt.InvalidSignatureError,
@@ -642,7 +662,7 @@ class Auth:
                     raise InvalidCredentials(
                         "The token has expired, please login again",
                         log_txt="Error while trying to decode OIDC token. The token has expired.",
-                        status_code=400,
+                        status_code=401,
                     )
                 except (
                     jwt.InvalidTokenError,
