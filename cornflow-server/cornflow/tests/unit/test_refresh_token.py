@@ -174,6 +174,102 @@ class TestRefreshTokenFlow(TestCase):
         new_refresh = self.refresh(refresh_token).json["refresh_token"]
         self.assertEqual(200, self.refresh(new_refresh).status_code)
 
+    # -- the access token dies with its session ----------------------------
+
+    def test_reuse_detection_kills_the_access_token_in_circulation(self):
+        # UAT 6.5: revoking the session on reuse detection must also stop the
+        # access tokens already issued, not only the renewal
+        login = self.login().json
+        rotated = self.refresh(login["refresh_token"]).json
+        # replaying the superseded refresh token revokes the session
+        self.assertEqual(401, self.refresh(login["refresh_token"]).status_code)
+        # neither the access token minted by the refresh...
+        self.assertEqual(
+            401,
+            self.client.get(
+                f"{USER_URL}{self.user_id}/", headers=auth_header(rotated["token"])
+            ).status_code,
+        )
+        # ...nor the one issued at login keep working
+        self.assertEqual(
+            401,
+            self.client.get(
+                f"{USER_URL}{self.user_id}/", headers=auth_header(login["token"])
+            ).status_code,
+        )
+
+    def test_logout_kills_the_access_token_in_circulation(self):
+        # same hole on the logout path: clicking "log out" must end access now
+        login = self.login().json
+        self.assertEqual(200, self.logout(login["refresh_token"]).status_code)
+        response = self.client.get(
+            f"{USER_URL}{self.user_id}/", headers=auth_header(login["token"])
+        )
+        self.assertEqual(401, response.status_code)
+
+    def test_absolute_cap_kills_the_access_token(self):
+        login = self.login().json
+        session = self._session()
+        session.expires_at = datetime.now(timezone.utc) - timedelta(minutes=1)
+        db.session.add(session)
+        db.session.commit()
+        self.assertEqual(
+            401,
+            self.client.get(
+                f"{USER_URL}{self.user_id}/", headers=auth_header(login["token"])
+            ).status_code,
+        )
+
+    def test_revoking_one_session_leaves_the_others_alive(self):
+        # each login is an independent session: closing one must not close the
+        # rest (only a global event such as a password change does that)
+        first = self.login().json
+        second = self.login().json
+        self.logout(first["refresh_token"])
+        self.assertEqual(
+            401,
+            self.client.get(
+                f"{USER_URL}{self.user_id}/", headers=auth_header(first["token"])
+            ).status_code,
+        )
+        self.assertEqual(
+            200,
+            self.client.get(
+                f"{USER_URL}{self.user_id}/", headers=auth_header(second["token"])
+            ).status_code,
+        )
+
+    def test_inactivity_does_not_break_an_active_access_token(self):
+        # the session-state check must NOT enforce the inactivity window, or a
+        # user making requests without refreshing would be logged out
+        login = self.login().json
+        session = self._session()
+        window = int(current_app.config["REFRESH_TOKEN_INACTIVITY_MINUTES"])
+        session.last_activity_at = datetime.now(timezone.utc) - timedelta(
+            minutes=window + 5
+        )
+        db.session.add(session)
+        db.session.commit()
+        # the access token still works (it is the refresh that would fail)
+        self.assertEqual(
+            200,
+            self.client.get(
+                f"{USER_URL}{self.user_id}/", headers=auth_header(login["token"])
+            ).status_code,
+        )
+        self.assertEqual(401, self.refresh(login["refresh_token"]).status_code)
+
+    def test_legacy_token_without_session_still_works(self):
+        # tokens issued before sessions were bound carry no "sid": they must
+        # keep working so upgrading a deployment does not log everybody out
+        from cornflow.shared.authentication import Auth
+
+        legacy = Auth.generate_token(self.user_id)
+        response = self.client.get(
+            f"{USER_URL}{self.user_id}/", headers=auth_header(legacy)
+        )
+        self.assertEqual(200, response.status_code)
+
     # -- revocation --------------------------------------------------------
 
     def test_logout_revokes_session(self):
