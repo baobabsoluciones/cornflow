@@ -6,12 +6,14 @@ refusal to use a refresh token on a normal endpoint.
 """
 
 import json
+import logging
+import unittest
 from datetime import datetime, timedelta, timezone
 
 from flask import current_app
 from flask_testing import TestCase
 
-from cornflow.app import create_app
+from cornflow.app import _check_session_windows, create_app
 from cornflow.commands.access import access_init_command
 from cornflow.commands.dag import register_deployed_dags_command_test
 from cornflow.commands.permissions import register_dag_permissions_command
@@ -399,3 +401,81 @@ class TestRefreshTokenFlow(TestCase):
         self.assertEqual("session.reuse_detected", events[0]["event"])
         self.assertEqual(self.user_id, events[0]["actor_id"])
         self.assertEqual("revoked", events[0]["outcome"])
+
+
+class TestSessionWindowSanityCheck(unittest.TestCase):
+    """
+    The inactivity window must be longer than the access-token lifetime: a
+    client only refreshes once its access token has expired, so a shorter
+    window would log out users who are actively working. The application
+    reports the misconfiguration at startup (it is stricter, not laxer, so it
+    is not clamped).
+    """
+
+    def _warnings(self, **config):
+        app = create_app("testing")
+        app.config.update(config)
+        records = []
+
+        class _Capture(logging.Handler):
+            def emit(self, record):
+                records.append(record.getMessage())
+
+        handler = _Capture()
+        app.logger.addHandler(handler)
+        try:
+            _check_session_windows(app)
+        finally:
+            app.logger.removeHandler(handler)
+        return records
+
+    def test_no_warning_with_the_defaults(self):
+        self.assertEqual(
+            [],
+            self._warnings(
+                ACCESS_TOKEN_DURATION_MINUTES=15,
+                REFRESH_TOKEN_INACTIVITY_MINUTES=30,
+                REFRESH_TOKEN_ABSOLUTE_HOURS=12,
+            ),
+        )
+
+    def test_warns_when_the_window_is_not_longer_than_the_access_token(self):
+        warnings = self._warnings(
+            ACCESS_TOKEN_DURATION_MINUTES=15,
+            REFRESH_TOKEN_INACTIVITY_MINUTES=10,
+            REFRESH_TOKEN_ABSOLUTE_HOURS=12,
+        )
+        self.assertTrue(
+            any("REFRESH_TOKEN_INACTIVITY_MINUTES" in w for w in warnings),
+            msg=f"expected a warning, got {warnings}",
+        )
+
+    def test_warns_when_the_window_equals_the_access_token(self):
+        warnings = self._warnings(
+            ACCESS_TOKEN_DURATION_MINUTES=15,
+            REFRESH_TOKEN_INACTIVITY_MINUTES=15,
+            REFRESH_TOKEN_ABSOLUTE_HOURS=12,
+        )
+        self.assertTrue(any("actively working" in w for w in warnings))
+
+    def test_warns_when_the_absolute_cap_swallows_the_window(self):
+        warnings = self._warnings(
+            ACCESS_TOKEN_DURATION_MINUTES=15,
+            REFRESH_TOKEN_INACTIVITY_MINUTES=120,
+            REFRESH_TOKEN_ABSOLUTE_HOURS=1,
+        )
+        self.assertTrue(
+            any("REFRESH_TOKEN_ABSOLUTE_HOURS" in w for w in warnings),
+            msg=f"expected a warning, got {warnings}",
+        )
+
+    def test_silent_when_refresh_sessions_are_disabled(self):
+        self.assertEqual(
+            [],
+            self._warnings(
+                REFRESH_TOKEN_ENABLED=0,
+                ACCESS_TOKEN_DURATION_MINUTES=15,
+                REFRESH_TOKEN_INACTIVITY_MINUTES=1,
+                REFRESH_TOKEN_ABSOLUTE_HOURS=12,
+            ),
+        )

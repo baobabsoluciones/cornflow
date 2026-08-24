@@ -85,6 +85,46 @@ def _check_secret_keys(app):
             )
 
 
+def _check_session_windows(app):
+    """
+    Warns when the session windows are configured in a way that would log out
+    users who are actively working.
+
+    Activity is only recorded when the client exchanges the refresh token, and
+    a client only does that once its access token has expired. So an
+    inactivity window that is not longer than the access-token lifetime closes
+    the session of an active user: by the time the client refreshes, the
+    window has already elapsed. The same applies to an absolute cap shorter
+    than the inactivity window, which would make the window unreachable.
+
+    These are misconfigurations rather than security weaknesses (they are
+    stricter, not laxer), so they are reported and not clamped.
+
+    :param app: the Flask application being created
+    """
+    if int(app.config.get("REFRESH_TOKEN_ENABLED", 1)) != 1:
+        return
+    access = int(app.config.get("ACCESS_TOKEN_DURATION_MINUTES", 15))
+    inactivity = int(app.config.get("REFRESH_TOKEN_INACTIVITY_MINUTES", 30))
+    absolute_minutes = int(app.config.get("REFRESH_TOKEN_ABSOLUTE_HOURS", 12)) * 60
+    if inactivity <= access:
+        app.logger.warning(
+            f"REFRESH_TOKEN_INACTIVITY_MINUTES ({inactivity}) is not greater "
+            f"than ACCESS_TOKEN_DURATION_MINUTES ({access}): users who are "
+            f"actively working will be logged out, because a client only "
+            f"refreshes its session once the access token has expired. Set "
+            f"the inactivity window above the access-token lifetime "
+            f"(defaults: 15 and 30)."
+        )
+    if absolute_minutes <= inactivity:
+        app.logger.warning(
+            f"REFRESH_TOKEN_ABSOLUTE_HOURS ({absolute_minutes // 60}h) is not "
+            f"longer than REFRESH_TOKEN_INACTIVITY_MINUTES ({inactivity} min): "
+            f"every session will end at the absolute cap and the inactivity "
+            f"window will never apply."
+        )
+
+
 def create_app(env_name="development", dataconn=None):
     """
 
@@ -103,6 +143,7 @@ def create_app(env_name="development", dataconn=None):
 
     app.config.from_object(app_config[env_name])
     _check_secret_keys(app)
+    _check_session_windows(app)
     # initialization for init_cornflow_service.py
     if dataconn is not None:
         app.config["SQLALCHEMY_DATABASE_URI"] = dataconn
