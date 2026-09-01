@@ -494,6 +494,56 @@ class CLITests(TestCase):
         self.assertEqual(user.roles, {1: "viewer"})
         self.assertFalse(user.is_service_user())
 
+    def test_viewer_user_command_not_marked_by_default(self):
+        runner = CliRunner()
+        self.test_roles_init_command()
+        result = runner.invoke(
+            cli,
+            [
+                "users",
+                "create",
+                "viewer",
+                "-u",
+                "plainuser",
+                "-p",
+                "Kx9#tR2m!Qw7Zp",
+                "-e",
+                "plainuser@test.org",
+            ],
+        )
+        self.assertEqual(result.exit_code, 0)
+        user = UserModel.get_one_user_by_email("plainuser@test.org")
+        self.assertFalse(user.pwd_change_required)
+
+    def test_viewer_user_command_force_password_change(self):
+        runner = CliRunner()
+        self.test_roles_init_command()
+        result = runner.invoke(
+            cli,
+            [
+                "users",
+                "create",
+                "viewer",
+                "-u",
+                "provisioned",
+                "-p",
+                "Kx9#tR2m!Qw7Zp",
+                "-e",
+                "provisioned@test.org",
+                "--force-password-change",
+            ],
+        )
+        self.assertEqual(result.exit_code, 0)
+        user = UserModel.get_one_user_by_email("provisioned@test.org")
+        self.assertTrue(user.pwd_change_required)
+
+    def test_service_user_command_has_no_force_flag(self):
+        # Service users are exempt from rotation: the flag must not exist
+        runner = CliRunner()
+        result = runner.invoke(cli, ["users", "create", "service", "--help"])
+        self.assertEqual(result.exit_code, 0)
+        self.assertNotIn("--force-password-change", result.output)
+
     def test_generate_token(self):
         runner = CliRunner()
 
