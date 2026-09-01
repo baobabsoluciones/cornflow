@@ -9,7 +9,7 @@ from flask_apispec import doc, marshal_with, use_kwargs
 
 # Import from internal modules
 from cornflow.endpoints.meta_resource import BaseMetaResource
-from cornflow.models import UserRoleModel
+from cornflow.models import RoleModel, UserModel, UserRoleModel
 from cornflow.schemas.user_role import UserRoleRequest, UserRoleResponse
 from cornflow.shared.audit import audit
 from cornflow.shared.authentication import Auth, authenticate
@@ -19,6 +19,18 @@ from cornflow.shared.exceptions import (
     NoPermission,
     ObjectAlreadyExists,
 )
+
+
+def _role_name_of(role_id):
+    """Readable role name for the audit trail (falls back to None)."""
+    role = RoleModel.get_one_object(idx=role_id)
+    return role.name if role is not None else None
+
+
+def _username_of(user_id):
+    """Readable username for the audit trail (falls back to None)."""
+    user = UserModel.get_one_user(user_id)
+    return user.username if user is not None else None
 
 
 class UserRoleListEndpoint(BaseMetaResource):
@@ -109,7 +121,9 @@ class UserRoleListEndpoint(BaseMetaResource):
             audit(
                 "role.granted",
                 target_id=kwargs.get("user_id"),
+                target=_username_of(kwargs.get("user_id")),
                 role_id=kwargs.get("role_id"),
+                role=_role_name_of(kwargs.get("role_id")),
             )
             return self.activate_detail(**kwargs)
         elif UserRoleModel.check_if_role_assigned(**kwargs):
@@ -126,7 +140,9 @@ class UserRoleListEndpoint(BaseMetaResource):
             audit(
                 "role.granted",
                 target_id=kwargs.get("user_id"),
+                target=_username_of(kwargs.get("user_id")),
                 role_id=kwargs.get("role_id"),
+                role=_role_name_of(kwargs.get("role_id")),
             )
             return self.post_list(kwargs, trace_field="admin_id")
 
@@ -197,5 +213,11 @@ class UserRoleDetailEndpoint(BaseMetaResource):
         current_app.logger.info(
             f"User {self.get_user()} deletes user role assignment for user {user_id} and role {role_id}"
         )
-        audit("role.revoked", target_id=user_id, role_id=role_id)
+        audit(
+            "role.revoked",
+            target_id=user_id,
+            target=_username_of(user_id),
+            role_id=role_id,
+            role=_role_name_of(role_id),
+        )
         return self.delete_detail(user_id=user_id, role_id=role_id)

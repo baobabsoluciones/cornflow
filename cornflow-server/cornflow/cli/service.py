@@ -176,7 +176,13 @@ def _setup_environment_variables():
     # Cornflow app config
     os.environ.setdefault("cornflow_url", "http://cornflow:5000")
     os.environ["FLASK_APP"] = "cornflow.app"
-    os.environ["SECRET_KEY"] = os.getenv("FERNET_KEY", Fernet.generate_key().decode())
+    # Respect an operator-provided SECRET_KEY: it signs the tokens and the
+    # secrets encrypted at rest (TOTP) derive from it. FERNET_KEY stays as
+    # the fallback so deployments that never set SECRET_KEY keep the key
+    # their stored secrets were derived from after an upgrade.
+    os.environ.setdefault(
+        "SECRET_KEY", os.getenv("FERNET_KEY", Fernet.generate_key().decode())
+    )
 
     # Cornflow db defaults
     os.environ["DEFAULT_POSTGRES"] = "1"

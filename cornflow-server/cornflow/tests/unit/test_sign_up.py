@@ -43,6 +43,18 @@ class TestSignUp(TestCase):
         db.session.remove()
         db.drop_all()
 
+    def test_self_signup_password_is_not_single_use(self):
+        # The owner chose the password themselves: no forced change
+        response = self.client.post(
+            SIGNUP_URL,
+            data=json.dumps(self.data),
+            follow_redirects=True,
+            headers={"Content-Type": "application/json"},
+        )
+        self.assertEqual(201, response.status_code)
+        user = UserModel.get_one_user(response.json["id"])
+        self.assertFalse(user.pwd_change_required)
+
     def test_successful_signup(self):
         payload = self.data
 
@@ -189,6 +201,23 @@ class TestSignUpAuthenticated(TestCase):
         """Helper method to get authentication token for a user"""
         auth = Auth()
         return auth.generate_token(user.id)
+
+    def test_admin_provisioned_password_is_single_use(self):
+        # An administrator knows the password they typed: the account must
+        # change it on first login (same reasoning as an admin reset)
+        admin_token = self.get_auth_token(self.admin_user)
+        response = self.client.post(
+            SIGNUP_URL,
+            data=json.dumps(self.data),
+            follow_redirects=True,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {admin_token}",
+            },
+        )
+        self.assertEqual(201, response.status_code)
+        user = UserModel.get_one_user(response.json["id"])
+        self.assertTrue(user.pwd_change_required)
 
     def test_authenticated_signup_admin_can_register(self):
         """Test that admin users can register new users"""

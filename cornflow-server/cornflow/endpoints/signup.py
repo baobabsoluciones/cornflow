@@ -3,7 +3,7 @@ External endpoint for the user to signup
 """
 
 # Import from libraries
-from flask import current_app
+from flask import current_app, g
 from flask_apispec import use_kwargs, doc
 
 # Import from internal modules
@@ -92,6 +92,21 @@ class SignUpEndpoint(BaseMetaResource):
                 error="Email already in use, please supply another email address",
                 log_txt="Error while user tries to sign up. Email already in use.",
             )
+
+        # When the signup is performed by an authenticated administrator
+        # (SIGNUP_ACTIVATED with auth) the password is known by someone other
+        # than the account owner, so it is single-use: the user must change
+        # it on first login. Self-registration (open signup) is not marked -
+        # the owner chose the password themselves. The config is checked
+        # besides g.user because g lives on the application context and can
+        # carry the actor of a previous request when the context outlives the
+        # request (as under flask_testing); with auth required, g.user was
+        # necessarily set by this request's authentication.
+        signup_requires_auth = (
+            int(current_app.config["SIGNUP_ACTIVATED"]) != SIGNUP_WITH_NO_AUTH
+        )
+        if signup_requires_auth and getattr(g, "user", None) is not None:
+            user.pwd_change_required = True
 
         user.save()
 
