@@ -157,10 +157,11 @@ def unlock_user(username):
 
 @users.command(
     name="bi_token",
-    help="Generate a BI token for a user (valid for BI_TOKEN_DURATION_DAYS "
-    "days). Intended to be run inside the server with database access; no "
-    "further authentication is required because CLI access is already "
-    "privileged. Use it to (re)generate Power BI tokens.",
+    help="[DEPRECATED] Generate a BI token for a user (valid for "
+    "BI_TOKEN_DURATION_DAYS days). BI tokens are superseded by the read-only "
+    "personal API keys (users api_key --read-only), which are individually "
+    "revocable and get expiry warnings; this command is kept for backwards "
+    "compatibility and will be removed in a future release.",
 )
 @username
 def issue_bi_token(username):

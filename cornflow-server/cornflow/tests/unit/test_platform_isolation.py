@@ -232,6 +232,21 @@ class TestPlatformDataIsolation(TestCase, _RoleUserMixin):
             platform_execution, self.list_executions(platform_admin_token)
         )
 
+    def test_service_account_sees_platform_data(self):
+        # UAT 12.1: airflow (a client-side service account) must read the
+        # instance of a platform user to solve their execution; the isolation
+        # must not apply to service accounts, which act on behalf of everyone
+        service_token, _ = self.user_with_role(
+            "svcisolation", "svcisolation@test.com", SERVICE_ROLE
+        )
+        platform_instance = self.create_instance(self.platform_token)
+        response = self.client.get(
+            f"{INSTANCE_URL}{platform_instance}/",
+            headers=auth_header(service_token),
+        )
+        self.assertEqual(200, response.status_code)
+        self.assertIn(platform_instance, self.list_instances(service_token))
+
     def test_isolation_can_be_disabled(self):
         platform_instance = self.create_instance(self.platform_token)
         current_app.config["PLATFORM_DATA_ISOLATION"] = 0
