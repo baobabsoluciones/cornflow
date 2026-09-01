@@ -35,6 +35,12 @@ def _hide_platform_objects(query, cls, user):
         return query
     if not int(current_app.config.get("PLATFORM_DATA_ISOLATION", 1)):
         return query
+    # Service accounts act on behalf of every user: airflow must be able to
+    # read a platform user's instance to solve it (found in UAT 12.1, where
+    # the executions of a platform user never left the queue because the
+    # service account could not see their data and every task got a 404)
+    if user.is_service_user():
+        return query
     # Imported here to avoid a circular import at module load
     from cornflow.models.user_role import UserRoleModel
 
