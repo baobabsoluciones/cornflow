@@ -32,6 +32,16 @@ def create_user_with_role(
         user.save()
         user_role = UserRoleModel({"user_id": user.id, "role_id": role})
         user_role.save()
+        from cornflow.shared.audit import audit
+
+        audit(
+            "user.created",
+            actor="cli",
+            target_id=user.id,
+            target=username,
+            source="cli",
+            role_id=role,
+        )
         if verbose:
             current_app.logger.info(
                 f"User {username} is created and assigned {role_name} role"

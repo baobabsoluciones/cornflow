@@ -13,6 +13,9 @@ class UserRoleRequest(Schema):
 
     user_id = fields.Int()
     role_id = fields.Int()
+    # Fresh TOTP code of the ACTING administrator, required (when the step-up
+    # is enabled and the actor has MFA) to grant a platform role
+    totp_code = fields.Str(required=False, load_default=None)
 
 
 class UserRoleResponse(UserRoleRequest):

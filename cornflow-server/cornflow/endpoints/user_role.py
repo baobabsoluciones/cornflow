@@ -15,6 +15,7 @@ from cornflow.shared.audit import audit
 from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.const import ADMIN_ROLE, AUTH_LDAP, PLATFORM_ROLES
 from cornflow.shared.exceptions import (
+    InvalidCredentials,
     EndpointNotImplemented,
     NoPermission,
     ObjectAlreadyExists,
@@ -98,6 +99,10 @@ class UserRoleListEndpoint(BaseMetaResource):
                 + err,
             )
 
+        # The code never reaches the model: it only proves the actor's
+        # presence for the step-up below
+        totp_code = kwargs.pop("totp_code", None)
+
         # Platform roles are internal: only a platform administrator can
         # grant them. Without this check a client admin could escalate
         # themselves (or anyone) into the platform side.
@@ -112,6 +117,25 @@ class UserRoleListEndpoint(BaseMetaResource):
                 f"{kwargs.get('user_id')}. Only platform administrators can "
                 f"grant platform roles.",
             )
+
+        # Granting a platform role mints an internal account: a stolen admin
+        # session must not be enough, so the acting administrator confirms
+        # with a fresh TOTP code (same step-up as generating an API key).
+        # Only enforceable when the actor has MFA enrolled.
+        if kwargs.get("role_id") in PLATFORM_ROLES:
+            step_up = (
+                int(current_app.config.get("PLATFORM_ROLE_STEPUP_TOTP", 1)) == 1
+            )
+            actor = self.get_user()
+            if step_up and actor.mfa_enabled:
+                if not totp_code or not actor.check_totp_code(totp_code):
+                    raise InvalidCredentials(
+                        "A valid two-factor authentication code is required "
+                        "to grant a platform role",
+                        log_txt=f"Error while user {actor} tries to grant "
+                        f"platform role {kwargs.get('role_id')}. The step-up "
+                        f"TOTP code is missing or invalid.",
+                    )
 
         # Check if the assignation is disabled, or it does exist
         if UserRoleModel.check_if_role_assigned_disabled(**kwargs):
