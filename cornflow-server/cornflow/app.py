@@ -45,6 +45,7 @@ from cornflow.shared.const import (
     AUTH_LDAP,
     AUTH_OID,
     CONDITIONAL_ENDPOINTS,
+    SIGNUP_PLATFORM_ADMIN_ONLY,
     SIGNUP_WITH_AUTH,
     SIGNUP_WITH_NO_AUTH,
 )
@@ -197,7 +198,11 @@ def create_app(env_name="development", dataconn=None):
 
     if auth_type == AUTH_DB:
         signup_activated = int(app.config["SIGNUP_ACTIVATED"])
-        if signup_activated in [SIGNUP_WITH_AUTH, SIGNUP_WITH_NO_AUTH]:
+        if signup_activated in [
+            SIGNUP_WITH_AUTH,
+            SIGNUP_WITH_NO_AUTH,
+            SIGNUP_PLATFORM_ADMIN_ONLY,
+        ]:
             api.add_resource(
                 SignUpEndpoint, CONDITIONAL_ENDPOINTS["signup"], endpoint="signup"
             )

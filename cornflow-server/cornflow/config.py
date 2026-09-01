@@ -212,6 +212,10 @@ class DefaultConfig(object):
     # Require a fresh TOTP (step-up) when an MFA-enabled user generates an
     # API key through the API/UI. The CLI path is exempt (machine access).
     API_KEY_STEPUP_TOTP = int(os.getenv("API_KEY_STEPUP_TOTP", 1))
+    # Granting a platform role through the API asks the acting administrator
+    # for a fresh TOTP code (same step-up as generating an API key): a stolen
+    # session token alone can not mint internal accounts
+    PLATFORM_ROLE_STEPUP_TOTP = int(os.getenv("PLATFORM_ROLE_STEPUP_TOTP", 1))
     # Rotation grace window in minutes: after generating a new API key the
     # previous one keeps working for this long, so a key wired into running
     # automation can be replaced without a gap (generate, then redeploy).

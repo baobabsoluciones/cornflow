@@ -156,9 +156,13 @@ AIRFLOW_TO_STATE_MAP = dict(
 # NO_SIGNUP: no signup endpoint
 # SIGNUP_WITH_NO_AUTH: signup endpoint with no auth
 # SIGNUP_WITH_AUTH: signup endpoint with auth
+# SIGNUP_PLATFORM_ADMIN_ONLY: signup endpoint with auth, restricted to
+# platform administrators (a compromised client admin can not quietly
+# provision new accounts)
 NO_SIGNUP = 0
 SIGNUP_WITH_NO_AUTH = 1
 SIGNUP_WITH_AUTH = 2
+SIGNUP_PLATFORM_ADMIN_ONLY = 3
 
 DATABRICKS_TO_STATE_MAP = dict(
     BLOCKED=EXEC_STATE_QUEUED,

@@ -11,6 +11,8 @@ users:
 
 import json
 
+import pyotp
+
 from flask import current_app
 from flask_testing import TestCase
 
@@ -30,7 +32,13 @@ from cornflow.shared.const import (
     SERVICE_ROLE,
 )
 from cornflow.shared.exceptions import ConfigurationError
-from cornflow.tests.const import INSTANCE_PATH, INSTANCE_URL, LOGIN_URL, SIGNUP_URL
+from cornflow.tests.const import (
+    INSTANCE_PATH,
+    INSTANCE_URL,
+    LOGIN_URL,
+    SIGNUP_URL,
+    USER_ROLE_URL,
+)
 
 STRONG_PASSWORD = "Kx9#tR2m!Qw7Zp"
 JSON_HEADER = {"Content-Type": "application/json"}
@@ -382,3 +390,77 @@ class TestReservedRoleIds(TestCase):
         message = str(ctx.exception)
         self.assertIn("supervisor", message)
         self.assertIn("950", message)
+
+
+class TestPlatformRoleStepUp(TestCase, _RoleUserMixin):
+    """
+    Granting a platform role through the API requires a fresh TOTP code from
+    the acting administrator (when they have MFA enrolled): a stolen session
+    token alone must not be able to mint internal accounts.
+    """
+
+    def create_app(self):
+        return create_app("testing")
+
+    def setUp(self):
+        db.create_all()
+        access_init_command(verbose=False)
+        register_deployed_dags_command_test(verbose=False)
+        self.admin_token, self.admin_id = self.user_with_role(
+            "stepupadmin", "stepupadmin@test.com", PLATFORM_ADMIN_ROLE
+        )
+        _, self.target_id = self.user_with_role(
+            "stepuptarget", "stepuptarget@test.com", PLANNER_ROLE
+        )
+
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
+
+    def grant(self, role_id, totp_code=None):
+        payload = {"user_id": self.target_id, "role_id": role_id}
+        if totp_code is not None:
+            payload["totp_code"] = totp_code
+        return self.client.post(
+            USER_ROLE_URL,
+            data=json.dumps(payload),
+            headers=auth_header(self.admin_token),
+        )
+
+    def enable_mfa(self):
+        secret = pyotp.random_base32()
+        from cornflow.models import UserModel
+
+        user = UserModel.get_one_user(self.admin_id)
+        user.set_totp_secret(secret)
+        user.mfa_enabled = True
+        user.save()
+        return secret
+
+    def test_without_mfa_no_step_up_applies(self):
+        response = self.grant(PLATFORM_VIEWER_ROLE)
+        self.assertEqual(201, response.status_code)
+
+    def test_with_mfa_a_code_is_required(self):
+        self.enable_mfa()
+        response = self.grant(PLATFORM_VIEWER_ROLE)
+        self.assertEqual(400, response.status_code)
+
+    def test_with_mfa_a_wrong_code_is_rejected(self):
+        self.enable_mfa()
+        response = self.grant(PLATFORM_VIEWER_ROLE, totp_code="000000")
+        self.assertEqual(400, response.status_code)
+
+    def test_with_mfa_a_valid_code_grants(self):
+        secret = self.enable_mfa()
+        response = self.grant(
+            PLATFORM_VIEWER_ROLE, totp_code=pyotp.TOTP(secret).now()
+        )
+        self.assertEqual(201, response.status_code)
+
+    def test_client_roles_need_no_step_up(self):
+        # the step-up protects the platform side only: ordinary role grants
+        # keep working without a code even with MFA enabled
+        self.enable_mfa()
+        response = self.grant(ADMIN_ROLE)
+        self.assertEqual(201, response.status_code)
