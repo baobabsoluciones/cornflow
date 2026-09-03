@@ -975,6 +975,7 @@ class TestLoginLockout(TestCase):
             headers=JSON_HEADER,
         )
 
+
     def test_lockout_after_max_attempts(self):
         # A wrong password always returns the same generic error (no
         # enumeration), even on the attempt that trips the lock
@@ -1818,6 +1819,27 @@ class TestAuditLogging(TestCase):
         self.audit_logger.removeHandler(self.capture)
         db.session.remove()
         db.drop_all()
+
+    def test_user_created_event(self):
+        # A quietly provisioned account is a persistence vector: every account
+        # creation leaves an audit event saying who created whom
+        response = self.client.post(
+            SIGNUP_URL,
+            data=json.dumps(
+                {
+                    "username": "createdbyaudit",
+                    "email": "createdbyaudit@test.com",
+                    "password": STRONG_PASSWORD,
+                }
+            ),
+            headers=JSON_HEADER,
+        )
+        self.assertEqual(201, response.status_code)
+        events = self.capture.by_event("user.created")
+        self.assertEqual(1, len(events))
+        self.assertEqual("createdbyaudit", events[0].get("target"))
+        # open signup: nobody else created it
+        self.assertEqual("self-signup", events[0].get("actor"))
 
     def log_in(self, password):
         return self.client.post(

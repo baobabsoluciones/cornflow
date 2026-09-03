@@ -61,11 +61,15 @@ class TestCornflowClientUser(TestCase):
     def test_refresh_and_logout(self):
         # the interactive login returned a refresh token
         self.assertIsNotNone(self.client.refresh_token)
-        old_token = self.client.token
-        # refresh rotates the access + refresh token and keeps the session
+        old_refresh = self.client.refresh_token
+        # refresh rotates the refresh token (a fresh unique jti every time)
+        # and keeps the session. The ACCESS token is deliberately not
+        # compared: its claims have second resolution, so a refresh landing
+        # in the same second as the login mints a byte-identical (and equally
+        # valid) token and the comparison flakes.
         result = self.client.refresh()
         self.assertIn("token", result)
-        self.assertNotEqual(old_token, self.client.token)
+        self.assertNotEqual(old_refresh, self.client.refresh_token)
         # the new access token works on an authenticated endpoint
         self.assertEqual("user", self.client.get_one_user(self.user_id)["username"])
         # logout revokes the session: a further refresh is no longer possible

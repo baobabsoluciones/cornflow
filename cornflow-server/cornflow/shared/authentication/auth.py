@@ -341,13 +341,19 @@ class Auth:
         )
 
     @staticmethod
-    def generate_access_token(user_id: int = None) -> str:
+    def generate_access_token(user_id: int = None, session=None) -> str:
         """
         Generates a short-lived access token (ACCESS_TOKEN_DURATION_MINUTES)
         carrying the token-version claim. It is the credential sent on every
         request; the client renews it via the refresh endpoint.
 
+        When it belongs to a stored session the token also carries its id
+        ("sid"), so revoking that session (logout, refresh-token reuse
+        detection) invalidates the access tokens already in circulation
+        instead of letting them live until their own expiry.
+
         :param int user_id: user id to generate the token for
+        :param session: the :class:`SessionModel` the token belongs to, if any
         :return: the generated access token
         :rtype: str
         """
@@ -373,6 +379,8 @@ class Auth:
             "tv": user.token_version or 0,
             "type": TOKEN_TYPE_ACCESS,
         }
+        if session is not None:
+            payload["sid"] = session.session_id
         return jwt.encode(
             payload, current_app.config["SECRET_TOKEN_KEY"], algorithm="HS256"
         )
@@ -432,7 +440,7 @@ class Auth:
             return {"token": Auth.generate_token(user.id)}
         session = SessionModel.create_for_user(user)
         return {
-            "token": Auth.generate_access_token(user.id),
+            "token": Auth.generate_access_token(user.id, session=session),
             "refresh_token": Auth.generate_refresh_token(user.id, session),
         }
 
@@ -512,8 +520,14 @@ class Auth:
                 f"session expired (inactivity or absolute cap).",
             )
         session.rotate()
+        audit(
+            "session.refreshed",
+            actor_id=user.id,
+            actor=user.username,
+            session_id=session.session_id,
+        )
         return {
-            "token": Auth.generate_access_token(user.id),
+            "token": Auth.generate_access_token(user.id, session=session),
             "refresh_token": Auth.generate_refresh_token(user.id, session),
             "id": user.id,
         }
@@ -524,19 +538,29 @@ class Auth:
         Revokes the session behind a refresh token (logout). Idempotent: an
         invalid, expired or already-revoked token is a no-op.
 
+        Returns the owner of the closed session so the caller can attribute the
+        event: a logout is not authenticated (the client only sends the refresh
+        token), so without this the audit record would say when and from where
+        but never who.
+
         :param str refresh_token: the refresh token whose session to revoke
+        :return: the user whose session was closed, or None when there was
+          nothing to close
+        :rtype: :class:`UserModel` or None
         """
         if not refresh_token:
-            return
+            return None
         try:
             payload = Auth.decode_token(refresh_token)
         except InvalidCredentials:
-            return
+            return None
         if not isinstance(payload, dict) or payload.get("type") != TOKEN_TYPE_REFRESH:
-            return
+            return None
         session = SessionModel.get_active(payload.get("sid"))
-        if session is not None:
-            session.revoke()
+        if session is None:
+            return None
+        session.revoke()
+        return UserModel.get_one_user(session.user_id)
 
     @staticmethod
     def generate_api_key(user_id: int = None, scope: str = None) -> str:
@@ -613,7 +637,11 @@ class Auth:
             raise InvalidCredentials(
                 "The token has expired, please login again",
                 log_txt="Error while trying to decode token. The token has expired.",
-                status_code=400,
+                # 401 and not 400: an expired credential is an authentication
+                # failure, and it is the status every client (the web app, the
+                # cornflow-client library) uses to decide to renew the session
+                # instead of surfacing the error.
+                status_code=401,
             )
         except (
             jwt.InvalidSignatureError,
@@ -634,7 +662,7 @@ class Auth:
                     raise InvalidCredentials(
                         "The token has expired, please login again",
                         log_txt="Error while trying to decode OIDC token. The token has expired.",
-                        status_code=400,
+                        status_code=401,
                     )
                 except (
                     jwt.InvalidTokenError,
@@ -755,8 +783,55 @@ class Auth:
             )
 
         self._check_token_version(user, data)
+        self._check_session_state(user, data)
 
         return user, data
+
+    @staticmethod
+    def _check_session_state(user, payload):
+        """
+        Rejects an access token whose backing session is gone, revoked or past
+        its absolute lifetime.
+
+        Access tokens are short-lived but stateless, so without this check a
+        revoked session would keep granting access until the token expired on
+        its own (up to ACCESS_TOKEN_DURATION_MINUTES): logging out, or
+        detecting the reuse of a refresh token, would stop the renewal but not
+        the access already in circulation.
+
+        Only the absolute cap is enforced here, never the inactivity window:
+        activity is recorded when the client refreshes, which an active client
+        does at least once per access-token lifetime (the window is always
+        longer than that lifetime). Checking inactivity here would log out a
+        user who is actively making requests.
+
+        Tokens issued before sessions were bound (no "sid" claim) are left to
+        the token-version check alone, so upgrading a deployment does not log
+        everybody out.
+
+        :param user: the user the token belongs to
+        :param dict payload: the decoded token payload
+        """
+        if not isinstance(payload, dict):
+            return
+        session_id = payload.get("sid")
+        if not session_id:
+            return
+        session = SessionModel.get_active(session_id)
+        if session is None:
+            raise InvalidCredentials(
+                "The session has been closed, please log in again",
+                status_code=401,
+                log_txt=f"Error while user {user.id} authenticates. The session "
+                f"backing the access token is revoked or no longer exists.",
+            )
+        if session.is_expired():
+            raise InvalidCredentials(
+                "The session has expired, please log in again",
+                status_code=401,
+                log_txt=f"Error while user {user.id} authenticates. The session "
+                f"backing the access token reached its absolute lifetime.",
+            )
 
     def _check_token_version(self, user, payload):
         """

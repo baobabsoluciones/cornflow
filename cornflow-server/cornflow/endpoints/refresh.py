@@ -48,8 +48,9 @@ class RefreshTokenEndpoint(BaseMetaResource):
         :rtype: Tuple(dict, integer)
         """
         body = request.get_json(silent=True) or {}
+        # The session.refreshed audit event is emitted by the auth layer, which
+        # is where the user behind the token is resolved
         result = self.auth_class.consume_refresh_token(body.get("refresh_token"))
-        audit("session.refreshed", actor_id=result.get("id"))
         return result, 200
 
 
@@ -72,6 +73,12 @@ class LogoutEndpoint(BaseMetaResource):
         :rtype: Tuple(dict, integer)
         """
         body = request.get_json(silent=True) or {}
-        self.auth_class.revoke_session(body.get("refresh_token"))
-        audit("session.logout")
+        user = self.auth_class.revoke_session(body.get("refresh_token"))
+        # A logout carries no session credential, so the actor is taken from
+        # the session that was closed (None when there was nothing to close)
+        audit(
+            "session.logout",
+            actor_id=getattr(user, "id", None),
+            actor=getattr(user, "username", None),
+        )
         return {"message": "The session has been closed"}, 200

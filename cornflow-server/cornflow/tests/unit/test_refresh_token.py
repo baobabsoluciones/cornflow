@@ -6,12 +6,14 @@ refusal to use a refresh token on a normal endpoint.
 """
 
 import json
+import logging
+import unittest
 from datetime import datetime, timedelta, timezone
 
 from flask import current_app
 from flask_testing import TestCase
 
-from cornflow.app import create_app
+from cornflow.app import _check_session_windows, create_app
 from cornflow.commands.access import access_init_command
 from cornflow.commands.dag import register_deployed_dags_command_test
 from cornflow.commands.permissions import register_dag_permissions_command
@@ -174,6 +176,102 @@ class TestRefreshTokenFlow(TestCase):
         new_refresh = self.refresh(refresh_token).json["refresh_token"]
         self.assertEqual(200, self.refresh(new_refresh).status_code)
 
+    # -- the access token dies with its session ----------------------------
+
+    def test_reuse_detection_kills_the_access_token_in_circulation(self):
+        # UAT 6.5: revoking the session on reuse detection must also stop the
+        # access tokens already issued, not only the renewal
+        login = self.login().json
+        rotated = self.refresh(login["refresh_token"]).json
+        # replaying the superseded refresh token revokes the session
+        self.assertEqual(401, self.refresh(login["refresh_token"]).status_code)
+        # neither the access token minted by the refresh...
+        self.assertEqual(
+            401,
+            self.client.get(
+                f"{USER_URL}{self.user_id}/", headers=auth_header(rotated["token"])
+            ).status_code,
+        )
+        # ...nor the one issued at login keep working
+        self.assertEqual(
+            401,
+            self.client.get(
+                f"{USER_URL}{self.user_id}/", headers=auth_header(login["token"])
+            ).status_code,
+        )
+
+    def test_logout_kills_the_access_token_in_circulation(self):
+        # same hole on the logout path: clicking "log out" must end access now
+        login = self.login().json
+        self.assertEqual(200, self.logout(login["refresh_token"]).status_code)
+        response = self.client.get(
+            f"{USER_URL}{self.user_id}/", headers=auth_header(login["token"])
+        )
+        self.assertEqual(401, response.status_code)
+
+    def test_absolute_cap_kills_the_access_token(self):
+        login = self.login().json
+        session = self._session()
+        session.expires_at = datetime.now(timezone.utc) - timedelta(minutes=1)
+        db.session.add(session)
+        db.session.commit()
+        self.assertEqual(
+            401,
+            self.client.get(
+                f"{USER_URL}{self.user_id}/", headers=auth_header(login["token"])
+            ).status_code,
+        )
+
+    def test_revoking_one_session_leaves_the_others_alive(self):
+        # each login is an independent session: closing one must not close the
+        # rest (only a global event such as a password change does that)
+        first = self.login().json
+        second = self.login().json
+        self.logout(first["refresh_token"])
+        self.assertEqual(
+            401,
+            self.client.get(
+                f"{USER_URL}{self.user_id}/", headers=auth_header(first["token"])
+            ).status_code,
+        )
+        self.assertEqual(
+            200,
+            self.client.get(
+                f"{USER_URL}{self.user_id}/", headers=auth_header(second["token"])
+            ).status_code,
+        )
+
+    def test_inactivity_does_not_break_an_active_access_token(self):
+        # the session-state check must NOT enforce the inactivity window, or a
+        # user making requests without refreshing would be logged out
+        login = self.login().json
+        session = self._session()
+        window = int(current_app.config["REFRESH_TOKEN_INACTIVITY_MINUTES"])
+        session.last_activity_at = datetime.now(timezone.utc) - timedelta(
+            minutes=window + 5
+        )
+        db.session.add(session)
+        db.session.commit()
+        # the access token still works (it is the refresh that would fail)
+        self.assertEqual(
+            200,
+            self.client.get(
+                f"{USER_URL}{self.user_id}/", headers=auth_header(login["token"])
+            ).status_code,
+        )
+        self.assertEqual(401, self.refresh(login["refresh_token"]).status_code)
+
+    def test_legacy_token_without_session_still_works(self):
+        # tokens issued before sessions were bound carry no "sid": they must
+        # keep working so upgrading a deployment does not log everybody out
+        from cornflow.shared.authentication import Auth
+
+        legacy = Auth.generate_token(self.user_id)
+        response = self.client.get(
+            f"{USER_URL}{self.user_id}/", headers=auth_header(legacy)
+        )
+        self.assertEqual(200, response.status_code)
+
     # -- revocation --------------------------------------------------------
 
     def test_logout_revokes_session(self):
@@ -303,3 +401,81 @@ class TestRefreshTokenFlow(TestCase):
         self.assertEqual("session.reuse_detected", events[0]["event"])
         self.assertEqual(self.user_id, events[0]["actor_id"])
         self.assertEqual("revoked", events[0]["outcome"])
+
+
+class TestSessionWindowSanityCheck(unittest.TestCase):
+    """
+    The inactivity window must be longer than the access-token lifetime: a
+    client only refreshes once its access token has expired, so a shorter
+    window would log out users who are actively working. The application
+    reports the misconfiguration at startup (it is stricter, not laxer, so it
+    is not clamped).
+    """
+
+    def _warnings(self, **config):
+        app = create_app("testing")
+        app.config.update(config)
+        records = []
+
+        class _Capture(logging.Handler):
+            def emit(self, record):
+                records.append(record.getMessage())
+
+        handler = _Capture()
+        app.logger.addHandler(handler)
+        try:
+            _check_session_windows(app)
+        finally:
+            app.logger.removeHandler(handler)
+        return records
+
+    def test_no_warning_with_the_defaults(self):
+        self.assertEqual(
+            [],
+            self._warnings(
+                ACCESS_TOKEN_DURATION_MINUTES=15,
+                REFRESH_TOKEN_INACTIVITY_MINUTES=30,
+                REFRESH_TOKEN_ABSOLUTE_HOURS=12,
+            ),
+        )
+
+    def test_warns_when_the_window_is_not_longer_than_the_access_token(self):
+        warnings = self._warnings(
+            ACCESS_TOKEN_DURATION_MINUTES=15,
+            REFRESH_TOKEN_INACTIVITY_MINUTES=10,
+            REFRESH_TOKEN_ABSOLUTE_HOURS=12,
+        )
+        self.assertTrue(
+            any("REFRESH_TOKEN_INACTIVITY_MINUTES" in w for w in warnings),
+            msg=f"expected a warning, got {warnings}",
+        )
+
+    def test_warns_when_the_window_equals_the_access_token(self):
+        warnings = self._warnings(
+            ACCESS_TOKEN_DURATION_MINUTES=15,
+            REFRESH_TOKEN_INACTIVITY_MINUTES=15,
+            REFRESH_TOKEN_ABSOLUTE_HOURS=12,
+        )
+        self.assertTrue(any("actively working" in w for w in warnings))
+
+    def test_warns_when_the_absolute_cap_swallows_the_window(self):
+        warnings = self._warnings(
+            ACCESS_TOKEN_DURATION_MINUTES=15,
+            REFRESH_TOKEN_INACTIVITY_MINUTES=120,
+            REFRESH_TOKEN_ABSOLUTE_HOURS=1,
+        )
+        self.assertTrue(
+            any("REFRESH_TOKEN_ABSOLUTE_HOURS" in w for w in warnings),
+            msg=f"expected a warning, got {warnings}",
+        )
+
+    def test_silent_when_refresh_sessions_are_disabled(self):
+        self.assertEqual(
+            [],
+            self._warnings(
+                REFRESH_TOKEN_ENABLED=0,
+                ACCESS_TOKEN_DURATION_MINUTES=15,
+                REFRESH_TOKEN_INACTIVITY_MINUTES=1,
+                REFRESH_TOKEN_ABSOLUTE_HOURS=12,
+            ),
+        )

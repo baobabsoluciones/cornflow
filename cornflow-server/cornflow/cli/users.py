@@ -21,6 +21,16 @@ from cornflow.shared.exceptions import (
 )
 
 
+force_password_change = click.option(
+    "--force-password-change",
+    is_flag=True,
+    default=False,
+    help="Mark the password as single-use: the user must change it on first "
+    "login. Meant for provisioning accounts for other people. Not available "
+    "for service users, which are exempt from rotation.",
+)
+
+
 @click.group(name="users", help="Commands to manage the users")
 def users():
     """
@@ -60,11 +70,18 @@ def create_service_user(username, password, email, verbose):
 @password
 @email
 @verbose
-def create_viewer_user(username, password, email, verbose):
+@force_password_change
+def create_viewer_user(username, password, email, verbose, force_password_change):
     app = get_app()
     with app.app_context():
         create_user_with_role(
-            username, email, password, "viewer user", VIEWER_ROLE, verbose=verbose
+            username,
+            email,
+            password,
+            "viewer user",
+            VIEWER_ROLE,
+            verbose=verbose,
+            force_password_change=force_password_change,
         )
 
 
@@ -73,7 +90,8 @@ def create_viewer_user(username, password, email, verbose):
 @password
 @email
 @verbose
-def create_platform_admin_user(username, password, email, verbose):
+@force_password_change
+def create_platform_admin_user(username, password, email, verbose, force_password_change):
     app = get_app()
     with app.app_context():
         create_user_with_role(
@@ -83,6 +101,7 @@ def create_platform_admin_user(username, password, email, verbose):
             "platform administrator",
             PLATFORM_ADMIN_ROLE,
             verbose=verbose,
+            force_password_change=force_password_change,
         )
 
 
@@ -95,7 +114,8 @@ def create_platform_admin_user(username, password, email, verbose):
 @password
 @email
 @verbose
-def create_platform_viewer_user(username, password, email, verbose):
+@force_password_change
+def create_platform_viewer_user(username, password, email, verbose, force_password_change):
     app = get_app()
     with app.app_context():
         create_user_with_role(
@@ -105,6 +125,7 @@ def create_platform_viewer_user(username, password, email, verbose):
             "platform viewer",
             PLATFORM_VIEWER_ROLE,
             verbose=verbose,
+            force_password_change=force_password_change,
         )
 
 
@@ -117,7 +138,8 @@ def create_platform_viewer_user(username, password, email, verbose):
 @password
 @email
 @verbose
-def create_platform_planner_user(username, password, email, verbose):
+@force_password_change
+def create_platform_planner_user(username, password, email, verbose, force_password_change):
     app = get_app()
     with app.app_context():
         create_user_with_role(
@@ -127,6 +149,7 @@ def create_platform_planner_user(username, password, email, verbose):
             "platform planner",
             PLATFORM_PLANNER_ROLE,
             verbose=verbose,
+            force_password_change=force_password_change,
         )
 
 
@@ -157,10 +180,11 @@ def unlock_user(username):
 
 @users.command(
     name="bi_token",
-    help="Generate a BI token for a user (valid for BI_TOKEN_DURATION_DAYS "
-    "days). Intended to be run inside the server with database access; no "
-    "further authentication is required because CLI access is already "
-    "privileged. Use it to (re)generate Power BI tokens.",
+    help="[DEPRECATED] Generate a BI token for a user (valid for "
+    "BI_TOKEN_DURATION_DAYS days). BI tokens are superseded by the read-only "
+    "personal API keys (users api_key --read-only), which are individually "
+    "revocable and get expiry warnings; this command is kept for backwards "
+    "compatibility and will be removed in a future release.",
 )
 @username
 def issue_bi_token(username):
