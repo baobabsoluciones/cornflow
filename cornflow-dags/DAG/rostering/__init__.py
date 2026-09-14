@@ -31,7 +31,6 @@ class Rostering(ApplicationCore):
         "email": [""],
         "email_on_failure": False,
         "email_on_retry": False,
-        "schedule_interval": None,
     }
 
     extra_args = {"max_active_runs": 2}

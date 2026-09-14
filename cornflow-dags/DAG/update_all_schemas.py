@@ -66,6 +66,7 @@ def import_dags():
                 "run_deployed_dags",
                 "update_dag_registry",
                 "update_all_schemas",
+                "execution_files_cleanup",
             )
         ):
             continue

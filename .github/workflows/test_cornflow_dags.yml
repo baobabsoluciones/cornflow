@@ -80,6 +80,8 @@ jobs:
             sleep 2
           done
           airflow dags list
+          # Import errors are only written to the dag-processor log files, so surface them here
+          airflow dags list-import-errors
         env:
           AIRFLOW__SCHEDULER__CATCHUP_BY_DEFAULT: 0
           AIRFLOW_HOME: '${GITHUB_WORKSPACE}'
