@@ -53,7 +53,6 @@ jobs:
           # The fab extra provides FabAuthManager and the `airflow users create` CLI,
           # which moved out of Airflow core in Airflow 3.
           python -m pip install "apache-airflow[fab]==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
-          python -m pip install -U orloge pulp
           python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
           # Airflow 3 replaced `db init` with the idempotent `db migrate`
           airflow db migrate
@@ -105,6 +104,14 @@ jobs:
           coverage run -a --source=. --rcfile=./.coveragerc -m unittest discover -s ./tests/integration
           coverage report -m
           coverage xml
+      - name: Show failed Airflow task logs
+        if: failure()
+        run: |
+          LOGS="${GITHUB_WORKSPACE}/logs"
+          grep -rl "Task failed with exception" "$LOGS" 2>/dev/null | head -n 20 | while read -r f; do
+            echo "===== $f"
+            tail -n 80 "$f"
+          done
       - name: Upload coverage to codecov
         uses: codecov/codecov-action@v3
         with:

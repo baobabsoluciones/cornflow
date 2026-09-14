@@ -78,7 +78,6 @@ jobs:
           # The fab extra provides FabAuthManager and the `airflow users create` CLI,
           # which moved out of Airflow core in Airflow 3.
           python -m pip install "apache-airflow[fab]==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
-          python -m pip install -U orloge pulp
           python -m pip install -U -r airflow_config/requirements.txt
           python -m pip uninstall cornflow-client -y
           python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
@@ -183,6 +182,14 @@ jobs:
           OPEN_DEPLOYMENT: 1
           DATABASE_URL: sqlite:///cornflow_test.db
           LOG_LEVEL: 30
+      - name: Show failed Airflow task logs
+        if: failure()
+        run: |
+          LOGS="${GITHUB_WORKSPACE}/cornflow-server/airflow_config/logs"
+          grep -rl "Task failed with exception" "$LOGS" 2>/dev/null | head -n 20 | while read -r f; do
+            echo "===== $f"
+            tail -n 80 "$f"
+          done
       - name: Upload coverage to codecov
         uses: codecov/codecov-action@v3
         with:
