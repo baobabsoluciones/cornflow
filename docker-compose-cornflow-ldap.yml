@@ -24,7 +24,6 @@
 # The following variables are supported:
 #
 # Feel free to modify this file to suit your needs.
-version: "3.8"
 
 x-airflow-common: &airflow-common
   # In order to add custom dependencies or upgrade provider packages you can use your extended image.
