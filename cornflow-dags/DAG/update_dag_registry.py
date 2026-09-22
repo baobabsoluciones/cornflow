@@ -2,10 +2,8 @@ from datetime import datetime, timedelta
 import logging
 
 from airflow import DAG
-from airflow.models import DagModel
 from airflow.operators.python import PythonOperator
 from airflow.secrets.environment_variables import EnvironmentVariablesBackend
-from airflow.utils.db import create_session
 from cornflow_client.airflow.dag_utilities import connect_to_cornflow
 
 from update_all_schemas import get_new_apps
@@ -26,66 +24,51 @@ logger = logging.getLogger("airflow.task")
 
 
 def update_dag_registry(**kwargs):
-    with create_session() as session:
-        model_dags = [
-            dag
-            for dag in session.query(DagModel)
-            for tag in dag.tags
-            if tag.name == "model"
-        ]
-        logger.info(f"MODEL DAGS: {model_dags}")
-        cf_client = connect_to_cornflow(EnvironmentVariablesBackend())
-        deployed_dags = [
-            dag["id"] for dag in cf_client.get_deployed_dags(encoding="br")
-        ]
-        logger.info(f"DEPLOYED DAGS: {deployed_dags}")
-        all_apps = dict()
-        for app in get_new_apps():
-            all_apps[app.name] = app
-        for model in model_dags:
-            if model.dag_id not in all_apps:
-                logger.warning(
-                    f"App {model.dag_id} is registered in Airflow database but there is no app for it. Skipping"
-                )
-                continue
-            app = all_apps[model.dag_id]
-            if model.dag_id not in deployed_dags:
-                response = cf_client.create_deployed_dag(
-                    name=model.dag_id,
-                    description=model.description,
+    # Airflow 3 no permite acceso directo a la BBDD por ORM desde una tarea (RuntimeError:
+    # "Direct database access via the ORM is not allowed in Airflow 3.0"), así que ya no se puede
+    # hacer `session.query(DagModel)` para encontrar los DAGs con tag "model". No hace falta:
+    # `get_new_apps()` ya devuelve exactamente esas mismas apps (activate_dags.py crea un DAG por
+    # cada una, con `tags=["model"]` y `dag_id == app.name`), así que es la misma información sin
+    # pasar por la BBDD. `app.description` sustituye a `model.description` (mismo valor: es lo que
+    # activate_dags.py usa para crear el DAG).
+    cf_client = connect_to_cornflow(EnvironmentVariablesBackend())
+    deployed_dags = [dag["id"] for dag in cf_client.get_deployed_dags(encoding="br")]
+    logger.info(f"DEPLOYED DAGS: {deployed_dags}")
+
+    apps = get_new_apps()
+    logger.info(f"MODEL APPS: {[app.name for app in apps]}")
+
+    for app in apps:
+        solver = app.get_solver(app.get_default_solver_name())
+        if app.name not in deployed_dags:
+            response = cf_client.create_deployed_dag(
+                name=app.name,
+                description=app.description,
+                instance_schema=app.instance.schema,
+                instance_checks_schema=app.instance.schema_checks,
+                solution_schema=app.solution.schema,
+                solution_checks_schema=solver.schema_checks,
+                kpis_schema=solver.schema_kpis,
+                config_schema=app.schema,
+                encoding="br",
+            )
+            logger.info(f"DAG: {response['id']} registered")
+        else:
+            # Even if the dag is registered, we still update its schemas
+            response = cf_client.put_deployed_dag(
+                dag_id=app.name,
+                data=dict(
+                    description=app.description,
                     instance_schema=app.instance.schema,
                     instance_checks_schema=app.instance.schema_checks,
                     solution_schema=app.solution.schema,
-                    solution_checks_schema=app.get_solver(
-                        app.get_default_solver_name()
-                    ).schema_checks,
-                    kpis_schema=app.get_solver(
-                        app.get_default_solver_name()
-                    ).schema_kpis,
+                    solution_checks_schema=solver.schema_checks,
+                    kpis_schema=solver.schema_kpis,
                     config_schema=app.schema,
-                    encoding="br",
-                )
-                logger.info(f"DAG: {response['id']} registered")
-            else:
-                # Even if the dag is registered, we still update its schemas
-                response = cf_client.put_deployed_dag(
-                    dag_id=model.dag_id,
-                    data=dict(
-                        description=model.description,
-                        instance_schema=app.instance.schema,
-                        instance_checks_schema=app.instance.schema_checks,
-                        solution_schema=app.solution.schema,
-                        solution_checks_schema=app.get_solver(
-                            app.get_default_solver_name()
-                        ).schema_checks,
-                        kpis_schema=app.get_solver(
-                            app.get_default_solver_name()
-                        ).schema_kpis,
-                        config_schema=app.schema,
-                    ),
-                    encoding="br",
-                )
-                logger.info(f"DAG: {model.dag_id} registered")
+                ),
+                encoding="br",
+            )
+            logger.info(f"DAG: {app.name} registered")
 
 
 dag = DAG(
@@ -93,12 +76,11 @@ dag = DAG(
     default_args=default_args,
     catchup=False,
     tags=["internal"],
-    schedule_interval="@hourly",
+    schedule="@hourly",
 )
 
 update_dag_registry_2 = PythonOperator(
     task_id="update_dag_registry",
-    provide_context=True,
     python_callable=update_dag_registry,
     dag=dag,
 )
