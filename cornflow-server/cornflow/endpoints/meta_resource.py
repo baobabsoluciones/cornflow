@@ -116,21 +116,19 @@ class BaseMetaResource(Resource, MethodResource):
         and creating the ones that do not.
 
         The rows that already exist are looked up with the fields declared on
-        `self.unique`. On the models that implement the soft delete (the ones with a
-        `deleted_at` column) the deleted rows are left out of that lookup: they keep
-        their `deleted_at` and the row that is sent is created as a new one, so it is
+        `self.unique`, regardless of their `deleted_at` value, so a soft deleted
+        row is matched too. On the models that implement the soft delete (the
+        ones with a `deleted_at` column) a match that was deleted is reactivated,
+        clearing its `deleted_at` before applying the update, so it becomes
         visible again on the reads.
 
-        A deleted row still holds the id it was created with, so a row that is sent
-        with that same id can not be created next to it. That is the only case that
-        is rejected, naming the id, instead of failing later on the primary key.
+        If no row matches (i.e. a row with a different value on the unique
+        fields), a new one is created, as before.
 
         :param dict data: a dictionary with key 'data' that holds a list with all the
             objects that are going to be created or updated
         :param str trace_field: the field that tracks the user that created the object
         :return: a message and a status code of the operation
-        :raises InvalidUsage: if the id of a row that has to be created is the one of
-            a soft deleted row
         """
         data = [
             {**el, **{trace_field: self.get_user_id()}} for el in dict(data)["data"]
@@ -141,23 +139,14 @@ class BaseMetaResource(Resource, MethodResource):
         instances = []
         for el in data:
             temp_el = dict(SuperDict(el).kfilter(lambda v: v in self.unique))
-            query = self.data_model.query.filter_by(**temp_el)
-            if has_soft_delete:
-                query = query.filter_by(deleted_at=None)
-            temp_instance = query.first()
+            temp_instance = self.data_model.query.filter_by(**temp_el).first()
             if temp_instance is not None:
+                if has_soft_delete and temp_instance.deleted_at is not None:
+                    temp_instance.deleted_at = None
                 temp_instance.pre_update(el)
                 instances.append(temp_instance)
             else:
                 instance = self.data_model(el)
-                idx = getattr(instance, "id", None)
-                taken_by = None
-                if has_soft_delete and idx is not None:
-                    taken_by = self.data_model.query.filter_by(id=idx).first()
-                if taken_by is not None and taken_by.deleted_at is not None:
-                    raise InvalidUsage(
-                        f"The id {idx} belongs to a deleted record and can not be reused"
-                    )
                 instances.append(instance)
 
         self.data_model.create_update_bulk(instances)
