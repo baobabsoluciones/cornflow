@@ -122,8 +122,11 @@ class BaseMetaResource(Resource, MethodResource):
         clearing its `deleted_at` before applying the update, so it becomes
         visible again on the reads.
 
-        If no row matches (i.e. a row with a different value on the unique
-        fields), a new one is created, as before.
+        If no row matches on `self.unique` but the model has soft delete and the
+        payload carries an `id`, the row is looked up by that id as a fallback.
+        A soft deleted row found this way is reactivated the same way as a
+        regular match. If no row is found, or the row found is not deleted, a
+        new instance is created.
 
         :param dict data: a dictionary with key 'data' that holds a list with all the
             objects that are going to be created or updated
@@ -140,6 +143,14 @@ class BaseMetaResource(Resource, MethodResource):
         for el in data:
             temp_el = dict(SuperDict(el).kfilter(lambda v: v in self.unique))
             temp_instance = self.data_model.query.filter_by(**temp_el).first()
+            if (
+                temp_instance is None
+                and has_soft_delete
+                and el.get("id") is not None
+            ):
+                candidate = self.data_model.query.filter_by(id=el.get("id")).first()
+                if candidate is not None and candidate.deleted_at is not None:
+                    temp_instance = candidate
             if temp_instance is not None:
                 if has_soft_delete and temp_instance.deleted_at is not None:
                     temp_instance.deleted_at = None

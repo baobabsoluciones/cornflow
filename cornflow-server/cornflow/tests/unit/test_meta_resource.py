@@ -233,3 +233,24 @@ class TestPostBulkUpdateClientId(BulkUpdateTestCase):
             self.bulk_update([{"id": 98, "name": "another role"}])
 
         self.assertEqual("a live role", RoleModel.query.get(98).name)
+
+    def test_id_of_a_soft_deleted_row_is_reactivated_when_unique_differs(self):
+        """
+        When the unique fields do not match a soft deleted row, its id can still be
+        given again to the bulk update: the row that holds it is reactivated and
+        updated with the data sent, instead of failing on the primary key or a new
+        row being created
+        """
+        self.resource.unique = ["name"]
+        deleted = RoleModel({"id": 97, "name": "a role"})
+        deleted.save()
+        deleted.disable()
+
+        _, status = self.bulk_update([{"id": 97, "name": "a role renamed"}])
+
+        self.assertEqual(201, status)
+        reactivated = RoleModel.query.get(97)
+        self.assertIsNone(reactivated.deleted_at)
+        self.assertEqual("a role renamed", reactivated.name)
+        # and it is visible on the reads again
+        self.assertIsNotNone(RoleModel.get_one_object(idx=97))
