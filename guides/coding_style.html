@@ -6,7 +6,7 @@
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=ad592e98" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=70423902" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=2ceb65ce" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -180,11 +180,11 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="4"><span class="cm">  for (var point of this.instance.lonLat) {</span>
 </span><span data-line="5"><span class="cm">    var newPoint = { x: point.x, y: point.y, location: point.location }</span>
 </span><span data-line="6"><span class="cm">    if (point.location === 0) {</span>
-</span><span data-line="7"><span class="cm">      newPoint.type = &#39;B&#39;</span>
+</span><span data-line="7"><span class="cm">      newPoint.type = 'B'</span>
 </span><span data-line="8"><span class="cm">    } else if (point.location &lt; 1 + this.instance.data.sources.length) {</span>
-</span><span data-line="9"><span class="cm">      newPoint.type = &#39;S&#39;</span>
+</span><span data-line="9"><span class="cm">      newPoint.type = 'S'</span>
 </span><span data-line="10"><span class="cm">    } else {</span>
-</span><span data-line="11"><span class="cm">      newPoint.type = &#39;C&#39;</span>
+</span><span data-line="11"><span class="cm">      newPoint.type = 'C'</span>
 </span><span data-line="12"><span class="cm">      newPoint.capacity = this.instance.data.customers[point.location - offsetCustomers].Capacity</span>
 </span><span data-line="13"><span class="cm">    }</span>
 </span><span data-line="14"><span class="cm">    points.push(newPoint)</span>
@@ -214,8 +214,8 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="15"><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">instance</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 </span><span data-line="16"><span class="w">      </span><span class="k">this</span><span class="p">.</span><span class="nx">offsetCustomers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">instance</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">sources</span><span class="p">.</span><span class="nx">length</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">1</span>
 </span><span data-line="17"><span class="w">    </span><span class="p">}</span>
-</span><span data-line="18"><span class="w">    </span><span class="k">this</span><span class="p">.</span><span class="nx">colorBase</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;#65A0D1&#39;</span>
-</span><span data-line="19"><span class="w">    </span><span class="k">this</span><span class="p">.</span><span class="nx">colorSource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;#D35A5A&#39;</span>
+</span><span data-line="18"><span class="w">    </span><span class="k">this</span><span class="p">.</span><span class="nx">colorBase</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'#65A0D1'</span>
+</span><span data-line="19"><span class="w">    </span><span class="k">this</span><span class="p">.</span><span class="nx">colorSource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'#D35A5A'</span>
 </span><span data-line="20">
 </span><span data-line="21"><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">instance</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 </span><span data-line="22"><span class="w">      </span><span class="k">this</span><span class="p">.</span><span class="nx">horizon</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">instance</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">parameters</span><span class="p">.</span><span class="nx">horizon</span>
@@ -242,8 +242,8 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="11"><span class="w">    </span><span class="k">this</span><span class="p">.</span><span class="nx">sizeBasePoint</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">30</span>
 </span><span data-line="12"><span class="w">    </span><span class="k">this</span><span class="p">.</span><span class="nx">sizeSourcePoint</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">20</span>
 </span><span data-line="13"><span class="w">      </span><span class="k">this</span><span class="p">.</span><span class="nx">offsetCustomers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">instance</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">sources</span><span class="p">.</span><span class="nx">length</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">1</span>
-</span><span data-line="14"><span class="w">    </span><span class="k">this</span><span class="p">.</span><span class="nx">colorBase</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;#65A0D1&#39;</span>
-</span><span data-line="15"><span class="w">    </span><span class="k">this</span><span class="p">.</span><span class="nx">colorSource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;#D35A5A&#39;</span>
+</span><span data-line="14"><span class="w">    </span><span class="k">this</span><span class="p">.</span><span class="nx">colorBase</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'#65A0D1'</span>
+</span><span data-line="15"><span class="w">    </span><span class="k">this</span><span class="p">.</span><span class="nx">colorSource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'#D35A5A'</span>
 </span><span data-line="16">
 </span><span data-line="17"><span class="w">    </span><span class="k">this</span><span class="p">.</span><span class="nx">horizon</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">instance</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">parameters</span><span class="p">.</span><span class="nx">horizon</span>
 </span><span data-line="18"><span class="w">    </span><span class="k">this</span><span class="p">.</span><span class="nx">unit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">instance</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">parameters</span><span class="p">.</span><span class="nx">unit</span>
@@ -254,21 +254,21 @@ data-aria-dark="Switch to auto color mode">
 <section id="indentation">
 <h2>Indentation<a class="headerlink" href="#indentation" title="Link to this heading">#</a></h2>
 <p>original code:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">driver</span> <span class="o">=</span> <span class="n">shift</span><span class="p">[</span><span class="s2">&quot;driver&quot;</span><span class="p">]</span>
-</span><span data-line="2"><span class="n">time_cost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">get_driver_property</span><span class="p">(</span><span class="n">driver</span><span class="p">,</span> <span class="s2">&quot;TimeCost&quot;</span><span class="p">)</span>
-</span><span data-line="3"><span class="n">layover_cost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">get_driver_property</span><span class="p">(</span><span class="n">driver</span><span class="p">,</span> <span class="s2">&quot;LayoverCost&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">driver</span> <span class="o">=</span> <span class="n">shift</span><span class="p">[</span><span class="s2">"driver"</span><span class="p">]</span>
+</span><span data-line="2"><span class="n">time_cost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">get_driver_property</span><span class="p">(</span><span class="n">driver</span><span class="p">,</span> <span class="s2">"TimeCost"</span><span class="p">)</span>
+</span><span data-line="3"><span class="n">layover_cost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">get_driver_property</span><span class="p">(</span><span class="n">driver</span><span class="p">,</span> <span class="s2">"LayoverCost"</span><span class="p">)</span>
 </span><span data-line="4">
-</span><span data-line="5"><span class="n">trailer</span> <span class="o">=</span> <span class="n">shift</span><span class="p">[</span><span class="s2">&quot;trailer&quot;</span><span class="p">]</span>
-</span><span data-line="6"><span class="n">dist_cost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">get_trailer_property</span><span class="p">(</span><span class="n">trailer</span><span class="p">,</span> <span class="s2">&quot;DistanceCost&quot;</span><span class="p">)</span>
+</span><span data-line="5"><span class="n">trailer</span> <span class="o">=</span> <span class="n">shift</span><span class="p">[</span><span class="s2">"trailer"</span><span class="p">]</span>
+</span><span data-line="6"><span class="n">dist_cost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">get_trailer_property</span><span class="p">(</span><span class="n">trailer</span><span class="p">,</span> <span class="s2">"DistanceCost"</span><span class="p">)</span>
 </span><span data-line="7">
 </span><span data-line="8"><span class="n">current_stop</span> <span class="o">=</span> <span class="kc">None</span>
 </span><span data-line="9"><span class="n">layover</span> <span class="o">=</span> <span class="kc">False</span>
 </span><span data-line="10">
 </span><span data-line="11">
-</span><span data-line="12"><span class="k">for</span> <span class="n">stop</span> <span class="ow">in</span> <span class="n">shift</span><span class="p">[</span><span class="s2">&quot;route&quot;</span><span class="p">]:</span>
+</span><span data-line="12"><span class="k">for</span> <span class="n">stop</span> <span class="ow">in</span> <span class="n">shift</span><span class="p">[</span><span class="s2">"route"</span><span class="p">]:</span>
 </span><span data-line="13">    <span class="n">previous_stop</span> <span class="o">=</span> <span class="n">current_stop</span>
-</span><span data-line="14">    <span class="n">current_stop</span> <span class="o">=</span> <span class="n">stop</span><span class="p">[</span><span class="s2">&quot;location&quot;</span><span class="p">]</span>
-</span><span data-line="15">    <span class="k">if</span> <span class="n">stop</span><span class="p">[</span><span class="s2">&quot;layover_before&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+</span><span data-line="14">    <span class="n">current_stop</span> <span class="o">=</span> <span class="n">stop</span><span class="p">[</span><span class="s2">"location"</span><span class="p">]</span>
+</span><span data-line="15">    <span class="k">if</span> <span class="n">stop</span><span class="p">[</span><span class="s2">"layover_before"</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
 </span><span data-line="16">        <span class="n">layover</span> <span class="o">=</span> <span class="kc">True</span>
 </span><span data-line="17">    <span class="k">if</span> <span class="n">previous_stop</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
 </span><span data-line="18">        <span class="n">distance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">get_distance_between</span><span class="p">(</span>
@@ -277,11 +277,11 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="21">        <span class="n">time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">get_time_between</span><span class="p">(</span><span class="n">previous_stop</span><span class="p">,</span> <span class="n">current_stop</span><span class="p">)</span>
 </span><span data-line="22">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_source</span><span class="p">(</span><span class="n">current_stop</span><span class="p">):</span>
 </span><span data-line="23">            <span class="n">time</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">get_source_property</span><span class="p">(</span>
-</span><span data-line="24">                <span class="n">current_stop</span><span class="p">,</span> <span class="s2">&quot;setupTime&quot;</span>
+</span><span data-line="24">                <span class="n">current_stop</span><span class="p">,</span> <span class="s2">"setupTime"</span>
 </span><span data-line="25">            <span class="p">)</span>
 </span><span data-line="26">        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_customer</span><span class="p">(</span><span class="n">current_stop</span><span class="p">):</span>
 </span><span data-line="27">            <span class="n">time</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">get_customer_property</span><span class="p">(</span>
-</span><span data-line="28">                <span class="n">current_stop</span><span class="p">,</span> <span class="s2">&quot;setupTime&quot;</span>
+</span><span data-line="28">                <span class="n">current_stop</span><span class="p">,</span> <span class="s2">"setupTime"</span>
 </span><span data-line="29">            <span class="p">)</span>
 </span><span data-line="30">        <span class="n">total_cost</span> <span class="o">+=</span> <span class="n">distance</span> <span class="o">*</span> <span class="n">dist_cost</span> <span class="o">+</span> <span class="n">time</span> <span class="o">*</span> <span class="n">time_cost</span>
 </span><span data-line="31">
@@ -306,8 +306,8 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="6">
 </span><span data-line="7">    <span class="k">for</span> <span class="n">stop</span> <span class="ow">in</span> <span class="n">route</span><span class="p">:</span>
 </span><span data-line="8">        <span class="n">previous_stop</span> <span class="o">=</span> <span class="n">current_stop</span>
-</span><span data-line="9">        <span class="n">current_stop</span> <span class="o">=</span> <span class="n">stop</span><span class="p">[</span><span class="s2">&quot;location&quot;</span><span class="p">]</span>
-</span><span data-line="10">        <span class="k">if</span> <span class="n">stop</span><span class="p">[</span><span class="s2">&quot;layover_before&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+</span><span data-line="9">        <span class="n">current_stop</span> <span class="o">=</span> <span class="n">stop</span><span class="p">[</span><span class="s2">"location"</span><span class="p">]</span>
+</span><span data-line="10">        <span class="k">if</span> <span class="n">stop</span><span class="p">[</span><span class="s2">"layover_before"</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
 </span><span data-line="11">            <span class="n">layover</span> <span class="o">=</span> <span class="kc">True</span>
 </span><span data-line="12">        <span class="k">if</span> <span class="n">previous_stop</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 </span><span data-line="13">            <span class="k">continue</span>
@@ -317,11 +317,11 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="17">        <span class="n">time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">get_time_between</span><span class="p">(</span><span class="n">previous_stop</span><span class="p">,</span> <span class="n">current_stop</span><span class="p">)</span>
 </span><span data-line="18">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_source</span><span class="p">(</span><span class="n">current_stop</span><span class="p">):</span>
 </span><span data-line="19">            <span class="n">time</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">get_source_property</span><span class="p">(</span>
-</span><span data-line="20">                <span class="n">current_stop</span><span class="p">,</span> <span class="s2">&quot;setupTime&quot;</span>
+</span><span data-line="20">                <span class="n">current_stop</span><span class="p">,</span> <span class="s2">"setupTime"</span>
 </span><span data-line="21">            <span class="p">)</span>
 </span><span data-line="22">        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_customer</span><span class="p">(</span><span class="n">current_stop</span><span class="p">):</span>
 </span><span data-line="23">            <span class="n">time</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">get_customer_property</span><span class="p">(</span>
-</span><span data-line="24">                <span class="n">current_stop</span><span class="p">,</span> <span class="s2">&quot;setupTime&quot;</span>
+</span><span data-line="24">                <span class="n">current_stop</span><span class="p">,</span> <span class="s2">"setupTime"</span>
 </span><span data-line="25">            <span class="p">)</span>
 </span><span data-line="26">        <span class="n">cost</span> <span class="o">+=</span> <span class="n">distance</span> <span class="o">*</span> <span class="n">dist_cost</span> <span class="o">+</span> <span class="n">time</span> <span class="o">*</span> <span class="n">time_cost</span>
 </span><span data-line="27">
@@ -331,14 +331,14 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="31">
 </span><span data-line="32"><span class="k">def</span><span class="w"> </span><span class="nf">_get_shift_cost</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shift</span><span class="p">):</span>
 </span><span data-line="33">    <span class="n">total_cost</span> <span class="o">=</span> <span class="mi">0</span>
-</span><span data-line="34">    <span class="n">driver</span> <span class="o">=</span> <span class="n">shift</span><span class="p">[</span><span class="s2">&quot;driver&quot;</span><span class="p">]</span>
-</span><span data-line="35">    <span class="n">time_cost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">get_driver_property</span><span class="p">(</span><span class="n">driver</span><span class="p">,</span> <span class="s2">&quot;TimeCost&quot;</span><span class="p">)</span>
-</span><span data-line="36">    <span class="n">layover_cost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">get_driver_property</span><span class="p">(</span><span class="n">driver</span><span class="p">,</span> <span class="s2">&quot;LayoverCost&quot;</span><span class="p">)</span>
+</span><span data-line="34">    <span class="n">driver</span> <span class="o">=</span> <span class="n">shift</span><span class="p">[</span><span class="s2">"driver"</span><span class="p">]</span>
+</span><span data-line="35">    <span class="n">time_cost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">get_driver_property</span><span class="p">(</span><span class="n">driver</span><span class="p">,</span> <span class="s2">"TimeCost"</span><span class="p">)</span>
+</span><span data-line="36">    <span class="n">layover_cost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">get_driver_property</span><span class="p">(</span><span class="n">driver</span><span class="p">,</span> <span class="s2">"LayoverCost"</span><span class="p">)</span>
 </span><span data-line="37">
-</span><span data-line="38">    <span class="n">trailer</span> <span class="o">=</span> <span class="n">shift</span><span class="p">[</span><span class="s2">&quot;trailer&quot;</span><span class="p">]</span>
-</span><span data-line="39">    <span class="n">dist_cost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">get_trailer_property</span><span class="p">(</span><span class="n">trailer</span><span class="p">,</span> <span class="s2">&quot;DistanceCost&quot;</span><span class="p">)</span>
-</span><span data-line="40">    <span class="k">for</span> <span class="n">stop</span> <span class="ow">in</span> <span class="n">shift</span><span class="p">[</span><span class="s2">&quot;route&quot;</span><span class="p">]:</span>
-</span><span data-line="41">        <span class="n">total_cost</span> <span class="o">+=</span> <span class="n">_get_route_cost</span><span class="p">(</span><span class="n">shift</span><span class="p">[</span><span class="s1">&#39;route&#39;</span><span class="p">],</span> <span class="n">time_cost</span><span class="p">,</span> <span class="n">layover_cost</span><span class="p">,</span> <span class="n">dist_cost</span><span class="p">)</span>
+</span><span data-line="38">    <span class="n">trailer</span> <span class="o">=</span> <span class="n">shift</span><span class="p">[</span><span class="s2">"trailer"</span><span class="p">]</span>
+</span><span data-line="39">    <span class="n">dist_cost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">get_trailer_property</span><span class="p">(</span><span class="n">trailer</span><span class="p">,</span> <span class="s2">"DistanceCost"</span><span class="p">)</span>
+</span><span data-line="40">    <span class="k">for</span> <span class="n">stop</span> <span class="ow">in</span> <span class="n">shift</span><span class="p">[</span><span class="s2">"route"</span><span class="p">]:</span>
+</span><span data-line="41">        <span class="n">total_cost</span> <span class="o">+=</span> <span class="n">_get_route_cost</span><span class="p">(</span><span class="n">shift</span><span class="p">[</span><span class="s1">'route'</span><span class="p">],</span> <span class="n">time_cost</span><span class="p">,</span> <span class="n">layover_cost</span><span class="p">,</span> <span class="n">dist_cost</span><span class="p">)</span>
 </span><span data-line="42">    <span class="k">return</span> <span class="n">total_cost</span>
 </span><span data-line="43">
 </span><span data-line="44"><span class="k">def</span><span class="w"> </span><span class="nf">get_objective</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -350,14 +350,14 @@ data-aria-dark="Switch to auto color mode">
 <section id="no-repetition">
 <h2>No repetition<a class="headerlink" href="#no-repetition" title="Link to this heading">#</a></h2>
 <p>original code:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;customers&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;customers&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
-</span><span data-line="2"><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;trailers&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;trailers&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
-</span><span data-line="3"><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;drivers&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;drivers&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
-</span><span data-line="4"><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;sources&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;sources&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">data_dict</span><span class="p">[</span><span class="s2">"customers"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">"customers"</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+</span><span data-line="2"><span class="n">data_dict</span><span class="p">[</span><span class="s2">"trailers"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">"trailers"</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+</span><span data-line="3"><span class="n">data_dict</span><span class="p">[</span><span class="s2">"drivers"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">"drivers"</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+</span><span data-line="4"><span class="n">data_dict</span><span class="p">[</span><span class="s2">"sources"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">"sources"</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 </span></pre></div>
 </div>
 <p>better:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;customers&quot;</span><span class="p">,</span><span class="s2">&quot;trailers&quot;</span><span class="p">,</span><span class="s2">&quot;drivers&quot;</span><span class="p">,</span><span class="s2">&quot;sources&quot;</span><span class="p">]:</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"customers"</span><span class="p">,</span><span class="s2">"trailers"</span><span class="p">,</span><span class="s2">"drivers"</span><span class="p">,</span><span class="s2">"sources"</span><span class="p">]:</span>
 </span><span data-line="2">    <span class="n">data_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 </span></pre></div>
 </div>
@@ -385,8 +385,8 @@ data-aria-dark="Switch to auto color mode">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">def</span><span class="w"> </span><span class="nf">get_real_end_timeslot</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SuperDict</span><span class="p">:</span>
 </span><span data-line="2">    <span class="k">return</span> <span class="n">SuperDict</span><span class="p">(</span>
 </span><span data-line="3">        <span class="p">{</span>
-</span><span data-line="4">            <span class="p">(</span><span class="n">k1</span><span class="p">,</span> <span class="n">k2</span><span class="p">):</span> <span class="n">get_date_time_from_string</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="s2">&quot;end_timeslot&quot;</span><span class="p">])</span>
-</span><span data-line="5">            <span class="k">for</span> <span class="p">(</span><span class="n">k1</span><span class="p">,</span> <span class="n">k2</span><span class="p">),</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;production_scheduling&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+</span><span data-line="4">            <span class="p">(</span><span class="n">k1</span><span class="p">,</span> <span class="n">k2</span><span class="p">):</span> <span class="n">get_date_time_from_string</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="s2">"end_timeslot"</span><span class="p">])</span>
+</span><span data-line="5">            <span class="k">for</span> <span class="p">(</span><span class="n">k1</span><span class="p">,</span> <span class="n">k2</span><span class="p">),</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"production_scheduling"</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
 </span><span data-line="6">        <span class="p">}</span>
 </span><span data-line="7">    <span class="p">)</span>
 </span></pre></div>
@@ -394,8 +394,8 @@ data-aria-dark="Switch to auto color mode">
 <p>Where we are taking one of the keys of a nested dictionary can be done:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">def</span><span class="w"> </span><span class="nf">get_real_end_timeslot</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SuperDict</span><span class="p">:</span>
 </span><span data-line="2">    <span class="k">return</span> <span class="p">(</span>
-</span><span data-line="3">        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;production_scheduling&quot;</span><span class="p">]</span>
-</span><span data-line="4">        <span class="o">.</span><span class="n">get_property</span><span class="p">(</span><span class="s2">&quot;end_timeslot&quot;</span><span class="p">)</span>
+</span><span data-line="3">        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">"production_scheduling"</span><span class="p">]</span>
+</span><span data-line="4">        <span class="o">.</span><span class="n">get_property</span><span class="p">(</span><span class="s2">"end_timeslot"</span><span class="p">)</span>
 </span><span data-line="5">        <span class="o">.</span><span class="n">vapply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">get_date_time_from_string</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
 </span><span data-line="6">    <span class="p">)</span>
 </span></pre></div>

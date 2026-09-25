@@ -6,7 +6,7 @@
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=ad592e98" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=70423902" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=2ceb65ce" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -127,34 +127,34 @@ data-aria-dark="Switch to auto color mode">
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
 <li><a class="reference internal" href="#empty-base-model">Empty base model</a><ul>
 <li><a class="reference internal" href="#cornflow.models.meta_models.EmptyBaseModel"><code class="docutils literal notranslate"><span class="pre">EmptyBaseModel</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow.models.meta_models.EmptyBaseModel.commit_changes"><code class="docutils literal notranslate">commit_changes()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.models.meta_models.EmptyBaseModel.save"><code class="docutils literal notranslate">save()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.models.meta_models.EmptyBaseModel.delete"><code class="docutils literal notranslate">delete()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.models.meta_models.EmptyBaseModel.update"><code class="docutils literal notranslate">update()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.models.meta_models.EmptyBaseModel.pre_update"><code class="docutils literal notranslate">pre_update()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.models.meta_models.EmptyBaseModel.get_all_objects"><code class="docutils literal notranslate">get_all_objects()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.models.meta_models.EmptyBaseModel.get_one_object"><code class="docutils literal notranslate">get_one_object()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.models.meta_models.EmptyBaseModel.get"><code class="docutils literal notranslate">get()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.models.meta_models.EmptyBaseModel.commit_changes"><code class="docutils literal notranslate"><span class="pre">EmptyBaseModel.commit_changes()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.models.meta_models.EmptyBaseModel.save"><code class="docutils literal notranslate"><span class="pre">EmptyBaseModel.save()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.models.meta_models.EmptyBaseModel.delete"><code class="docutils literal notranslate"><span class="pre">EmptyBaseModel.delete()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.models.meta_models.EmptyBaseModel.update"><code class="docutils literal notranslate"><span class="pre">EmptyBaseModel.update()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.models.meta_models.EmptyBaseModel.pre_update"><code class="docutils literal notranslate"><span class="pre">EmptyBaseModel.pre_update()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.models.meta_models.EmptyBaseModel.get_all_objects"><code class="docutils literal notranslate"><span class="pre">EmptyBaseModel.get_all_objects()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.models.meta_models.EmptyBaseModel.get_one_object"><code class="docutils literal notranslate"><span class="pre">EmptyBaseModel.get_one_object()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.models.meta_models.EmptyBaseModel.get"><code class="docutils literal notranslate"><span class="pre">EmptyBaseModel.get()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li><a class="reference internal" href="#trace-attributes">Trace attributes</a><ul>
 <li><a class="reference internal" href="#cornflow.models.meta_models.TraceAttributesModel"><code class="docutils literal notranslate"><span class="pre">TraceAttributesModel</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow.models.meta_models.TraceAttributesModel.update"><code class="docutils literal notranslate">update()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.models.meta_models.TraceAttributesModel.pre_update"><code class="docutils literal notranslate">pre_update()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.models.meta_models.TraceAttributesModel.disable"><code class="docutils literal notranslate">disable()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.models.meta_models.TraceAttributesModel.activate"><code class="docutils literal notranslate">activate()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.models.meta_models.TraceAttributesModel.get_all_objects"><code class="docutils literal notranslate">get_all_objects()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.models.meta_models.TraceAttributesModel.get_one_object"><code class="docutils literal notranslate">get_one_object()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.models.meta_models.TraceAttributesModel.update"><code class="docutils literal notranslate"><span class="pre">TraceAttributesModel.update()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.models.meta_models.TraceAttributesModel.pre_update"><code class="docutils literal notranslate"><span class="pre">TraceAttributesModel.pre_update()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.models.meta_models.TraceAttributesModel.disable"><code class="docutils literal notranslate"><span class="pre">TraceAttributesModel.disable()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.models.meta_models.TraceAttributesModel.activate"><code class="docutils literal notranslate"><span class="pre">TraceAttributesModel.activate()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.models.meta_models.TraceAttributesModel.get_all_objects"><code class="docutils literal notranslate"><span class="pre">TraceAttributesModel.get_all_objects()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.models.meta_models.TraceAttributesModel.get_one_object"><code class="docutils literal notranslate"><span class="pre">TraceAttributesModel.get_one_object()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li><a class="reference internal" href="#base-data-model">Base data model</a><ul>
 <li><a class="reference internal" href="#cornflow.models.base_data_model.BaseDataModel"><code class="docutils literal notranslate"><span class="pre">BaseDataModel</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow.models.base_data_model.BaseDataModel.get_all_objects"><code class="docutils literal notranslate">get_all_objects()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.models.base_data_model.BaseDataModel.get_one_object"><code class="docutils literal notranslate">get_one_object()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.models.base_data_model.BaseDataModel.get_all_objects"><code class="docutils literal notranslate"><span class="pre">BaseDataModel.get_all_objects()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.models.base_data_model.BaseDataModel.get_one_object"><code class="docutils literal notranslate"><span class="pre">BaseDataModel.get_one_object()</span></code></a></li>
 </ul>
 </li>
 </ul>

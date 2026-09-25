@@ -6,7 +6,7 @@
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=ad592e98" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=70423902" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=2ceb65ce" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -127,45 +127,45 @@ data-aria-dark="Switch to auto color mode">
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
 <li><a class="reference internal" href="#instance-model">Instance model</a><ul>
 <li><a class="reference internal" href="#cornflow.models.InstanceModel"><code class="docutils literal notranslate"><span class="pre">InstanceModel</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow.models.InstanceModel.update"><code class="docutils literal notranslate">update()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.models.InstanceModel.update"><code class="docutils literal notranslate"><span class="pre">InstanceModel.update()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li><a class="reference internal" href="#execution-model">Execution model</a><ul>
 <li><a class="reference internal" href="#cornflow.models.ExecutionModel"><code class="docutils literal notranslate"><span class="pre">ExecutionModel</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow.models.ExecutionModel.update"><code class="docutils literal notranslate">update()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.models.ExecutionModel.update_config"><code class="docutils literal notranslate">update_config()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.models.ExecutionModel.update_state"><code class="docutils literal notranslate">update_state()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.models.ExecutionModel.update_log_txt"><code class="docutils literal notranslate">update_log_txt()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.models.ExecutionModel.update"><code class="docutils literal notranslate"><span class="pre">ExecutionModel.update()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.models.ExecutionModel.update_config"><code class="docutils literal notranslate"><span class="pre">ExecutionModel.update_config()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.models.ExecutionModel.update_state"><code class="docutils literal notranslate"><span class="pre">ExecutionModel.update_state()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.models.ExecutionModel.update_log_txt"><code class="docutils literal notranslate"><span class="pre">ExecutionModel.update_log_txt()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li><a class="reference internal" href="#case-model">Case model</a><ul>
 <li><a class="reference internal" href="#cornflow.models.CaseModel"><code class="docutils literal notranslate"><span class="pre">CaseModel</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow.models.CaseModel.from_parent_id"><code class="docutils literal notranslate">from_parent_id()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.models.CaseModel.patch"><code class="docutils literal notranslate">patch()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.models.CaseModel.update"><code class="docutils literal notranslate">update()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.models.CaseModel.apply_patch"><code class="docutils literal notranslate">apply_patch()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.models.CaseModel.move_to"><code class="docutils literal notranslate">move_to()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.models.CaseModel.from_parent_id"><code class="docutils literal notranslate"><span class="pre">CaseModel.from_parent_id()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.models.CaseModel.patch"><code class="docutils literal notranslate"><span class="pre">CaseModel.patch()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.models.CaseModel.update"><code class="docutils literal notranslate"><span class="pre">CaseModel.update()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.models.CaseModel.apply_patch"><code class="docutils literal notranslate"><span class="pre">CaseModel.apply_patch()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.models.CaseModel.move_to"><code class="docutils literal notranslate"><span class="pre">CaseModel.move_to()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li><a class="reference internal" href="#user-model">User model</a><ul>
 <li><a class="reference internal" href="#cornflow.models.UserModel"><code class="docutils literal notranslate"><span class="pre">UserModel</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow.models.UserModel.update"><code class="docutils literal notranslate">update()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.models.UserModel.comes_from_external_provider"><code class="docutils literal notranslate">comes_from_external_provider()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.models.UserModel.check_hash"><code class="docutils literal notranslate">check_hash()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.models.UserModel.get_all_users"><code class="docutils literal notranslate">get_all_users()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.models.UserModel.get_one_user"><code class="docutils literal notranslate">get_one_user()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.models.UserModel.get_one_user_by_email"><code class="docutils literal notranslate">get_one_user_by_email()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.models.UserModel.get_one_user_by_username"><code class="docutils literal notranslate">get_one_user_by_username()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.models.UserModel.check_username_in_use"><code class="docutils literal notranslate">check_username_in_use()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.models.UserModel.generate_random_password"><code class="docutils literal notranslate">generate_random_password()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.models.UserModel.is_admin"><code class="docutils literal notranslate">is_admin()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.models.UserModel.is_service_user"><code class="docutils literal notranslate">is_service_user()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.models.UserModel.update"><code class="docutils literal notranslate"><span class="pre">UserModel.update()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.models.UserModel.comes_from_external_provider"><code class="docutils literal notranslate"><span class="pre">UserModel.comes_from_external_provider()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.models.UserModel.check_hash"><code class="docutils literal notranslate"><span class="pre">UserModel.check_hash()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.models.UserModel.get_all_users"><code class="docutils literal notranslate"><span class="pre">UserModel.get_all_users()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.models.UserModel.get_one_user"><code class="docutils literal notranslate"><span class="pre">UserModel.get_one_user()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.models.UserModel.get_one_user_by_email"><code class="docutils literal notranslate"><span class="pre">UserModel.get_one_user_by_email()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.models.UserModel.get_one_user_by_username"><code class="docutils literal notranslate"><span class="pre">UserModel.get_one_user_by_username()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.models.UserModel.check_username_in_use"><code class="docutils literal notranslate"><span class="pre">UserModel.check_username_in_use()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.models.UserModel.generate_random_password"><code class="docutils literal notranslate"><span class="pre">UserModel.generate_random_password()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.models.UserModel.is_admin"><code class="docutils literal notranslate"><span class="pre">UserModel.is_admin()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.models.UserModel.is_service_user"><code class="docutils literal notranslate"><span class="pre">UserModel.is_service_user()</span></code></a></li>
 </ul>
 </li>
 </ul>

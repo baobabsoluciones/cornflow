@@ -6,7 +6,7 @@
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=ad592e98" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=70423902" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=2ceb65ce" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -170,29 +170,29 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="3"><span class="kn">from</span><span class="w"> </span><span class="nn">instance</span><span class="w"> </span><span class="kn">import</span> <span class="n">Instance</span>
 </span><span data-line="4">
 </span><span data-line="5">
-</span><span data-line="6"><span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;C:/Users/me/path/to/my/input-data-file.json”</span>
+</span><span data-line="6"><span class="n">path</span> <span class="o">=</span> <span class="s2">"C:/Users/me/path/to/my/input-data-file.json”</span>
 </span><span data-line="7"><span class="o">//</span> <span class="n">Data</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">schema</span> <span class="nb">format</span><span class="p">:</span>
 </span><span data-line="8"><span class="n">data</span> <span class="o">=</span> <span class="n">Instance</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
 </span><span data-line="9">
-</span><span data-line="10"><span class="n">client</span> <span class="o">=</span> <span class="n">CornFlow</span><span class="p">(</span><span class="s2">&quot;https://devsm.cornflow.baobabsoluciones.app&quot;</span><span class="p">)</span>
+</span><span data-line="10"><span class="n">client</span> <span class="o">=</span> <span class="n">CornFlow</span><span class="p">(</span><span class="s2">"https://devsm.cornflow.baobabsoluciones.app"</span><span class="p">)</span>
 </span><span data-line="11"><span class="o">//</span> <span class="n">Sign_up</span> <span class="n">only</span> <span class="n">the</span> <span class="n">first</span> <span class="n">time</span><span class="p">:</span>
 </span><span data-line="12"><span class="n">client</span><span class="o">.</span><span class="n">sign_up</span><span class="p">(</span><span class="n">YOUR_USER_NAME</span><span class="p">,</span> <span class="n">YOUR_EMAIL</span><span class="p">,</span> <span class="n">YOUR_PASSWORD</span><span class="p">)</span>
 </span><span data-line="13"><span class="n">client</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">YOUR_USER_NAME</span><span class="p">,</span> <span class="n">YOUR_PASSWORD</span><span class="p">)</span>
 </span><span data-line="14">
-</span><span data-line="15"><span class="n">instance</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">create_instance</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;test_my_project&quot;</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="s2">&quot;my_project&quot;</span><span class="p">)</span>
-</span><span data-line="16"><span class="n">instance_id</span> <span class="o">=</span> <span class="n">instance</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+</span><span data-line="15"><span class="n">instance</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">create_instance</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"test_my_project"</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="s2">"my_project"</span><span class="p">)</span>
+</span><span data-line="16"><span class="n">instance_id</span> <span class="o">=</span> <span class="n">instance</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]</span>
 </span><span data-line="17">
 </span><span data-line="18"><span class="n">execution_config</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-</span><span data-line="19">   <span class="n">solver</span><span class="o">=</span><span class="s2">&quot;algorithm1&quot;</span><span class="p">,</span>
+</span><span data-line="19">   <span class="n">solver</span><span class="o">=</span><span class="s2">"algorithm1"</span><span class="p">,</span>
 </span><span data-line="20">   <span class="n">timeLimit</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
 </span><span data-line="21"><span class="p">)</span>
 </span><span data-line="22">
-</span><span data-line="23"><span class="n">execution</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">create_execution</span><span class="p">(</span><span class="n">instance_id</span><span class="p">,</span> <span class="n">execution_config</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="s2">&quot;my_project&quot;</span><span class="p">)</span>
-</span><span data-line="24"><span class="n">execution_id</span> <span class="o">=</span> <span class="n">execution</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+</span><span data-line="23"><span class="n">execution</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">create_execution</span><span class="p">(</span><span class="n">instance_id</span><span class="p">,</span> <span class="n">execution_config</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="s2">"my_project"</span><span class="p">)</span>
+</span><span data-line="24"><span class="n">execution_id</span> <span class="o">=</span> <span class="n">execution</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]</span>
 </span><span data-line="25">
-</span><span data-line="26"><span class="k">while</span> <span class="ow">not</span> <span class="n">client</span><span class="o">.</span><span class="n">get_status</span><span class="p">(</span><span class="n">execution_id</span><span class="p">)[</span><span class="s2">&quot;state&quot;</span><span class="p">]:</span>
+</span><span data-line="26"><span class="k">while</span> <span class="ow">not</span> <span class="n">client</span><span class="o">.</span><span class="n">get_status</span><span class="p">(</span><span class="n">execution_id</span><span class="p">)[</span><span class="s2">"state"</span><span class="p">]:</span>
 </span><span data-line="27">   <span class="n">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</span><span data-line="28">   <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Still waiting for the solution!&quot;</span><span class="p">)</span>
+</span><span data-line="28">   <span class="nb">print</span><span class="p">(</span><span class="s2">"Still waiting for the solution!"</span><span class="p">)</span>
 </span><span data-line="29"><span class="nb">print</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">get_status</span><span class="p">(</span><span class="n">execution_id</span><span class="p">))</span>
 </span><span data-line="30">
 </span><span data-line="31"><span class="n">solution</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_solution</span><span class="p">(</span><span class="n">execution_id</span><span class="p">)</span>

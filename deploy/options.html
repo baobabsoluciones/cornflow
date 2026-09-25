@@ -6,7 +6,7 @@
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=ad592e98" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=70423902" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=2ceb65ce" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -195,7 +195,7 @@ Eg.:</p>
 <p>To create a database, you must be a superuser. A user called postgres is made on and the user postgres has full superadmin access to entire PostgreSQL:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">sudo</span> <span class="o">-</span><span class="n">u</span> <span class="n">postgres</span> <span class="n">psql</span>
 </span><span data-line="2"><span class="n">postgres</span><span class="o">=</span><span class="c1"># create database cornflowdb;</span>
-</span><span data-line="3"><span class="n">postgres</span><span class="o">=</span><span class="c1"># create user myuser with encrypted password &#39;myuserpwd&#39;;</span>
+</span><span data-line="3"><span class="n">postgres</span><span class="o">=</span><span class="c1"># create user myuser with encrypted password 'myuserpwd';</span>
 </span><span data-line="4"><span class="n">postgres</span><span class="o">=</span><span class="c1"># grant all privileges on database cornflowdb to myuser;</span>
 </span></pre></div>
 </div>

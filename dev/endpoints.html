@@ -6,7 +6,7 @@
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=ad592e98" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=70423902" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=2ceb65ce" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -127,61 +127,61 @@ data-aria-dark="Switch to auto color mode">
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
 <li><a class="reference internal" href="#module-cornflow.endpoints.signup">Signup endpoint</a><ul>
 <li><a class="reference internal" href="#cornflow.endpoints.signup.SignUpEndpoint"><code class="docutils literal notranslate"><span class="pre">SignUpEndpoint</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow.endpoints.signup.SignUpEndpoint.ROLES_WITH_ACCESS"><code class="docutils literal notranslate">ROLES_WITH_ACCESS</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.signup.SignUpEndpoint.post"><code class="docutils literal notranslate">post()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.signup.SignUpEndpoint.sign_up"><code class="docutils literal notranslate">sign_up()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.signup.SignUpEndpoint.methods"><code class="docutils literal notranslate">methods</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.signup.SignUpEndpoint.ROLES_WITH_ACCESS"><code class="docutils literal notranslate"><span class="pre">SignUpEndpoint.ROLES_WITH_ACCESS</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.signup.SignUpEndpoint.post"><code class="docutils literal notranslate"><span class="pre">SignUpEndpoint.post()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.signup.SignUpEndpoint.sign_up"><code class="docutils literal notranslate"><span class="pre">SignUpEndpoint.sign_up()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.signup.SignUpEndpoint.methods"><code class="docutils literal notranslate"><span class="pre">SignUpEndpoint.methods</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li><a class="reference internal" href="#module-cornflow.endpoints.login">Login endpoint</a><ul>
 <li><a class="reference internal" href="#cornflow.endpoints.login.LoginBaseEndpoint"><code class="docutils literal notranslate"><span class="pre">LoginBaseEndpoint</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow.endpoints.login.LoginBaseEndpoint.log_in"><code class="docutils literal notranslate">log_in()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.login.LoginBaseEndpoint.auth_db_authenticate"><code class="docutils literal notranslate">auth_db_authenticate()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.login.LoginBaseEndpoint.auth_ldap_authenticate"><code class="docutils literal notranslate">auth_ldap_authenticate()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.login.LoginBaseEndpoint.auth_oid_authenticate"><code class="docutils literal notranslate">auth_oid_authenticate()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.login.LoginBaseEndpoint.log_in"><code class="docutils literal notranslate"><span class="pre">LoginBaseEndpoint.log_in()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.login.LoginBaseEndpoint.auth_db_authenticate"><code class="docutils literal notranslate"><span class="pre">LoginBaseEndpoint.auth_db_authenticate()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.login.LoginBaseEndpoint.auth_ldap_authenticate"><code class="docutils literal notranslate"><span class="pre">LoginBaseEndpoint.auth_ldap_authenticate()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.login.LoginBaseEndpoint.auth_oid_authenticate"><code class="docutils literal notranslate"><span class="pre">LoginBaseEndpoint.auth_oid_authenticate()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#cornflow.endpoints.login.check_last_password_change"><code class="docutils literal notranslate"><span class="pre">check_last_password_change()</span></code></a></li>
 <li><a class="reference internal" href="#cornflow.endpoints.login.LoginEndpoint"><code class="docutils literal notranslate"><span class="pre">LoginEndpoint</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow.endpoints.login.LoginEndpoint.post"><code class="docutils literal notranslate">post()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.login.LoginEndpoint.methods"><code class="docutils literal notranslate">methods</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.login.LoginEndpoint.post"><code class="docutils literal notranslate"><span class="pre">LoginEndpoint.post()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.login.LoginEndpoint.methods"><code class="docutils literal notranslate"><span class="pre">LoginEndpoint.methods</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#cornflow.endpoints.login.LoginOpenAuthEndpoint"><code class="docutils literal notranslate"><span class="pre">LoginOpenAuthEndpoint</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow.endpoints.login.LoginOpenAuthEndpoint.post"><code class="docutils literal notranslate">post()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.login.LoginOpenAuthEndpoint.methods"><code class="docutils literal notranslate">methods</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.login.LoginOpenAuthEndpoint.post"><code class="docutils literal notranslate"><span class="pre">LoginOpenAuthEndpoint.post()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.login.LoginOpenAuthEndpoint.methods"><code class="docutils literal notranslate"><span class="pre">LoginOpenAuthEndpoint.methods</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li><a class="reference internal" href="#module-cornflow.endpoints.instance">Instance endpoints</a><ul>
 <li><a class="reference internal" href="#cornflow.endpoints.instance.InstanceEndpoint"><code class="docutils literal notranslate"><span class="pre">InstanceEndpoint</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow.endpoints.instance.InstanceEndpoint.get"><code class="docutils literal notranslate">get()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.instance.InstanceEndpoint.post"><code class="docutils literal notranslate">post()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.instance.InstanceEndpoint.methods"><code class="docutils literal notranslate">methods</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.instance.InstanceEndpoint.get"><code class="docutils literal notranslate"><span class="pre">InstanceEndpoint.get()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.instance.InstanceEndpoint.post"><code class="docutils literal notranslate"><span class="pre">InstanceEndpoint.post()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.instance.InstanceEndpoint.methods"><code class="docutils literal notranslate"><span class="pre">InstanceEndpoint.methods</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#cornflow.endpoints.instance.InstanceDetailsEndpointBase"><code class="docutils literal notranslate"><span class="pre">InstanceDetailsEndpointBase</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow.endpoints.instance.InstanceDetailsEndpointBase.get"><code class="docutils literal notranslate">get()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.instance.InstanceDetailsEndpointBase.methods"><code class="docutils literal notranslate">methods</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.instance.InstanceDetailsEndpointBase.get"><code class="docutils literal notranslate"><span class="pre">InstanceDetailsEndpointBase.get()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.instance.InstanceDetailsEndpointBase.methods"><code class="docutils literal notranslate"><span class="pre">InstanceDetailsEndpointBase.methods</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#cornflow.endpoints.instance.InstanceDetailsEndpoint"><code class="docutils literal notranslate"><span class="pre">InstanceDetailsEndpoint</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow.endpoints.instance.InstanceDetailsEndpoint.put"><code class="docutils literal notranslate">put()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.instance.InstanceDetailsEndpoint.delete"><code class="docutils literal notranslate">delete()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.instance.InstanceDetailsEndpoint.methods"><code class="docutils literal notranslate">methods</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.instance.InstanceDetailsEndpoint.put"><code class="docutils literal notranslate"><span class="pre">InstanceDetailsEndpoint.put()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.instance.InstanceDetailsEndpoint.delete"><code class="docutils literal notranslate"><span class="pre">InstanceDetailsEndpoint.delete()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.instance.InstanceDetailsEndpoint.methods"><code class="docutils literal notranslate"><span class="pre">InstanceDetailsEndpoint.methods</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#cornflow.endpoints.instance.InstanceDataEndpoint"><code class="docutils literal notranslate"><span class="pre">InstanceDataEndpoint</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow.endpoints.instance.InstanceDataEndpoint.get"><code class="docutils literal notranslate">get()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.instance.InstanceDataEndpoint.methods"><code class="docutils literal notranslate">methods</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.instance.InstanceDataEndpoint.get"><code class="docutils literal notranslate"><span class="pre">InstanceDataEndpoint.get()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.instance.InstanceDataEndpoint.methods"><code class="docutils literal notranslate"><span class="pre">InstanceDataEndpoint.methods</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#cornflow.endpoints.instance.InstanceFileEndpoint"><code class="docutils literal notranslate"><span class="pre">InstanceFileEndpoint</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow.endpoints.instance.InstanceFileEndpoint.post"><code class="docutils literal notranslate">post()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.instance.InstanceFileEndpoint.methods"><code class="docutils literal notranslate">methods</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.instance.InstanceFileEndpoint.post"><code class="docutils literal notranslate"><span class="pre">InstanceFileEndpoint.post()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.instance.InstanceFileEndpoint.methods"><code class="docutils literal notranslate"><span class="pre">InstanceFileEndpoint.methods</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#cornflow.endpoints.instance.allowed_file"><code class="docutils literal notranslate"><span class="pre">allowed_file()</span></code></a></li>
@@ -189,63 +189,63 @@ data-aria-dark="Switch to auto color mode">
 </li>
 <li><a class="reference internal" href="#module-cornflow.endpoints.execution">Execution endpoints</a><ul>
 <li><a class="reference internal" href="#cornflow.endpoints.execution.OrchestratorMixin"><code class="docutils literal notranslate"><span class="pre">OrchestratorMixin</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow.endpoints.execution.OrchestratorMixin.orch_type"><code class="docutils literal notranslate">orch_type</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.execution.OrchestratorMixin.orch_client"><code class="docutils literal notranslate">orch_client</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.execution.OrchestratorMixin.orch_error"><code class="docutils literal notranslate">orch_error</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.execution.OrchestratorMixin.orch_to_state_map"><code class="docutils literal notranslate">orch_to_state_map</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.execution.OrchestratorMixin.orch_const"><code class="docutils literal notranslate">orch_const</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.execution.OrchestratorMixin.orch_type"><code class="docutils literal notranslate"><span class="pre">OrchestratorMixin.orch_type</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.execution.OrchestratorMixin.orch_client"><code class="docutils literal notranslate"><span class="pre">OrchestratorMixin.orch_client</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.execution.OrchestratorMixin.orch_error"><code class="docutils literal notranslate"><span class="pre">OrchestratorMixin.orch_error</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.execution.OrchestratorMixin.orch_to_state_map"><code class="docutils literal notranslate"><span class="pre">OrchestratorMixin.orch_to_state_map</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.execution.OrchestratorMixin.orch_const"><code class="docutils literal notranslate"><span class="pre">OrchestratorMixin.orch_const</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionEndpoint"><code class="docutils literal notranslate"><span class="pre">ExecutionEndpoint</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionEndpoint.get"><code class="docutils literal notranslate">get()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionEndpoint.post"><code class="docutils literal notranslate">post()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionEndpoint.methods"><code class="docutils literal notranslate">methods</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionEndpoint.get"><code class="docutils literal notranslate"><span class="pre">ExecutionEndpoint.get()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionEndpoint.post"><code class="docutils literal notranslate"><span class="pre">ExecutionEndpoint.post()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionEndpoint.methods"><code class="docutils literal notranslate"><span class="pre">ExecutionEndpoint.methods</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionRelaunchEndpoint"><code class="docutils literal notranslate"><span class="pre">ExecutionRelaunchEndpoint</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionRelaunchEndpoint.post"><code class="docutils literal notranslate">post()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionRelaunchEndpoint.methods"><code class="docutils literal notranslate">methods</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionRelaunchEndpoint.post"><code class="docutils literal notranslate"><span class="pre">ExecutionRelaunchEndpoint.post()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionRelaunchEndpoint.methods"><code class="docutils literal notranslate"><span class="pre">ExecutionRelaunchEndpoint.methods</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionDetailsEndpointBase"><code class="docutils literal notranslate"><span class="pre">ExecutionDetailsEndpointBase</span></code></a></li>
 <li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionDetailsEndpoint"><code class="docutils literal notranslate"><span class="pre">ExecutionDetailsEndpoint</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionDetailsEndpoint.get"><code class="docutils literal notranslate">get()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionDetailsEndpoint.put"><code class="docutils literal notranslate">put()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionDetailsEndpoint.delete"><code class="docutils literal notranslate">delete()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionDetailsEndpoint.post"><code class="docutils literal notranslate">post()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionDetailsEndpoint.methods"><code class="docutils literal notranslate">methods</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionDetailsEndpoint.get"><code class="docutils literal notranslate"><span class="pre">ExecutionDetailsEndpoint.get()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionDetailsEndpoint.put"><code class="docutils literal notranslate"><span class="pre">ExecutionDetailsEndpoint.put()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionDetailsEndpoint.delete"><code class="docutils literal notranslate"><span class="pre">ExecutionDetailsEndpoint.delete()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionDetailsEndpoint.post"><code class="docutils literal notranslate"><span class="pre">ExecutionDetailsEndpoint.post()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionDetailsEndpoint.methods"><code class="docutils literal notranslate"><span class="pre">ExecutionDetailsEndpoint.methods</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionStatusEndpoint"><code class="docutils literal notranslate"><span class="pre">ExecutionStatusEndpoint</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionStatusEndpoint.get"><code class="docutils literal notranslate">get()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionStatusEndpoint.put"><code class="docutils literal notranslate">put()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionStatusEndpoint.methods"><code class="docutils literal notranslate">methods</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionStatusEndpoint.get"><code class="docutils literal notranslate"><span class="pre">ExecutionStatusEndpoint.get()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionStatusEndpoint.put"><code class="docutils literal notranslate"><span class="pre">ExecutionStatusEndpoint.put()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionStatusEndpoint.methods"><code class="docutils literal notranslate"><span class="pre">ExecutionStatusEndpoint.methods</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionDataEndpoint"><code class="docutils literal notranslate"><span class="pre">ExecutionDataEndpoint</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionDataEndpoint.get"><code class="docutils literal notranslate">get()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionDataEndpoint.methods"><code class="docutils literal notranslate">methods</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionDataEndpoint.get"><code class="docutils literal notranslate"><span class="pre">ExecutionDataEndpoint.get()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionDataEndpoint.methods"><code class="docutils literal notranslate"><span class="pre">ExecutionDataEndpoint.methods</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionLogEndpoint"><code class="docutils literal notranslate"><span class="pre">ExecutionLogEndpoint</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionLogEndpoint.get"><code class="docutils literal notranslate">get()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionLogEndpoint.methods"><code class="docutils literal notranslate">methods</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionLogEndpoint.get"><code class="docutils literal notranslate"><span class="pre">ExecutionLogEndpoint.get()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionLogEndpoint.methods"><code class="docutils literal notranslate"><span class="pre">ExecutionLogEndpoint.methods</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionFilesEndpointMixin"><code class="docutils literal notranslate"><span class="pre">ExecutionFilesEndpointMixin</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionFilesEndpointMixin.ROLES_WITH_ACCESS"><code class="docutils literal notranslate">ROLES_WITH_ACCESS</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionFilesEndpointMixin.check_execution_files_active"><code class="docutils literal notranslate">check_execution_files_active()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionFilesEndpointMixin.ROLES_WITH_ACCESS"><code class="docutils literal notranslate"><span class="pre">ExecutionFilesEndpointMixin.ROLES_WITH_ACCESS</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionFilesEndpointMixin.check_execution_files_active"><code class="docutils literal notranslate"><span class="pre">ExecutionFilesEndpointMixin.check_execution_files_active()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionFilesEndpoint"><code class="docutils literal notranslate"><span class="pre">ExecutionFilesEndpoint</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionFilesEndpoint.get"><code class="docutils literal notranslate">get()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionFilesEndpoint.post"><code class="docutils literal notranslate">post()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionFilesEndpoint.methods"><code class="docutils literal notranslate">methods</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionFilesEndpoint.get"><code class="docutils literal notranslate"><span class="pre">ExecutionFilesEndpoint.get()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionFilesEndpoint.post"><code class="docutils literal notranslate"><span class="pre">ExecutionFilesEndpoint.post()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionFilesEndpoint.methods"><code class="docutils literal notranslate"><span class="pre">ExecutionFilesEndpoint.methods</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionFilesCleanupEndpoint"><code class="docutils literal notranslate"><span class="pre">ExecutionFilesCleanupEndpoint</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionFilesCleanupEndpoint.delete"><code class="docutils literal notranslate">delete()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionFilesCleanupEndpoint.methods"><code class="docutils literal notranslate">methods</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionFilesCleanupEndpoint.delete"><code class="docutils literal notranslate"><span class="pre">ExecutionFilesCleanupEndpoint.delete()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.execution.ExecutionFilesCleanupEndpoint.methods"><code class="docutils literal notranslate"><span class="pre">ExecutionFilesCleanupEndpoint.methods</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#cornflow.endpoints.execution.map_run_state"><code class="docutils literal notranslate"><span class="pre">map_run_state()</span></code></a></li>
@@ -253,28 +253,28 @@ data-aria-dark="Switch to auto color mode">
 </li>
 <li><a class="reference internal" href="#module-cornflow.endpoints.user">User endpoint</a><ul>
 <li><a class="reference internal" href="#cornflow.endpoints.user.UserEndpoint"><code class="docutils literal notranslate"><span class="pre">UserEndpoint</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow.endpoints.user.UserEndpoint.ROLES_WITH_ACCESS"><code class="docutils literal notranslate">ROLES_WITH_ACCESS</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.user.UserEndpoint.get"><code class="docutils literal notranslate">get()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.user.UserEndpoint.methods"><code class="docutils literal notranslate">methods</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.user.UserEndpoint.ROLES_WITH_ACCESS"><code class="docutils literal notranslate"><span class="pre">UserEndpoint.ROLES_WITH_ACCESS</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.user.UserEndpoint.get"><code class="docutils literal notranslate"><span class="pre">UserEndpoint.get()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.user.UserEndpoint.methods"><code class="docutils literal notranslate"><span class="pre">UserEndpoint.methods</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#cornflow.endpoints.user.UserDetailsEndpoint"><code class="docutils literal notranslate"><span class="pre">UserDetailsEndpoint</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow.endpoints.user.UserDetailsEndpoint.ROLES_WITH_ACCESS"><code class="docutils literal notranslate">ROLES_WITH_ACCESS</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.user.UserDetailsEndpoint.get"><code class="docutils literal notranslate">get()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.user.UserDetailsEndpoint.delete"><code class="docutils literal notranslate">delete()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.user.UserDetailsEndpoint.put"><code class="docutils literal notranslate">put()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.user.UserDetailsEndpoint.methods"><code class="docutils literal notranslate">methods</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.user.UserDetailsEndpoint.ROLES_WITH_ACCESS"><code class="docutils literal notranslate"><span class="pre">UserDetailsEndpoint.ROLES_WITH_ACCESS</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.user.UserDetailsEndpoint.get"><code class="docutils literal notranslate"><span class="pre">UserDetailsEndpoint.get()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.user.UserDetailsEndpoint.delete"><code class="docutils literal notranslate"><span class="pre">UserDetailsEndpoint.delete()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.user.UserDetailsEndpoint.put"><code class="docutils literal notranslate"><span class="pre">UserDetailsEndpoint.put()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.user.UserDetailsEndpoint.methods"><code class="docutils literal notranslate"><span class="pre">UserDetailsEndpoint.methods</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#cornflow.endpoints.user.ToggleUserAdmin"><code class="docutils literal notranslate"><span class="pre">ToggleUserAdmin</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow.endpoints.user.ToggleUserAdmin.ROLES_WITH_ACCESS"><code class="docutils literal notranslate">ROLES_WITH_ACCESS</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.user.ToggleUserAdmin.put"><code class="docutils literal notranslate">put()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.user.ToggleUserAdmin.methods"><code class="docutils literal notranslate">methods</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.user.ToggleUserAdmin.ROLES_WITH_ACCESS"><code class="docutils literal notranslate"><span class="pre">ToggleUserAdmin.ROLES_WITH_ACCESS</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.user.ToggleUserAdmin.put"><code class="docutils literal notranslate"><span class="pre">ToggleUserAdmin.put()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.user.ToggleUserAdmin.methods"><code class="docutils literal notranslate"><span class="pre">ToggleUserAdmin.methods</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#cornflow.endpoints.user.RecoverPassword"><code class="docutils literal notranslate"><span class="pre">RecoverPassword</span></code></a><ul>
-<li><a class="reference internal" href="#cornflow.endpoints.user.RecoverPassword.put"><code class="docutils literal notranslate">put()</span></code></a></li>
-<li><a class="reference internal" href="#cornflow.endpoints.user.RecoverPassword.methods"><code class="docutils literal notranslate">methods</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.user.RecoverPassword.put"><code class="docutils literal notranslate"><span class="pre">RecoverPassword.put()</span></code></a></li>
+<li><a class="reference internal" href="#cornflow.endpoints.user.RecoverPassword.methods"><code class="docutils literal notranslate"><span class="pre">RecoverPassword.methods</span></code></a></li>
 </ul>
 </li>
 </ul>

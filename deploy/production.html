@@ -6,7 +6,7 @@
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=ad592e98" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=70423902" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=2ceb65ce" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -190,21 +190,21 @@ Please go to the <a class="reference external" href="http://nginx.org/en/docs/ht
 </span><span data-line="8">     proxy_redirect off;
 </span><span data-line="9">     proxy_http_version 1.1;
 </span><span data-line="10">     proxy_set_header Upgrade $http_upgrade;
-</span><span data-line="11">     proxy_set_header Connection &quot;upgrade&quot;;
+</span><span data-line="11">     proxy_set_header Connection "upgrade";
 </span><span data-line="12">   }
 </span><span data-line="13">   ssl_certificate /pathtocertificate/mysite.crt;
 </span><span data-line="14">   ssl_certificate_key /pathtocertificatekey/mysite.key;
 </span><span data-line="15">   error_page 400 /400.json;
 </span><span data-line="16">   location /400.json {
-</span><span data-line="17">       return 400 &#39;{&quot;error&quot;:{&quot;code&quot;:400,&quot;message&quot;:&quot;Bad Request&quot;}}&#39;;
+</span><span data-line="17">       return 400 '{"error":{"code":400,"message":"Bad Request"}}';
 </span><span data-line="18">   }
 </span><span data-line="19">   error_page 403 /403.json;
 </span><span data-line="20">   location /403.json {
-</span><span data-line="21">       return 403 &#39;{&quot;error&quot;:{&quot;code&quot;:403,&quot;message&quot;: &quot;Forbidden&quot;}}&#39;;
+</span><span data-line="21">       return 403 '{"error":{"code":403,"message": "Forbidden"}}';
 </span><span data-line="22">   }
 </span><span data-line="23">   error_page 500 /500.json;
 </span><span data-line="24">   location /500.json {
-</span><span data-line="25">       return 500 &#39;{&quot;error&quot;:{&quot;code&quot;:500,&quot;message&quot;:&quot;Internal Server Error&quot;}}&#39;;
+</span><span data-line="25">       return 500 '{"error":{"code":500,"message":"Internal Server Error"}}';
 </span><span data-line="26">   }
 </span><span data-line="27">}
 </span></pre></div>
@@ -215,7 +215,7 @@ Please go to the <a class="reference external" href="http://nginx.org/en/docs/ht
 <p>When using cornflow in a production environment, the usernames and passwords should be stored in a safe place. In the deployment through docker-compose you can connect the environment variables with your KMS system.
 If you are running docker services in production, it is also convenient to use the <a class="reference external" href="https://docs.docker.com/engine/swarm/secrets/#use-secrets-in-compose">docker secret manager</a>.</p>
 <p>It is also recommended to put a password in the celery broker for the production environment. In all airflow services, the redis environment variable should be secured with a key:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">REDIS_PASSWORD</span><span class="o">=</span><span class="s2">&quot;myredispassword&quot;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">REDIS_PASSWORD</span><span class="o">=</span><span class="s2">"myredispassword"</span>
 </span></pre></div>
 </div>
 <p>Flower has by default a <a class="reference external" href="https://flower.readthedocs.io/en/latest/auth.html">basic authentication</a> shared with the airflow server in the deployment.</p>
@@ -229,10 +229,10 @@ To activate the functionality that supports this type of access, it is necessary
 </span></pre></div>
 </div>
 <p>With this docker template following users will be create in openldap server:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">User</span> <span class="s2">&quot;administrator&quot;</span> <span class="k">with</span> <span class="n">password</span> <span class="s2">&quot;adminnistrator1234&quot;</span>
-</span><span data-line="2"><span class="n">Service</span> <span class="n">user</span> <span class="s2">&quot;cornflow&quot;</span> <span class="k">with</span> <span class="n">password</span> <span class="s2">&quot;cornflow1234&quot;</span>
-</span><span data-line="3"><span class="n">Viewer</span> <span class="n">user</span> <span class="s2">&quot;viewer&quot;</span> <span class="k">with</span> <span class="n">password</span> <span class="s2">&quot;viewer1234&quot;</span>
-</span><span data-line="4"><span class="n">General</span> <span class="n">user</span> <span class="s2">&quot;planner&quot;</span> <span class="k">with</span> <span class="n">password</span> <span class="s2">&quot;planner1234&quot;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">User</span> <span class="s2">"administrator"</span> <span class="k">with</span> <span class="n">password</span> <span class="s2">"adminnistrator1234"</span>
+</span><span data-line="2"><span class="n">Service</span> <span class="n">user</span> <span class="s2">"cornflow"</span> <span class="k">with</span> <span class="n">password</span> <span class="s2">"cornflow1234"</span>
+</span><span data-line="3"><span class="n">Viewer</span> <span class="n">user</span> <span class="s2">"viewer"</span> <span class="k">with</span> <span class="n">password</span> <span class="s2">"viewer1234"</span>
+</span><span data-line="4"><span class="n">General</span> <span class="n">user</span> <span class="s2">"planner"</span> <span class="k">with</span> <span class="n">password</span> <span class="s2">"planner1234"</span>
 </span></pre></div>
 </div>
 <p>Airflow does support this functionality and therefore it should be activated in the production deployment. To learn more about how to enable LDAP in airflow, see this <a class="reference external" href="https://airflow.apache.org/docs/apache-airflow/1.10.1/security.html#ldap">page</a>.</p>

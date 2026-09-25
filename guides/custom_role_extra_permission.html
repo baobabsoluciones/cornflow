@@ -6,7 +6,7 @@
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=ad592e98" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=70423902" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=2ceb65ce" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -226,13 +226,13 @@ for assigning specific additional permissions to any role on particular endpoint
 </span><span data-line="16"><span class="c1"># List of specific additional permissions (role_id, action_id, endpoint_name)</span>
 </span><span data-line="17"><span class="n">EXTRA_PERMISSION_ASSIGNATION</span> <span class="o">=</span> <span class="p">[</span>
 </span><span data-line="18">    <span class="c1"># Give production role patch permission on specific endpoint</span>
-</span><span data-line="19">    <span class="p">(</span><span class="mi">888</span><span class="p">,</span> <span class="n">PATCH_ACTION</span><span class="p">,</span> <span class="s2">&quot;production_planning&quot;</span><span class="p">),</span>
+</span><span data-line="19">    <span class="p">(</span><span class="mi">888</span><span class="p">,</span> <span class="n">PATCH_ACTION</span><span class="p">,</span> <span class="s2">"production_planning"</span><span class="p">),</span>
 </span><span data-line="20">    <span class="c1"># Give standard viewer role post permission on reports endpoint</span>
-</span><span data-line="21">    <span class="p">(</span><span class="n">VIEWER_ROLE</span><span class="p">,</span> <span class="n">POST_ACTION</span><span class="p">,</span> <span class="s2">&quot;reports&quot;</span><span class="p">),</span>
+</span><span data-line="21">    <span class="p">(</span><span class="n">VIEWER_ROLE</span><span class="p">,</span> <span class="n">POST_ACTION</span><span class="p">,</span> <span class="s2">"reports"</span><span class="p">),</span>
 </span><span data-line="22">    <span class="c1"># Give quality role put permission on quality control endpoint</span>
-</span><span data-line="23">    <span class="p">(</span><span class="mi">777</span><span class="p">,</span> <span class="n">PUT_ACTION</span><span class="p">,</span> <span class="s2">&quot;quality_control&quot;</span><span class="p">),</span>
+</span><span data-line="23">    <span class="p">(</span><span class="mi">777</span><span class="p">,</span> <span class="n">PUT_ACTION</span><span class="p">,</span> <span class="s2">"quality_control"</span><span class="p">),</span>
 </span><span data-line="24">    <span class="c1"># Give standard planner role patch permission on scheduling endpoint</span>
-</span><span data-line="25">    <span class="p">(</span><span class="n">PLANNER_ROLE</span><span class="p">,</span> <span class="n">PATCH_ACTION</span><span class="p">,</span> <span class="s2">&quot;scheduling_optimizer&quot;</span><span class="p">),</span>
+</span><span data-line="25">    <span class="p">(</span><span class="n">PLANNER_ROLE</span><span class="p">,</span> <span class="n">PATCH_ACTION</span><span class="p">,</span> <span class="s2">"scheduling_optimizer"</span><span class="p">),</span>
 </span><span data-line="26"><span class="p">]</span>
 </span></pre></div>
 </div>
@@ -243,14 +243,14 @@ for assigning specific additional permissions to any role on particular endpoint
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">class</span><span class="w"> </span><span class="nc">ProductionPlanningResource</span><span class="p">(</span><span class="n">BaseInstanceResource</span><span class="p">):</span>
 </span><span data-line="2">    <span class="c1"># Custom role 888 + standard role</span>
 </span><span data-line="3">    <span class="n">ROLES_WITH_ACCESS</span> <span class="o">=</span> <span class="p">[</span><span class="mi">888</span><span class="p">,</span> <span class="n">PLANNER_ROLE</span><span class="p">]</span>
-</span><span data-line="4">    <span class="n">DESCRIPTION</span> <span class="o">=</span> <span class="s2">&quot;Production planning endpoint&quot;</span>
+</span><span data-line="4">    <span class="n">DESCRIPTION</span> <span class="o">=</span> <span class="s2">"Production planning endpoint"</span>
 </span><span data-line="5">
 </span><span data-line="6">    <span class="c1"># ... rest of implementation</span>
 </span><span data-line="7">
 </span><span data-line="8"><span class="k">class</span><span class="w"> </span><span class="nc">QualityControlResource</span><span class="p">(</span><span class="n">BaseInstanceResource</span><span class="p">):</span>
 </span><span data-line="9">    <span class="c1"># Custom role 777 + standard role</span>
 </span><span data-line="10">    <span class="n">ROLES_WITH_ACCESS</span> <span class="o">=</span> <span class="p">[</span><span class="mi">777</span><span class="p">,</span> <span class="n">VIEWER_ROLE</span><span class="p">]</span>
-</span><span data-line="11">    <span class="n">DESCRIPTION</span> <span class="o">=</span> <span class="s2">&quot;Quality control endpoint&quot;</span>
+</span><span data-line="11">    <span class="n">DESCRIPTION</span> <span class="o">=</span> <span class="s2">"Quality control endpoint"</span>
 </span><span data-line="12">
 </span><span data-line="13">    <span class="c1"># ... rest of implementation</span>
 </span></pre></div>
@@ -289,14 +289,14 @@ for assigning specific additional permissions to any role on particular endpoint
 </span><span data-line="14"><span class="c1"># Additional specific permissions per endpoint</span>
 </span><span data-line="15"><span class="n">EXTRA_PERMISSION_ASSIGNATION</span> <span class="o">=</span> <span class="p">[</span>
 </span><span data-line="16">    <span class="c1"># Give production role patch permission on production planning</span>
-</span><span data-line="17">    <span class="p">(</span><span class="mi">888</span><span class="p">,</span> <span class="n">PATCH_ACTION</span><span class="p">,</span> <span class="s2">&quot;production_planning&quot;</span><span class="p">),</span>
+</span><span data-line="17">    <span class="p">(</span><span class="mi">888</span><span class="p">,</span> <span class="n">PATCH_ACTION</span><span class="p">,</span> <span class="s2">"production_planning"</span><span class="p">),</span>
 </span><span data-line="18">    <span class="c1"># Give standard viewer role post permission on reports</span>
-</span><span data-line="19">    <span class="p">(</span><span class="n">VIEWER_ROLE</span><span class="p">,</span> <span class="n">POST_ACTION</span><span class="p">,</span> <span class="s2">&quot;reports&quot;</span><span class="p">),</span>
+</span><span data-line="19">    <span class="p">(</span><span class="n">VIEWER_ROLE</span><span class="p">,</span> <span class="n">POST_ACTION</span><span class="p">,</span> <span class="s2">"reports"</span><span class="p">),</span>
 </span><span data-line="20">    <span class="c1"># Give quality role additional permissions</span>
-</span><span data-line="21">    <span class="p">(</span><span class="mi">777</span><span class="p">,</span> <span class="n">PUT_ACTION</span><span class="p">,</span> <span class="s2">&quot;quality_control&quot;</span><span class="p">),</span>
-</span><span data-line="22">    <span class="p">(</span><span class="mi">777</span><span class="p">,</span> <span class="n">PATCH_ACTION</span><span class="p">,</span> <span class="s2">&quot;quality_control&quot;</span><span class="p">),</span>
+</span><span data-line="21">    <span class="p">(</span><span class="mi">777</span><span class="p">,</span> <span class="n">PUT_ACTION</span><span class="p">,</span> <span class="s2">"quality_control"</span><span class="p">),</span>
+</span><span data-line="22">    <span class="p">(</span><span class="mi">777</span><span class="p">,</span> <span class="n">PATCH_ACTION</span><span class="p">,</span> <span class="s2">"quality_control"</span><span class="p">),</span>
 </span><span data-line="23">    <span class="c1"># Extend planner role with patch permission on specific endpoint</span>
-</span><span data-line="24">    <span class="p">(</span><span class="n">PLANNER_ROLE</span><span class="p">,</span> <span class="n">PATCH_ACTION</span><span class="p">,</span> <span class="s2">&quot;scheduling_optimizer&quot;</span><span class="p">),</span>
+</span><span data-line="24">    <span class="p">(</span><span class="n">PLANNER_ROLE</span><span class="p">,</span> <span class="n">PATCH_ACTION</span><span class="p">,</span> <span class="s2">"scheduling_optimizer"</span><span class="p">),</span>
 </span><span data-line="25"><span class="p">]</span>
 </span></pre></div>
 </div>
@@ -308,32 +308,32 @@ for assigning specific additional permissions to any role on particular endpoint
 </span><span data-line="3">
 </span><span data-line="4"><span class="k">class</span><span class="w"> </span><span class="nc">ProductionPlanningResource</span><span class="p">(</span><span class="n">BaseInstanceResource</span><span class="p">):</span>
 </span><span data-line="5">    <span class="n">ROLES_WITH_ACCESS</span> <span class="o">=</span> <span class="p">[</span><span class="mi">888</span><span class="p">,</span> <span class="n">PLANNER_ROLE</span><span class="p">]</span>
-</span><span data-line="6">    <span class="n">DESCRIPTION</span> <span class="o">=</span> <span class="s2">&quot;Production planning endpoint&quot;</span>
+</span><span data-line="6">    <span class="n">DESCRIPTION</span> <span class="o">=</span> <span class="s2">"Production planning endpoint"</span>
 </span><span data-line="7">
 </span><span data-line="8"><span class="k">class</span><span class="w"> </span><span class="nc">QualityControlResource</span><span class="p">(</span><span class="n">BaseInstanceResource</span><span class="p">):</span>
 </span><span data-line="9">    <span class="n">ROLES_WITH_ACCESS</span> <span class="o">=</span> <span class="p">[</span><span class="mi">777</span><span class="p">,</span> <span class="n">VIEWER_ROLE</span><span class="p">]</span>
-</span><span data-line="10">    <span class="n">DESCRIPTION</span> <span class="o">=</span> <span class="s2">&quot;Quality control endpoint&quot;</span>
+</span><span data-line="10">    <span class="n">DESCRIPTION</span> <span class="o">=</span> <span class="s2">"Quality control endpoint"</span>
 </span><span data-line="11">
 </span><span data-line="12"><span class="k">class</span><span class="w"> </span><span class="nc">ReportsResource</span><span class="p">(</span><span class="n">BaseInstanceResource</span><span class="p">):</span>
 </span><span data-line="13">    <span class="n">ROLES_WITH_ACCESS</span> <span class="o">=</span> <span class="p">[</span><span class="mi">999</span><span class="p">,</span> <span class="mi">888</span><span class="p">,</span> <span class="mi">777</span><span class="p">,</span> <span class="n">VIEWER_ROLE</span><span class="p">]</span>
-</span><span data-line="14">    <span class="n">DESCRIPTION</span> <span class="o">=</span> <span class="s2">&quot;Reports endpoint - accessible by multiple roles&quot;</span>
+</span><span data-line="14">    <span class="n">DESCRIPTION</span> <span class="o">=</span> <span class="s2">"Reports endpoint - accessible by multiple roles"</span>
 </span><span data-line="15">
 </span><span data-line="16"><span class="c1"># Resource list for export</span>
 </span><span data-line="17"><span class="n">resources</span> <span class="o">=</span> <span class="p">[</span>
 </span><span data-line="18">    <span class="p">{</span>
-</span><span data-line="19">        <span class="s2">&quot;endpoint&quot;</span><span class="p">:</span> <span class="s2">&quot;production_planning&quot;</span><span class="p">,</span>
-</span><span data-line="20">        <span class="s2">&quot;urls&quot;</span><span class="p">:</span> <span class="s2">&quot;/production-planning/&quot;</span><span class="p">,</span>
-</span><span data-line="21">        <span class="s2">&quot;resource&quot;</span><span class="p">:</span> <span class="n">ProductionPlanningResource</span><span class="p">,</span>
+</span><span data-line="19">        <span class="s2">"endpoint"</span><span class="p">:</span> <span class="s2">"production_planning"</span><span class="p">,</span>
+</span><span data-line="20">        <span class="s2">"urls"</span><span class="p">:</span> <span class="s2">"/production-planning/"</span><span class="p">,</span>
+</span><span data-line="21">        <span class="s2">"resource"</span><span class="p">:</span> <span class="n">ProductionPlanningResource</span><span class="p">,</span>
 </span><span data-line="22">    <span class="p">},</span>
 </span><span data-line="23">    <span class="p">{</span>
-</span><span data-line="24">        <span class="s2">&quot;endpoint&quot;</span><span class="p">:</span> <span class="s2">&quot;quality_control&quot;</span><span class="p">,</span>
-</span><span data-line="25">        <span class="s2">&quot;urls&quot;</span><span class="p">:</span> <span class="s2">&quot;/quality-control/&quot;</span><span class="p">,</span>
-</span><span data-line="26">        <span class="s2">&quot;resource&quot;</span><span class="p">:</span> <span class="n">QualityControlResource</span><span class="p">,</span>
+</span><span data-line="24">        <span class="s2">"endpoint"</span><span class="p">:</span> <span class="s2">"quality_control"</span><span class="p">,</span>
+</span><span data-line="25">        <span class="s2">"urls"</span><span class="p">:</span> <span class="s2">"/quality-control/"</span><span class="p">,</span>
+</span><span data-line="26">        <span class="s2">"resource"</span><span class="p">:</span> <span class="n">QualityControlResource</span><span class="p">,</span>
 </span><span data-line="27">    <span class="p">},</span>
 </span><span data-line="28">    <span class="p">{</span>
-</span><span data-line="29">        <span class="s2">&quot;endpoint&quot;</span><span class="p">:</span> <span class="s2">&quot;reports&quot;</span><span class="p">,</span>
-</span><span data-line="30">        <span class="s2">&quot;urls&quot;</span><span class="p">:</span> <span class="s2">&quot;/reports/&quot;</span><span class="p">,</span>
-</span><span data-line="31">        <span class="s2">&quot;resource&quot;</span><span class="p">:</span> <span class="n">ReportsResource</span><span class="p">,</span>
+</span><span data-line="29">        <span class="s2">"endpoint"</span><span class="p">:</span> <span class="s2">"reports"</span><span class="p">,</span>
+</span><span data-line="30">        <span class="s2">"urls"</span><span class="p">:</span> <span class="s2">"/reports/"</span><span class="p">,</span>
+</span><span data-line="31">        <span class="s2">"resource"</span><span class="p">:</span> <span class="n">ReportsResource</span><span class="p">,</span>
 </span><span data-line="32">    <span class="p">},</span>
 </span><span data-line="33"><span class="p">]</span>
 </span></pre></div>
@@ -358,8 +358,8 @@ for assigning specific additional permissions to any role on particular endpoint
 </span><span data-line="3"><span class="p">}</span>
 </span><span data-line="4">
 </span><span data-line="5"><span class="n">EXTRA_PERMISSION_ASSIGNATION</span> <span class="o">=</span> <span class="p">[</span>
-</span><span data-line="6">    <span class="p">(</span><span class="mi">888</span><span class="p">,</span> <span class="n">PATCH_ACTION</span><span class="p">,</span> <span class="s2">&quot;production_planning&quot;</span><span class="p">),</span>
-</span><span data-line="7">    <span class="p">(</span><span class="n">VIEWER_ROLE</span><span class="p">,</span> <span class="n">POST_ACTION</span><span class="p">,</span> <span class="s2">&quot;reports&quot;</span><span class="p">),</span>        <span class="c1"># Extend standard role</span>
+</span><span data-line="6">    <span class="p">(</span><span class="mi">888</span><span class="p">,</span> <span class="n">PATCH_ACTION</span><span class="p">,</span> <span class="s2">"production_planning"</span><span class="p">),</span>
+</span><span data-line="7">    <span class="p">(</span><span class="n">VIEWER_ROLE</span><span class="p">,</span> <span class="n">POST_ACTION</span><span class="p">,</span> <span class="s2">"reports"</span><span class="p">),</span>        <span class="c1"># Extend standard role</span>
 </span><span data-line="8"><span class="p">]</span>
 </span></pre></div>
 </div>
