@@ -32,7 +32,6 @@ def get_email(text: str, subject: str, sender: str, receiver: str):
     t = MIMEText(body, "html")
 
     email.attach(t)
-    email.attach(t)
 
     return email.as_string()
 

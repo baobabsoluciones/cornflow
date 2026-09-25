@@ -111,16 +111,49 @@ class BaseMetaResource(Resource, MethodResource):
         return {"message": "Created correctly"}, 201
 
     def post_bulk_update(self, data, trace_field="user_id"):
-        """"""
+        """
+        Method to POST a bulk of objects, updating the ones that already exist
+        and creating the ones that do not.
+
+        The rows that already exist are looked up with the fields declared on
+        `self.unique`, regardless of their `deleted_at` value, so a soft deleted
+        row is matched too. On the models that implement the soft delete (the
+        ones with a `deleted_at` column) a match that was deleted is reactivated,
+        clearing its `deleted_at` before applying the update, so it becomes
+        visible again on the reads.
+
+        If no row matches on `self.unique` but the model has soft delete and the
+        payload carries an `id`, the row is looked up by that id as a fallback.
+        A soft deleted row found this way is reactivated the same way as a
+        regular match. If no row is found, or the row found is not deleted, a
+        new instance is created.
+
+        :param dict data: a dictionary with key 'data' that holds a list with all the
+            objects that are going to be created or updated
+        :param str trace_field: the field that tracks the user that created the object
+        :return: a message and a status code of the operation
+        """
         data = [
             {**el, **{trace_field: self.get_user_id()}} for el in dict(data)["data"]
         ]
+
+        has_soft_delete = hasattr(self.data_model, "deleted_at")
 
         instances = []
         for el in data:
             temp_el = dict(SuperDict(el).kfilter(lambda v: v in self.unique))
             temp_instance = self.data_model.query.filter_by(**temp_el).first()
+            if (
+                temp_instance is None
+                and has_soft_delete
+                and el.get("id") is not None
+            ):
+                candidate = self.data_model.query.filter_by(id=el.get("id")).first()
+                if candidate is not None and candidate.deleted_at is not None:
+                    temp_instance = candidate
             if temp_instance is not None:
+                if has_soft_delete and temp_instance.deleted_at is not None:
+                    temp_instance.deleted_at = None
                 temp_instance.pre_update(el)
                 instances.append(temp_instance)
             else:
