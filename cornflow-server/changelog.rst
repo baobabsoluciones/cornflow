@@ -1,3 +1,19 @@
+version 1.3.7
+--------------
+- released: 2026-07-10
+- description: Performance improvement
+- changelog:
+    - Improve performance of executions endpoint
+    - Add bug fix for when using click 8.4.0 with celery executor
+
+version 1.3.6
+--------------
+- released: 2026-06-25
+- description: Security update and performance improvement
+- changelog:
+    - Upgrade cryptography to 48.0.1 and PyJWT to 2.13.0
+    - Improve performance of executions endpoint
+
 version 1.3.5
 --------------
 - released: 2026-06-03
@@ -119,7 +135,7 @@ Changes You'll Notice
    {
      "cornflow_status": "healthy",
      "backend_status": "healthy",  // ← Changed from "airflow_status"
-     "cornflow_version": "1.3.0"
+     "cornflow_version": "1.3.6"
    }
 
 **What you need to do:**
