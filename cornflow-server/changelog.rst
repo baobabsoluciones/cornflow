@@ -1,3 +1,26 @@
+version 1.3.8
+--------------
+- released: 2026-09-25
+- description: Bug fixes
+- changelog:
+    - Bulk update and soft deleted rows
+        Resending a row that had been soft deleted through a bulk update now reactivates it: its
+        `deleted_at` is cleared and the update is applied, so the record becomes visible again on the
+        reads. Previously the row was updated in place but stayed deleted, while the call answered
+        201. If no row matches on the unique fields but the payload carries the `id` of a soft deleted
+        row, that row is reactivated instead of failing on the primary key. Models without soft delete
+        keep the previous behaviour.
+
+    - Databricks backend configuration
+        When the Databricks backend is selected, the required environment variables
+        (DATABRICKS_HOST, DATABRICKS_CLIENT_SECRET, DATABRICKS_TOKEN_ENDPOINT, DATABRICKS_EP_CLUSTERS,
+        DATABRICKS_CLIENT_ID) are validated on startup, and a clear fatal error lists the missing ones.
+        DATABRICKS_HEALTH_PATH defaults to "default path" when not set.
+
+    - Emails
+        Fixed the email body being attached twice, which made some clients render it twice or flag
+        the message as malformed.
+
 version 1.3.7
 --------------
 - released: 2026-07-10
