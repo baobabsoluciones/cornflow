@@ -63,7 +63,7 @@ global:
 image:
   repository: baobabsoluciones/cornflow
   # release.sh -v X.Y.Z sets this to release-vX.Y.Z before helm package. Empty falls back to release-v<Chart.appVersion> in templates.
-  tag: "release-v1.3.8rc3"
+  tag: "release-v1.3.8rc4"
   pullPolicy: IfNotPresent # Use Always for production
 
 # =============================================================================
@@ -394,7 +394,7 @@ airflow:
             mountPath: /opt/airflow/dags
       # Extra init containers to install Python dependencies
       - name: install-requirements
-        image: baobabsoluciones/airflow-k8s:release-1.3.8rc3
+        image: baobabsoluciones/airflow-k8s:release-1.3.8rc4
         imagePullPolicy: IfNotPresent
         command:
           - /bin/sh

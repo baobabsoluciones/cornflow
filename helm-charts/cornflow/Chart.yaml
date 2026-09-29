@@ -4,7 +4,7 @@ annotations:
   repository: https://storage.googleapis.com/cornflow-public-artifacts/
   support: https://github.com/baobabsoluciones/cornflow/issues
 apiVersion: v2
-appVersion: "1.3.8rc3"
+appVersion: "1.3.8rc4"
 dependencies:
   - condition: airflow.enabled
     name: airflow
