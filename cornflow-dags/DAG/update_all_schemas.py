@@ -57,14 +57,8 @@ def import_dags():
                 "documentation",
                 "tests",
                 "activate_dags",
-                # Estos ficheros crean un DAG directamente a nivel de módulo (with DAG(...) as dag:
-                # fuera de cualquier función). Si se re-importan aquí (por ejemplo, cuando
-                # activate_dags.py llama a get_new_apps() -> import_dags()), ese `with DAG(...)`
-                # se vuelve a ejecutar y el DAG resultante queda registrado con el fichero que se
-                # esté parseando en ese momento como fileloc (p. ej. activate_dags.py) en vez del
-                # suyo propio (dag_tunnel.py) -> el DAG real desaparece del listado, sustituido por
-                # esta copia "fantasma" mal atribuida. activate_dags.py ya estaba en esta lista por
-                # el mismo motivo; faltaba el resto.
+                # These files define a DAG at module level; re-importing them registers it
+                # under the wrong fileloc
                 "run_deployed_dags",
                 "update_dag_registry",
                 "update_all_schemas",
@@ -137,15 +131,7 @@ def get_all_example_data(apps):
 def update_all_schemas(**kwargs):
     sys.setrecursionlimit(250)
 
-    # Airflow 3 no permite acceso directo a la BBDD por ORM desde una tarea (RuntimeError:
-    # "Direct database access via the ORM is not allowed in Airflow 3.0") -> ya no se puede hacer
-    # `with create_session() as session: session.query(Variable)` para listar y borrar TODAS las
-    # variables antes de regenerarlas. `airflow.sdk.Variable` (el Variable "seguro" para tareas en
-    # Airflow 3) no expone un listado de todas las claves, así que no hay forma de replicar el
-    # "borrar todo" sin volver a la BBDD directa. En su lugar, simplemente se sobreescriben las
-    # claves de los esquemas/ejemplos actuales (Variable.set ya sobreescribe si la clave existe) —
-    # la única diferencia de comportamiento es que las variables de apps que se hayan eliminado
-    # del todo ya no se limpian automáticamente aquí.
+    # Airflow 3 forbids ORM access from tasks, so existing variables are overwritten, not cleared
     # we update all schemas that we found:
     apps = get_new_apps()
 

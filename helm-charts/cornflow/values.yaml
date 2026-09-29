@@ -472,7 +472,7 @@ airflow:
     # Airflow 3.x: AUTH_BACKENDS (plural) reemplaza AUTH_BACKEND (singular)
     - name: AIRFLOW__API__AUTH_BACKENDS
       value: "airflow.api.auth.backend.basic_auth"
-    # Airflow 3.x: auth manager explícito (FAB es el por defecto, pero conviene fijarlo)
+    # Airflow 3.x: set the auth manager explicitly
     - name: AIRFLOW__CORE__AUTH_MANAGER
       value: "airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager"
     - name: PYTHONPATH
