@@ -16,8 +16,6 @@ for various DAG-related scenarios.
 
 # Import from libraries
 import json
-from unittest.mock import patch
-
 from flask_testing import TestCase
 
 # Import from internal modules
@@ -25,14 +23,7 @@ from cornflow.app import create_app
 from cornflow.commands.access import access_init_command
 from cornflow.commands.dag import register_deployed_dags_command_test
 from cornflow.commands.permissions import register_dag_permissions_command
-from cornflow.shared.const import (
-    ADMIN_ROLE,
-    DAG_PERMISSIONS_WARNING_KEY,
-    DAG_PERMISSIONS_WARNING_POST,
-    DAG_PERMISSIONS_WARNING_PUT,
-    PLANNER_ROLE,
-    SERVICE_ROLE,
-)
+from cornflow.shared.const import ADMIN_ROLE, SERVICE_ROLE
 from cornflow.models import DeployedWorkflow, PermissionsDAG, UserModel, UserRoleModel
 from cornflow.shared.const import EXEC_STATE_CORRECT, EXEC_STATE_MANUAL
 from cornflow.shared import db
@@ -43,7 +34,6 @@ from cornflow.tests.const import (
     EXECUTION_URL_NORUN,
     INSTANCE_URL,
     LOGIN_URL,
-    SCHEMA_URL,
     SIGNUP_URL,
     USER_URL,
     EXECUTION_URL,
@@ -475,61 +465,24 @@ class TestDeployedDAG(TestCase):
             response.json.get("error", ""),
         )
 
-
-class TestDeployedDAGPermissions(TestCase):
-    """
-    Permissions created by POST and PUT of the deployed DAGs endpoints.
-    """
-
-    def create_app(self):
-        app = create_app("testing")
-        app.config["OPEN_DEPLOYMENT"] = "0"
-        return app
-
-    def setUp(self):
-        db.create_all()
-        access_init_command(verbose=False)
-        register_deployed_dags_command_test(verbose=False)
-        self.users = {}
-        self.tokens = {}
-        self.create_user("service_user", [SERVICE_ROLE])
-        self.create_user("admin1", [ADMIN_ROLE])
-        self.create_user("admin2", [ADMIN_ROLE])
-        self.create_user("planner1", [PLANNER_ROLE])
-
-    def tearDown(self):
-        db.session.remove()
-        db.drop_all()
-
-    def create_user(self, username, roles):
-        user = UserModel(
-            {
-                "username": username,
-                "email": f"{username}@test.org",
-                "password": "Testpassword1!",
-            }
+    def test_post_and_put_create_permissions(self):
+        self.app.config["OPEN_DEPLOYMENT"] = 0
+        planner = dict(
+            username="aPlanner", email="planner@test.org", password="Testpassword1!"
         )
-        user.save()
-        for role in roles:
-            UserRoleModel({"user_id": user.id, "role_id": role}).save()
-        self.users[username] = user.id
-        self.tokens[username] = self.client.post(
-            LOGIN_URL,
-            data=json.dumps({"username": username, "password": "Testpassword1!"}),
+        planner_id = self.client.post(
+            SIGNUP_URL,
+            data=json.dumps(planner),
             follow_redirects=True,
             headers={"Content-Type": "application/json"},
-        ).json["token"]
-
-    def headers(self, username):
-        return {
+        ).json["id"]
+        headers = {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {self.tokens[username]}",
+            "Authorization": f"Bearer {self.token}",
         }
 
-    def dag_payload(self, dag_id):
-        return {
-            "description": None,
-            "id": dag_id,
+        payload = {
+            "id": "new_dag",
             "instance_schema": {},
             "solution_schema": {},
             "instance_checks_schema": {},
@@ -537,121 +490,32 @@ class TestDeployedDAGPermissions(TestCase):
             "config_schema": {},
             "kpis_schema": {},
         }
-
-    def _post_dag(self, dag_id, username="service_user", payload=None):
-        return self.client.post(
+        response = self.client.post(
             DEPLOYED_DAG_URL,
-            data=json.dumps(payload or self.dag_payload(dag_id)),
-            follow_redirects=True,
-            headers=self.headers(username),
-        )
-
-    def _put_dag(self, dag_id, username="service_user", description="updated"):
-        payload = {
-            "description": description,
-            "instance_checks_schema": {},
-            "solution_checks_schema": {},
-            "kpis_schema": {},
-        }
-        return self.client.put(
-            DEPLOYED_DAG_URL + dag_id + "/",
             data=json.dumps(payload),
             follow_redirects=True,
-            headers=self.headers(username),
+            headers=headers,
         )
+        self.assertEqual(response.status_code, 201)
+        self.assertTrue(PermissionsDAG.check_if_has_permissions(self.admin["id"], "new_dag"))
+        self.assertFalse(PermissionsDAG.check_if_has_permissions(planner_id, "new_dag"))
 
-    def _get_schema(self, dag_id, username):
-        return self.client.get(
-            SCHEMA_URL + dag_id + "/",
+        PermissionsDAG.query.filter_by(dag_id="solve_model_dag").delete()
+        db.session.commit()
+        self.assertFalse(
+            PermissionsDAG.check_if_has_permissions(self.admin["id"], "solve_model_dag")
+        )
+        payload.pop("id")
+        response = self.client.put(
+            DEPLOYED_DAG_URL + "solve_model_dag/",
+            data=json.dumps(payload),
             follow_redirects=True,
-            headers=self.headers(username),
+            headers=headers,
         )
-
-    def _perms(self, dag_id):
-        return {p.user_id for p in PermissionsDAG.query.filter_by(dag_id=dag_id).all()}
-
-    def ids(self, *usernames):
-        return {self.users[name] for name in usernames}
-
-    def test_post_closed_creates_admins_and_service(self):
-        response = self._post_dag("d1")
-        self.assertEqual(201, response.status_code)
-        self.assertEqual(self.ids("service_user", "admin1", "admin2"), self._perms("d1"))
-        for username in ["service_user", "admin1", "admin2"]:
-            self.assertEqual(200, self._get_schema("d1", username).status_code)
-        denied = self._get_schema("d1", "planner1")
-        self.assertEqual(403, denied.status_code)
-        self.assertIn(
-            "User does not have permission to access this dag", str(denied.json)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(
+            PermissionsDAG.check_if_has_permissions(self.admin["id"], "solve_model_dag")
         )
-
-    def test_post_no_warning_on_success(self):
-        response = self._post_dag("d1")
-        self.assertEqual(201, response.status_code)
-        self.assertEqual(self.dag_payload("d1"), response.json)
-        self.assertNotIn(DAG_PERMISSIONS_WARNING_KEY, response.json)
-
-    def test_put_closed_repairs_existing_dag(self):
-        response = self._put_dag("gc")
-        self.assertEqual(200, response.status_code)
-        self.assertEqual({"message": "Updated correctly"}, response.json)
-        self.assertEqual(self.ids("service_user", "admin1", "admin2"), self._perms("gc"))
-        for username in ["service_user", "admin1", "admin2"]:
-            self.assertEqual(200, self._get_schema("gc", username).status_code)
-        self.assertEqual("updated", DeployedWorkflow.query.get("gc").description)
-        self.assertEqual(403, self._get_schema("gc", "planner1").status_code)
-
-    def test_post_open_all_users_only_new_dag(self):
-        self.app.config["OPEN_DEPLOYMENT"] = "1"
-        self.assertEqual(201, self._post_dag("d1").status_code)
-        self.assertEqual(
-            self.ids("service_user", "admin1", "admin2", "planner1"),
-            self._perms("d1"),
+        self.assertFalse(
+            PermissionsDAG.check_if_has_permissions(planner_id, "solve_model_dag")
         )
-        self.assertEqual(set(), self._perms("gc"))
-
-    def test_post_permissions_failure(self):
-        payload = self.dag_payload("d_fail")
-        with patch.object(
-            PermissionsDAG,
-            "add_missing_dag_permissions",
-            side_effect=Exception("forced"),
-        ):
-            with self.assertLogs("cornflow", level="ERROR") as cm:
-                response = self._post_dag("d_fail")
-        self.assertEqual(201, response.status_code)
-        self.assertIsNotNone(DeployedWorkflow.query.get("d_fail"))
-        body = dict(response.json)
-        self.assertEqual(
-            DAG_PERMISSIONS_WARNING_POST.format(dag_id="d_fail"),
-            body.pop(DAG_PERMISSIONS_WARNING_KEY),
-        )
-        self.assertEqual(payload, body)
-        output = "\n".join(cm.output)
-        self.assertIn("d_fail", output)
-        self.assertIn("forced", output)
-        self.assertEqual(set(), self._perms("d_fail"))
-
-    def test_put_permissions_failure(self):
-        with patch.object(
-            PermissionsDAG,
-            "add_missing_dag_permissions",
-            side_effect=Exception("forced"),
-        ):
-            with self.assertLogs("cornflow", level="INFO") as cm:
-                response = self._put_dag("gc")
-        self.assertEqual(200, response.status_code)
-        self.assertEqual(
-            {
-                "message": "Updated correctly",
-                DAG_PERMISSIONS_WARNING_KEY: DAG_PERMISSIONS_WARNING_PUT.format(
-                    dag_id="gc"
-                ),
-            },
-            response.json,
-        )
-        self.assertEqual("updated", DeployedWorkflow.query.get("gc").description)
-        error_logs = [line for line in cm.output if line.startswith("ERROR")]
-        self.assertTrue(any("gc" in line for line in error_logs))
-        self.assertIn("Schemas saved for DAG gc", "\n".join(cm.output))
-        self.assertEqual(set(), self._perms("gc"))

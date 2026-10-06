@@ -10,18 +10,8 @@ from flask_apispec import use_kwargs, doc, marshal_with
 
 # Import from internal modules
 from cornflow.endpoints.meta_resource import BaseMetaResource
-from cornflow.models import (
-    DeployedWorkflow,
-    ExecutionModel,
-    InstanceModel,
-    CaseModel,
-    PermissionsDAG,
-)
-from cornflow.schemas import (
-    DeployedDAGSchema,
-    DeployedDAGEditSchema,
-    DeployedDAGPostResponse,
-)
+from cornflow.models import DeployedWorkflow, ExecutionModel, InstanceModel, CaseModel
+from cornflow.schemas import DeployedDAGSchema, DeployedDAGEditSchema
 from cornflow.schemas.case import CaseChecksKPIsRequest
 from cornflow.schemas.instance import InstanceCheckRequest
 from cornflow.schemas.execution import (
@@ -30,13 +20,9 @@ from cornflow.schemas.execution import (
     ExecutionDetailsEndpointResponse,
 )
 
-from cornflow.shared import db
 from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.const import (
     ADMIN_ROLE,
-    DAG_PERMISSIONS_WARNING_KEY,
-    DAG_PERMISSIONS_WARNING_POST,
-    DAG_PERMISSIONS_WARNING_PUT,
     EXEC_STATE_CORRECT,
     EXEC_STATE_MANUAL,
     EXECUTION_STATE_MESSAGE_DICT,
@@ -45,28 +31,6 @@ from cornflow.shared.const import (
 )
 from cornflow.shared.exceptions import ObjectDoesNotExist, InvalidData
 from cornflow.shared.validators import json_schema_validate_as_string
-
-
-def _add_dag_permissions_or_warning(dag_id: str, warning_template: str):
-    """
-    Create the missing permissions of a deployed DAG.
-
-    The DAG itself is already committed when this is called, so a failure here
-    only rolls back the permissions.
-
-    :param str dag_id: id of the deployed DAG
-    :param str warning_template: warning text with a {dag_id} placeholder
-    :return: None if the permissions are in place, the warning text otherwise
-    """
-    try:
-        PermissionsDAG.add_missing_dag_permissions([dag_id])
-    except Exception as err:
-        db.session.rollback()
-        current_app.logger.error(
-            f"The permissions for DAG {dag_id} could not be created: {err}"
-        )
-        return warning_template.format(dag_id=dag_id)
-    return None
 
 
 class DAGDetailEndpoint(BaseMetaResource):
@@ -298,16 +262,14 @@ class DeployedDAGEndpoint(BaseMetaResource):
 
     @doc(description="Post a new deployed dag", tags=["DeployedDAGs"])
     @authenticate(auth_class=Auth())
-    @marshal_with(DeployedDAGPostResponse)
+    @marshal_with(DeployedDAGSchema)
     @use_kwargs(DeployedDAGSchema)
     def post(self, **kwargs):
-        item, status = self.post_list(kwargs)
-        warning = _add_dag_permissions_or_warning(item.id, DAG_PERMISSIONS_WARNING_POST)
-        if warning is None:
-            return item, status
-        response = DeployedDAGSchema().dump(item)
-        response[DAG_PERMISSIONS_WARNING_KEY] = warning
-        return response, status
+        from cornflow.commands.permissions import register_dag_permissions_command
+
+        response = self.post_list(kwargs)
+        register_dag_permissions_command()
+        return response
 
 
 class DeployedDagDetailEndpoint(BaseMetaResource):
@@ -324,9 +286,9 @@ class DeployedDagDetailEndpoint(BaseMetaResource):
     @authenticate(auth_class=Auth())
     @use_kwargs(DeployedDAGEditSchema, location="json")
     def put(self, idx, **req_data):
+        from cornflow.commands.permissions import register_dag_permissions_command
+
         current_app.logger.info(f"Schemas saved for DAG {idx}")
-        response, status = self.put_detail(data=req_data, idx=idx, track_user=False)
-        warning = _add_dag_permissions_or_warning(idx, DAG_PERMISSIONS_WARNING_PUT)
-        if warning is not None:
-            response[DAG_PERMISSIONS_WARNING_KEY] = warning
-        return response, status
+        response = self.put_detail(data=req_data, idx=idx, track_user=False)
+        register_dag_permissions_command()
+        return response

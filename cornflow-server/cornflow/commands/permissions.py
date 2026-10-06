@@ -228,29 +228,62 @@ def register_dag_permissions_command(
     open_deployment: int = None, verbose: bool = False
 ):
     """
-    Register the missing DAG permissions for all the deployed DAGs.
-    open_deployment: 1 gives access to all users, 0 only to admin and service users.
-        If None, it is read from the app configuration.
+    Register DAG permissions.
+    open_deployment: If 1, it will register the permissions for the open deployment.
     verbose: If True, it will print the permissions that are being registered.
     """
 
     from flask import current_app
     from sqlalchemy.exc import DBAPIError, IntegrityError
 
-    from cornflow.models import DeployedWorkflow, PermissionsDAG
+    from cornflow.models import DeployedWorkflow, PermissionsDAG, UserModel
     from cornflow.shared import db
 
-    all_dag_ids = [dag.id for dag in DeployedWorkflow.get_all_objects().all()]
+    if open_deployment is None:
+        open_deployment = int(current_app.config["OPEN_DEPLOYMENT"])
+
+    existing_permissions = [
+        (permission.dag_id, permission.user_id)
+        for permission in PermissionsDAG.get_all_objects()
+    ]
 
     try:
-        permissions = PermissionsDAG.add_missing_dag_permissions(
-            all_dag_ids, open_deployment=open_deployment
-        )
+        db.session.commit()
+    except DBAPIError as e:
+        db.session.rollback()
+        current_app.logger.error(f"Unknown error on database commit: {e}")
+
+    all_users = UserModel.get_all_users().all()
+    all_dags = DeployedWorkflow.get_all_objects().all()
+
+    if int(open_deployment) == 1:
+
+        permissions = [
+            PermissionsDAG({"dag_id": dag.id, "user_id": user.id})
+            for user in all_users
+            for dag in all_dags
+            if (dag.id, user.id) not in existing_permissions
+        ]
+
+    else:
+        permissions = [
+            PermissionsDAG({"dag_id": dag.id, "user_id": user.id})
+            for user in all_users
+            for dag in all_dags
+            if (dag.id, user.id) not in existing_permissions
+            and (user.is_service_user() or user.is_admin())
+        ]
+
+    if len(permissions) > 0:
+        db.session.bulk_save_objects(permissions)
+
+    try:
+        db.session.commit()
     except IntegrityError as e:
-        permissions = []
+        db.session.rollback()
         current_app.logger.error(f"Integrity error on dag permissions register: {e}")
     except DBAPIError as e:
-        permissions = []
+        db.session.rollback()
         current_app.logger.error(f"Unknown error on dag permissions register: {e}")
 
     if "postgres" in str(db.session.get_bind()):

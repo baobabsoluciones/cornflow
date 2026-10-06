@@ -183,15 +183,6 @@ AIRFLOW_NOT_REACHABLE_MSG = "Airflow is not reachable"
 DAG_PAUSED_MSG = "The dag exists but it is paused in airflow"
 AIRFLOW_ERROR_MSG = "Airflow responded with an error:"
 DATA_DOES_NOT_EXIST_MSG = "The data entity does not exist on the database"
-DAG_PERMISSIONS_WARNING_KEY = "permissions_warning"
-DAG_PERMISSIONS_WARNING_POST = (
-    "The DAG {dag_id} has been saved, but its permissions could not be created. "
-    "Users will not have access to it until the permissions are registered."
-)
-DAG_PERMISSIONS_WARNING_PUT = (
-    "The DAG {dag_id} has been updated, but its permissions could not be created. "
-    "Users will not have access to it until the permissions are registered."
-)
 
 # Conditional endpoints
 CONDITIONAL_ENDPOINTS = {
