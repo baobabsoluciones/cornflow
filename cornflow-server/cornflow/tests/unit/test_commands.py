@@ -16,8 +16,10 @@ for various command scenarios and configurations.
 """
 
 import json
+from unittest.mock import patch
 
 from flask_testing import TestCase
+from sqlalchemy.exc import DBAPIError, IntegrityError
 
 from cornflow.app import (
     access_init,
@@ -31,6 +33,7 @@ from cornflow.app import (
     register_views,
 )
 from cornflow.commands.dag import register_deployed_dags_command_test
+from cornflow.commands.permissions import register_dag_permissions_command
 from cornflow.endpoints import alarms_resources, get_resources
 from cornflow.models import (
     ActionModel,
@@ -392,22 +395,79 @@ class TestCommands(TestCase):
         Verifies:
 
         - Successful permission assignment
-        - Restricted access for admin users
-        - Proper service user permissions
+        - Admin and service users get access to all DAGs
         """
         register_deployed_dags_command_test()
         self.test_service_user_command()
         self.test_admin_user_command()
+        self.test_base_user_command()
         self.runner.invoke(register_dag_permissions, ["-o", 0])
 
         service = UserModel.get_one_user_by_email("testemail@test.org")
         admin = UserModel.get_one_user_by_email("admin@test.org")
+        base = UserModel.get_one_user_by_email("base@test.org")
 
         service_permissions = PermissionsDAG.get_user_dag_permissions(service.id)
         admin_permissions = PermissionsDAG.get_user_dag_permissions(admin.id)
 
         self.assertEqual(4, len(service_permissions))
-        self.assertEqual(0, len(admin_permissions))
+        self.assertEqual(4, len(admin_permissions))
+        self.assertEqual(0, len(PermissionsDAG.get_user_dag_permissions(base.id)))
+
+    def test_dag_permissions_command_single_missing(self):
+        """
+        The command saves the permission when only one is missing.
+        """
+        register_deployed_dags_command_test(dags=["solve_model_dag"])
+        service = self.test_service_user_command()
+
+        with self.assertLogs("cornflow", level="INFO") as cm:
+            register_dag_permissions_command(open_deployment=0, verbose=True)
+
+        self.assertEqual(1, len(PermissionsDAG.get_user_dag_permissions(service.id)))
+        output = "\n".join(cm.output)
+        self.assertIn("Workflow permissions registered: 1", output)
+        self.assertNotIn("No new Workflow permissions", output)
+
+    def test_dag_permissions_command_string_open_deployment(self):
+        """
+        The open deployment value is also accepted as a string.
+        """
+        register_deployed_dags_command_test()
+        self.test_service_user_command()
+        base = self.test_base_user_command()
+
+        register_dag_permissions_command(open_deployment="0")
+        self.assertEqual(0, len(PermissionsDAG.get_user_dag_permissions(base.id)))
+
+        register_dag_permissions_command(open_deployment="1")
+        self.assertEqual(4, len(PermissionsDAG.get_user_dag_permissions(base.id)))
+
+    def test_dag_permissions_command_db_error_logged(self):
+        """
+        Database errors are logged and do not stop the command.
+        """
+        register_deployed_dags_command_test()
+        self.test_service_user_command()
+        cases = [
+            (
+                IntegrityError("stmt", {}, Exception("forced")),
+                "Integrity error on dag permissions register",
+            ),
+            (
+                DBAPIError("stmt", {}, Exception("forced")),
+                "Unknown error on dag permissions register",
+            ),
+        ]
+        for error, message in cases:
+            with patch.object(
+                PermissionsDAG, "add_missing_dag_permissions", side_effect=error
+            ):
+                with self.assertLogs("cornflow", level="INFO") as cm:
+                    register_dag_permissions_command(open_deployment=0, verbose=True)
+            output = "\n".join(cm.output)
+            self.assertIn(message, output)
+            self.assertIn("No new Workflow permissions", output)
 
     def test_argument_parsing_correct(self):
         """

@@ -13,6 +13,7 @@ LEVEL_CONVERTER = {
 def log_config(level=20):
     return {
         'version': 1,
+        'disable_existing_loggers': False,
         'formatters': {'default': {
             'format': '[%(asctime)s] [%(levelname)s] in %(module)s: %(message)s',
         }},
