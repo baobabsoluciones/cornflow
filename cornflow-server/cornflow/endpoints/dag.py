@@ -265,7 +265,11 @@ class DeployedDAGEndpoint(BaseMetaResource):
     @marshal_with(DeployedDAGSchema)
     @use_kwargs(DeployedDAGSchema)
     def post(self, **kwargs):
-        return self.post_list(kwargs)
+        from cornflow.commands.permissions import register_dag_permissions_command
+
+        response = self.post_list(kwargs)
+        register_dag_permissions_command()
+        return response
 
 
 class DeployedDagDetailEndpoint(BaseMetaResource):
@@ -282,5 +286,9 @@ class DeployedDagDetailEndpoint(BaseMetaResource):
     @authenticate(auth_class=Auth())
     @use_kwargs(DeployedDAGEditSchema, location="json")
     def put(self, idx, **req_data):
+        from cornflow.commands.permissions import register_dag_permissions_command
+
         current_app.logger.info(f"Schemas saved for DAG {idx}")
-        return self.put_detail(data=req_data, idx=idx, track_user=False)
+        response = self.put_detail(data=req_data, idx=idx, track_user=False)
+        register_dag_permissions_command()
+        return response
