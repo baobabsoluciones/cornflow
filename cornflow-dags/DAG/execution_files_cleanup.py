@@ -64,13 +64,12 @@ dag = DAG(
     default_args=default_args,
     catchup=False,
     tags=["internal"],
-    schedule_interval="@daily",
+    schedule="@daily",
     start_date=datetime(2024, 6, 1, 0, 0, 0),
 )
 
 execution_files_cleanup_operator = PythonOperator(
     task_id="execution_files_cleanup",
-    provide_context=True,
     python_callable=execution_files_cleanup,
     dag=dag,
 )

@@ -1,5 +1,6 @@
 # Airflow init script for Dockerfile ENTRYPOINT
 import os
+import secrets
 import subprocess
 import sys
 from cryptography.fernet import Fernet
@@ -15,8 +16,21 @@ global_env_vars = [
     ("EXECUTOR", "Sequential"),
     ("AIRFLOW__CORE__LOAD_EXAMPLES", "0"),
     ("AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION", "0"),
-    ("AIRFLOW__API__AUTH_BACKEND", "airflow.api.auth.backend.basic_auth"),
+    # Airflow 3 renamed AUTH_BACKEND (singular) to AUTH_BACKENDS (plural, comma-separated)
+    ("AIRFLOW__API__AUTH_BACKENDS", "airflow.api.auth.backend.basic_auth"),
+    # FAB moved out of airflow core into apache-airflow-providers-fab in Airflow 3; it must be
+    # selected explicitly or Airflow defaults to the bare-bones SimpleAuthManager, which doesn't
+    # support `airflow users create`/LDAP (see webserver_ldap.py)
+    (
+        "AIRFLOW__CORE__AUTH_MANAGER",
+        "airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager",
+    ),
     ("AIRFLOW__CORE__FERNET_KEY", Fernet.generate_key().decode()),
+    # Airflow 3's api-server signs/validates JWTs with this secret; every component that talks to
+    # the api-server (scheduler, and tasks via the Task Execution API) must share the same value,
+    # so containers running as separate processes (e.g. docker-compose-cornflow-celery.yml) need
+    # to set this explicitly instead of relying on this per-container random default.
+    ("AIRFLOW__API_AUTH__JWT_SECRET", secrets.token_hex(32)),
     ("AIRFLOW_USER", "admin"),
     ("AIRFLOW_FIRSTNAME", "admin"),
     ("AIRFLOW_LASTNAME", "admin"),
@@ -152,7 +166,9 @@ if os.getenv("AIRFLOW_LDAP_ENABLE") == "True":
 # Entrypoint of airflow services depends on command given by arg
 def airflowsvc(afsvc):
     if afsvc == "webserver":
-        os.system("airflow db init")
+        # Airflow 3 removed `db init`/`db upgrade`; `db migrate` is the idempotent replacement
+        # for both first-time initialization and upgrades.
+        os.system("airflow db migrate")
         # Create user only if using AUTH_DB
         if os.getenv("AIRFLOW_LDAP_ENABLE") != "True":
             os.system(
@@ -163,8 +179,15 @@ def airflowsvc(afsvc):
             or os.getenv("AIRFLOW__CORE__EXECUTOR") == "SequentialExecutor"
         ):
             # With the "Local" and "Sequential" executors it should all run in one container.
+            # Airflow 3 always requires a standalone dag-processor process; the scheduler no
+            # longer parses DAG files itself.
             subprocess.run("airflow scheduler &", shell=True)
-        os.system("airflow webserver")
+            subprocess.run("airflow dag-processor &", shell=True)
+        # Airflow 3 renamed the `webserver` command to `api-server`.
+        os.system("airflow api-server")
+    if afsvc == "dag-processor":
+        time.sleep(10)
+        os.system(f"airflow {afsvc}")
     if afsvc == "worker":
         time.sleep(10)
         os.system(f"airflow celery {afsvc}")

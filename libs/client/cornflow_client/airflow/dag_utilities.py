@@ -38,7 +38,6 @@ default_args = {
     "email_on_failure": False,
     "email_on_retry": False,
     "retry_delay": timedelta(minutes=1),
-    "schedule_interval": None,
 }
 
 
@@ -104,14 +103,42 @@ def try_to_save_error(client, exec_id, state=-1):
         print(f"An exception trying to register the failed status: {e}")
 
 
+def get_base_log_folder(kwargs):
+    """
+    Return the Airflow base log folder for the running task.
+
+    Airflow 2 exposed the configuration parser in the task context as ``conf``.
+    Airflow 3 removed it from the context, so fall back to reading it from
+    ``airflow.configuration`` (and, failing that, to the default location).
+    """
+    if "conf" in kwargs:
+        return kwargs["conf"].get("logging", "base_log_folder")
+    try:
+        from airflow.configuration import conf
+
+        return conf.get("logging", "base_log_folder")
+    except Exception:
+        return os.path.join(os.environ.get("AIRFLOW_HOME", ""), "logs")
+
+
 def try_to_save_airflow_log(client, exec_id, ti, base_log_folder):
+    # Airflow >= 2.3 (and Airflow 3) layout
     log_file = os.path.join(
         base_log_folder,
-        f"{ti.dag_id}",
-        f"{ti.task_id}",
-        f"{ti.run_id}".replace("manual__", "").replace("scheduled__", ""),
-        f"{ti.try_number}.log",
+        f"dag_id={ti.dag_id}",
+        f"run_id={ti.run_id}",
+        f"task_id={ti.task_id}",
+        f"attempt={ti.try_number}.log",
     )
+    if not os.path.exists(log_file):
+        # legacy layout kept for older deployments
+        log_file = os.path.join(
+            base_log_folder,
+            f"{ti.dag_id}",
+            f"{ti.task_id}",
+            f"{ti.run_id}".replace("manual__", "").replace("scheduled__", ""),
+            f"{ti.try_number}.log",
+        )
     if os.path.exists(log_file):
         with open(log_file, "r") as fd:
             log_file_txt = fd.read()
@@ -193,7 +220,7 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
     :return:
     """
     ti = kwargs["ti"]
-    base_log_folder = kwargs["conf"].get("logging", "base_log_folder")
+    base_log_folder = get_base_log_folder(kwargs)
     config = dict()
     try:
         client = connect_to_cornflow(secrets)
@@ -300,7 +327,7 @@ def cf_check_generate_kpis(fun_check_generate_kpis, dag_name, secrets, **kwargs)
     :return:
     """
     ti = kwargs["ti"]
-    base_log_folder = kwargs["conf"].get("logging", "base_log_folder")
+    base_log_folder = get_base_log_folder(kwargs)
     config = dict()
     try:
         client = connect_to_cornflow(secrets)
