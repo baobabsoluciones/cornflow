@@ -550,6 +550,31 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
         current_app.logger.info(f"User {self.get_user()} edits execution {idx}")
         return self.put_detail(data, user=self.get_user(), idx=idx)
 
+    def set_execution_dag_run_to_fail(self, idx):
+        # Helper method used by the stop and delete execution endpoints to mark the
+        # associated Airflow DAG run as failed. Only applies when the orchestrator is Airflow.
+        execution = ExecutionModel.get_one_object(user=self.get_user(), idx=idx)
+        if execution is None:
+            raise ObjectDoesNotExist(
+                log_txt=f"Error while user {self.get_user()} tries to stop execution {idx}. "
+                f"The execution does not exist."
+            )
+        if not self.orch_client.is_alive(config=current_app.config):
+
+            raise AirflowError(
+                error=AIRFLOW_NOT_REACHABLE_MSG,
+                log_txt=f"Error while user {self.get_user()} tries to stop execution {idx}. "
+                + AIRFLOW_NOT_REACHABLE_MSG,
+            )
+        self.orch_client.set_dag_run_to_fail(
+            dag_name=execution.schema,
+            run_id=execution.run_id,
+            checks_and_kpis_workflow=execution.last_run_checks_and_kpis,
+        )
+        # We should check if the execution has been stopped
+        execution.update_state(EXEC_STATE_STOPPED)
+        current_app.logger.info(f"User {self.get_user()} stopped execution {idx}")
+
     @doc(description="Delete an execution", tags=["Executions"], inherit=False)
     @authenticate(auth_class=Auth())
     def delete(self, idx):
@@ -564,7 +589,9 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
         :rtype: Tuple(dict, integer)
         """
         current_app.logger.info(f"User {self.get_user()} deleted execution {idx}")
-        return self.delete_detail(user=self.get_user(), idx=idx)
+        if self.orch_type == AIRFLOW_BACKEND:
+            self.set_execution_dag_run_to_fail(idx)
+        return self.disable_detail(idx=idx)
 
     @doc(description="Stop an execution", tags=["Executions"], inherit=False)
     @authenticate(auth_class=Auth())
@@ -574,28 +601,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
             return {
                 "message": f"This feature is not available for {self.orch_const['name']}"
             }, 501
-        execution = ExecutionModel.get_one_object(user=self.get_user(), idx=idx)
-        if execution is None:
-            raise ObjectDoesNotExist(
-                log_txt=f"Error while user {self.get_user()} tries to stop execution {idx}. "
-                f"The execution does not exist."
-            )
-
-        if not self.orch_client.is_alive(config=current_app.config):
-            raise self.orch_error(
-                error=AIRFLOW_NOT_REACHABLE_MSG,
-                log_txt=f"Error while user {self.get_user()} tries to stop execution {idx}. {AIRFLOW_NOT_REACHABLE_MSG}",
-            )
-
-        self.orch_client.set_dag_run_to_fail(
-            dag_name=execution.schema,
-            run_id=execution.run_id,
-            checks_and_kpis_workflow=execution.last_run_checks_and_kpis,
-        )
-        # We should check if the execution has been stopped
-        execution.update_state(EXEC_STATE_STOPPED)
-        current_app.logger.info(f"User {self.get_user()} stopped execution {idx}")
-        return {"message": "The execution has been stopped"}, 200
+        self.set_execution_dag_run_to_fail(idx)
 
 
 class ExecutionStatusEndpoint(OrchestratorMixin):
