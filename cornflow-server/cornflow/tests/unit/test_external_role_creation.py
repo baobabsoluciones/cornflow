@@ -6,6 +6,7 @@ from cornflow.shared import db
 from cornflow.tests.custom_test_case import CustomTestCase
 from cornflow.models import ViewModel
 from cornflow.commands.access import access_init_command
+from cornflow.shared.exceptions import ConfigurationError
 from cornflow.shared.const import (
     VIEWER_ROLE,
     PLANNER_ROLE,
@@ -212,9 +213,9 @@ class ExternalRoleCreationTestCase(CustomTestCase):
         mock_const = MagicMock()
         mock_const.EXTRA_PERMISSION_ASSIGNATION = [
             (10000, POST_ACTION, "production_planning"),
-            (999, PATCH_ACTION, "quality_control"),
+            (799, PATCH_ACTION, "quality_control"),
         ]
-        # Define permissions for custom roles used in endpoints (888, 777) and test roles (10000, 999)
+        # Define permissions for custom roles used in endpoints (888, 777) and test roles (10000, 799)
         mock_const.CUSTOM_ROLES_ACTIONS = {
             # Used in endpoints
             888: [GET_ACTION],
@@ -223,7 +224,7 @@ class ExternalRoleCreationTestCase(CustomTestCase):
             # Used in test
             10000: [GET_ACTION],
             # Used in test
-            999: [GET_ACTION],
+            799: [GET_ACTION],
         }
         mock_shared.const = mock_const
         mock_external_app.shared = mock_shared
@@ -252,10 +253,67 @@ class ExternalRoleCreationTestCase(CustomTestCase):
         from cornflow.models import PermissionViewRoleModel
 
         permissions_10000 = PermissionViewRoleModel.query.filter_by(role_id=10000).all()
-        permissions_999 = PermissionViewRoleModel.query.filter_by(role_id=999).all()
+        permissions_799 = PermissionViewRoleModel.query.filter_by(role_id=799).all()
 
         self.assertTrue(len(permissions_10000) > 0)
-        self.assertEqual(len(permissions_999), 0)
+        self.assertEqual(len(permissions_799), 0)
+
+    @patch("cornflow.commands.auxiliar.import_module")
+    @patch("cornflow.commands.views.import_module")
+    @patch.dict(
+        os.environ, {"EXTERNAL_APP": "1", "EXTERNAL_APP_MODULE": "external_test_app"}
+    )
+    def test_custom_role_in_reserved_range_aborts_registration(
+        self, mock_import_views, mock_import_auxiliar
+    ):
+        """
+        Test that an external app declaring a custom role inside the range
+        reserved for the cornflow platform roles (900-999) aborts the
+        registration instead of silently reassigning the meaning of that id.
+
+        This is the realistic collision: role ids are allocated by hand, so an
+        application that already uses e.g. 999 must be told to renumber rather
+        than have its role become a platform role on upgrade.
+        """
+        mock_external_app = MagicMock()
+
+        mock_shared = MagicMock()
+        mock_const = MagicMock()
+        # 999 is inside the reserved platform range
+        mock_const.EXTRA_PERMISSION_ASSIGNATION = [
+            (999, PATCH_ACTION, "quality_control"),
+        ]
+        mock_const.CUSTOM_ROLES_ACTIONS = {
+            888: [GET_ACTION],
+            777: [GET_ACTION],
+            999: [GET_ACTION],
+        }
+        mock_shared.const = mock_const
+        mock_external_app.shared = mock_shared
+
+        mock_endpoints = MagicMock()
+        mock_endpoints.resources = self._create_mock_external_app_resources()
+        mock_external_app.endpoints = mock_endpoints
+
+        mock_import_views.return_value = mock_external_app
+        mock_import_auxiliar.return_value = mock_external_app
+
+        with self.assertRaises(ConfigurationError) as ctx:
+            access_init_command(verbose=True)
+
+        message = str(ctx.exception)
+        # the error names the offending id and the range, and points at the
+        # ids a custom role may use
+        self.assertIn("999", message)
+        self.assertIn("900-999", message)
+        self.assertIn("5 and 899", message)
+
+        # and no permission was granted to the trespassing role
+        from cornflow.models import PermissionViewRoleModel
+
+        self.assertEqual(
+            0, len(PermissionViewRoleModel.query.filter_by(role_id=999).all())
+        )
 
     def test_fallback_when_no_external_config(self):
         """

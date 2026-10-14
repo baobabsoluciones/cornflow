@@ -14,12 +14,12 @@ from cornflow.schemas.permissions import (
 )
 from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.compress import compressed
-from cornflow.shared.const import ADMIN_ROLE
+from cornflow.shared.const import PLATFORM_ADMIN_ROLE
 from cornflow.shared.exceptions import ObjectAlreadyExists
 
 
 class PermissionsViewRoleEndpoint(BaseMetaResource):
-    ROLES_WITH_ACCESS = [ADMIN_ROLE]
+    ROLES_WITH_ACCESS = [PLATFORM_ADMIN_ROLE]
 
     def __init__(self):
         super().__init__()
@@ -58,7 +58,7 @@ class PermissionsViewRoleEndpoint(BaseMetaResource):
 
 
 class PermissionsViewRoleDetailEndpoint(BaseMetaResource):
-    ROLES_WITH_ACCESS = [ADMIN_ROLE]
+    ROLES_WITH_ACCESS = [PLATFORM_ADMIN_ROLE]
 
     def __init__(self):
         super().__init__()

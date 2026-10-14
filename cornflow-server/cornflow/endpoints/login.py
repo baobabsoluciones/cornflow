@@ -2,7 +2,7 @@
 External endpoint for the user to log in to the cornflow webserver
 """
 
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 
 # Partial imports
 from flask import current_app, request
@@ -11,14 +11,26 @@ from sqlalchemy.exc import IntegrityError, DBAPIError
 
 # Import from internal modules
 from cornflow.endpoints.meta_resource import BaseMetaResource
-from cornflow.models import UserModel, UserRoleModel, PermissionsDAG
+from cornflow.models import (
+    MFABackupCodeModel,
+    PermissionsDAG,
+    UserModel,
+    UserRoleModel,
+)
 from cornflow.schemas.user import LoginEndpointRequest, LoginOpenAuthRequest
 from cornflow.shared import db
+from cornflow.shared.audit import audit
 from cornflow.shared.authentication import Auth, LDAPBase
+from cornflow.shared.rate_limit import (
+    limiter,
+    login_rate_limit,
+    RATE_LIMIT_MESSAGE,
+)
 from cornflow.shared.const import (
     AUTH_DB,
     AUTH_LDAP,
     AUTH_OID,
+    TOKEN_PURPOSE_MFA_SETUP,
 )
 from cornflow.shared.exceptions import (
     ConfigurationError,
@@ -48,17 +60,39 @@ class LoginBaseEndpoint(BaseMetaResource):
         """
         auth_type = current_app.config["AUTH_TYPE"]
         response = {}
+        totp_code = kwargs.pop("totp_code", None)
 
         if auth_type == AUTH_DB:
             user = self.auth_db_authenticate(**kwargs)
+            mfa_response = self.check_mfa(user, totp_code)
+            if mfa_response is not None:
+                return mfa_response, 200
+            # The authentication is fully completed: clear the failed
+            # login attempts counter and record the login timestamp. The
+            # previous timestamp is returned so the client can show the
+            # user their last access.
+            user.reset_failed_login()
             response.update({"change_password": check_last_password_change(user)})
+            response.update({"last_login": self._register_successful_login(user)})
             current_app.logger.info(
                 f"User {user.id} logged in successfully using database authentication"
+            )
+            audit(
+                "login.success",
+                actor_id=user.id,
+                actor=user.username,
+                method="db",
             )
         elif auth_type == AUTH_LDAP:
             user = self.auth_ldap_authenticate(**kwargs)
             current_app.logger.info(
                 f"User {user.id} logged in successfully using LDAP authentication"
+            )
+            audit(
+                "login.success",
+                actor_id=user.id,
+                actor=user.username,
+                method="ldap",
             )
         elif auth_type == AUTH_OID:
             if kwargs.get("username") and kwargs.get("password"):
@@ -73,12 +107,24 @@ class LoginBaseEndpoint(BaseMetaResource):
                 current_app.logger.info(
                     f"Service user {user.id} logged in successfully using password"
                 )
+                audit(
+                    "login.success",
+                    actor_id=user.id,
+                    actor=user.username,
+                    method="oid_service",
+                )
                 token = self.auth_class.generate_token(user.id)
             else:
                 token = self.auth_class().get_token_from_header(request.headers)
                 user = self.auth_oid_authenticate(token=token)
                 current_app.logger.info(
                     f"User {user.id} logged in successfully using OpenID authentication"
+                )
+                audit(
+                    "login.success",
+                    actor_id=user.id,
+                    actor=user.username,
+                    method="oid",
                 )
 
             response.update({"token": token, "id": user.id})
@@ -87,13 +133,98 @@ class LoginBaseEndpoint(BaseMetaResource):
             raise ConfigurationError()
 
         try:
-            token = self.auth_class.generate_token(user.id)
+            tokens = self.auth_class.issue_session_tokens(user)
         except Exception as e:
-            raise InvalidUsage(f"Error in generating user token: {str(e)}", 400)
+            raise InvalidUsage(
+                "Could not complete the login. Please try again or contact "
+                "an administrator.",
+                status_code=400,
+                log_txt=f"Error while generating the token for user {user.id}: "
+                f"{str(e)}",
+            )
 
-        response.update({"token": token, "id": user.id})
+        response.update(tokens)
+        response.update({"id": user.id})
 
         return response, 200
+
+    @staticmethod
+    def _register_successful_login(user):
+        """
+        Stamps the current login time on the user and returns the previous
+        login time (ISO string or None) so the client can display it.
+
+        :param user: the user that just logged in
+        :return: the previous last-login timestamp as ISO 8601, or None
+        :rtype: str or None
+        """
+        previous = user.last_login_at
+        user.last_login_at = datetime.now(timezone.utc)
+        db.session.add(user)
+        db.session.commit()
+        return previous.isoformat() if previous else None
+
+    def check_mfa(self, user, totp_code):
+        """
+        Handles the two-factor authentication step of the login for internal
+        (database authenticated) users. Service users are exempt as they are
+        machine-to-machine accounts.
+
+        :param user: the user that passed the password authentication
+        :param str totp_code: the TOTP (or backup) code sent on the login
+          request, if any
+        :return: None if the login can continue, or the dict that must be
+          returned to the client to complete the missing MFA step
+        :rtype: dict or None
+        """
+        if user.is_service_user():
+            return None
+
+        if user.mfa_enabled:
+            if not totp_code:
+                current_app.logger.info(
+                    f"User {user.id} passed password authentication, "
+                    f"waiting for the two-factor authentication code"
+                )
+                return {"mfa_required": True}
+            valid = user.check_totp_code(totp_code)
+            if not valid:
+                valid = MFABackupCodeModel.try_consume(user.id, totp_code)
+                if valid:
+                    db.session.commit()
+                    current_app.logger.info(
+                        f"User {user.id} logged in using a backup code"
+                    )
+            if not valid:
+                # Wrong second-factor codes also count towards the lockout
+                user.register_failed_login()
+                audit(
+                    "login.failure",
+                    outcome="failure",
+                    actor_id=user.id,
+                    actor=user.username,
+                    reason="bad_totp",
+                )
+                if user.is_login_locked():
+                    self.raise_account_locked(user)
+                raise InvalidCredentials(
+                    "Invalid two-factor authentication code",
+                    log_txt=f"Error while user {user.id} tries to log in. "
+                    f"The two-factor authentication code is not valid.",
+                )
+            return None
+
+        if int(current_app.config.get("MFA_REQUIRED", 0)) == 1:
+            temp_token = self.auth_class.generate_token(
+                user.id, purpose=TOKEN_PURPOSE_MFA_SETUP
+            )
+            current_app.logger.info(
+                f"User {user.id} passed password authentication and must "
+                f"enroll in two-factor authentication"
+            )
+            return {"mfa_setup_required": True, "temp_token": temp_token}
+
+        return None
 
     def auth_db_authenticate(self, username, password):
         """
@@ -107,12 +238,64 @@ class LoginBaseEndpoint(BaseMetaResource):
         user = self.data_model.get_one_object(username=username)
 
         if not user:
+            # The audit channel is a trusted internal sink, so recording the
+            # attempted (non-existent) username is fine and useful to
+            # defenders; the response to the client stays generic.
+            audit(
+                "login.failure",
+                outcome="failure",
+                actor=username,
+                reason="unknown_user",
+            )
             raise InvalidCredentials()
 
+        # The password is always checked first and, on failure, the same
+        # generic error is returned whether the account exists, the password
+        # is wrong or the account is locked. This avoids leaking (through the
+        # account-locked message) that a given username exists. The lock is
+        # only revealed to a caller that provided the correct password, i.e.
+        # the legitimate owner of the account.
         if not user.check_hash(password):
+            user.register_failed_login()
+            audit(
+                "login.failure",
+                outcome="failure",
+                actor_id=user.id,
+                actor=user.username,
+                reason="bad_password",
+            )
             raise InvalidCredentials()
+
+        self.check_account_lock(user)
 
         return user
+
+    @staticmethod
+    def check_account_lock(user):
+        """
+        Raises an error if the account is locked because of too many
+        consecutive failed login attempts.
+
+        :param user: the user trying to log in
+        """
+        if user.is_login_locked():
+            LoginBaseEndpoint.raise_account_locked(user)
+
+    @staticmethod
+    def raise_account_locked(user):
+        """
+        Raises the account-locked error.
+
+        :param user: the locked user
+        """
+        raise InvalidCredentials(
+            "The account is locked due to too many failed login attempts. "
+            "Please contact a platform administrator to unlock it.",
+            status_code=403,
+            payload={"error_code": "account_locked"},
+            log_txt=f"Error while user {user.id} tries to log in. "
+            f"The account is locked.",
+        )
 
     def auth_ldap_authenticate(self, username, password):
         """
@@ -231,37 +414,18 @@ class LoginBaseEndpoint(BaseMetaResource):
 
 def check_last_password_change(user):
     """
-    Check if the user needs to change their password based on the password rotation time.
+    Check if the user needs to change their password, either because the
+    password rotation time has passed or because the password was flagged
+    for a forced change (first login after the policy hardening, a password
+    reset by an admin or a recovery with a temporary password).
 
     :param user: The user object to check
     :return: True if password needs to be changed, False otherwise
     :rtype: bool
     """
-    if user.pwd_last_change:
-        # Handle the case where pwd_last_change is already a datetime object
-        if isinstance(user.pwd_last_change, datetime):
-            # If it's a naive datetime (no timezone info), make it timezone-aware
-            if user.pwd_last_change.tzinfo is None:
-                last_change = user.pwd_last_change.replace(tzinfo=timezone.utc)
-            else:
-                # Already timezone-aware
-                last_change = user.pwd_last_change
-        else:
-            # It's a timestamp (integer), convert to datetime
-            last_change = datetime.fromtimestamp(user.pwd_last_change, timezone.utc)
-
-        # Get current time with UTC timezone for proper comparison
-        current_time = datetime.now(timezone.utc)
-
-        # Calculate the expiration time based on the password rotation setting
-        expiration_time = last_change + timedelta(
-            days=int(current_app.config["PWD_ROTATION_TIME"])
-        )
-
-        # Compare the timezone-aware datetimes
-        if expiration_time < current_time:
-            return True
-    return False
+    if user.pwd_change_required:
+        return True
+    return Auth.password_rotation_expired(user)
 
 
 class LoginEndpoint(LoginBaseEndpoint):
@@ -274,6 +438,11 @@ class LoginEndpoint(LoginBaseEndpoint):
         self.data_model = UserModel
         self.auth_class = Auth
         self.user_role_association = UserRoleModel
+
+    # Per-IP rate limit applied around the whole endpoint (flask-restful
+    # discovers class-level decorators; a per-method decorator would not be
+    # enforced through its dispatch)
+    decorators = [limiter.limit(login_rate_limit, error_message=RATE_LIMIT_MESSAGE)]
 
     @doc(description="Log in", tags=["Users"])
     @use_kwargs(LoginEndpointRequest, location="json")
@@ -291,6 +460,8 @@ class LoginEndpoint(LoginBaseEndpoint):
 
 class LoginOpenAuthEndpoint(LoginBaseEndpoint):
     """ """
+
+    decorators = [limiter.limit(login_rate_limit, error_message=RATE_LIMIT_MESSAGE)]
 
     def __init__(self):
         super().__init__()

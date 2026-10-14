@@ -296,7 +296,7 @@ class TestDeployedDAG(TestCase):
         self.url = USER_URL
         self.model = UserModel
         self.admin = dict(
-            username="anAdminUser", email="admin@admin.com", password="Testpassword1!"
+            username="anAdminUser", email="admin@admin.com", password="Kx9#tR2m!Qw7Zp"
         )
 
         response = self.client.post(

@@ -43,7 +43,7 @@ Then we run the following commands::
 
   flask db upgrade -d cornflow/migrations
   flask access_init
-  flask create_admin_user -u admin -e admin@cornflow.org -p Adminpassword1!
+  flask create_admin_user -u admin -e admin@cornflow.org -p Kd8-rVt.Nq2Wp5
   flask create_service_user -u service_user -e service_user@cornflow.org -p Service_password1
   flask run
 

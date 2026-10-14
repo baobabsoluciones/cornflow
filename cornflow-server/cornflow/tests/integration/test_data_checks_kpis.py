@@ -77,7 +77,7 @@ class TestDataChecks(CustomTestCaseLive):
         user_data = dict(
             username="testname",
             email="test@test.com",
-            pwd="Testpassword1!",
+            pwd="Kx9#tR2m!Qw7Zp",
         )
         self.set_client(self.get_server_url())
         response = self.login_or_signup(user_data)
@@ -88,7 +88,7 @@ class TestDataChecks(CustomTestCaseLive):
         os.environ["CORNFLOW_SERVICE_USER"] = "service_user"
 
         self.create_service_user(
-            dict(username="airflow", pwd="Airflow_test_password1", email="af@cf.com")
+            dict(username="airflow", pwd="Xq7-mBv.Ld9Rn2", email="af@cf.com")
         )
 
     def tearDown(self):

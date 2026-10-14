@@ -22,7 +22,7 @@ class TestCheckToken(CheckTokenTestCase.TokenEndpoint):
         self.data = {
             "username": "testname",
             "email": "test@test.com",
-            "password": "Testpassword1!",
+            "password": "Kx9#tR2m!Qw7Zp",
         }
         user = UserModel(data=self.data)
         user.save()
@@ -43,11 +43,14 @@ class TestCheckToken(CheckTokenTestCase.TokenEndpoint):
         self.assertEqual(1, self.response.json["valid"])
 
     def test_token_duration(self):
-        durations = [0.000000000001, 1]
+        # The interactive session token is now the short-lived access token,
+        # whose lifetime is ACCESS_TOKEN_DURATION_MINUTES (0 => immediately
+        # expired => invalid).
+        durations = [0, 15]
         asserts = [0, 1]
         payload = self.data
         for i in range(2):
-            current_app.config["TOKEN_DURATION"] = durations[i]
+            current_app.config["ACCESS_TOKEN_DURATION_MINUTES"] = durations[i]
             self.token = self.client.post(
                 LOGIN_URL,
                 data=json.dumps(payload),
