@@ -21,6 +21,7 @@ from cornflow.models import ExecutionModel, InstanceModel
 from cornflow.shared import db
 from cornflow.shared.const import (
     ADMIN_ROLE,
+    EXEC_STATE_CORRECT,
     EXECUTION_FILES_STATUS_DELETED,
     EXECUTION_FILES_STATUS_ERROR,
     EXECUTION_FILES_STATUS_NOT_GENERATED,
@@ -30,12 +31,15 @@ from cornflow.shared.const import (
     PLANNER_ROLE,
     VIEWER_ROLE,
 )
+from cornflow.tests.base_test_execution import TestExecutionsDetailEndpointMock
 from cornflow.tests.const import (
+    CASE_PATH,
     DAG_URL,
     EXECUTION_FILES_CLEANUP_URL,
     EXECUTION_FILES_URL,
     EXECUTION_PATH,
     EXECUTION_SOLUTION_PATH,
+    EXECUTION_URL,
     EXECUTION_URL_NORUN,
     INSTANCE_PATH,
     INSTANCE_URL,
@@ -654,3 +658,62 @@ class TestExecutionListDataLoading(CustomTestCase):
                     item,
                     f"Required field '{field}' is missing from the execution list response.",
                 )
+
+
+class TestExecutionDataEndpoint(TestExecutionsDetailEndpointMock):
+    """
+    Confirms `/execution/<idx>/data/` -- now served by
+    ExecutionDataEndpointRaw -- returns the expected payload, including
+    the filtered `log` field, while skipping decode/re-encode of the
+    (potentially huge) `data`/`checks`/`kpis` columns.
+    """
+
+    def _put_solution(self, idx, token):
+        with open(CASE_PATH) as f:
+            case_payload = json.load(f)
+        log_json = {
+            "status": "feasible",
+            "status_code": 2,
+            "sol_code": 1,
+            "some_other_key": "this should be excluded",
+        }
+        self.update_row(
+            url=f"{DAG_URL}{idx}/",
+            payload_to_check={},
+            change=dict(
+                data=case_payload["data"],
+                checks={"check_1": []},
+                kpis={"kpi_1": 42},
+                state=EXEC_STATE_CORRECT,
+                log_json=log_json,
+            ),
+            token=token,
+            check_payload=False,
+        )
+        return case_payload
+
+    def test_get_data(self):
+        idx = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
+        token = self.create_service_user()
+        case_payload = self._put_solution(idx, token)
+
+        data = self.client.get(
+            EXECUTION_URL + idx + "/data/",
+            headers=self.get_header_with_auth(token),
+        ).json
+
+        self.assertEqual(data["data"], case_payload["data"])
+        self.assertEqual(data["checks"], {"check_1": []})
+        self.assertEqual(data["kpis"], {"kpi_1": 42})
+        self.assertEqual(
+            data["log"], {"status": "feasible", "status_code": 2, "sol_code": 1}
+        )
+        self.assertNotIn("some_other_key", data["log"])
+        self.assertEqual(data["id"], idx)
+
+    def test_get_no_data(self):
+        response = self.client.get(
+            EXECUTION_URL + "nonexistent" + "/data/",
+            headers=self.get_header_with_auth(self.token),
+        )
+        self.assertEqual(response.status_code, 404)
