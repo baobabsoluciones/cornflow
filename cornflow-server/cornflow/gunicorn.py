@@ -1,6 +1,9 @@
 """gunicorn WSGI server configuration."""
+
 import os
 from multiprocessing import cpu_count
+
+from cornflow.shared.log_config import gunicorn_log_config
 
 
 def max_workers():
@@ -21,3 +24,8 @@ log_level = "info"
 if os.getenv("CORNFLOW_LOGGING") == "file":
     accesslog = "/usr/src/app/log/info.log"
     errorlog = "/usr/src/app/log/error.log"
+else:
+    # error and access logs share stream (CORNFLOW_LOG_STREAM), format
+    # (CORNFLOW_LOG_FORMAT) and cloud shipping with the application logs
+    accesslog = "-"
+    logconfig_dict = gunicorn_log_config()
