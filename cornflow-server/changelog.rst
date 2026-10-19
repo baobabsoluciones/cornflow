@@ -158,7 +158,7 @@ Changes You'll Notice
    {
      "cornflow_status": "healthy",
      "backend_status": "healthy",  // ← Changed from "airflow_status"
-     "cornflow_version": "1.3.6"
+     "cornflow_version": "1.3.0"
    }
 
 **What you need to do:**
