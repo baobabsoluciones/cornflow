@@ -7,6 +7,9 @@ from update_all_schemas import get_new_apps
 
 
 def create_dag(app):
+    """
+    Create DAG for model resolution
+    """
     def solve(**kwargs):
         return utils.cf_solve_app(app, EnvironmentVariablesBackend(), **kwargs)
 
