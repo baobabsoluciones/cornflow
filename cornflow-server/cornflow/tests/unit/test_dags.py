@@ -464,3 +464,58 @@ class TestDeployedDAG(TestCase):
             "'id': ['Missing data for required field.']",
             response.json.get("error", ""),
         )
+
+    def test_post_and_put_create_permissions(self):
+        self.app.config["OPEN_DEPLOYMENT"] = 0
+        planner = dict(
+            username="aPlanner", email="planner@test.org", password="Testpassword1!"
+        )
+        planner_id = self.client.post(
+            SIGNUP_URL,
+            data=json.dumps(planner),
+            follow_redirects=True,
+            headers={"Content-Type": "application/json"},
+        ).json["id"]
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.token}",
+        }
+
+        payload = {
+            "id": "new_dag",
+            "instance_schema": {},
+            "solution_schema": {},
+            "instance_checks_schema": {},
+            "solution_checks_schema": {},
+            "config_schema": {},
+            "kpis_schema": {},
+        }
+        response = self.client.post(
+            DEPLOYED_DAG_URL,
+            data=json.dumps(payload),
+            follow_redirects=True,
+            headers=headers,
+        )
+        self.assertEqual(response.status_code, 201)
+        self.assertTrue(PermissionsDAG.check_if_has_permissions(self.admin["id"], "new_dag"))
+        self.assertFalse(PermissionsDAG.check_if_has_permissions(planner_id, "new_dag"))
+
+        PermissionsDAG.query.filter_by(dag_id="solve_model_dag").delete()
+        db.session.commit()
+        self.assertFalse(
+            PermissionsDAG.check_if_has_permissions(self.admin["id"], "solve_model_dag")
+        )
+        payload.pop("id")
+        response = self.client.put(
+            DEPLOYED_DAG_URL + "solve_model_dag/",
+            data=json.dumps(payload),
+            follow_redirects=True,
+            headers=headers,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(
+            PermissionsDAG.check_if_has_permissions(self.admin["id"], "solve_model_dag")
+        )
+        self.assertFalse(
+            PermissionsDAG.check_if_has_permissions(planner_id, "solve_model_dag")
+        )

@@ -256,7 +256,7 @@ def register_dag_permissions_command(
     all_users = UserModel.get_all_users().all()
     all_dags = DeployedWorkflow.get_all_objects().all()
 
-    if open_deployment == 1:
+    if int(open_deployment) == 1:
 
         permissions = [
             PermissionsDAG({"dag_id": dag.id, "user_id": user.id})
@@ -270,10 +270,11 @@ def register_dag_permissions_command(
             PermissionsDAG({"dag_id": dag.id, "user_id": user.id})
             for user in all_users
             for dag in all_dags
-            if (dag.id, user.id) not in existing_permissions and user.is_service_user()
+            if (dag.id, user.id) not in existing_permissions
+            and (user.is_service_user() or user.is_admin())
         ]
 
-    if len(permissions) > 1:
+    if len(permissions) > 0:
         db.session.bulk_save_objects(permissions)
 
     try:
@@ -300,7 +301,7 @@ def register_dag_permissions_command(
 
     if verbose:
         click.echo(f"Workflow permissions registered")
-        if len(permissions) > 1:
+        if len(permissions) > 0:
             current_app.logger.info(
                 f"Workflow permissions registered: {len(permissions)}"
             )
