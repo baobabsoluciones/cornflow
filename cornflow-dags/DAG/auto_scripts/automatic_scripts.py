@@ -158,12 +158,11 @@ dag = DAG(
     default_args=default_args,
     catchup=False,
     tags=["internal"],
-    schedule_interval="@hourly",
+    schedule="@hourly",
 )
 
 execute_scripts2 = PythonOperator(
     task_id="execute_scripts",
-    provide_context=True,
     python_callable=execute_scripts,
     dag=dag,
 )

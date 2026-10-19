@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Any, Dict
 from uuid import uuid4
 
-from airflow.models.xcom import BaseXCom
+from airflow.sdk.bases.xcom import BaseXCom
 from airflow.providers.google.cloud.hooks.gcs import GCSHook
 
 

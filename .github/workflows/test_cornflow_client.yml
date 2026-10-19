@@ -83,27 +83,49 @@ jobs:
           cd cornflow-server
           python -m venv afvenv
           source afvenv/bin/activate
-          AIRFLOW_VERSION=2.9.1
+          AIRFLOW_VERSION=3.2.2
           PYTHON_VERSION="$(python3 --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
           CLIENT_BRANCH="${{ github.head_ref || github.ref_name }}"
           CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
-          python -m pip install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
-          python -m pip install -U orloge pulp
+          # The fab extra provides FabAuthManager and the `airflow users create` CLI,
+          # which moved out of Airflow core in Airflow 3.
+          python -m pip install "apache-airflow[fab]==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
           python -m pip install -U -r airflow_config/requirements.txt
           python -m pip uninstall cornflow-client -y
           python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
-          airflow db init
+          # Airflow 3 replaced `db init` with the idempotent `db migrate`
+          airflow db migrate
           airflow users create -u admin -f admin -l admin -r Admin -p admin -e admin@example.org
-          airflow webserver -p 8080 &
+          # Airflow 3 renamed `webserver` to `api-server` and no longer parses DAGs in the
+          # scheduler: a standalone dag-processor is mandatory.
+          airflow api-server -p 8080 &
           airflow scheduler &
+          airflow dag-processor &
+          # Wait for the api-server to answer and for the dag-processor to parse the DAGs
+          # before cornflow registers them.
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:8080/api/v2/monitor/health > /dev/null; then break; fi
+            sleep 2
+          done
+          for i in $(seq 1 60); do
+            if airflow dags list -o json 2>/dev/null | grep -q '"solve_model_dag"'; then break; fi
+            sleep 2
+          done
+          airflow dags list
+          # Import errors are only written to the dag-processor log files, so surface them here
+          airflow dags list-import-errors
           deactivate
-          sleep 5s
         env:
           AIRFLOW__SCHEDULER__CATCHUP_BY_DEFAULT: 0
           AIRFLOW_HOME: '${GITHUB_WORKSPACE}/cornflow-server/airflow_config'
           AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 0
-          AIRFLOW__API__AUTH_BACKEND: airflow.api.auth.backend.basic_auth
-          AIRFLOW__WEBSERVER__SECRET_KEY: e9adafa751fd35adfc1fdd3285019be15eea0758f76e38e1e37a1154fb36
+          # Airflow 3: AUTH_BACKENDS (plural) replaces AUTH_BACKEND, and the FAB auth manager
+          # has to be selected explicitly (it backs `airflow users create`)
+          AIRFLOW__API__AUTH_BACKENDS: airflow.api.auth.backend.basic_auth
+          AIRFLOW__CORE__AUTH_MANAGER: airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
+          # Shared JWT secret between api-server, scheduler and dag-processor
+          AIRFLOW__API_AUTH__JWT_SECRET: 4f8c1b2e9d7a6c5b3e2f1a0d9c8b7a6e5f4d3c2b1a0f9e8d7c6b5a4f3e2d1c0b
+          AIRFLOW__API__SECRET_KEY: e9adafa751fd35adfc1fdd3285019be15eea0758f76e38e1e37a1154fb36
           AIRFLOW__CORE__LOAD_EXAMPLES: 0
           AIRFLOW_CONN_CF_URI: http://airflow:Airflow_test_password1@localhost:5050
       - name: Run cornflow
@@ -148,6 +170,14 @@ jobs:
           coverage run -a --source=./cornflow_client/ --rcfile=./.coveragerc -m unittest discover -s cornflow_client/tests/integration
           coverage report -m
           coverage xml
+      - name: Show failed Airflow task logs
+        if: failure()
+        run: |
+          LOGS="${GITHUB_WORKSPACE}/cornflow-server/airflow_config/logs"
+          grep -rl "Task failed with exception" "$LOGS" 2>/dev/null | head -n 20 | while read -r f; do
+            echo "===== $f"
+            tail -n 80 "$f"
+          done
       - name: Upload coverage to codecov
         uses: codecov/codecov-action@v3
         with:

@@ -7,10 +7,6 @@ from update_all_schemas import get_new_apps
 
 
 def create_dag(app):
-    """
-    Create DAG for model resolution
-    """
-
     def solve(**kwargs):
         return utils.cf_solve_app(app, EnvironmentVariablesBackend(), **kwargs)
 
@@ -27,9 +23,9 @@ def create_dag(app):
         app.name,
         description=app.description,
         default_args=default_args,
-        schedule_interval=None,
+        schedule=None,
         tags=["model"],
-        **kwargs,
+        **kwargs
     )
     with dag:
         notify = getattr(app, "notify", True)
@@ -46,9 +42,7 @@ def create_dag(app):
 
 
 def create_check_kpis_dag(app):
-    """
-    Create DAG for checking data and generating KPIs
-    """
+    """Create DAG for checking data and generating KPIs."""
 
     def check_generate_kpis(**kwargs):
         return utils.cf_check_generate_kpis_app(
@@ -69,7 +63,7 @@ def create_check_kpis_dag(app):
         dag_name,
         description=f"Checks and KPIs generation for {app.name}",
         default_args=default_args_checks_kpis,
-        schedule_interval=None,
+        schedule=None,
         tags=["check_kpis"],
         **kwargs_checks_kpis,
     )
@@ -85,7 +79,6 @@ def create_check_kpis_dag(app):
             )
 
     return dag
-
 
 for app in get_new_apps():
     globals()[app.name] = create_dag(app)

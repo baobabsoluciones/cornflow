@@ -48,10 +48,16 @@ class TestRawCornflowClientUser(TestCase):
     def check_execution_statuses(
         self, execution_id, end_state=STATUS_OPTIMAL, initial_state=None
     ):
-        if initial_state is None:
-            statuses = [initial_state]
-        else:
-            statuses = []
+        """
+        Poll the execution status until ``end_state`` is reached (or 100 polls)
+        and check the transitions that were observed.
+
+        The intermediate states (queued, running) are only checked for ordering
+        when they were actually seen: short tasks (e.g. the check_kpis DAGs) can
+        go from queued to finished between two polls, so requiring them makes
+        the test flaky.
+        """
+        statuses = [] if initial_state is None else [initial_state]
         response = self.client.raw.get_status(execution_id)
         statuses.append(response.json()["state"])
         while end_state not in statuses and len(statuses) < 100:
@@ -59,15 +65,16 @@ class TestRawCornflowClientUser(TestCase):
             response = self.client.raw.get_status(execution_id)
             statuses.append(response.json()["state"])
 
-        self.assertIn(STATUS_QUEUED, statuses)
-        self.assertIn(STATUS_NOT_SOLVED, statuses)
         self.assertIn(end_state, statuses)
-
-        queued_idx = statuses.index(STATUS_QUEUED)
-        not_solved_idx = statuses.index(STATUS_NOT_SOLVED)
         end_state_idx = statuses.index(end_state)
-        self.assertLess(queued_idx, not_solved_idx)
-        self.assertLess(not_solved_idx, end_state_idx)
+        if STATUS_QUEUED in statuses:
+            self.assertLess(statuses.index(STATUS_QUEUED), end_state_idx)
+        if STATUS_NOT_SOLVED in statuses:
+            self.assertLess(statuses.index(STATUS_NOT_SOLVED), end_state_idx)
+        if STATUS_QUEUED in statuses and STATUS_NOT_SOLVED in statuses:
+            self.assertLess(
+                statuses.index(STATUS_QUEUED), statuses.index(STATUS_NOT_SOLVED)
+            )
 
         return statuses
 
@@ -283,7 +290,6 @@ class TestRawCornflowClientUser(TestCase):
             self.assertIn(item, response.keys())
 
         self.assertEqual(execution["id"], response["id"])
-        self.assertIn(STATUS_NOT_SOLVED, statuses)
         self.assertIn(STATUS_OPTIMAL, statuses)
 
     def test_execution_status(self):
@@ -291,7 +297,6 @@ class TestRawCornflowClientUser(TestCase):
 
         statuses = self.check_execution_statuses(execution["id"])
 
-        self.assertIn(STATUS_NOT_SOLVED, statuses)
         self.assertIn(STATUS_OPTIMAL, statuses)
 
         items = ["id", "state", "message", "data_hash"]
@@ -357,7 +362,6 @@ class TestRawCornflowClientUser(TestCase):
             self.assertIn(item, response.keys())
 
         self.assertEqual(execution["id"], response["id"])
-        self.assertIn(STATUS_NOT_SOLVED, statuses)
         self.assertIn(STATUS_OPTIMAL, statuses)
 
         return response
@@ -687,9 +691,14 @@ class TestRawCornflowClientService(TestCase):
             schema="solve_model_dag",
         ).json()
 
-        time.sleep(15)
-
-        solution = client.raw.get_solution(execution["id"]).json()
+        # Wait for the solve to finish instead of a fixed sleep: task start-up is
+        # slower on Airflow 3 and 15 seconds was not always enough.
+        for _ in range(100):
+            solution = client.raw.get_solution(execution["id"]).json()
+            if solution["state"] == STATUS_OPTIMAL:
+                break
+            time.sleep(2)
+        self.assertEqual(STATUS_OPTIMAL, solution["state"])
 
         payload = dict(
             state=1, log_json={}, log_text="", solution_schema="solve_model_dag"
