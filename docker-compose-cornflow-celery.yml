@@ -28,31 +28,33 @@
 x-airflow-common: &airflow-common
   # In order to add custom dependencies or upgrade provider packages you can use your extended image.
   # Comment the image line and uncomment the "build" and "context" lines below, Then run `docker-compose build` to build the images.
-  image: baobabsoluciones/airflow-k8s:release-v1.3.9rc3
+  image: baobabsoluciones/airflow:release-v1.3.9
   platform: linux/amd64
   #build:
-  #context: ./cornflow-server/airflow_config
+  #  context: ./cornflow-server/airflow_config
   environment: &airflow-common-env
     AIRFLOW_USER: admin
     AIRFLOW_PWD: admin
     AIRFLOW_DB_HOST: airflow_db
     AIRFLOW_DB_PORT: 5432
     AIRFLOW_DB_USER: airflow
-    AIRFLOW_DB_PASSWORD: airflow
+    AIRFLOW_DB_PWD: airflow
     AIRFLOW_DB: airflow
     AIRFLOW__CORE__FERNET_KEY: ""
-    # Airflow 3's api-server signs/validates JWTs with this secret. Unlike the Fernet key above,
-    # it can't be disabled with an empty value, and webserver/scheduler/worker run as separate
-    # containers here, so it must be pinned to the same value for all of them explicitly (a
-    # per-container random default, like the one the image generates as a fallback, would break
-    # task execution since tasks authenticate against the api-server through this secret).
+    # Airflow 3's api-server signs/validates JWTs with this secret and uses the secret key for its
+    # sessions. They are pinned here so every Airflow container shares the same values (a
+    # per-container random default would break task execution).
     AIRFLOW__API_AUTH__JWT_SECRET: "dev-only-jwt-secret-change-me-1a2b3c4d5e6f7a8b9c0d"
+    AIRFLOW__API__SECRET_KEY: "dev-only-secret-key-change-me-9f8e7d6c5b4a39281706"
     EXECUTOR: Celery
+    # Airflow 3 tasks call the api-server (Task Execution API); in this setup it runs in the
+    # webserver container, so localhost (the default) would not work from the worker
+    AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://webserver:8080/execution/
     # Airflow 3 moved instance_name from [webserver] to [api]; navbar_color has no equivalent
     # in the new React-based UI and was dropped.
     AIRFLOW__API__INSTANCE_NAME: CornflowEnv
     # Airflow 3: AUTH_BACKENDS (plural) replaces AUTH_BACKEND (singular)
-    AIRFLOW__API__AUTH_BACKENDS: airflow.api.auth.backend.basic_auth
+    AIRFLOW__API__AUTH_BACKENDS: airflow.providers.fab.auth_manager.api.auth.backend.basic_auth
     # Airflow 3: the auth manager is now explicit (FAB moved out of core into
     # apache-airflow-providers-fab); it's what backs `airflow users create`
     AIRFLOW__CORE__AUTH_MANAGER: airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
@@ -71,7 +73,7 @@ x-airflow-common: &airflow-common
 x-cornflow-common: &cornflow-common
   # In order to add custom dependencies or upgrade provider packages you can use your extended image.
   # Comment the image line and uncomment the "build" and "context" lines below, Then run `docker-compose build` to build the images.
-  image: baobabsoluciones/cornflow:release-v1.3.9rc3
+  image: baobabsoluciones/cornflow:release-v1.3.9
   platform: linux/amd64
   #  build:
   #    context: ./cornflow-server
@@ -165,21 +167,29 @@ services:
     restart: always
     depends_on:
       <<: *airflow-common-depends-on
+      # the webserver container runs the database migration
+      webserver:
+        condition: service_healthy
 
   scheduler:
     <<: *airflow-common
     command: scheduler
     healthcheck:
-      test: ["CMD", "curl", "--fail", "http://localhost:8974/health"]
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:8974/health"]
       interval: 30s
       timeout: 10s
       retries: 5
       start_period: 30s
     environment:
       <<: *airflow-common-env
+      # the scheduler health server (port 8974) is disabled by default
+      AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: "true"
     restart: always
     depends_on:
       <<: *airflow-common-depends-on
+      # the webserver container runs the database migration
+      webserver:
+        condition: service_healthy
 
   # You can enable flower by adding "--profile flower" option e.g. docker-compose --profile flower up
   # or by explicitly targeted on the command line e.g. docker-compose up flower.
@@ -191,9 +201,8 @@ services:
       - flower
     ports:
       - "5555:5555"
-      - "5555:5555"
     healthcheck:
-      test: ["CMD", "curl", "--fail", "http://localhost:5555/"]
+      test: ["CMD-SHELL", "wget -q -O /dev/null --user=$${AIRFLOW_USER} --password=$${AIRFLOW_PWD} http://localhost:5555/"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -203,9 +212,12 @@ services:
     restart: always
     depends_on:
       <<: *airflow-common-depends-on
+      # the webserver container runs the database migration
+      webserver:
+        condition: service_healthy
 
   redis:
-    image: redis:latest
+    image: redis:7.2
     expose:
       - 6379
     healthcheck:
@@ -227,6 +239,9 @@ services:
     restart: always
     depends_on:
       <<: *airflow-common-depends-on
+      # the webserver container runs the database migration
+      webserver:
+        condition: service_healthy
 
 volumes:
   postgres_cf_data:

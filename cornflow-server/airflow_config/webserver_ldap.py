@@ -20,6 +20,9 @@ import os
 
 from airflow import configuration as conf
 
+# the FAB provider calls ldap.filter without importing it, so it has to be loaded here
+import ldap.filter  # noqa: F401
+
 from flask_appbuilder.security.manager import AUTH_LDAP
 
 basedir = os.path.abspath(os.path.dirname(__file__))

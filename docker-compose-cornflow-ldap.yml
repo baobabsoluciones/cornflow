@@ -26,23 +26,32 @@
 # Feel free to modify this file to suit your needs.
 
 x-airflow-common: &airflow-common
-  # In order to add custom dependencies or upgrade provider packages you can use your extended image.
-  # Comment the image line and uncomment the "build" and "context" lines below, Then run `docker-compose build` to build the images.
-  image: baobabsoluciones/airflow-k8s:release-v1.3.9rc3
+  # The published image still ships a webserver_ldap.py that fails on login (it never imports
+  # ldap.filter). Until it is republished, a thin layer on top of it applies the fixed file from
+  # this repository; after that this can go back to using the plain image.
+  image: cornflow-airflow-ldap:local
   platform: linux/amd64
-  #build:
-  #context: ./cornflow-server/airflow_config
+  build:
+    context: ./cornflow-server/airflow_config
+    dockerfile_inline: |
+      FROM baobabsoluciones/airflow:release-v1.3.9
+      COPY --chown=cornflow webserver_ldap.py /usr/local/airflow/webserver_ldap.py
   environment: &airflow-common-env
     AIRFLOW_DB_HOST: airflow_db
     AIRFLOW_DB_PORT: 5432
     AIRFLOW_DB_USER: airflow
-    AIRFLOW_DB_PASSWORD: airflow
+    AIRFLOW_DB_PWD: airflow
     AIRFLOW_DB: airflow
+    # Airflow 3's api-server signs/validates JWTs with this secret and uses the secret key for its
+    # sessions. They are pinned here so every Airflow container shares the same values (a
+    # per-container random default would break task execution).
+    AIRFLOW__API_AUTH__JWT_SECRET: "dev-only-jwt-secret-change-me-1a2b3c4d5e6f7a8b9c0d"
+    AIRFLOW__API__SECRET_KEY: "dev-only-secret-key-change-me-9f8e7d6c5b4a39281706"
     # Airflow 3 moved instance_name from [webserver] to [api]; navbar_color has no equivalent
     # in the new React-based UI and was dropped.
     AIRFLOW__API__INSTANCE_NAME: CornflowEnv
     # Airflow 3: AUTH_BACKENDS (plural) replaces AUTH_BACKEND (singular)
-    AIRFLOW__API__AUTH_BACKENDS: airflow.api.auth.backend.basic_auth
+    AIRFLOW__API__AUTH_BACKENDS: airflow.providers.fab.auth_manager.api.auth.backend.basic_auth
     # Airflow 3: the auth manager is now explicit (FAB moved out of core into
     # apache-airflow-providers-fab); FabAuthManager is required for the LDAP webserver config below
     AIRFLOW__CORE__AUTH_MANAGER: airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
@@ -68,10 +77,10 @@ x-airflow-common: &airflow-common
 x-cornflow-common: &cornflow-common
   # In order to add custom dependencies or upgrade provider packages you can use your extended image.
   # Comment the image line and uncomment the "build" and "context" lines below, Then run `docker-compose build` to build the images.
-  image: baobabsoluciones/cornflow:release-v1.3.9rc3
+  image: baobabsoluciones/cornflow:release-v1.3.9
   platform: linux/amd64
   #build:
-  #context: ./cornflow-server
+  #  context: ./cornflow-server
   environment: &cornflow-common-env
     CORNFLOW_DB_HOST: cornflow_db
     CORNFLOW_DB_PORT: 5432
@@ -83,6 +92,8 @@ x-cornflow-common: &cornflow-common
     LDAP_BIND_DN: cn=admin,dc=example,dc=org
     LDAP_BIND_PASSWORD: admin
     LDAP_SERVICE_BASE: ou=service,dc=example,dc=org
+    # group of the service user in ldapbootstrap.ldif (cornflow expects "service" by default)
+    LDAP_GROUP_TO_ROLE_SERVICE: services
     CORNFLOW_SERVICE_USER: cornflow
     # airflow user and password from LDAP credentials file in cornflow-server/airflow_config/ldapbootstrap.ldif
     AIRFLOW_USER: administrator
