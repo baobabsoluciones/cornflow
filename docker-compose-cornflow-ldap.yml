@@ -16,35 +16,38 @@
 # under the License.
 #
 
-# Basic Airflow cluster configuration for development purposes with LDAP Auth.
+# Basic Airflow cluster configuration for development purposes with LDAP Auth (LocalExecutor).
 #
 # WARNING: This configuration is for local development. Do not use it in a production deployment.
 #
-# This configuration supports basic configuration using environment variables or an .env file
-# The following variables are supported:
+# Airflow runs with its native commands (api-server, scheduler, dag-processor, triggerer) on the
+# same image used by the helm chart. The airflow-init service migrates the database and installs
+# the python requirements of the DAGs. Users are not created: they come from the LDAP server.
+#
+# The following variables are supported (all optional, they can be set in an .env file):
+#   AIRFLOW_UID  user id the Airflow containers run as (default 50000). On Linux set it to
+#                your own user id (`echo "AIRFLOW_UID=$(id -u)" > .env`) to avoid permission
+#                problems on the logs folder.
 #
 # Feel free to modify this file to suit your needs.
 
 x-airflow-common: &airflow-common
-  # The published image still ships a webserver_ldap.py that fails on login (it never imports
-  # ldap.filter). Until it is republished, a thin layer on top of it applies the fixed file from
-  # this repository; after that this can go back to using the plain image.
-  image: cornflow-airflow-ldap:local
+  # In order to add custom dependencies or upgrade provider packages you can use your extended image.
+  # Comment the image line and uncomment the "build" and "context" lines below, Then run `docker-compose build` to build the images.
+  image: baobabsoluciones/airflow-k8s:release-v1.3.9
   platform: linux/amd64
-  build:
-    context: ./cornflow-server/airflow_config
-    dockerfile_inline: |
-      FROM baobabsoluciones/airflow:release-v1.3.9
-      COPY --chown=cornflow webserver_ldap.py /usr/local/airflow/webserver_ldap.py
+  #build:
+  #  context: ./cornflow-server/airflow_config
+  #  dockerfile: Dockerfile-k8s
+  user: "${AIRFLOW_UID:-50000}:0"
   environment: &airflow-common-env
-    AIRFLOW_DB_HOST: airflow_db
-    AIRFLOW_DB_PORT: 5432
-    AIRFLOW_DB_USER: airflow
-    AIRFLOW_DB_PWD: airflow
-    AIRFLOW_DB: airflow
-    # Airflow 3's api-server signs/validates JWTs with this secret and uses the secret key for its
-    # sessions. They are pinned here so every Airflow container shares the same values (a
-    # per-container random default would break task execution).
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "False"
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow_db:5432/airflow
+    # Fixed development keys so every Airflow container shares the same values (a per-container
+    # random default would break task execution and connection decryption).
+    AIRFLOW__CORE__FERNET_KEY: "i_3pAg-igN2aEXPhDX_mZC7U0vt5YYnJS-hleIkOqek="
     AIRFLOW__API_AUTH__JWT_SECRET: "dev-only-jwt-secret-change-me-1a2b3c4d5e6f7a8b9c0d"
     AIRFLOW__API__SECRET_KEY: "dev-only-secret-key-change-me-9f8e7d6c5b4a39281706"
     # Airflow 3 moved instance_name from [webserver] to [api]; navbar_color has no equivalent
@@ -52,27 +55,45 @@ x-airflow-common: &airflow-common
     AIRFLOW__API__INSTANCE_NAME: CornflowEnv
     # Airflow 3: AUTH_BACKENDS (plural) replaces AUTH_BACKEND (singular)
     AIRFLOW__API__AUTH_BACKENDS: airflow.providers.fab.auth_manager.api.auth.backend.basic_auth
-    # Airflow 3: the auth manager is now explicit (FAB moved out of core into
-    # apache-airflow-providers-fab); FabAuthManager is required for the LDAP webserver config below
+    # FAB moved out of core into apache-airflow-providers-fab; it backs `airflow users create`
     AIRFLOW__CORE__AUTH_MANAGER: airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
+    # Airflow 3 tasks call the api-server (Task Execution API), which runs in its own container
+    AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-apiserver:8080/execution/
     AIRFLOW_LDAP_ENABLE: "True"
     AIRFLOW_LDAP_URI: ldap://openldap:389
     AIRFLOW_LDAP_SEARCH: ou=users,dc=example,dc=org
     AIRFLOW_LDAP_BIND_USER: cn=admin,dc=example,dc=org
     AIRFLOW_LDAP_BIND_PASSWORD: admin
     AIRFLOW_LDAP_UID_FIELD: cn
+    AIRFLOW_LDAP_GROUP_FIELD: memberUid
+    AIRFLOW_LDAP_ROLE_MAPPING_ADMIN: cn=administrators,ou=groups,dc=example,dc=org
+    AIRFLOW_LDAP_ROLE_MAPPING_OP: cn=services,ou=service,dc=example,dc=org
+    AIRFLOW_LDAP_ROLE_MAPPING_PUBLIC: cn=viewers,ou=groups,dc=example,dc=org
+    AIRFLOW_LDAP_ROLE_MAPPING_VIEWER: cn=planners,ou=groups,dc=example,dc=org
+    # Python requirements of the DAGs are installed here by airflow-init
+    PYTHONPATH: /opt/airflow/deps
+    # Connection used by the DAGs to send the results back to cornflow
     # cornflow user and password from LDAP credentials file in cornflow-server/airflow_config/ldapbootstrap.ldif
+    AIRFLOW_CONN_CF_URI: cornflow://cornflow:cornflow1234@cornflow:5000
     CORNFLOW_SERVICE_USER: cornflow
     CORNFLOW_SERVICE_PWD: cornflow1234
   volumes:
-    - ./cornflow-dags/DAG:/usr/local/airflow/dags
-    - ./cornflow-dags/requirements.txt:/requirements.txt
-    - ./cornflow-server/airflow_config/logs:/usr/local/airflow/logs
-    - ./cornflow-server/airflow_config/plugins:/usr/local/airflow/plugins
-    - ./cornflow-server/airflow_config/airflow_local_settings.py:/usr/local/airflow/config/airflow_local_settings.py
+    - ./cornflow-dags/DAG:/opt/airflow/dags
+    - ./cornflow-dags/requirements.txt:/requirements.txt:ro
+    - ./cornflow-server/airflow_config/logs:/opt/airflow/logs
+    - ./cornflow-server/airflow_config/plugins:/opt/airflow/plugins
+    # The published image ships an airflow_local_settings.py written for Airflow 2, which breaks
+    # every Airflow 3 command; the one from this repository replaces it.
+    - ./cornflow-server/airflow_config/airflow_local_settings.py:/opt/airflow/config/airflow_local_settings.py:ro
+    # LDAP configuration of the FAB auth manager. The published image ships a webserver_ldap.py
+    # that never imports ldap.filter, which breaks the login; the one from this repository fixes it.
+    - ./cornflow-server/airflow_config/webserver_ldap.py:/opt/airflow/webserver_config.py:ro
+    - airflow_deps:/opt/airflow/deps
   depends_on: &airflow-common-depends-on
     airflow_db:
       condition: service_healthy
+    airflow-init:
+      condition: service_completed_successfully
 
 x-cornflow-common: &cornflow-common
   # In order to add custom dependencies or upgrade provider packages you can use your extended image.
@@ -95,13 +116,14 @@ x-cornflow-common: &cornflow-common
     # group of the service user in ldapbootstrap.ldif (cornflow expects "service" by default)
     LDAP_GROUP_TO_ROLE_SERVICE: services
     CORNFLOW_SERVICE_USER: cornflow
+    AIRFLOW_URL: http://airflow-apiserver:8080
     # airflow user and password from LDAP credentials file in cornflow-server/airflow_config/ldapbootstrap.ldif
     AIRFLOW_USER: administrator
     AIRFLOW_PWD: administrator1234
   depends_on: &cornflow-common-depends-on
     cornflow_db:
       condition: service_healthy
-    webserver:
+    airflow-apiserver:
       condition: service_healthy
 
 services:
@@ -149,24 +171,99 @@ services:
     volumes:
       - postgres_af_data:/var/lib/postgresql/data/
 
-  webserver:
+  # One-shot service: fixes the ownership of the mounted folders, installs the DAG requirements,
+  # migrates the database and creates the admin user. It is safe to run it several times.
+  airflow-init:
     <<: *airflow-common
-    command: webserver
+    # root is needed to fix the ownership of the mounted folders
+    user: "0:0"
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        set -e
+        chown -R "$${AIRFLOW_UID:-50000}:0" /opt/airflow/logs /opt/airflow/deps
+        # everything else runs as the airflow user
+        exec setpriv --reuid="$${AIRFLOW_UID:-50000}" --regid=0 --clear-groups /bin/bash -c '
+          set -e
+          export HOME=/home/airflow
+          if [ ! -f /opt/airflow/deps/.requirements.md5 ] || ! md5sum -c --status /opt/airflow/deps/.requirements.md5; then
+            python -m pip install --no-cache-dir --target /opt/airflow/deps -r /requirements.txt
+            md5sum /requirements.txt > /opt/airflow/deps/.requirements.md5
+          fi
+          exec /entrypoint airflow version
+        '
+    environment:
+      <<: *airflow-common-env
+      AIRFLOW_UID: "${AIRFLOW_UID:-50000}"
+      _AIRFLOW_DB_MIGRATE: "true"
+    depends_on:
+      airflow_db:
+        condition: service_healthy
+
+  airflow-apiserver:
+    <<: *airflow-common
+    command: api-server
     ports:
       - 8080:8080
     healthcheck:
-      # Airflow 3's webserver process is now `airflow api-server`; check its health endpoint
-      # instead of a pid file (the pid file it writes is no longer guaranteed to be named
-      # airflow-webserver.pid).
-      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:8080/api/v2/monitor/health"]
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/api/v2/monitor/health"]
       interval: 30s
       timeout: 30s
       retries: 5
+      start_period: 30s
+    restart: always
+
+  # Airflow 3 always requires a standalone dag-processor process; the scheduler no longer parses
+  # DAG files itself.
+  airflow-dag-processor:
+    <<: *airflow-common
+    command: dag-processor
+    healthcheck:
+      test: ["CMD-SHELL", 'airflow jobs check --job-type DagProcessorJob --hostname "$${HOSTNAME}"']
+      interval: 30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+    restart: always
+
+  airflow-scheduler:
+    <<: *airflow-common
+    command: scheduler
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8974/health"]
+      interval: 30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
     environment:
       <<: *airflow-common-env
+      # the scheduler health server (port 8974) is disabled by default
+      AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: "true"
     restart: always
+
+  airflow-triggerer:
+    <<: *airflow-common
+    command: triggerer
+    healthcheck:
+      test: ["CMD-SHELL", 'airflow jobs check --job-type TriggererJob --hostname "$${HOSTNAME}"']
+      interval: 30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+    restart: always
+
+  # One-shot service: registers the model DAGs in cornflow once it is up. The hourly
+  # update_dag_registry run that Airflow starts on its own usually fires before cornflow is ready.
+  airflow-register-dags:
+    <<: *airflow-common
+    command: dags trigger update_dag_registry
+    restart: "no"
     depends_on:
-      <<: *airflow-common-depends-on
+      airflow-scheduler:
+        condition: service_healthy
+      cornflow:
+        condition: service_healthy
 
   openldap:
     image: osixia/openldap
@@ -196,3 +293,4 @@ services:
 volumes:
   postgres_cf_data:
   postgres_af_data:
+  airflow_deps:
