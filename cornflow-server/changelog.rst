@@ -1,3 +1,65 @@
+version 1.3.9
+--------------
+- released: 2026-10-19
+- description: Airflow 3 support, automatic DAG permissions and security update
+- changelog:
+    - Airflow 3.2.2
+        The Airflow image is upgraded from 2.9.1 to 3.2.2. The webserver is replaced by the
+        api-server and a standalone dag-processor is now required. The Airflow client in
+        cornflow-client detects the API version (v1 or v2) and authenticates with basic auth or
+        JWT accordingly, so it keeps working against Airflow 2 deployments. Internal DAGs are
+        adapted to Airflow 3 (no ORM access from tasks, ``schedule`` instead of
+        ``schedule_interval``). A new ``airflow-k8s`` image and a Helm chart are provided.
+
+    - DAG permissions
+        Permissions are now created when a deployed DAG is registered or updated, without
+        having to run the ``register_dag_permissions`` command. With ``OPEN_DEPLOYMENT=0``,
+        admin users are granted access to every DAG along with service users. Fixed a case
+        where a single new permission was not saved.
+
+    - Security update
+        Upgrade PyJWT to 2.15.1, cryptography to 50.0.2, requests to 2.33.0 and setuptools
+        to 83.0.0.
+
+version 1.3.8
+--------------
+- released: 2026-09-25
+- description: Bug fixes
+- changelog:
+    - Bulk update and soft deleted rows
+        Resending a row that had been soft deleted through a bulk update now reactivates it: its
+        `deleted_at` is cleared and the update is applied, so the record becomes visible again on the
+        reads. Previously the row was updated in place but stayed deleted, while the call answered
+        201. If no row matches on the unique fields but the payload carries the `id` of a soft deleted
+        row, that row is reactivated instead of failing on the primary key. Models without soft delete
+        keep the previous behaviour.
+
+    - Databricks backend configuration
+        When the Databricks backend is selected, the required environment variables
+        (DATABRICKS_HOST, DATABRICKS_CLIENT_SECRET, DATABRICKS_TOKEN_ENDPOINT, DATABRICKS_EP_CLUSTERS,
+        DATABRICKS_CLIENT_ID) are validated on startup, and a clear fatal error lists the missing ones.
+        DATABRICKS_HEALTH_PATH defaults to "default path" when not set.
+
+    - Emails
+        Fixed the email body being attached twice, which made some clients render it twice or flag
+        the message as malformed.
+
+version 1.3.7
+--------------
+- released: 2026-07-10
+- description: Performance improvement
+- changelog:
+    - Improve performance of executions endpoint
+    - Add bug fix for when using click 8.4.0 with celery executor
+
+version 1.3.6
+--------------
+- released: 2026-06-25
+- description: Security update and performance improvement
+- changelog:
+    - Upgrade cryptography to 48.0.1 and PyJWT to 2.13.0
+    - Improve performance of executions endpoint
+
 version 1.3.5
 --------------
 - released: 2026-06-03
