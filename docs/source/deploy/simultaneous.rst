@@ -38,7 +38,7 @@ For running with CeleryExecutor execute this command::
     e13c87bcd36b   baobabsoluciones/docker-airflow   "/initairflow.sh wor…"   6 minutes ago   Up 6 minutes             5555/tcp, 8080/tcp, 8793/tcp                                    corn_worker_1
     5a96cc04b69b   baobabsoluciones/docker-airflow   "/initairflow.sh sch…"   6 minutes ago   Up 5 minutes             5555/tcp, 8080/tcp, 8793/tcp                                    corn_scheduler_1
     c5d3fdad4c6b   baobabsoluciones/cornflow         "./initapp.sh"           6 minutes ago   Up 6 minutes             0.0.0.0:5000->5000/tcp, :::5000->5000/tcp                       corn_cornflow_1
-    e98dfc643ddd   baobabsoluciones/docker-airflow   "/initairflow.sh web…"   6 minutes ago   Up 6 minutes (healthy)   5555/tcp, 8793/tcp, 0.0.0.0:8080->8080/tcp, :::8080->8080/tcp   corn_webserver_1
+    e98dfc643ddd   baobabsoluciones/airflow-k8s      "/usr/bin/dumb-init …"   6 minutes ago   Up 6 minutes (healthy)   5555/tcp, 8793/tcp, 0.0.0.0:8080->8080/tcp, :::8080->8080/tcp   corn_webserver_1
     129fd9b29361   baobabsoluciones/docker-airflow   "/initairflow.sh flo…"   6 minutes ago   Up 6 minutes             8080/tcp, 0.0.0.0:5555->5555/tcp, :::5555->5555/tcp, 8793/tcp   corn_flower_1
     c56e3444078c   postgres                          "docker-entrypoint.s…"   6 minutes ago   Up 6 minutes             5432/tcp                                                        corn_airflow_db_1
     7a7b10d09a46   redis:5.0.5                       "docker-entrypoint.s…"   6 minutes ago   Up 6 minutes             6379/tcp                                                        corn_redis_1
@@ -54,7 +54,7 @@ The number of ``workers`` deployed depends on ``--scale`` argument. For example,
     fca4c231139f   baobabsoluciones/docker-airflow   "/initairflow.sh wor…"   4 minutes ago   Up 54 seconds            5555/tcp, 8080/tcp, 8793/tcp                                    corn_worker_2
     a7f2868e9329   baobabsoluciones/docker-airflow   "/initairflow.sh sch…"   4 minutes ago   Up 24 seconds            5555/tcp, 8080/tcp, 8793/tcp                                    corn_scheduler_1
     f21b97ae83e8   baobabsoluciones/cornflow         "./initapp.sh"           4 minutes ago   Up 4 minutes             0.0.0.0:5000->5000/tcp, :::5000->5000/tcp                       corn_cornflow_1
-    68d8f7db53ac   baobabsoluciones/docker-airflow   "/initairflow.sh web…"   4 minutes ago   Up 4 minutes (healthy)   5555/tcp, 8793/tcp, 0.0.0.0:8080->8080/tcp, :::8080->8080/tcp   corn_webserver_1
+    68d8f7db53ac   baobabsoluciones/airflow-k8s      "/usr/bin/dumb-init …"   4 minutes ago   Up 4 minutes (healthy)   5555/tcp, 8793/tcp, 0.0.0.0:8080->8080/tcp, :::8080->8080/tcp   corn_webserver_1
     7d6e114978af   baobabsoluciones/docker-airflow   "/initairflow.sh flo…"   4 minutes ago   Up 3 minutes             8080/tcp, 0.0.0.0:5555->5555/tcp, :::5555->5555/tcp, 8793/tcp   corn_flower_1
     d2730ce4b8c1   postgres                          "docker-entrypoint.s…"   4 minutes ago   Up 4 minutes             5432/tcp                                                        corn_cornflow_db_1
     ec86c6761b80   postgres                          "docker-entrypoint.s…"   4 minutes ago   Up 4 minutes             5432/tcp                                                        corn_airflow_db_1

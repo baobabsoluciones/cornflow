@@ -336,7 +336,6 @@ class Airflow(object):
         )
         dag_run_data = dag_run.json()
         # then, we use the "executed_date" to build a call to the change state api
-        # TODO: We assume the solving task is named as is parent dag!
         payload = dict(
             dry_run=False,
             include_downstream=True,
