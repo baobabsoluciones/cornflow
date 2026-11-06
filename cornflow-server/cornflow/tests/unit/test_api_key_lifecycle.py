@@ -31,11 +31,11 @@ from cornflow.shared.const import (
     API_KEY_SCOPE_READ,
     PLATFORM_ADMIN_ROLE,
 )
-from cornflow.tests.const import INSTANCE_PATH, INSTANCE_URL, LOGIN_URL, SIGNUP_URL
+from cornflow.tests.const import INSTANCE_PATH, INSTANCE_URL, LOGIN_URL, PREFIX, SIGNUP_URL
 
 STRONG_PASSWORD = "Kx9#tR2m!Qw7Zp"
 JSON_HEADER = {"Content-Type": "application/json"}
-API_KEY_URL = "/user/api-key/"
+API_KEY_URL = PREFIX + "/user/api-key/"
 
 
 def auth_header(token):

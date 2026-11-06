@@ -18,6 +18,9 @@ from cornflow.shared import db
 from cornflow.tests.const import LOGIN_URL
 from cornflow.tests.custom_test_case import CustomTestCase
 
+# Unprefixed alias of the login route
+LEGACY_LOGIN_URL = "/login/"
+
 
 class BaseApplicationRootTest(CustomTestCase):
     """
@@ -70,18 +73,18 @@ class TestApplicationRoot(BaseApplicationRootTest):
 
     def test_wrong_route(self):
         # Outside APPLICATION_ROOT nothing is served
+        self.assertEqual(self.login(LEGACY_LOGIN_URL).status_code, 404)
         self.assertEqual(self.login(LOGIN_URL).status_code, 404)
-        self.assertEqual(self.login(f"/cornflow{LOGIN_URL}").status_code, 404)
 
     def test_correct_route(self):
         # Legacy (unprefixed) route under APPLICATION_ROOT
-        response = self.login(f"{current_app.config['APPLICATION_ROOT']}{LOGIN_URL}")
+        response = self.login(f"{current_app.config['APPLICATION_ROOT']}{LEGACY_LOGIN_URL}")
         self.assertEqual(response.status_code, 200)
 
     def test_correct_canonical_route_under_root(self):
         # Canonical /cornflow route under APPLICATION_ROOT
         response = self.login(
-            f"{current_app.config['APPLICATION_ROOT']}/cornflow{LOGIN_URL}"
+            f"{current_app.config['APPLICATION_ROOT']}{LOGIN_URL}"
         )
         self.assertEqual(response.status_code, 200)
 
@@ -95,12 +98,12 @@ class TestApplicationRootPluginMode(BaseApplicationRootTest):
     EXTERNAL_APP = 0
 
     def test_canonical_route(self):
-        self.assertEqual(self.login(f"/cornflow{LOGIN_URL}").status_code, 200)
+        self.assertEqual(self.login(LOGIN_URL).status_code, 200)
 
     def test_legacy_alias_route(self):
-        self.assertEqual(self.login(LOGIN_URL).status_code, 200)
+        self.assertEqual(self.login(LEGACY_LOGIN_URL).status_code, 200)
 
     def test_application_root_not_mounted(self):
         root = current_app.config["APPLICATION_ROOT"]
+        self.assertEqual(self.login(f"{root}{LEGACY_LOGIN_URL}").status_code, 404)
         self.assertEqual(self.login(f"{root}{LOGIN_URL}").status_code, 404)
-        self.assertEqual(self.login(f"{root}/cornflow{LOGIN_URL}").status_code, 404)

@@ -45,6 +45,7 @@ from cornflow.shared.const import (
     AUTH_LDAP,
     AUTH_OID,
     CONDITIONAL_ENDPOINTS,
+    LEGACY_ENDPOINT_SUFFIX,
     SIGNUP_WITH_AUTH,
     SIGNUP_WITH_NO_AUTH,
 )
@@ -83,6 +84,34 @@ def _check_secret_keys(app):
                 f"bytes long (256 bits). Generate one with: "
                 f'python -c "import secrets; print(secrets.token_hex(32))"'
             )
+
+
+def _register_legacy_routes(app, resources, alarms_resources, auth_type):
+    """
+    Registers the unprefixed routes (e.g. ``/login/``) kept for backwards
+    compatibility. The canonical routes live under ``/cornflow/``.
+
+    Every alias is named ``<endpoint>`` + ``LEGACY_ENDPOINT_SUFFIX``. To remove
+    the unprefixed routes, delete this function and its call in ``create_app``.
+    """
+    suffix = LEGACY_ENDPOINT_SUFFIX
+    api_legacy = Api(app)
+    for res in resources:
+        api_legacy.add_resource(res["resource"], res["urls"], endpoint=res["endpoint"] + suffix)
+    if app.config["ALARMS_ENDPOINTS"]:
+        for res in alarms_resources:
+            api_legacy.add_resource(res["resource"], res["urls"], endpoint=res["endpoint"] + suffix)
+    if auth_type == AUTH_DB:
+        signup_activated = int(app.config["SIGNUP_ACTIVATED"])
+        if signup_activated in [SIGNUP_WITH_AUTH, SIGNUP_WITH_NO_AUTH]:
+            api_legacy.add_resource(SignUpEndpoint, CONDITIONAL_ENDPOINTS["signup"], endpoint="signup" + suffix)
+        api_legacy.add_resource(LoginEndpoint, CONDITIONAL_ENDPOINTS["login"], endpoint="login" + suffix)
+    elif auth_type == AUTH_LDAP:
+        api_legacy.add_resource(LoginEndpoint, CONDITIONAL_ENDPOINTS["login"], endpoint="login" + suffix)
+    elif auth_type == AUTH_OID:
+        api_legacy.add_resource(LoginOpenAuthEndpoint, CONDITIONAL_ENDPOINTS["login"], endpoint="login" + suffix)
+    api_legacy.add_resource(RefreshTokenEndpoint, "/token/refresh/", endpoint="token-refresh" + suffix)
+    api_legacy.add_resource(LogoutEndpoint, "/logout/", endpoint="logout" + suffix)
 
 
 def create_app(env_name="development", dataconn=None):
@@ -176,24 +205,7 @@ def create_app(env_name="development", dataconn=None):
 
     app.register_blueprint(cornflow_bp)
 
-    # Alias de compatibilidad: mismas rutas sin prefijo (URLs legacy)
-    api_compat = Api(app)
-    for res in resources:
-        api_compat.add_resource(res["resource"], res["urls"], endpoint=res["endpoint"] + "_compat")
-    if app.config["ALARMS_ENDPOINTS"]:
-        for res in alarms_resources:
-            api_compat.add_resource(res["resource"], res["urls"], endpoint=res["endpoint"] + "_compat")
-    if auth_type == AUTH_DB:
-        _signup_activated = int(app.config["SIGNUP_ACTIVATED"])
-        if _signup_activated in [SIGNUP_WITH_AUTH, SIGNUP_WITH_NO_AUTH]:
-            api_compat.add_resource(SignUpEndpoint, CONDITIONAL_ENDPOINTS["signup"], endpoint="signup_compat")
-        api_compat.add_resource(LoginEndpoint, CONDITIONAL_ENDPOINTS["login"], endpoint="login_compat")
-    elif auth_type == AUTH_LDAP:
-        api_compat.add_resource(LoginEndpoint, CONDITIONAL_ENDPOINTS["login"], endpoint="login_compat")
-    elif auth_type == AUTH_OID:
-        api_compat.add_resource(LoginOpenAuthEndpoint, CONDITIONAL_ENDPOINTS["login"], endpoint="login_compat")
-    api_compat.add_resource(RefreshTokenEndpoint, "/token/refresh/", endpoint="token-refresh_compat")
-    api_compat.add_resource(LogoutEndpoint, "/logout/", endpoint="logout_compat")
+    _register_legacy_routes(app, resources, alarms_resources, auth_type)
 
     # The interactive API docs (Swagger UI) are registered only when enabled.
     # They are off by default in production so the deny-by-default CSP holds

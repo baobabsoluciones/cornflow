@@ -16,7 +16,7 @@ TestApiViewListEndpoint
 from cornflow.endpoints import ApiViewListEndpoint, alarms_resources, get_resources
 from cornflow.models import ViewModel
 from cornflow.shared.const import ROLES_MAP
-from cornflow.tests.const import APIVIEW_URL
+from cornflow.tests.const import APIVIEW_URL, PREFIX
 from cornflow.tests.custom_test_case import CustomTestCase
 
 
@@ -47,7 +47,7 @@ class TestApiViewListEndpoint(CustomTestCase):
         self.payload = [
             {
                 "name": view["endpoint"],
-                "url_rule": "/cornflow" + view["urls"],
+                "url_rule": PREFIX + view["urls"],
                 "description": view["resource"].DESCRIPTION,
             }
             for view in resources

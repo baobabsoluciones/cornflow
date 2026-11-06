@@ -32,13 +32,13 @@ from cornflow.shared.const import ADMIN_ROLE, PLATFORM_ADMIN_ROLE, SERVICE_ROLE
 from cornflow.shared.exceptions import InvalidCredentials
 from cornflow.shared.security import resolve_cors_origins
 from cornflow.shared.validators import check_password_pattern, passwords_too_similar
-from cornflow.tests.const import LOGIN_URL, SIGNUP_URL, USER_URL, INSTANCE_URL
+from cornflow.tests.const import PREFIX, LOGIN_URL, SIGNUP_URL, USER_URL, INSTANCE_URL
 
-ROLES_URL = "/roles/"
-PERMISSION_URL = "/permission/"
+ROLES_URL = PREFIX + "/roles/"
+PERMISSION_URL = PREFIX + "/permission/"
 
-MFA_SETUP_URL = "/mfa/setup/"
-MFA_VERIFY_URL = "/mfa/verify/"
+MFA_SETUP_URL = PREFIX + "/mfa/setup/"
+MFA_VERIFY_URL = PREFIX + "/mfa/verify/"
 
 STRONG_PASSWORD = "Kx9#tR2m!Qw7Zp"
 OTHER_STRONG_PASSWORD = "Nw5@rT8y!Kd3Zx"
@@ -348,14 +348,14 @@ class TestRoleScoping(TestCase):
         return self.client.get(url, headers=auth_header(token))
 
     def test_client_admin_denied_on_platform_endpoints(self):
-        for url in (ROLES_URL, PERMISSION_URL, "/apiview/", "/action/"):
+        for url in (ROLES_URL, PERMISSION_URL, PREFIX + "/apiview/", PREFIX + "/action/"):
             response = self.get(url, self.admin_token)
             self.assertEqual(
                 403, response.status_code, msg=f"admin should be denied {url}"
             )
 
     def test_platform_admin_allowed_on_platform_endpoints(self):
-        for url in (ROLES_URL, PERMISSION_URL, "/apiview/", "/action/"):
+        for url in (ROLES_URL, PERMISSION_URL, PREFIX + "/apiview/", PREFIX + "/action/"):
             response = self.get(url, self.platform_token)
             self.assertEqual(
                 200, response.status_code, msg=f"platform admin denied {url}"
@@ -378,7 +378,7 @@ class TestRoleScoping(TestCase):
         self.assertEqual(403, response.status_code)
         # via the user/role delete path too
         response = self.client.delete(
-            f"/user/role/{self.target_id}/{ADMIN_ROLE}/",
+            f"{PREFIX}/user/role/{self.target_id}/{ADMIN_ROLE}/",
             headers=auth_header(self.admin_token),
         )
         self.assertEqual(403, response.status_code)
@@ -398,7 +398,7 @@ class TestRoleScoping(TestCase):
         from cornflow.shared.const import VIEWER_ROLE
 
         response = self.client.post(
-            "/user/role/",
+            PREFIX + "/user/role/",
             data=json.dumps({"user_id": self.target_id, "role_id": VIEWER_ROLE}),
             headers=auth_header(self.admin_token),
         )
@@ -474,7 +474,7 @@ class TestPlatformRoles(TestCase):
 
     def grant(self, token, role_id, user_id=None):
         return self.client.post(
-            "/user/role/",
+            PREFIX + "/user/role/",
             data=json.dumps(
                 {"user_id": user_id or self.target_id, "role_id": role_id}
             ),
@@ -550,7 +550,7 @@ class TestPlatformRoles(TestCase):
             {"user_id": self.target_id, "role_id": PLATFORM_VIEWER_ROLE}
         ).save()
         response = self.client.delete(
-            f"/user/role/{self.target_id}/{PLATFORM_VIEWER_ROLE}/",
+            f"{PREFIX}/user/role/{self.target_id}/{PLATFORM_VIEWER_ROLE}/",
             headers=auth_header(self.admin_token),
         )
         self.assertEqual(403, response.status_code)
@@ -561,7 +561,7 @@ class TestPlatformRoles(TestCase):
         response = self.grant(self.platform_token, PLATFORM_PLANNER_ROLE)
         self.assertIn(response.status_code, (200, 201))
         response = self.client.delete(
-            f"/user/role/{self.target_id}/{PLATFORM_PLANNER_ROLE}/",
+            f"{PREFIX}/user/role/{self.target_id}/{PLATFORM_PLANNER_ROLE}/",
             headers=auth_header(self.platform_token),
         )
         self.assertEqual(200, response.status_code)
@@ -658,7 +658,7 @@ class TestApiKey(TestCase):
         if totp_code is not None:
             body["totp_code"] = totp_code
         return self.client.post(
-            "/user/api-key/",
+            PREFIX + "/user/api-key/",
             data=json.dumps(body),
             headers=auth_header(token or self.session_token),
         )
@@ -727,7 +727,7 @@ class TestApiKey(TestCase):
     def test_revoke_api_key(self):
         api_key = self.generate_key().json["api_key"]
         response = self.client.delete(
-            "/user/api-key/", headers=auth_header(self.session_token)
+            PREFIX + "/user/api-key/", headers=auth_header(self.session_token)
         )
         self.assertEqual(200, response.status_code)
         response = self.client.get(
@@ -803,7 +803,7 @@ class TestApiKeyDisabled(TestCase):
 
     def test_generation_disabled(self):
         response = self.client.post(
-            "/user/api-key/", data=json.dumps({}), headers=auth_header(self.token)
+            PREFIX + "/user/api-key/", data=json.dumps({}), headers=auth_header(self.token)
         )
         self.assertEqual(501, response.status_code)
 
@@ -1192,14 +1192,14 @@ class TestRateLimiting(TestCase):
     def test_recover_password_is_rate_limited(self):
         for _ in range(2):
             response = self.client.put(
-                "/user/recover-password/",
+                PREFIX + "/user/recover-password/",
                 data=json.dumps({"email": "someone@test.com"}),
                 headers=JSON_HEADER,
             )
             self.assertNotEqual(429, response.status_code)
 
         response = self.client.put(
-            "/user/recover-password/",
+            PREFIX + "/user/recover-password/",
             data=json.dumps({"email": "someone@test.com"}),
             headers=JSON_HEADER,
         )
@@ -1211,14 +1211,14 @@ class TestRateLimiting(TestCase):
         # shares its per-IP limit (3 per minute in this config)
         for _ in range(3):
             response = self.client.post(
-                "/token/refresh/",
+                PREFIX + "/token/refresh/",
                 data=json.dumps({"refresh_token": "not-a-valid-token"}),
                 headers=JSON_HEADER,
             )
             self.assertNotEqual(429, response.status_code)
 
         response = self.client.post(
-            "/token/refresh/",
+            PREFIX + "/token/refresh/",
             data=json.dumps({"refresh_token": "not-a-valid-token"}),
             headers=JSON_HEADER,
         )
@@ -1300,7 +1300,7 @@ class TestPasswordResetLink(TestCase):
         """
         with patch("cornflow.endpoints.user.send_email_to") as send_mock:
             response = self.client.put(
-                "/user/recover-password/",
+                PREFIX + "/user/recover-password/",
                 data=json.dumps({"email": email or self.user_data["email"]}),
                 headers=JSON_HEADER,
             )
@@ -1316,7 +1316,7 @@ class TestPasswordResetLink(TestCase):
 
     def reset_password(self, token, new_password):
         return self.client.put(
-            "/user/reset-password/",
+            PREFIX + "/user/reset-password/",
             data=json.dumps({"password": new_password}),
             headers=auth_header(token),
         )

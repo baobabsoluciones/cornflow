@@ -25,6 +25,7 @@ from cornflow.shared.authentication import Auth
 from cornflow.shared.const import (
     ADMIN_ROLE,
     CONDITIONAL_ENDPOINTS,
+    LEGACY_ENDPOINT_SUFFIX,
     NO_SIGNUP,
     PLANNER_ROLE,
     SIGNUP_WITH_AUTH,
@@ -115,7 +116,7 @@ class ConditionalResourcesMixin:
     def test_get_resources_has_no_blueprint_or_alias_names(self):
         for res in get_resources():
             self.assertFalse(res["endpoint"].startswith("cornflow."), res["endpoint"])
-            self.assertFalse(res["endpoint"].endswith("_compat"), res["endpoint"])
+            self.assertFalse(res["endpoint"].endswith(LEGACY_ENDPOINT_SUFFIX), res["endpoint"])
 
     def test_get_resources_has_unique_endpoints(self):
         names = [res["endpoint"] for res in get_resources()]

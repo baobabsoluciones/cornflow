@@ -361,7 +361,7 @@ class ResetPassword(BaseMetaResource):
     """
 
     ROLES_WITH_ACCESS = ALL_DEFAULT_ROLES
-    decorators = [limiter.limit(recover_rate_limit, error_message=RATE_LIMIT_MESSAGE)]
+    decorators = [limiter.shared_limit(recover_rate_limit, scope="reset-password", error_message=RATE_LIMIT_MESSAGE)]
 
     def __init__(self):
         super().__init__()
@@ -400,7 +400,7 @@ class RecoverPassword(BaseMetaResource):
     Endpoint to recover the password
     """
 
-    decorators = [limiter.limit(recover_rate_limit, error_message=RATE_LIMIT_MESSAGE)]
+    decorators = [limiter.shared_limit(recover_rate_limit, scope="recover-password", error_message=RATE_LIMIT_MESSAGE)]
 
     def __init__(self):
         super().__init__()

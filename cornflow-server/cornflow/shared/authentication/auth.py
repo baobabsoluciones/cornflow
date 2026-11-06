@@ -22,6 +22,7 @@ from cornflow.models import (
     UserModel,
     ViewModel,
 )
+from cornflow.shared.utils import logical_endpoint_name
 from cornflow.shared.const import (
     API_KEY_FORBIDDEN_ENDPOINTS,
     API_KEY_SCOPE_FULL,
@@ -71,7 +72,7 @@ class Auth:
                 "A refresh token can not be used to access this endpoint",
                 status_code=401,
                 log_txt=f"Error while user {user.id} tries to authenticate with "
-                f"a refresh token on endpoint {request.endpoint}.",
+                f"a refresh token on endpoint {logical_endpoint_name(request.endpoint)}.",
             )
         if token_type == TOKEN_TYPE_API_KEY:
             # Personal API key: validate its version and restrict it away from
@@ -130,7 +131,7 @@ class Auth:
 
         :param user: the user the key belongs to
         """
-        endpoint = request.endpoint
+        endpoint = logical_endpoint_name(request.endpoint)
         forbidden_methods = API_KEY_FORBIDDEN_ENDPOINTS.get(endpoint, [])
         if request.method in forbidden_methods:
             raise NoPermission(
@@ -163,7 +164,7 @@ class Auth:
             status_code=403,
             payload={"error_code": "api_key_read_only"},
             log_txt=f"Error while user {user.id} tries a {request.method} on "
-            f"endpoint {request.endpoint} with a read-only API key.",
+            f"endpoint {logical_endpoint_name(request.endpoint)} with a read-only API key.",
         )
 
     @staticmethod
@@ -176,7 +177,7 @@ class Auth:
         :param str purpose: the purpose claim found on the token
         :param user: the user object the token belongs to
         """
-        endpoint = request.endpoint
+        endpoint = logical_endpoint_name(request.endpoint)
         if endpoint in TOKEN_PURPOSE_ALLOWED_ENDPOINTS.get(purpose, []):
             return
         raise InvalidCredentials(
@@ -207,7 +208,7 @@ class Auth:
             return
         if user.is_service_user():
             return
-        endpoint = request.endpoint
+        endpoint = logical_endpoint_name(request.endpoint)
         allowed_methods = PWD_ROTATION_ALLOWED_ENDPOINTS.get(endpoint, [])
         if request.method in allowed_methods:
             if endpoint != "user-detail":

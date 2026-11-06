@@ -442,7 +442,7 @@ class LoginEndpoint(LoginBaseEndpoint):
     # Per-IP rate limit applied around the whole endpoint (flask-restful
     # discovers class-level decorators; a per-method decorator would not be
     # enforced through its dispatch)
-    decorators = [limiter.limit(login_rate_limit, error_message=RATE_LIMIT_MESSAGE)]
+    decorators = [limiter.shared_limit(login_rate_limit, scope="login", error_message=RATE_LIMIT_MESSAGE)]
 
     @doc(description="Log in", tags=["Users"])
     @use_kwargs(LoginEndpointRequest, location="json")
@@ -461,7 +461,7 @@ class LoginEndpoint(LoginBaseEndpoint):
 class LoginOpenAuthEndpoint(LoginBaseEndpoint):
     """ """
 
-    decorators = [limiter.limit(login_rate_limit, error_message=RATE_LIMIT_MESSAGE)]
+    decorators = [limiter.shared_limit(login_rate_limit, scope="login", error_message=RATE_LIMIT_MESSAGE)]
 
     def __init__(self):
         super().__init__()

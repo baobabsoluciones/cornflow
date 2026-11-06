@@ -365,6 +365,9 @@ DATA_DOES_NOT_EXIST_MSG = "The data entity does not exist on the database"
 # Name of the Flask Blueprint where the core endpoints are registered
 CORNFLOW_BLUEPRINT_NAME = "cornflow"
 
+# Suffix of the endpoint names of the unprefixed (legacy) routes
+LEGACY_ENDPOINT_SUFFIX = "_compat"
+
 # Conditional endpoints
 CONDITIONAL_ENDPOINTS = {
     "signup": "/signup/",

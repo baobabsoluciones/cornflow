@@ -30,7 +30,7 @@ from cornflow.shared.const import (
     SERVICE_ROLE,
 )
 from cornflow.shared.exceptions import ConfigurationError
-from cornflow.tests.const import INSTANCE_PATH, INSTANCE_URL, LOGIN_URL, SIGNUP_URL
+from cornflow.tests.const import INSTANCE_PATH, INSTANCE_URL, LOGIN_URL, PREFIX, SIGNUP_URL
 
 STRONG_PASSWORD = "Kx9#tR2m!Qw7Zp"
 JSON_HEADER = {"Content-Type": "application/json"}
@@ -233,7 +233,7 @@ class TestServiceUserAttribution(TestCase, _RoleUserMixin):
 
         # airflow (service account) writes the instance checks back
         response = self.client.put(
-            f"/dag/instance/{instance_id}/",
+            f"{PREFIX}/dag/instance/{instance_id}/",
             data=json.dumps({"checks": {}}),
             headers=auth_header(self.service_token),
         )
@@ -247,7 +247,7 @@ class TestServiceUserAttribution(TestCase, _RoleUserMixin):
     def test_owner_still_sees_the_instance_after_a_service_write(self):
         instance_id = self.create_instance()
         self.client.put(
-            f"/dag/instance/{instance_id}/",
+            f"{PREFIX}/dag/instance/{instance_id}/",
             data=json.dumps({"checks": {}}),
             headers=auth_header(self.service_token),
         )
