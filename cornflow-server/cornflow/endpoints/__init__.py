@@ -5,7 +5,7 @@ The login resource gets created on app startup as it depends on configuration
 """
 
 from flask import current_app
-from cornflow.shared.const import CONDITIONAL_ENDPOINTS
+from cornflow.shared.const import CONDITIONAL_ENDPOINTS, CORNFLOW_BLUEPRINT_NAME
 from .action import ActionListEndpoint
 from .alarms import AlarmsEndpoint, AlarmDetailEndpoint
 from .api_key import UserApiKeyEndpoint
@@ -299,18 +299,22 @@ def get_resources():
     :rtype: list
     """
     base_resources = resources.copy()
-    registered_resources = current_app.view_functions.keys()
-    for resource in registered_resources:
-        if resource in CONDITIONAL_ENDPOINTS.keys():
-            # Check if the resource already exists
-            if resource not in [
-                present_resource["endpoint"] for present_resource in base_resources
-            ]:
+    present_endpoints = {present_resource["endpoint"] for present_resource in base_resources}
+    view_functions = current_app.view_functions
+    for endpoint, url in CONDITIONAL_ENDPOINTS.items():
+        if endpoint in present_endpoints:
+            continue
+        # The core is registered in a Blueprint, so the Flask name carries its
+        # prefix (e.g. "cornflow.login"). Aliases ("login_compat") are ignored.
+        for key in (endpoint, f"{CORNFLOW_BLUEPRINT_NAME}.{endpoint}"):
+            view_function = view_functions.get(key)
+            if view_function is not None:
                 base_resources.append(
                     dict(
-                        resource=current_app.view_functions[resource].view_class,
-                        urls=CONDITIONAL_ENDPOINTS[resource],
-                        endpoint=resource,
+                        resource=view_function.view_class,
+                        urls=url,
+                        endpoint=endpoint,
                     )
                 )
+                break
     return base_resources
