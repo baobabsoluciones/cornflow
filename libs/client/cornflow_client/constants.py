@@ -286,6 +286,10 @@ class DatabricksError(OrchError):
     log_txt = "Databricks error"
 
 
+class PulseError(OrchError):
+    log_txt = "Pulse error"
+
+
 class NoSolverException(Exception):
     pass
 
@@ -323,6 +327,11 @@ config_orchestrator = {
     "databricks": {
         "name": "Databricks",
         "def_schema": "979073949072767",
+        "run_id": "run_id",
+    },
+    "pulse": {
+        "name": "Pulse",
+        "def_schema": "solve_model_dag",
         "run_id": "run_id",
     },
 }

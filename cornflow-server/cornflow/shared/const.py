@@ -5,6 +5,7 @@ In this file we import the values for different constants on cornflow server
 # CORNFLOW BACKEND
 AIRFLOW_BACKEND = 1
 DATABRICKS_BACKEND = 2
+PULSE_BACKEND = 3
 
 
 CORNFLOW_VERSION = "1.3.9rc3"
@@ -76,6 +77,15 @@ DATABRICKS_FINISH_TO_STATE_MAP = dict(
 )
 
 DATABRICKS_TERMINATE_STATE = "TERMINATED"
+
+# Status of a launch (run) in Pulse
+PULSE_TO_STATE_MAP = dict(
+    queued=EXEC_STATE_QUEUED,
+    processing=EXEC_STATE_RUNNING,
+    completed=EXEC_STATE_CORRECT,
+    failed=EXEC_STATE_ERROR,
+    stopped=EXEC_STATE_STOPPED,
+)
 # These codes and names are inherited from flask app builder in order to have the same names and values
 # as this library that is the base of airflow
 AUTH_DB = 1
@@ -201,6 +211,11 @@ config_orchestrator = {
     "databricks": {
         "name": "Databricks",
         "def_schema": "979073949072767",
+        "run_id": "run_id",
+    },
+    "pulse": {
+        "name": "Pulse",
+        "def_schema": "solve_model_dag",
         "run_id": "run_id",
     },
 }

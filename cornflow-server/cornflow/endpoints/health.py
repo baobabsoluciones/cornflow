@@ -17,11 +17,13 @@ from cornflow.schemas.health import HealthResponse
 from cornflow.shared.const import (
     AIRFLOW_BACKEND,
     DATABRICKS_BACKEND,
+    PULSE_BACKEND,
     STATUS_HEALTHY,
     STATUS_UNHEALTHY,
     CORNFLOW_VERSION,
 )
 from cornflow_client.databricks.api import Databricks
+from cornflow_client.pulse.api import Pulse
 from cornflow.shared.exceptions import EndpointNotImplemented
 
 
@@ -60,6 +62,8 @@ class HealthEndpoint(BaseMetaResource):
             client = Airflow.from_config(current_app.config)
         elif current_app.config["CORNFLOW_BACKEND"] == DATABRICKS_BACKEND:
             client = Databricks.from_config(current_app.config)
+        elif current_app.config["CORNFLOW_BACKEND"] == PULSE_BACKEND:
+            client = Pulse.from_config(current_app.config)
         else:
             raise EndpointNotImplemented()
         if client.is_alive(current_app.config):

@@ -8,6 +8,7 @@ from cornflow.shared.const import (
     OID_OTHER,
     AIRFLOW_BACKEND,
     DATABRICKS_BACKEND,
+    PULSE_BACKEND,
     USER_ACCESS_ALL_OBJECTS_NO,
 )
 from apispec import APISpec
@@ -51,6 +52,13 @@ class DefaultConfig(object):
     DATABRICKS_EP_CLUSTERS = os.getenv("DATABRICKS_EP_CLUSTERS")
     DATABRICKS_CLIENT_ID = os.getenv("DATABRICKS_CLIENT_ID")
     DATABRICKS_HEALTH_PATH = os.getenv("DATABRICKS_HEALTH_PATH", "default path")
+
+    # PULSE config
+    PULSE_URL = os.getenv("PULSE_URL")
+    # Optional shared token sent to Pulse as "Authorization: Bearer <token>"
+    PULSE_TOKEN = os.getenv("PULSE_TOKEN")
+    PULSE_TIMEOUT = int(os.getenv("PULSE_TIMEOUT", 30))
+
     # If service user is allowed to log with username and password
     SERVICE_USER_ALLOW_PASSWORD_LOGIN = int(
         os.getenv("SERVICE_USER_ALLOW_PASSWORD_LOGIN", 1)
@@ -162,6 +170,11 @@ class TestingDatabricks(Testing):
     CORNFLOW_BACKEND = DATABRICKS_BACKEND
 
 
+class TestingPulse(Testing):
+    CORNFLOW_BACKEND = PULSE_BACKEND
+    PULSE_URL = os.getenv("PULSE_URL", "http://localhost:8001")
+
+
 class TestingOpenAuth(Testing):
     """
     Configuration class for testing some edge cases with Open Auth login
@@ -201,4 +214,5 @@ app_config = {
     "testing-oauth": TestingOpenAuth,
     "testing-root": TestingApplicationRoot,
     "testing-databricks": TestingDatabricks,
+    "testing-pulse": TestingPulse,
 }

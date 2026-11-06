@@ -1,0 +1,22 @@
+# Local development: cornflow using Pulse as backend (CORNFLOW_BACKEND=3).
+#
+# Override on top of docker-compose-cornflow-celery.yml:
+#   docker compose -f docker-compose-cornflow-celery.yml -f docker-compose-pulse.yml up -d --force-recreate cornflow
+#
+# - Pulse must be running on the host (docker-backend: `docker compose up --build -d`,
+#   kubernetes executor), reachable at http://host.docker.internal:8001.
+# - The cornflow server and client code of this repository are mounted and put first
+#   in PYTHONPATH, so they take precedence over the cornflow version installed in the
+#   image (no rebuild needed after code changes, only a restart).
+
+services:
+  cornflow:
+    environment:
+      CORNFLOW_BACKEND: 3
+      PULSE_URL: http://host.docker.internal:8001
+      PYTHONPATH: /opt/cornflow-src/cornflow-server:/opt/cornflow-src/libs/client
+    volumes:
+      - ./cornflow-server:/opt/cornflow-src/cornflow-server:ro
+      - ./libs/client:/opt/cornflow-src/libs/client:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
