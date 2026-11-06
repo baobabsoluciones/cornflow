@@ -273,7 +273,7 @@ class TestSignUpAuthenticated(TestCase):
         self.assertIsNotNone(
             signup_view, "Signup endpoint should be registered in views table"
         )
-        self.assertEqual("/signup/", signup_view.url_rule)
+        self.assertEqual("/cornflow/signup/", signup_view.url_rule)
 
         # Check that admin role has permissions for signup endpoint
         admin_permissions = PermissionViewRoleModel.query.filter_by(
