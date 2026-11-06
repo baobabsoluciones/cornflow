@@ -71,16 +71,17 @@ Issue: Can't find Scheduler logs.
     
     .. code-block:: bash
 
-        FileNotFoundError: [Errno 2] No such file or directory: '/usr/local/airflow/logs/scheduler/2024-07-01'
-        PermissionError: [Errno 13] Permission denied: '/usr/local/airflow/logs/scheduler'
+        FileNotFoundError: [Errno 2] No such file or directory: '/opt/airflow/logs/scheduler/2024-07-01'
+        PermissionError: [Errno 13] Permission denied: '/opt/airflow/logs/scheduler'
     
     Possible solution: Both errors usually occur when using the root user and root group as the owner of the directory. One possible solution is:
 
     .. code-block:: bash
 
-        sudo chown -R 1000:1000 cornflow/cornflow-server/airflow_config/logs
-      
-    You should use 1000 because it is the UID and GID of the first user and group different from root.
+        echo "AIRFLOW_UID=$(id -u)" > .env
+        sudo chown -R $(id -u):0 cornflow/cornflow-server/airflow_config/logs
+
+    The Airflow containers run as the user given by the ``AIRFLOW_UID`` variable (50000 by default); setting it to your own user id avoids the permission problem.
 
 Airflow
 ^^^^^^^^^^^

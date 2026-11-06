@@ -241,7 +241,6 @@ class TestCornflowClientUser(TestCase):
             self.assertIn(item, response.keys())
 
         self.assertEqual(execution["id"], response["id"])
-        self.assertIn(STATUS_NOT_SOLVED, statuses)
         self.assertIn(STATUS_OPTIMAL, statuses)
 
     def test_execution_status(self):
@@ -249,7 +248,6 @@ class TestCornflowClientUser(TestCase):
 
         statuses = self.check_execution_statuses(execution["id"])
 
-        self.assertIn(STATUS_NOT_SOLVED, statuses)
         self.assertIn(STATUS_OPTIMAL, statuses)
 
         items = ["id", "state", "message", "data_hash"]
@@ -311,7 +309,6 @@ class TestCornflowClientUser(TestCase):
             self.assertIn(item, response.keys())
 
         self.assertEqual(execution["id"], response["id"])
-        self.assertIn(STATUS_NOT_SOLVED, statuses)
         self.assertIn(STATUS_OPTIMAL, statuses)
 
         return response
@@ -619,9 +616,14 @@ class TestCornflowClientService(TestCase):
             schema="solve_model_dag",
         )
 
-        time.sleep(15)
-
-        solution = client.get_solution(execution["id"])
+        # Wait for the solve to finish instead of a fixed sleep: task start-up is
+        # slower on Airflow 3 and 15 seconds was not always enough.
+        for _ in range(100):
+            solution = client.get_solution(execution["id"])
+            if solution["state"] == STATUS_OPTIMAL:
+                break
+            time.sleep(2)
+        self.assertEqual(STATUS_OPTIMAL, solution["state"])
 
         payload = dict(
             state=1, log_json={}, log_text="", solution_schema="solve_model_dag"

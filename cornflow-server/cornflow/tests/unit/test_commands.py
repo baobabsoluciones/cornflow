@@ -392,22 +392,39 @@ class TestCommands(TestCase):
         Verifies:
 
         - Successful permission assignment
-        - Restricted access for admin users
-        - Proper service user permissions
+        - Service and admin users receive all DAG permissions
+        - Base users receive none
         """
         register_deployed_dags_command_test()
         self.test_service_user_command()
         self.test_admin_user_command()
+        self.test_base_user_command()
         self.runner.invoke(register_dag_permissions, ["-o", 0])
 
         service = UserModel.get_one_user_by_email("testemail@test.org")
         admin = UserModel.get_one_user_by_email("admin@test.org")
+        base = UserModel.get_one_user_by_email("base@test.org")
 
         service_permissions = PermissionsDAG.get_user_dag_permissions(service.id)
         admin_permissions = PermissionsDAG.get_user_dag_permissions(admin.id)
+        base_permissions = PermissionsDAG.get_user_dag_permissions(base.id)
 
         self.assertEqual(4, len(service_permissions))
-        self.assertEqual(0, len(admin_permissions))
+        self.assertEqual(4, len(admin_permissions))
+        self.assertEqual(0, len(base_permissions))
+
+    def test_dag_permissions_command_single_missing(self):
+        """
+        Test that a single DAG without permissions is picked up by the command.
+        """
+        register_deployed_dags_command_test(dags=["solve_model_dag"])
+        self.test_service_user_command()
+        self.runner.invoke(register_dag_permissions, ["-o", 0])
+
+        service = UserModel.get_one_user_by_email("testemail@test.org")
+        service_permissions = PermissionsDAG.get_user_dag_permissions(service.id)
+
+        self.assertEqual(1, len(service_permissions))
 
     def test_argument_parsing_correct(self):
         """

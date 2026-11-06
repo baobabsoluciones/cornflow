@@ -37,7 +37,7 @@ class DAGTests(unittest.TestCase):
 
     def test_access_schemas(self):
         client = self.run_update_all_variables_until_finished()
-        url = f"{client.url}/variables"
+        url = f"{client.api_url}/variables"
         response = client.request_headers_auth(method="GET", url=url)
         apps_variables = [k["key"] for k in response.json()["variables"]]
         print(f"The following apps have variables: {apps_variables}")
