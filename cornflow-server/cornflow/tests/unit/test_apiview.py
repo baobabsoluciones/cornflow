@@ -47,7 +47,7 @@ class TestApiViewListEndpoint(CustomTestCase):
         self.payload = [
             {
                 "name": view["endpoint"],
-                "url_rule": view["urls"],
+                "url_rule": "/cornflow" + view["urls"],
                 "description": view["resource"].DESCRIPTION,
             }
             for view in resources
@@ -78,6 +78,8 @@ class TestApiViewListEndpoint(CustomTestCase):
                 },
             )
             self.assertEqual(200, response.status_code)
+            # Canonical URLs are stored with the /cornflow prefix
+            self.assertGreaterEqual(len(response.json), len(self.payload))
             for item in range(len(self.payload)):
                 for field in self.items_to_check:
                     self.assertEqual(
