@@ -1,4 +1,5 @@
 import importlib as il
+import logging
 import os
 import sys
 from datetime import datetime, timedelta
@@ -6,11 +7,12 @@ from typing import List
 from warnings import warn
 
 from airflow import DAG
-from airflow.models import Variable
 from airflow.operators.python import PythonOperator
-from airflow.utils.db import create_session
+from airflow.sdk import Variable
 from cornflow_client import ApplicationCore
 from cornflow_client.airflow.dag_utilities import callback_email
+
+logger = logging.getLogger("airflow.task")
 
 default_args = {
     "owner": "baobab",
@@ -37,11 +39,10 @@ def get_new_apps() -> List[ApplicationCore]:
 def import_dags():
     sys.path.append(os.path.dirname(__file__))
     _dir = os.path.dirname(__file__)
-    print(f"looking for apps in dir={_dir}")
+    logger.info(f"looking for apps in dir={_dir}")
     files = os.listdir(_dir)
-    print(f"Files are: {files}")
+    logger.info(f"Files are: {files}")
     # we go file by file and try to import it if matches the filters
-    # TODO: here we should implement a .dagignore file to avoid files that could be on the folder
     for dag_module in files:
         filename, ext = os.path.splitext(dag_module)
 
@@ -56,13 +57,19 @@ def import_dags():
                 "documentation",
                 "tests",
                 "activate_dags",
+                # These files define a DAG at module level; re-importing them registers it
+                # under the wrong fileloc
+                "run_deployed_dags",
+                "update_dag_registry",
+                "update_all_schemas",
+                "execution_files_cleanup",
             )
         ):
             continue
 
         try:
             _import_file(filename)
-            print(f"Imported {filename}")
+            logger.info(f"Imported {filename}")
         except Exception as e:
             raise e
 
@@ -79,25 +86,25 @@ def get_schemas_dag_file(_module):
 def get_all_schemas(apps):
     apps_names = [app.name for app in apps]
     if len(apps):
-        print(f"Found the following apps: {apps_names}")
+        logger.info(f"Found the following apps: {apps_names}")
     else:
-        print("No apps were found to update")
+        logger.info("No apps were found to update")
     schemas_new = {app.name: app.get_schemas() for app in apps}
-    print(f"Found the following new apps: {apps_names}")
+    logger.info(f"Found the following new apps: {apps_names}")
     return schemas_new
 
 
 def get_all_example_data(apps):
     apps_names = [app.name for app in apps]
     if len(apps):
-        print(f"Found the following apps: {apps_names}")
+        logger.info(f"Found the following apps: {apps_names}")
     else:
-        print("No apps were found to update")
+        logger.info("No apps were found to update")
     example_data_new = {}
 
     for app in apps:
         tests = app.test_cases
-        print(f"App: {app.name} has {len(tests)} examples")
+        logger.info(f"App: {app.name} has {len(tests)} examples")
 
         for pos, test in enumerate(tests):
             if isinstance(test, dict):
@@ -117,19 +124,14 @@ def get_all_example_data(apps):
         if len(tests) > 0:
             example_data_new[f"z_{app.name}_examples"] = tests
 
-    print(f"Found the following new apps: {apps_names}")
+    logger.info(f"Found the following new apps: {apps_names}")
     return example_data_new
 
 
 def update_all_schemas(**kwargs):
     sys.setrecursionlimit(250)
 
-    # first we delete all variables (this helps to keep it clean)
-    with create_session() as session:
-        current_vars = set(var.key for var in session.query(Variable))
-        for _var in current_vars:
-            Variable.delete(_var, session)
-
+    # Airflow 3 forbids ORM access from tasks, so existing variables are overwritten, not cleared
     # we update all schemas that we found:
     apps = get_new_apps()
 
@@ -149,12 +151,11 @@ dag = DAG(
     default_args=default_args,
     catchup=False,
     tags=["internal"],
-    schedule_interval="@hourly",
+    schedule="@hourly",
 )
 
 update_schema2 = PythonOperator(
     task_id="update_all_schemas",
-    provide_context=True,
     python_callable=update_all_schemas,
     dag=dag,
     on_failure_callback=callback_email,
