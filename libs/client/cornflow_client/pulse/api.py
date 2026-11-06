@@ -44,7 +44,9 @@ class Pulse:
     def is_alive(self, config=None):
         """
         Checks that Pulse answers its health endpoint and reports itself healthy
-        (database and Kubernetes API reachable).
+        (database and Kubernetes API reachable), and that it accepts our token:
+        /pulse/health is open, so a wrong PULSE_TOKEN would otherwise look
+        healthy while every launch fails with 401.
 
         :param dict config: for compatibility with the other orchestrator clients
         """
@@ -52,7 +54,14 @@ class Pulse:
             response = self.request_headers_auth(
                 method="GET", url=f"{self.url}/pulse/health"
             )
-            return response.json().get("status") == "healthy"
+            if response.json().get("status") != "healthy":
+                return False
+            # Cheap authenticated call: raises PulseError (401) if the token is wrong
+            self.request_headers_auth(
+                method="GET",
+                url=f"{self.url}/pulse/workflows/{self.constants['def_schema']}",
+            )
+            return True
         except Exception as err:
             log.error(f"Error checking Pulse health: {err}")
             return False
@@ -125,6 +134,23 @@ class Pulse:
         )
         return response.json().get("status")
 
+    def set_dag_run_to_fail(
+        self, dag_name, run_id, new_status="failed", checks_and_kpis_workflow=False
+    ):
+        """
+        Stops a launch in Pulse: Pulse deletes its Kubernetes Job (the pod is
+        killed) and marks the launch as stopped. Same signature as the airflow
+        API; dag_name, new_status and checks_and_kpis_workflow are not used.
+        Raises PulseError if the launch does not exist (404) or already
+        finished (409).
+
+        :param str dag_name: the schema of the execution
+        :param str run_id: the run id returned by run_workflow
+        """
+        return self.request_headers_auth(
+            method="POST", url=f"{self.url}/pulse/instances/{run_id}/stop"
+        )
+
     def request_headers_auth(self, status=200, **kwargs):
         headers = dict(kwargs.pop("headers", None) or {})
         if self.token:
@@ -137,5 +163,16 @@ class Pulse:
         if status is None:
             return response
         if response.status_code != status:
-            raise PulseError(error=response.text, status_code=response.status_code)
+            raise PulseError(
+                error=self._error_message(response), status_code=response.status_code
+            )
         return response
+
+    @staticmethod
+    def _error_message(response):
+        """The "message" of a Pulse error response, or its raw text."""
+        try:
+            message = response.json().get("message")
+        except (ValueError, AttributeError):
+            message = None
+        return message or response.text

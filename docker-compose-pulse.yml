@@ -8,12 +8,15 @@
 # - The cornflow server and client code of this repository are mounted and put first
 #   in PYTHONPATH, so they take precedence over the cornflow version installed in the
 #   image (no rebuild needed after code changes, only a restart).
+# - PULSE_TOKEN (mandatory) is read from the .env file next to this file (not in git):
+#   the same value as PULSE_API_TOKEN in docker-backend/.env.
 
 services:
   cornflow:
     environment:
       CORNFLOW_BACKEND: 3
       PULSE_URL: http://host.docker.internal:8001
+      PULSE_TOKEN: ${PULSE_TOKEN:?Set PULSE_TOKEN in .env (the PULSE_API_TOKEN of docker-backend/.env)}
       PYTHONPATH: /opt/cornflow-src/cornflow-server:/opt/cornflow-src/libs/client
     volumes:
       - ./cornflow-server:/opt/cornflow-src/cornflow-server:ro

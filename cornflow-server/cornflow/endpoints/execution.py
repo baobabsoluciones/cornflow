@@ -580,7 +580,7 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
     @authenticate(auth_class=Auth())
     @Auth.dag_permission_required
     def post(self, idx):
-        if self.orch_type != AIRFLOW_BACKEND:
+        if self.orch_type not in (AIRFLOW_BACKEND, PULSE_BACKEND):
             return {
                 "message": f"This feature is not available for {self.orch_const['name']}"
             }, 501
@@ -591,10 +591,25 @@ class ExecutionDetailsEndpoint(ExecutionDetailsEndpointBase):
                 f"The execution does not exist."
             )
 
+        # Pulse: the Job writes the final state in cornflow just before it ends,
+        # so Pulse may still see a finished execution as running for a few
+        # seconds. Only stop what cornflow itself sees as not finished.
+        if self.orch_type == PULSE_BACKEND and execution.state not in (
+            EXEC_STATE_QUEUED,
+            EXEC_STATE_RUNNING,
+            EXEC_STATE_UNKNOWN,
+        ):
+            raise InvalidUsage(
+                f"The execution has already finished (state {execution.state})",
+                log_txt=f"Error while user {self.get_user()} tries to stop execution {idx}. "
+                f"The execution has already finished.",
+            )
+
         if not self.orch_client.is_alive(config=current_app.config):
+            not_reachable = f"{self.orch_const['name']} is not reachable"
             raise self.orch_error(
-                error=AIRFLOW_NOT_REACHABLE_MSG,
-                log_txt=f"Error while user {self.get_user()} tries to stop execution {idx}. {AIRFLOW_NOT_REACHABLE_MSG}",
+                error=not_reachable,
+                log_txt=f"Error while user {self.get_user()} tries to stop execution {idx}. {not_reachable}",
             )
 
         self.orch_client.set_dag_run_to_fail(

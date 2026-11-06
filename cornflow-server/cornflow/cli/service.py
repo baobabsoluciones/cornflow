@@ -192,6 +192,11 @@ def _setup_environment_variables():
             sys.exit(
                 "FATAL: the Pulse backend requires the environment variable PULSE_URL"
             )
+        # The Pulse API always requires its shared token (PULSE_API_TOKEN in Pulse)
+        if not os.getenv("PULSE_TOKEN"):
+            sys.exit(
+                "FATAL: the Pulse backend requires the environment variable PULSE_TOKEN"
+            )
     else:
         raise Exception("Selected backend not among valid options")
     # Cornflow app config
