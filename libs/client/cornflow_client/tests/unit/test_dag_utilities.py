@@ -1,3 +1,4 @@
+import os
 import unittest
 from cornflow_client.constants import EXECUTION_FILES_STATUS_ERROR
 from cornflow_client.raw_cornflow_client import CornFlowApiError
@@ -40,6 +41,20 @@ class DagUtilities(unittest.TestCase):
                 username=user_info[0], pwd=user_info[1]
             )
             CornFlow.assert_called_with(url=url)
+
+    @patch("cornflow_client.airflow.dag_utilities.CornFlow")
+    def test_connection_with_api_key(self, CornFlow):
+        # When CORNFLOW_SERVICE_API_KEY is set, the service connection uses
+        # the API key and does not log in
+        secrets = Mock()
+        secrets.get_conn_value.return_value = (
+            "cornflow://service_user:pwd@localhost:5000"
+        )
+        client_instance = CornFlow.return_value
+        with patch.dict(os.environ, {"CORNFLOW_SERVICE_API_KEY": "the-api-key"}):
+            du.connect_to_cornflow(secrets)
+        client_instance.set_api_key.assert_called_with("the-api-key")
+        client_instance.login.assert_not_called()
 
     def test_try_to_write_file(self):
         """

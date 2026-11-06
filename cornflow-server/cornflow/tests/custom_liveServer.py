@@ -37,13 +37,18 @@ class CustomTestCaseLive(LiveServerTestCase):
 
     def setUp(self, create_all=True):
         if create_all:
+            # Drop first so a previous test whose setUp raised (and therefore
+            # skipped tearDown) can not leave stale rows behind: otherwise
+            # re-registering the deployed DAGs fails with a UNIQUE constraint
+            # error and cascades into every subsequent test.
+            db.drop_all()
             db.create_all()
         access_init_command(False)
         register_deployed_dags_command_test(verbose=False)
         user_data = dict(
             username="testname",
             email="test@test.com",
-            pwd="Testpassword1!",
+            pwd="Kx9#tR2m!Qw7Zp",
         )
         self.set_client(self.get_server_url())
         response = self.login_or_signup(user_data)
@@ -58,7 +63,7 @@ class CustomTestCaseLive(LiveServerTestCase):
 
         self.create_service_user(
             dict(
-                username="service_user", pwd="Airflow_test_password1", email="su@cf.com"
+                username="service_user", pwd="Xq7-mBv.Ld9Rn2", email="su@cf.com"
             )
         )
 
@@ -71,7 +76,7 @@ class CustomTestCaseLive(LiveServerTestCase):
             data = {
                 "username": "testuser" + str(role_id),
                 "email": "testemail" + str(role_id) + "@test.org",
-                "password": "Testpassword1!",
+                "password": "Kx9#tR2m!Qw7Zp",
             }
         response = self.login_or_signup(data)
         user_role = UserRoleModel.query.filter_by(

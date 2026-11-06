@@ -24,7 +24,7 @@ class TestTablesListEndpoint(TestCase):
         db.create_all()
         access_init_command(verbose=False)
         self.service_user = dict(
-            username="anAdminUser", email="admin@admin.com", password="Testpassword1!"
+            username="anAdminUser", email="admin@admin.com", password="Kx9#tR2m!Qw7Zp"
         )
 
         response = self.client.post(
@@ -97,7 +97,7 @@ class TestTablesListEndpoint(TestCase):
             new_user = dict(
                 username=f"user{i}",
                 email=f"user{i}@user.com",
-                password="Testpassword1!",
+                password="Kx9#tR2m!Qw7Zp",
             )
 
             self.client.post(
@@ -128,7 +128,7 @@ class TestTablesDetailEndpoint(TestCase):
         db.create_all()
         access_init_command(verbose=False)
         self.service_user = dict(
-            username="anAdminUser", email="admin@admin.com", password="Testpassword1!"
+            username="anAdminUser", email="admin@admin.com", password="Kx9#tR2m!Qw7Zp"
         )
 
         response = self.client.post(
@@ -232,7 +232,7 @@ class TestTablesEndpointAdmin(TestCase):
         db.create_all()
         access_init_command(verbose=False)
         self.user = dict(
-            username="anAdminUser", email="admin@admin.com", password="Testpassword1!"
+            username="anAdminUser", email="admin@admin.com", password="Kx9#tR2m!Qw7Zp"
         )
 
         response = self.client.post(

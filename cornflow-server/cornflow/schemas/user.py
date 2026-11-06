@@ -2,7 +2,9 @@
 This file contains the schemas used for the users defined in the application
 """
 
-from marshmallow import fields, Schema, validates_schema, ValidationError
+from marshmallow import fields, Schema, validate, validates_schema, ValidationError
+
+from cornflow.shared.const import API_KEY_SCOPES
 from .instance import InstanceSchema
 
 
@@ -28,6 +30,10 @@ class UserEndpointResponse(Schema):
     email = fields.Str()
     created_at = fields.Str()
     pwd_last_change = fields.DateTime()
+    pwd_change_required = fields.Boolean()
+    mfa_enabled = fields.Boolean()
+    locked = fields.Boolean()
+    last_login_at = fields.DateTime()
 
 
 class UserDetailsEndpointResponse(Schema):
@@ -37,6 +43,10 @@ class UserDetailsEndpointResponse(Schema):
     username = fields.Str()
     email = fields.Str()
     pwd_last_change = fields.DateTime()
+    pwd_change_required = fields.Boolean()
+    mfa_enabled = fields.Boolean()
+    locked = fields.Boolean()
+    last_login_at = fields.DateTime()
 
 
 class TokenEndpointResponse(Schema):
@@ -47,12 +57,22 @@ class RecoverPasswordRequest(Schema):
     email = fields.Str(required=True)
 
 
+class ResetPasswordRequest(Schema):
+    """
+    Schema for the request that sets a new password with a reset link token
+    """
+
+    password = fields.Str(required=True, load_only=True)
+
+
 class UserEditRequest(Schema):
     username = fields.Str(required=False)
     first_name = fields.Str(required=False)
     last_name = fields.Str(required=False)
     email = fields.Str(required=False)
     password = fields.Str(required=False)
+    # Required (and verified) when a user changes their own password
+    current_password = fields.Str(required=False, load_only=True)
 
 
 class LoginEndpointRequest(Schema):
@@ -62,6 +82,39 @@ class LoginEndpointRequest(Schema):
 
     username = fields.Str(required=True)
     password = fields.Str(required=True)
+    # TOTP or backup code, needed when the user has two-factor
+    # authentication enabled
+    totp_code = fields.Str(required=False, load_only=True)
+
+
+class MFAVerifyRequest(Schema):
+    """
+    Schema for the request that verifies the first TOTP code and activates
+    the two-factor authentication
+    """
+
+    totp_code = fields.Str(required=True, load_only=True)
+
+
+class ApiKeyRequest(Schema):
+    """
+    Schema for the personal API key generation request. The TOTP code is the
+    optional step-up second factor when the user has MFA enabled.
+    """
+
+    totp_code = fields.Str(required=False, load_only=True)
+    # "full" (default) or "read" for a read-only key
+    scope = fields.Str(
+        required=False,
+        load_only=True,
+        validate=validate.OneOf(API_KEY_SCOPES),
+    )
+
+
+class ApiKeyResponse(Schema):
+    api_key = fields.Str()
+    expires_at = fields.DateTime()
+    scope = fields.Str()
 
 
 class LoginOpenAuthRequest(Schema):

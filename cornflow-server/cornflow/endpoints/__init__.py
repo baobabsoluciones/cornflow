@@ -8,6 +8,7 @@ from flask import current_app
 from cornflow.shared.const import CONDITIONAL_ENDPOINTS
 from .action import ActionListEndpoint
 from .alarms import AlarmsEndpoint, AlarmDetailEndpoint
+from .api_key import UserApiKeyEndpoint
 from .apiview import ApiViewListEndpoint
 from .case import (
     CaseEndpoint,
@@ -51,12 +52,20 @@ from .instance import (
 )
 from .licenses import LicensesEndpoint
 from .main_alarms import MainAlarmsEndpoint
+from .mfa import MFASetupEndpoint, MFAVerifyEndpoint, UserMFAResetEndpoint
 from .permission import PermissionsViewRoleEndpoint, PermissionsViewRoleDetailEndpoint
 from .roles import RolesListEndpoint, RoleDetailEndpoint
 from .schemas import SchemaDetailsEndpoint, SchemaEndpoint
 from .tables import TablesEndpoint, TablesDetailsEndpoint
 from .token import TokenEndpoint
-from .user import UserEndpoint, UserDetailsEndpoint, ToggleUserAdmin, RecoverPassword
+from .user import (
+    RecoverPassword,
+    ResetPassword,
+    ToggleUserAdmin,
+    UserDetailsEndpoint,
+    UserEndpoint,
+    UserUnlockEndpoint,
+)
 from .user_role import UserRoleListEndpoint, UserRoleDetailEndpoint
 
 resources = [
@@ -161,7 +170,24 @@ resources = [
         urls="/user/<int:user_id>/<int:make_admin>/",
         endpoint="user-admin",
     ),
+    dict(
+        resource=UserUnlockEndpoint,
+        urls="/user/<int:user_id>/unlock/",
+        endpoint="user-unlock",
+    ),
     dict(resource=TokenEndpoint, urls="/token/", endpoint="token"),
+    dict(resource=MFASetupEndpoint, urls="/mfa/setup/", endpoint="mfa-setup"),
+    dict(resource=MFAVerifyEndpoint, urls="/mfa/verify/", endpoint="mfa-verify"),
+    dict(
+        resource=UserMFAResetEndpoint,
+        urls="/user/<int:user_id>/mfa/",
+        endpoint="user-mfa",
+    ),
+    dict(
+        resource=UserApiKeyEndpoint,
+        urls="/user/api-key/",
+        endpoint="user-api-key",
+    ),
     dict(resource=SchemaEndpoint, urls="/schema/", endpoint="schema"),
     dict(
         resource=SchemaDetailsEndpoint,
@@ -224,6 +250,11 @@ resources = [
         resource=RecoverPassword,
         urls="/user/recover-password/",
         endpoint="recover-password",
+    ),
+    dict(
+        resource=ResetPassword,
+        urls="/user/reset-password/",
+        endpoint="reset-password",
     ),
     dict(
         resource=LicensesEndpoint,

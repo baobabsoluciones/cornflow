@@ -249,7 +249,7 @@ class CLITests(TestCase):
         result = runner.invoke(cli, ["roles", "init", "-v"])
         self.assertEqual(result.exit_code, 0)
         roles = RoleModel.get_all_objects().all()
-        self.assertEqual(len(roles), 5)
+        self.assertEqual(len(roles), 8)
 
     def test_views_entrypoint(self):
         """
@@ -325,9 +325,9 @@ class CLITests(TestCase):
         views = ViewModel.get_all_objects().all()
         permissions = PermissionViewRoleModel.get_all_objects().all()
         self.assertEqual(len(actions), 5)
-        self.assertEqual(len(roles), 5)
+        self.assertEqual(len(roles), 8)
         self.assertEqual(len(views), (len(resources) + len(alarms_resources)))
-        self.assertEqual(len(permissions), 632)
+        self.assertEqual(len(permissions), 1230)
 
     def test_permissions_base_command(self):
         """
@@ -351,9 +351,9 @@ class CLITests(TestCase):
         views = ViewModel.get_all_objects().all()
         permissions = PermissionViewRoleModel.get_all_objects().all()
         self.assertEqual(len(actions), 5)
-        self.assertEqual(len(roles), 5)
+        self.assertEqual(len(roles), 8)
         self.assertEqual(len(views), (len(resources) + len(alarms_resources)))
-        self.assertEqual(len(permissions), 632)
+        self.assertEqual(len(permissions), 1230)
 
     def test_service_entrypoint(self):
         """
@@ -447,7 +447,7 @@ class CLITests(TestCase):
                 "-u",
                 "test",
                 "-p",
-                "testPassword1!",
+                "Kx9#tR2m!Qw7Zp",
                 "-e",
                 "test@test.org",
             ],
@@ -481,7 +481,7 @@ class CLITests(TestCase):
                 "-u",
                 "test",
                 "-p",
-                "testPassword1!",
+                "Kx9#tR2m!Qw7Zp",
                 "-e",
                 "test@test.org",
             ],
@@ -508,7 +508,7 @@ class CLITests(TestCase):
                 "-u",
                 "viewer_user",
                 "-p",
-                "testPassword1!",
+                "Kx9#tR2m!Qw7Zp",
                 "-e",
                 "viewer@test.org",
             ],
@@ -527,7 +527,7 @@ class CLITests(TestCase):
                 "-u",
                 "test",
                 "-p",
-                "testPassword1!",
+                "Kx9#tR2m!Qw7Zp",
                 "-e",
                 "test@test.org",
             ],
@@ -546,7 +546,7 @@ class CLITests(TestCase):
                 "-u",
                 "test",
                 "-p",
-                "testPassword1!",
+                "Kx9#tR2m!Qw7Zp",
             ],
         )
 
@@ -581,7 +581,7 @@ class CLITests(TestCase):
                 "-u",
                 "viewer_user",
                 "-p",
-                "testPassword1!",
+                "Kx9#tR2m!Qw7Zp",
             ],
         )
 
@@ -598,7 +598,7 @@ class CLITests(TestCase):
                 "-u",
                 "test",
                 "-p",
-                "testPassword1!",
+                "Kx9#tR2m!Qw7Zp",
             ],
         )
 
