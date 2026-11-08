@@ -8,6 +8,7 @@ from cornflow.commands.auxiliar import (
 from cornflow.models import ViewModel, PermissionViewRoleModel
 from cornflow.shared import db
 from cornflow.shared.const import ALL_DEFAULT_ROLES, GET_ACTION
+from cornflow.shared.plugins import get_plugins_resources
 import click
 from cornflow.shared.const import (
     ADMIN_ROLE,
@@ -52,6 +53,18 @@ def register_base_permissions_command(external_app: str = None, verbose: bool = 
     permissions_to_delete = get_permissions_to_delete(
         permissions_tuples, resources_roles_with_access.keys(), permissions_in_db
     )
+    # Plugin mode: the permissions on the plugin views are managed by each
+    # plugin (and by hand), so they are neither deleted nor reset here
+    plugin_views = {
+        views_in_db[res["endpoint"]]
+        for res in get_plugins_resources(current_app)
+        if res["endpoint"] in views_in_db
+    }
+    permissions_to_delete = [
+        permission
+        for permission in permissions_to_delete
+        if permission.api_view_id not in plugin_views
+    ]
 
     # Save the new permissions in the data
     save_and_delete_permissions(permissions_to_register, permissions_to_delete)

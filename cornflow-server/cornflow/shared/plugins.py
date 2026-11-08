@@ -1,0 +1,158 @@
+"""
+Support for the applications that extend cornflow as plugins.
+
+In plugin mode (``EXTERNAL_APP=0``) ``create_app`` loads every object published
+under the ``cornflow.plugins`` entry point group and calls its ``init_app``.
+The resources each plugin mounts are recorded on the application, so the
+access initialization keeps the plugin views (and their permissions) instead
+of deleting them as obsolete, and then asks each plugin to register its own
+roles, views and permissions.
+"""
+
+import importlib.metadata
+
+PLUGIN_ENTRY_POINT_GROUP = "cornflow.plugins"
+PLUGINS_EXTENSION = "cornflow_plugins"
+
+
+class CornflowPlugin:
+    """
+    Base class for the cornflow plugins.
+
+    :cvar int priority: order in which the plugins register their access,
+      lower values first. Plugins with the same priority keep the discovery order.
+    """
+
+    priority = 0
+
+    def init_app(self, app) -> None:
+        """
+        Mounts the plugin on the cornflow application (routes, configuration...).
+
+        :param app: the cornflow Flask application
+        """
+        raise NotImplementedError
+
+    def register_access(self, app) -> None:
+        """
+        Registers the roles, views and permissions the plugin needs.
+
+        Cornflow calls it on every access initialization (``access_init``,
+        ``cornflow service init``) right after registering its own access, so
+        it must be idempotent: it only adds what is missing and never deletes
+        or resets the permissions already stored.
+
+        The default implementation does nothing: a plugin that does not
+        override it has to register its access by itself.
+
+        :param app: the cornflow Flask application
+        """
+        return None
+
+
+class LoadedPlugin:
+    """
+    A plugin mounted on the application, together with the resources it added.
+
+    :param str name: the entry point name
+    :param plugin: the plugin object
+    :param list resources: the resources mounted by the plugin, with the same
+      shape as the cornflow resources (``endpoint``, ``urls`` and ``resource``)
+    """
+
+    def __init__(self, name, plugin, resources):
+        self.name = name
+        self.plugin = plugin
+        self.resources = resources
+
+    @property
+    def priority(self):
+        return getattr(self.plugin, "priority", 0)
+
+
+def _mounted_resources(app, view_functions_before):
+    """
+    Returns the resources mounted since the snapshot of the view functions
+    was taken: the new endpoints and the ones whose view was replaced. Only
+    the API resources (views with a ``DESCRIPTION``) are returned, as they are
+    the ones that need a view in the permission system.
+    """
+    resources = []
+    for endpoint, view_function in app.view_functions.items():
+        if view_functions_before.get(endpoint) is view_function:
+            continue
+        resource = getattr(view_function, "view_class", None)
+        if resource is None or not hasattr(resource, "DESCRIPTION"):
+            continue
+        try:
+            rules = list(app.url_map.iter_rules(endpoint))
+        except KeyError:
+            rules = []
+        if not rules:
+            continue
+        resources.append(
+            {"endpoint": endpoint, "urls": rules[0].rule, "resource": resource}
+        )
+    return resources
+
+
+def load_plugins(app):
+    """
+    Loads and mounts the plugins published under the ``cornflow.plugins``
+    entry point group, recording the resources each one mounts.
+
+    :param app: the cornflow Flask application
+    """
+    loaded = []
+    for entry_point in importlib.metadata.entry_points(group=PLUGIN_ENTRY_POINT_GROUP):
+        plugin = entry_point.load()()
+        view_functions_before = dict(app.view_functions)
+        plugin.init_app(app)
+        loaded.append(
+            LoadedPlugin(
+                entry_point.name,
+                plugin,
+                _mounted_resources(app, view_functions_before),
+            )
+        )
+    app.extensions[PLUGINS_EXTENSION] = loaded
+
+
+def get_loaded_plugins(app):
+    """
+    Returns the plugins mounted on the application sorted by priority.
+
+    :param app: the cornflow Flask application
+    :return: the list of :class:`LoadedPlugin`
+    """
+    return sorted(
+        app.extensions.get(PLUGINS_EXTENSION, []), key=lambda p: p.priority
+    )
+
+
+def get_plugins_resources(app):
+    """
+    Returns the resources mounted by the plugins, without duplicated endpoints.
+
+    :param app: the cornflow Flask application
+    :return: the list of resources
+    """
+    resources = {}
+    for loaded in get_loaded_plugins(app):
+        for resource in loaded.resources:
+            resources.setdefault(resource["endpoint"], resource)
+    return list(resources.values())
+
+
+def register_plugins_access(app):
+    """
+    Asks every plugin, by priority, to register its roles, views and
+    permissions. Plugins without a ``register_access`` method are skipped.
+
+    :param app: the cornflow Flask application
+    """
+    for loaded in get_loaded_plugins(app):
+        register_access = getattr(loaded.plugin, "register_access", None)
+        if callable(register_access):
+            app.logger.info(f"Registering the access of the plugin {loaded.name}")
+            register_access(app)

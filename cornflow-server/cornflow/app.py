@@ -51,6 +51,7 @@ from cornflow.shared.const import (
 )
 from cornflow.shared.exceptions import initialize_errorhandlers, ConfigurationError
 from cornflow.shared.log_config import log_config
+from cornflow.shared.plugins import load_plugins
 from cornflow.shared.security import init_security_headers, resolve_cors_origins
 
 
@@ -243,9 +244,7 @@ def create_app(env_name="development", dataconn=None):
             )
     else:
         # Plugin mode: autodiscover and mount plugins registered under cornflow.plugins.
-        from importlib.metadata import entry_points
-        for ep in entry_points(group="cornflow.plugins"):
-            ep.load()().init_app(app)
+        load_plugins(app)
 
     return app
 

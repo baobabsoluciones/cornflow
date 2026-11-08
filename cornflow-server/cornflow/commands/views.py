@@ -12,6 +12,7 @@ from cornflow.endpoints import alarms_resources, get_resources
 # Imports from internal libraries
 from cornflow.models import ViewModel
 from cornflow.shared import db
+from cornflow.shared.plugins import get_plugins_resources
 
 
 def register_views_command(external_app: str = None, verbose: bool = False):
@@ -204,6 +205,14 @@ def get_resources_to_register(external_app):
         if current_app.config["ALARMS_ENDPOINTS"]:
             resources_to_register = resources + alarms_resources
             current_app.logger.info(" ALARMS ENDPOINTS ENABLED ")
+        # Plugin mode: the views of the loaded plugins are kept (and updated),
+        # so they are not deleted as obsolete
+        core_endpoints = {res["endpoint"] for res in resources_to_register}
+        resources_to_register = resources_to_register + [
+            res
+            for res in get_plugins_resources(current_app)
+            if res["endpoint"] not in core_endpoints
+        ]
     else:
         current_app.logger.info(f" USING EXTERNAL APP: {external_app} ")
         sys.path.append("./")
