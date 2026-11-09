@@ -445,6 +445,117 @@ schema at ``/swagger/``) are **disabled in production** by default
 CSP. Re-enable with ``CORNFLOW_DOCS_ENABLED=1`` (you will likely also need to
 relax ``CONTENT_SECURITY_POLICY`` so the Swagger UI assets load).
 
+Hardening profiles: strict and relaxed
+*****************************************
+
+The defaults described above make up the **strict profile**: it is what a
+production deployment gets without setting anything else, and it is the
+behaviour the security UAT expects. Projects that do not need the full
+hardening (an internal tool, a demo, a deployment without a second factor
+available to its users...) can use the **relaxed profile** below. It only
+touches settings that trade convenience for security in a controlled way;
+everything else stays as in the strict profile.
+
+.. list-table:: Settings that the relaxed profile changes
+   :header-rows: 1
+   :widths: 30 15 15 40
+
+   * - Variable
+     - Strict (default)
+     - Relaxed
+     - Effect and limits
+   * - ``MFA_REQUIRED``
+     - ``1``
+     - ``0``
+     - Two-factor authentication becomes optional. Users can still enroll
+       voluntarily and then the second factor is required at their login.
+   * - ``SIGNUP_ACTIVATED``
+     - ``2``
+     - ``1``
+     - ``1`` opens self-registration without authentication (new users get
+       ``DEFAULT_ROLE``); ``2`` lets only administrators create users and
+       ``0`` disables the endpoint.
+   * - ``LOGIN_MAX_ATTEMPTS``
+     - ``5``
+     - ``10``
+     - More failed attempts before the account is locked. Capped at 10: the
+       lockout can not be disabled.
+   * - ``RATELIMIT_LOGIN`` / ``RATELIMIT_RECOVER``
+     - ``10 per minute`` / ``5 per hour``
+     - ``30 per minute`` / ``20 per hour``
+     - Higher per-IP limits (login, token refresh, logout, password
+       recovery and reset). Prefer raising the limits to
+       ``RATELIMIT_ENABLED=0``.
+   * - ``ACCESS_TOKEN_DURATION_MINUTES``
+     - ``15``
+     - ``60``
+     - Access-token lifetime. Capped at 60.
+   * - ``REFRESH_TOKEN_INACTIVITY_MINUTES``
+     - ``30``
+     - ``480``
+     - Inactivity window of a session. Capped at 720. Keep it longer than
+       the access-token lifetime.
+   * - ``REFRESH_TOKEN_ABSOLUTE_HOURS``
+     - ``12``
+     - ``24``
+     - Absolute session cap. Capped at 24.
+   * - ``API_KEY_STEPUP_TOTP``
+     - ``1``
+     - ``0``
+     - No fresh TOTP code to generate a personal API key.
+   * - ``API_KEY_ROTATION_GRACE_MINUTES``
+     - ``60``
+     - ``1440``
+     - The superseded API key keeps working for a day. Capped at 1440.
+   * - ``PERSONAL_TOKEN_ENABLED``
+     - ``1``
+     - ``1``
+     - Personal API keys stay available in both profiles; set ``0`` to
+       remove them from a deployment (stricter, not laxer).
+   * - ``PWD_ROTATION_TIME``
+     - ``120``
+     - ``365``
+     - Days before a password expires. Capped at 365.
+   * - ``HSTS_ENABLED``
+     - ``1`` (production)
+     - ``0``
+     - Only for deployments without TLS in front. Turn it on as soon as TLS
+       is in place.
+   * - ``CORNFLOW_DOCS_ENABLED``
+     - ``0`` (production)
+     - ``1``
+     - Interactive API docs on. May need a laxer
+       ``CONTENT_SECURITY_POLICY`` for the Swagger UI assets.
+
+**Never relaxed.** These controls are the same in both profiles; most of
+them can not be weakened through the environment at all:
+
+* The password policy: minimum length 12, character classes, no 6-digit
+  sequences, no personal data, zxcvbn score, history of 10 and the
+  similarity check (``PWD_MIN_LENGTH``, ``PWD_MIN_ZXCVBN_SCORE``,
+  ``PWD_HISTORY_SIZE`` and ``PWD_MAX_SIMILARITY`` are clamped).
+* ``SECRET_KEY`` and ``SECRET_BI_KEY`` of at least 32 bytes and bcrypt with
+  at least 12 rounds.
+* The forced change of passwords set by an administrator or by the recovery
+  e-mail: keep ``PWD_ROTATION_ENFORCE=1``.
+* The account lockout itself and its unlock by a platform administrator.
+* Refresh-token sessions (keep ``REFRESH_TOKEN_ENABLED=1``), rotation and
+  reuse detection, and the revocation of every session on password change,
+  lock and MFA reset.
+* The limits of personal API keys: read-only scope, no access to the
+  sensitive endpoints, revocation on lock and MFA reset.
+* Platform roles: only a platform administrator grants or revokes them, and
+  the reserved role id range.
+* The security audit log (keep ``AUDIT_LOG_ENABLED=1``) and the security
+  headers (keep ``SECURITY_HEADERS_ENABLED=1``; they do not affect API
+  clients).
+* A shared ``RATELIMIT_STORAGE_URI`` when the rate limiting is on.
+
+The server UAT battery (``cornflow/tests/unit/test_uat_hardening_*.py``)
+runs in both profiles: ``CORNFLOW_UAT_PROFILE=strict`` (default) checks the
+behaviour of the UAT sheet and ``CORNFLOW_UAT_PROFILE=relaxed`` checks that
+the relaxed settings work and that the rest of the hardening is unchanged.
+
 Roles definition
 *********************
 
