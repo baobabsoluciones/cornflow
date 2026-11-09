@@ -27,13 +27,27 @@ from cornflow.shared.const import (
     SERVICE_ROLE,
     VIEWER_ROLE,
 )
+from cornflow.shared.plugins import get_loaded_plugins
 from cornflow.tests.const import ROLES_URL, USER_ROLE_URL
 from cornflow.tests.custom_test_case import CustomTestCase
+
+
+def remove_plugin_roles(app):
+    """
+    These tests count the cornflow roles. When plugins are loaded, access_init
+    also registers their own roles: they are removed so only the cornflow
+    roles are left.
+    """
+    if get_loaded_plugins(app):
+        for role in RoleModel.get_all_objects():
+            if role.id not in ROLES_MAP:
+                role.delete()
 
 
 class TestRolesListEndpoint(CustomTestCase):
     def setUp(self):
         super().setUp()
+        remove_plugin_roles(self.app)
         self.payload = {"name": "new_role"}
         self.payloads = [{"id": key, "name": value} for key, value in ROLES_MAP.items()]
         self.url = ROLES_URL
@@ -442,6 +456,7 @@ class TestUserRolesDetailEndpoint(CustomTestCase):
 class TestRolesModelMethods(CustomTestCase):
     def setUp(self):
         super().setUp()
+        remove_plugin_roles(self.app)
         self.url = ROLES_URL
         self.model = RoleModel
         self.payload = {"name": "test_role"}
