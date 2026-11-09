@@ -1,9 +1,10 @@
 """
 Tests for the access initialization in plugin mode.
 
-``access_init`` must keep the views mounted by the plugins (and the
-permissions on them) while it keeps deleting the obsolete core views, and it
-must ask each plugin to register its own access, by priority.
+``access_init`` must keep the views mounted by the plugins while it keeps
+deleting the obsolete core views, it must ask each plugin to register its own
+access, by priority, and it must leave the permissions on the views of each
+plugin exactly as the code declares them.
 """
 
 import importlib.metadata
@@ -13,6 +14,7 @@ from flask_restful import Api
 
 from cornflow.app import create_app
 from cornflow.commands import access_init_command
+from cornflow.commands.auxiliar import get_all_external, get_all_resources
 from cornflow.commands.permissions import (
     get_base_permissions,
     get_db_permissions,
@@ -26,13 +28,21 @@ from cornflow.commands.views import (
     load_changes_to_db,
 )
 from cornflow.endpoints.meta_resource import BaseMetaResource
-from cornflow.models import PermissionViewRoleModel, ViewModel
+from cornflow.models import (
+    PermissionViewRoleModel,
+    RoleModel,
+    UserModel,
+    UserRoleModel,
+    ViewModel,
+)
 from cornflow.shared import db
 from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.const import (
+    ADMIN_ROLE,
     DELETE_ACTION,
     GET_ACTION,
     PLANNER_ROLE,
+    POST_ACTION,
     VIEWER_ROLE,
 )
 from cornflow.shared.plugins import (
@@ -44,10 +54,12 @@ from cornflow.tests.custom_test_case import CustomTestCase
 
 PLUGIN_URL = "/test-plugin/items/"
 OTHER_PLUGIN_URL = "/other-plugin/items/"
+CUSTOM_ROLE_PLUGIN_URL = "/custom-role-plugin/items/"
+PLUGIN_CUSTOM_ROLE = 50
 
 
 class PluginItemsEndpoint(BaseMetaResource):
-    ROLES_WITH_ACCESS = [PLANNER_ROLE]
+    ROLES_WITH_ACCESS = [PLANNER_ROLE, ADMIN_ROLE]
     DESCRIPTION = "Items of the test plugin"
 
     @authenticate(auth_class=Auth())
@@ -64,7 +76,16 @@ class OtherPluginItemsEndpoint(BaseMetaResource):
         return {"items": []}, 200
 
 
-def _register_resources_access(app, resources):
+class CustomRoleItemsEndpoint(BaseMetaResource):
+    ROLES_WITH_ACCESS = [PLUGIN_CUSTOM_ROLE]
+    DESCRIPTION = "Items of the test plugin with its own role"
+
+    @authenticate(auth_class=Auth())
+    def get(self):
+        return {"items": []}, 200
+
+
+def _register_resources_access(app, resources, custom_roles_actions=None):
     """Registers the views and the missing permissions of some resources."""
     with app.app_context():
         views_in_db = get_database_view()
@@ -72,7 +93,8 @@ def _register_resources_access(app, resources):
         load_changes_to_db([], to_register, [])
         views_in_db = {v.name: v.id for v in ViewModel.get_all_objects()}
         base_permissions = get_base_permissions(
-            {r["endpoint"]: r["resource"].ROLES_WITH_ACCESS for r in resources}, {}
+            {r["endpoint"]: r["resource"].ROLES_WITH_ACCESS for r in resources},
+            custom_roles_actions or {},
         )
         _, permissions_in_db_keys = get_db_permissions()
         tuples = get_permissions_in_code_as_tuples(
@@ -108,6 +130,27 @@ class OtherResourcesPlugin(ResourcesPlugin):
     url = OTHER_PLUGIN_URL
     endpoint = "other-plugin-items"
     resource = OtherPluginItemsEndpoint
+
+
+class CustomRolePlugin(ResourcesPlugin):
+    """Test plugin with its own role, like the MSC roles."""
+
+    url = CUSTOM_ROLE_PLUGIN_URL
+    endpoint = "custom-role-plugin-items"
+    resource = CustomRoleItemsEndpoint
+    custom_roles_actions = {PLUGIN_CUSTOM_ROLE: [GET_ACTION, POST_ACTION]}
+
+    def register_access(self, app):
+        if RoleModel.query.get(PLUGIN_CUSTOM_ROLE) is None:
+            RoleModel({"id": PLUGIN_CUSTOM_ROLE, "name": "plugin_role"}).save()
+        _register_resources_access(
+            app,
+            [{"endpoint": self.endpoint, "urls": self.url, "resource": self.resource}],
+            self.custom_roles_actions,
+        )
+
+    def get_custom_roles_actions(self):
+        return self.custom_roles_actions
 
 
 class PluginWithoutAccess:
@@ -213,16 +256,79 @@ class TestPluginAccess(PluginAccessTestCase):
         self.assertIsNone(ViewModel.query.filter_by(name="obsolete-core-view").first())
         self.assertIsNotNone(ViewModel.query.filter_by(name="test-plugin-items").first())
 
-    def test_custom_permission_on_plugin_view_survives_two_inits(self):
+    def test_custom_permission_on_plugin_view_deleted_on_init(self):
         view_id = ViewModel.query.filter_by(name="test-plugin-items").first().id
         PermissionViewRoleModel(
             {"role_id": VIEWER_ROLE, "action_id": GET_ACTION, "api_view_id": view_id}
         ).save()
+        headers = self.get_header_with_auth(self.create_user_with_role(VIEWER_ROLE))
+        # Only the viewer role: the default role on sign up is removed
+        user_id = UserModel.query.filter_by(username=f"testuser{VIEWER_ROLE}").first().id
+        UserRoleModel.query.filter_by(user_id=user_id, role_id=PLANNER_ROLE).delete()
+        db.session.commit()
+        self.assertEqual(200, self.client.get(PLUGIN_URL, headers=headers).status_code)
         access_init_command(verbose=False)
-        access_init_command(verbose=False)
-        self.assertIn(
+        self.assertNotIn(
             (VIEWER_ROLE, GET_ACTION), self.view_permissions("test-plugin-items")
         )
+        self.assertEqual(403, self.client.get(PLUGIN_URL, headers=headers).status_code)
+
+    def test_role_removed_from_declaration_loses_permission_on_init(self):
+        self.assertIn(
+            (ADMIN_ROLE, GET_ACTION), self.view_permissions("test-plugin-items")
+        )
+        with patch.object(PluginItemsEndpoint, "ROLES_WITH_ACCESS", [PLANNER_ROLE]):
+            access_init_command(verbose=False)
+        permissions = self.view_permissions("test-plugin-items")
+        self.assertFalse(any(role == ADMIN_ROLE for role, _ in permissions))
+        self.assertIn((PLANNER_ROLE, GET_ACTION), permissions)
+
+    def test_declared_permission_deleted_by_hand_is_restored_on_init(self):
+        view_id = ViewModel.query.filter_by(name="test-plugin-items").first().id
+        before = self.snapshot()
+        PermissionViewRoleModel.query.filter_by(
+            role_id=PLANNER_ROLE, action_id=GET_ACTION, api_view_id=view_id
+        ).first().delete()
+        self.assertNotIn(
+            (PLANNER_ROLE, GET_ACTION), self.view_permissions("test-plugin-items")
+        )
+        access_init_command(verbose=False)
+        self.assertEqual(before, self.snapshot())
+
+    def test_plugin_view_permissions_are_the_declared_ones(self):
+        resource = {
+            "endpoint": "test-plugin-items",
+            "urls": PLUGIN_URL,
+            "resource": PluginItemsEndpoint,
+        }
+        view_id = ViewModel.query.filter_by(name="test-plugin-items").first().id
+        expected = get_permissions_in_code_as_tuples(
+            [resource],
+            {"test-plugin-items": view_id},
+            get_base_permissions(get_all_resources([resource]), {}),
+            [],
+        )
+        self.assertEqual(
+            {(role, action) for role, action, _ in expected},
+            self.view_permissions("test-plugin-items"),
+        )
+
+    def test_core_view_permissions_are_the_declared_ones(self):
+        core_resources, extra_permissions, _ = get_all_external(None)
+        views_in_db = {v.name: v.id for v in ViewModel.get_all_objects()}
+        expected = get_permissions_in_code_as_tuples(
+            core_resources,
+            views_in_db,
+            get_base_permissions(get_all_resources(core_resources), {}),
+            extra_permissions,
+        )
+        plugin_view_id = views_in_db["test-plugin-items"]
+        stored = {
+            permission
+            for permission in self.snapshot()[1]
+            if permission[2] != plugin_view_id
+        }
+        self.assertEqual(expected, stored)
 
     def test_custom_permission_on_core_view_is_still_reset(self):
         view_id = ViewModel.query.filter_by(name="instance").first().id
@@ -262,6 +368,57 @@ class TestPluginAccessPriority(PluginAccessTestCase):
         self.assertEqual(before, self.snapshot())
         for name in ("test-plugin-items", "other-plugin-items"):
             self.assertIn(name, before[0])
+
+
+class TestPluginWithCustomRole(PluginAccessTestCase):
+    PLUGINS = [("custom_role_plugin", CustomRolePlugin)]
+
+    def test_custom_role_gets_the_declared_actions(self):
+        self.assertEqual(
+            {(PLUGIN_CUSTOM_ROLE, GET_ACTION), (PLUGIN_CUSTOM_ROLE, POST_ACTION)},
+            self.view_permissions("custom-role-plugin-items"),
+        )
+
+    def test_action_removed_from_custom_role_is_deleted_on_init(self):
+        with patch.object(
+            CustomRolePlugin,
+            "custom_roles_actions",
+            {PLUGIN_CUSTOM_ROLE: [GET_ACTION]},
+        ):
+            access_init_command(verbose=False)
+        self.assertEqual(
+            {(PLUGIN_CUSTOM_ROLE, GET_ACTION)},
+            self.view_permissions("custom-role-plugin-items"),
+        )
+
+    def test_undefined_custom_role_actions_leave_permissions_untouched(self):
+        before = self.snapshot()
+        with patch.object(CustomRolePlugin, "get_custom_roles_actions", lambda self: {}):
+            # register_access itself needs the actions, so it is skipped here
+            with patch.object(CustomRolePlugin, "register_access", lambda self, app: None):
+                access_init_command(verbose=False)
+        self.assertEqual(before, self.snapshot())
+
+
+class TestPluginsOnlySyncTheirViews(PluginAccessTestCase):
+    PLUGINS = [("test_plugin", ResourcesPlugin), ("plain_plugin", PluginWithoutAccess)]
+
+    def test_hand_permission_on_a_view_of_a_plugin_without_access_survives(self):
+        view_id = ViewModel.query.filter_by(name="other-plugin-items").first().id
+        PermissionViewRoleModel(
+            {"role_id": VIEWER_ROLE, "action_id": GET_ACTION, "api_view_id": view_id}
+        ).save()
+        test_view_id = ViewModel.query.filter_by(name="test-plugin-items").first().id
+        PermissionViewRoleModel(
+            {"role_id": VIEWER_ROLE, "action_id": GET_ACTION, "api_view_id": test_view_id}
+        ).save()
+        access_init_command(verbose=False)
+        self.assertEqual(
+            {(VIEWER_ROLE, GET_ACTION)}, self.view_permissions("other-plugin-items")
+        )
+        self.assertNotIn(
+            (VIEWER_ROLE, GET_ACTION), self.view_permissions("test-plugin-items")
+        )
 
 
 class TestPluginWithoutRegisterAccess(PluginAccessTestCase):

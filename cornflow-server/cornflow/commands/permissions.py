@@ -53,8 +53,9 @@ def register_base_permissions_command(external_app: str = None, verbose: bool = 
     permissions_to_delete = get_permissions_to_delete(
         permissions_tuples, resources_roles_with_access.keys(), permissions_in_db
     )
-    # Plugin mode: the permissions on the plugin views are managed by each
-    # plugin (and by hand), so they are neither deleted nor reset here
+    # Plugin mode: the permissions on the plugin views are left as declared
+    # by each plugin after it registers its access (its own roles may not
+    # exist yet), see sync_plugin_permissions_command
     plugin_views = {
         views_in_db[res["endpoint"]]
         for res in get_plugins_resources(current_app)
@@ -80,6 +81,72 @@ def register_base_permissions_command(external_app: str = None, verbose: bool = 
         current_app.logger.info(f"Permissions deleted: {len(permissions_to_delete)}")
     else:
         current_app.logger.info("No permissions to delete")
+
+
+def sync_plugin_permissions_command(loaded_plugin, resources):
+    """
+    Leaves the permissions on the views mounted by a plugin exactly as its code
+    declares them: the ``ROLES_WITH_ACCESS`` of each resource, with the actions
+    of the plugin's own roles given by its ``get_custom_roles_actions``, plus
+    the cornflow extra permissions on those views. The missing permissions are
+    created and the ones not declared, including those added by hand, are
+    deleted. The permissions on any other view are not touched, nor those on
+    the views the plugin mounts with the name of a cornflow endpoint, which
+    are managed as cornflow views.
+
+    loaded_plugin: the plugin, as recorded by load_plugins.
+    resources: the resources that belong to the plugin.
+    """
+    core_resources, extra_permissions, _ = get_all_external(None)
+    core_endpoints = {res["endpoint"] for res in core_resources}
+    views_in_db = {view.name: view.id for view in ViewModel.get_all_objects()}
+    plugin_views = {
+        res["endpoint"]: views_in_db[res["endpoint"]]
+        for res in resources
+        if res["endpoint"] not in core_endpoints and res["endpoint"] in views_in_db
+    }
+    if not plugin_views:
+        return
+    plugin_resources = [res for res in resources if res["endpoint"] in plugin_views]
+
+    get_custom_roles_actions = getattr(
+        loaded_plugin.plugin, "get_custom_roles_actions", None
+    )
+    custom_roles_actions = (
+        get_custom_roles_actions() if callable(get_custom_roles_actions) else {}
+    )
+    try:
+        base_permissions_assignation = get_base_permissions(
+            get_all_resources(plugin_resources), custom_roles_actions
+        )
+    except ValueError as e:
+        current_app.logger.error(
+            f"The permissions of the plugin {loaded_plugin.name} are left as they "
+            f"are: {e}"
+        )
+        return
+
+    permissions_tuples = get_permissions_in_code_as_tuples(
+        plugin_resources, plugin_views, base_permissions_assignation, extra_permissions
+    )
+    permissions_in_db, permissions_in_db_keys = get_db_permissions()
+    plugin_view_ids = set(plugin_views.values())
+    permissions_to_register = get_permissions_to_register(
+        permissions_tuples, permissions_in_db_keys
+    )
+    permissions_to_delete = get_permissions_to_delete(
+        permissions_tuples,
+        plugin_views.keys(),
+        [perm for perm in permissions_in_db if perm.api_view_id in plugin_view_ids],
+    )
+    save_and_delete_permissions(permissions_to_register, permissions_to_delete)
+
+    if permissions_to_register or permissions_to_delete:
+        current_app.logger.info(
+            f"Permissions of the plugin {loaded_plugin.name}: "
+            f"{len(permissions_to_register)} registered, "
+            f"{len(permissions_to_delete)} deleted"
+        )
 
 
 def save_new_roles(new_roles_to_add):
