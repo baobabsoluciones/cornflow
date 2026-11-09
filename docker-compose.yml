@@ -101,6 +101,9 @@ x-cornflow-common: &cornflow-common
     # airflow user and password created by airflow-init
     AIRFLOW_USER: admin
     AIRFLOW_PWD: admin
+    # Rate-limit counters are per gunicorn worker with the default memory://.
+    # Use a shared Redis when the limits must be exact, e.g.:
+    # RATELIMIT_STORAGE_URI: redis://redis:6379/0
   depends_on: &cornflow-common-depends-on
     cornflow_db:
       condition: service_healthy

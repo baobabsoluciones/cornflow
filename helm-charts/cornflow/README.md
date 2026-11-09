@@ -348,6 +348,7 @@ persistence:
 | `USER_ACCESS_ALL_OBJECTS` | Planner access to other users' objects | `0` |
 | `TOKEN_DURATION` | Token duration in hours | `24` |
 | `PWD_ROTATION_TIME` | Password rotation time in days | `120` |
+| `RATELIMIT_STORAGE_URI` | Shared storage of the rate-limit counters (e.g. `redis://<host>:6379/0`); `memory://` counts per gunicorn worker | `memory://` |
 
 ### Authentication Variables
 

@@ -200,6 +200,11 @@ cornflow:
     USER_ACCESS_ALL_OBJECTS: "0" # Planner users can access other users' objects
     TOKEN_DURATION: "24" # Token duration in hours
     PWD_ROTATION_TIME: "120" # Password rotation time in days
+    # Rate-limit counters of login, token refresh and password recovery.
+    # gunicorn runs several workers: with memory:// each worker keeps its own
+    # counters and the effective limit is the configured one times the number
+    # of workers. Point it to a shared Redis in production, e.g.:
+    #RATELIMIT_STORAGE_URI: "redis://<redis-host>:6379/0"
 
     # =============================================================================
     # FLASK CONFIGURATION

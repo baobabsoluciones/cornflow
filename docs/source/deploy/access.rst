@@ -146,8 +146,15 @@ configurable (``RATELIMIT_LOGIN`` default ``10 per minute``,
 ``RATELIMIT_RECOVER`` default ``5 per hour``); over the limit the endpoint
 answers 429. The counters use an in-memory backend by default, which is
 per-process: a production deployment behind several gunicorn workers must
-set ``RATELIMIT_STORAGE_URI`` to a shared backend (e.g. ``redis://...``).
-When behind a reverse proxy, set ``RATELIMIT_TRUST_FORWARDED_FOR=1`` so the
+set ``RATELIMIT_STORAGE_URI`` to a shared backend (e.g.
+``redis://<host>:6379/0``; the Redis client is installed with cornflow).
+With ``memory://`` every worker keeps its own counters (the image starts
+three), so a client is only throttled after the configured limit times the
+number of workers and the ``X-RateLimit-Remaining`` header goes up and down
+depending on the worker that answers. The server logs a warning at startup
+when rate limiting is on and the storage is ``memory://``. The Helm chart
+(``RATELIMIT_STORAGE_URI`` in ``values.yaml``) and ``docker-compose.yml``
+carry the variable, commented, ready to point to a Redis. When behind a reverse proxy, set ``RATELIMIT_TRUST_FORWARDED_FOR=1`` so the
 real client IP (from ``X-Forwarded-For``) is used instead of the proxy's;
 leave it off on direct deployments so the header can not be spoofed. The
 whole feature can be disabled with ``RATELIMIT_ENABLED=0``.
