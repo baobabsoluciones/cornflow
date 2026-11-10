@@ -9,7 +9,7 @@ from logging.config import dictConfig
 import click
 
 # Partial imports
-from flask import Flask
+from flask import Flask, Blueprint
 from flask.cli import with_appcontext
 from flask_apispec.extension import FlaskApiSpec
 from flask_cors import CORS
@@ -45,6 +45,7 @@ from cornflow.shared.const import (
     AUTH_LDAP,
     AUTH_OID,
     CONDITIONAL_ENDPOINTS,
+    LEGACY_ENDPOINT_SUFFIX,
     SIGNUP_WITH_AUTH,
     SIGNUP_WITH_NO_AUTH,
 )
@@ -83,6 +84,34 @@ def _check_secret_keys(app):
                 f"bytes long (256 bits). Generate one with: "
                 f'python -c "import secrets; print(secrets.token_hex(32))"'
             )
+
+
+def _register_legacy_routes(app, resources, alarms_resources, auth_type):
+    """
+    Registers the unprefixed routes (e.g. ``/login/``) kept for backwards
+    compatibility. The canonical routes live under ``/cornflow/``.
+
+    Every alias is named ``<endpoint>`` + ``LEGACY_ENDPOINT_SUFFIX``. To remove
+    the unprefixed routes, delete this function and its call in ``create_app``.
+    """
+    suffix = LEGACY_ENDPOINT_SUFFIX
+    api_legacy = Api(app)
+    for res in resources:
+        api_legacy.add_resource(res["resource"], res["urls"], endpoint=res["endpoint"] + suffix)
+    if app.config["ALARMS_ENDPOINTS"]:
+        for res in alarms_resources:
+            api_legacy.add_resource(res["resource"], res["urls"], endpoint=res["endpoint"] + suffix)
+    if auth_type == AUTH_DB:
+        signup_activated = int(app.config["SIGNUP_ACTIVATED"])
+        if signup_activated in [SIGNUP_WITH_AUTH, SIGNUP_WITH_NO_AUTH]:
+            api_legacy.add_resource(SignUpEndpoint, CONDITIONAL_ENDPOINTS["signup"], endpoint="signup" + suffix)
+        api_legacy.add_resource(LoginEndpoint, CONDITIONAL_ENDPOINTS["login"], endpoint="login" + suffix)
+    elif auth_type == AUTH_LDAP:
+        api_legacy.add_resource(LoginEndpoint, CONDITIONAL_ENDPOINTS["login"], endpoint="login" + suffix)
+    elif auth_type == AUTH_OID:
+        api_legacy.add_resource(LoginOpenAuthEndpoint, CONDITIONAL_ENDPOINTS["login"], endpoint="login" + suffix)
+    api_legacy.add_resource(RefreshTokenEndpoint, "/token/refresh/", endpoint="token-refresh" + suffix)
+    api_legacy.add_resource(LogoutEndpoint, "/logout/", endpoint="logout" + suffix)
 
 
 def create_app(env_name="development", dataconn=None):
@@ -133,23 +162,14 @@ def create_app(env_name="development", dataconn=None):
 
             event.listen(db.engine, "connect", _fk_pragma_on_connect)
 
-    api = Api(app)
+    # Rutas del Core bajo /cornflow/ via Blueprint (URLs canónicas)
+    cornflow_bp = Blueprint("cornflow", __name__, url_prefix="/cornflow")
+    api = Api(cornflow_bp)
     for res in resources:
         api.add_resource(res["resource"], res["urls"], endpoint=res["endpoint"])
     if app.config["ALARMS_ENDPOINTS"]:
         for res in alarms_resources:
             api.add_resource(res["resource"], res["urls"], endpoint=res["endpoint"])
-
-    # The interactive API docs (Swagger UI) are registered only when enabled.
-    # They are off by default in production so the deny-by-default CSP holds
-    # and the OpenAPI schema is not exposed.
-    if int(app.config.get("DOCS_ENABLED", 1)):
-        docs = FlaskApiSpec(app)
-        for res in resources:
-            docs.register(target=res["resource"], endpoint=res["endpoint"])
-        if app.config["ALARMS_ENDPOINTS"]:
-            for res in alarms_resources:
-                docs.register(target=res["resource"], endpoint=res["endpoint"])
 
     # Resource for the log-in
     auth_type = app.config["AUTH_TYPE"]
@@ -180,10 +200,24 @@ def create_app(env_name="development", dataconn=None):
     # Refresh-token session endpoints. Like login, they validate the token in
     # the request themselves, so they are registered outside the permission
     # system (no ViewModel / permission entries).
-    api.add_resource(
-        RefreshTokenEndpoint, "/token/refresh/", endpoint="token-refresh"
-    )
+    api.add_resource(RefreshTokenEndpoint, "/token/refresh/", endpoint="token-refresh")
     api.add_resource(LogoutEndpoint, "/logout/", endpoint="logout")
+
+    app.register_blueprint(cornflow_bp)
+
+    _register_legacy_routes(app, resources, alarms_resources, auth_type)
+
+    # The interactive API docs (Swagger UI) are registered only when enabled.
+    # They are off by default in production so the deny-by-default CSP holds
+    # and the OpenAPI schema is not exposed. Only the Blueprint routes are
+    # documented; the legacy aliases are not duplicated in the schema.
+    if int(app.config.get("DOCS_ENABLED", 1)):
+        docs = FlaskApiSpec(app)
+        for res in resources:
+            docs.register(target=res["resource"], endpoint=res["endpoint"], blueprint="cornflow")
+        if app.config["ALARMS_ENDPOINTS"]:
+            for res in alarms_resources:
+                docs.register(target=res["resource"], endpoint=res["endpoint"], blueprint="cornflow")
 
     initialize_errorhandlers(app)
     init_compress(app)
@@ -200,10 +234,18 @@ def create_app(env_name="development", dataconn=None):
     app.cli.add_command(register_deployed_dags)
     app.cli.add_command(register_dag_permissions)
 
-    if app.config["APPLICATION_ROOT"] != "/" and app.config["EXTERNAL_APP"] == 0:
-        app.wsgi_app = DispatcherMiddleware(
-            NotFound(), {app.config["APPLICATION_ROOT"]: app.wsgi_app}
-        )
+    if int(app.config["EXTERNAL_APP"]) == 1:
+        # Legacy mode: DispatcherMiddleware mounts cornflow under APPLICATION_ROOT.
+        # The external app is responsible for combining both apps via wsgi.py.
+        if app.config["APPLICATION_ROOT"] != "/":
+            app.wsgi_app = DispatcherMiddleware(
+                NotFound(), {app.config["APPLICATION_ROOT"]: app.wsgi_app}
+            )
+    else:
+        # Plugin mode: autodiscover and mount plugins registered under cornflow.plugins.
+        from importlib.metadata import entry_points
+        for ep in entry_points(group="cornflow.plugins"):
+            ep.load()().init_app(app)
 
     return app
 

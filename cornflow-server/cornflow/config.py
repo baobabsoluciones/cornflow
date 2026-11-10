@@ -75,7 +75,7 @@ class DefaultConfig(object):
     # Floor of 12 as recommended by CCN-STIC-807 for the employed hashing.
     BCRYPT_LOG_ROUNDS = _env_int_floor("BCRYPT_LOG_ROUNDS", 12, 12)
     CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*")
-    SQLALCHEMY_TRACK_MODIFICATIONS = True
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
     DEBUG = True
     TESTING = True
     LOG_LEVEL = int(os.getenv("LOG_LEVEL", 20))

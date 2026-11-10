@@ -7,7 +7,7 @@ def _get_file(relative_path):
     return os.path.join(path_to_tests_dir, relative_path)
 
 
-PREFIX = ""
+PREFIX = "/cornflow"
 INSTANCE_PATH = _get_file("./data/new_instance.json")
 EMPTY_INSTANCE_PATH = _get_file("./data/empty_instance.json")
 INSTANCES_LIST = [INSTANCE_PATH, _get_file("./data/new_instance_2.json")]

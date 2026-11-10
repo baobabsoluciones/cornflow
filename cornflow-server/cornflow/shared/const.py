@@ -7,7 +7,7 @@ AIRFLOW_BACKEND = 1
 DATABRICKS_BACKEND = 2
 
 
-CORNFLOW_VERSION = "1.3.9rc1"
+CORNFLOW_VERSION = "2.0.0rc4"
 INTERNAL_TOKEN_ISSUER = "cornflow"
 
 # ---------------------------------------------------------------------------
@@ -361,6 +361,12 @@ AIRFLOW_NOT_REACHABLE_MSG = "Airflow is not reachable"
 DAG_PAUSED_MSG = "The dag exists but it is paused in airflow"
 AIRFLOW_ERROR_MSG = "Airflow responded with an error:"
 DATA_DOES_NOT_EXIST_MSG = "The data entity does not exist on the database"
+
+# Name of the Flask Blueprint where the core endpoints are registered
+CORNFLOW_BLUEPRINT_NAME = "cornflow"
+
+# Suffix of the endpoint names of the unprefixed (legacy) routes
+LEGACY_ENDPOINT_SUFFIX = "_compat"
 
 # Conditional endpoints
 CONDITIONAL_ENDPOINTS = {

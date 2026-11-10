@@ -120,6 +120,20 @@ def get_views_to_update(
     ]
 
 
+def _get_url_from_map(endpoint):
+    """Return the real URL rule from Flask's URL map (includes Blueprint prefix)."""
+    try:
+        rules_map = current_app.url_map._rules_by_endpoint
+        # Try exact match first, then with blueprint prefix (e.g. "cornflow.instance")
+        for key in (endpoint, f"cornflow.{endpoint}"):
+            rules = list(rules_map.get(key, []))
+            if rules:
+                return rules[0].rule
+    except Exception:
+        pass
+    return None
+
+
 def get_views_to_update_and_delete(
     resources_to_register, views_registered_urls_all_attributes
 ):
@@ -130,7 +144,7 @@ def get_views_to_update_and_delete(
     """
     all_resources_to_register_views_endpoints = {
         view["endpoint"]: {
-            "url_rule": view["urls"],
+            "url_rule": _get_url_from_map(view["endpoint"]) or view["urls"],
             "description": view["resource"].DESCRIPTION,
         }
         for view in resources_to_register
@@ -157,7 +171,7 @@ def get_views_to_register(resources_to_register, views_registered_urls_all_attri
         ViewModel(
             {
                 "name": view["endpoint"],
-                "url_rule": view["urls"],
+                "url_rule": _get_url_from_map(view["endpoint"]) or view["urls"],
                 "description": view["resource"].DESCRIPTION,
             }
         )

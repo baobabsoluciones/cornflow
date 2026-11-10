@@ -31,7 +31,7 @@ class RefreshTokenEndpoint(BaseMetaResource):
 
     # Same per-IP limit as the login endpoint: both are unauthenticated
     # endpoints that take a credential in the body
-    decorators = [limiter.limit(login_rate_limit, error_message=RATE_LIMIT_MESSAGE)]
+    decorators = [limiter.shared_limit(login_rate_limit, scope="token-refresh", error_message=RATE_LIMIT_MESSAGE)]
 
     def __init__(self):
         super().__init__()
@@ -56,7 +56,7 @@ class RefreshTokenEndpoint(BaseMetaResource):
 class LogoutEndpoint(BaseMetaResource):
     """Endpoint to revoke the session behind a refresh token."""
 
-    decorators = [limiter.limit(login_rate_limit, error_message=RATE_LIMIT_MESSAGE)]
+    decorators = [limiter.shared_limit(login_rate_limit, scope="logout", error_message=RATE_LIMIT_MESSAGE)]
 
     def __init__(self):
         super().__init__()

@@ -1,15 +1,15 @@
-import json
 import logging
 import time
 from datetime import datetime, timedelta, timezone
 
 from airflow import DAG
-from airflow.models import Variable
 from airflow.operators.python import PythonOperator
+from airflow.sdk import Variable
 from airflow.secrets.environment_variables import EnvironmentVariablesBackend
-from airflow.utils.db import create_session
 from cornflow_client import CornFlowApiError
 from cornflow_client.airflow.dag_utilities import connect_to_cornflow
+
+from update_all_schemas import get_new_apps
 
 default_args = {
     "owner": "baobab",
@@ -27,14 +27,15 @@ logger = logging.getLogger("airflow.task")
 
 
 def run_examples(**kwargs):
-    with create_session() as session:
-        current_examples = {
-            var.key: json.loads(var.get_val())
-            for var in session.query(Variable)
-            if "_examples" in var.key
-        }
-
-    current_examples = {k: v for k, v in current_examples.items() if v != []}
+    # Airflow 3 does not allow direct database access from a task, so the example
+    # variables cannot be listed through the ORM anymore. update_all_schemas stores one
+    # variable per app under the key f"z_{app.name}_examples", so we read those directly.
+    current_examples = {}
+    for app in get_new_apps():
+        key = f"z_{app.name}_examples"
+        examples = Variable.get(key, default=None, deserialize_json=True)
+        if examples:
+            current_examples[key] = examples
 
     cf_client = connect_to_cornflow(EnvironmentVariablesBackend())
     executions = []
@@ -115,13 +116,12 @@ def run_examples(**kwargs):
 dag = DAG(
     "run_deployed_models",
     default_args=default_args,
-    schedule_interval=None,
+    schedule=None,
     catchup=False,
 )
 
 run_examples_task = PythonOperator(
     task_id="run_examples",
     python_callable=run_examples,
-    provide_context=True,
     dag=dag,
 )
