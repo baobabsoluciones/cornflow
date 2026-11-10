@@ -10,7 +10,7 @@ The ``docker-compose.yml`` describes the build of this services:
 
 #. cornflow application server
 #. postgresql server for cornflow and airflow internal database
-#. airflow webserver and scheduler server
+#. airflow api-server, scheduler, dag-processor and triggerer, started with the native Airflow 3 commands (a one-shot ``airflow-init`` service migrates the database and creates the admin user)
 
 .. _cornflow_docker_stack:
 

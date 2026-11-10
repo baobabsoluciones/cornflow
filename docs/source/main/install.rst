@@ -129,7 +129,7 @@ To continue the deployment we are going to need the Dockerfiles and docker-compo
 
 The Dockerfile for cornflow can be found inside the ``cornflow/cornflow-server`` folder and can be used as is, as this is the Dockerfile used to build the original image on docker hub.
 
-The Dockerfile for airflow can be found on the ``cornflow/cornflow-server/airflow_config`` folder and can be used as is, as this is the Dockerfile used to build the original image on docker hub. This image is built on top of another one that gets built manually and that has all the needed libraries for the solvers. This is done this way to improve the build time of the image as the solver libraries are quite heavy and quite prone to remain stable for long periods of time.
+The Dockerfile for airflow is ``Dockerfile-k8s`` in the ``cornflow/cornflow-server/airflow_config`` folder and can be used as is: it builds the ``baobabsoluciones/airflow-k8s`` image (the same one used by the helm chart) on top of the official Apache Airflow image and installs the solvers.
 
 Then we need a docker-compose file. The ``docker-compose.yml`` or ``docker-compose-cornflow-celery.yml`` that are in the root folder of the repository can be used with some small tweaks to build the images from the local repo instead that taking the official images.
 
@@ -137,7 +137,7 @@ To test out the simpler deployment we are going to use the ``docker-compose.yml`
 
 .. code-block:: yaml
   
-  image: baobabsoluciones/airflow:release-v1.0.8
+  image: baobabsoluciones/airflow-k8s:release-v1.3.9
 
 and:
 
@@ -153,6 +153,7 @@ And uncomment the following lines:
 
   build: 
     context: ./cornflow-server/airflow_config
+    dockerfile: Dockerfile-k8s
 
 and:
 
@@ -163,8 +164,6 @@ and:
 
 Then we can run the following commands to start up the containers::
 
-  cp -r cornflow/cornflow-dags/DAG/* cornflow/cornflow-server/airflow_config/dags/
-  cp cornflow/cornflow-dags/requirements.txt cornflow/cornflow-server/airflow_config/
   docker-compose up -d
 
 Then to stop the containers we can run::

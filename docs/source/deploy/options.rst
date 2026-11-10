@@ -55,11 +55,11 @@ Before deploying, set the required airflow environment connection. For example :
 Using custom ssh keys
 ******************************
 
-If you want to install packages that require a secure connection to a server, you can install your own private key file in the airflow service. To do this, you must mount a volume from its key file to the path ``/usr/local/airflow/.ssh/id_rsa`` ::
+If you want to install packages that require a secure connection to a server, you can install your own private key file in the airflow service. To do this, you must mount a volume from its key file to the path ``/home/airflow/.ssh/id_rsa`` (with permissions ``0600``) and provide an ssh ``config`` and ``known_hosts`` file for the server with which it will be used ::
 
-    volume:
-        - ./your_ssh_priv_key:/usr/local/airflow/.ssh/id_rsa
+    volumes:
+        - ./your_ssh_priv_key:/home/airflow/.ssh/id_rsa
+        - ./your_ssh_config:/home/airflow/.ssh/config
+        - ./your_known_hosts:/home/airflow/.ssh/known_hosts
 
-When you have included the key file in the airflow service, you must enter the server with which it will be used by means of an environment variable. For instance::
-
-    CUSTOM_SSH_HOST=github.com
+The containers no longer configure the ssh agent on startup, so the ``CUSTOM_SSH_HOST`` environment variable is not used anymore.
