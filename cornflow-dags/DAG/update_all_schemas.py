@@ -43,6 +43,7 @@ def import_dags():
     files = os.listdir(_dir)
     logger.info(f"Files are: {files}")
     # we go file by file and try to import it if matches the filters
+    # TODO: here we should implement a .dagignore file to avoid files that could be on the folder
     for dag_module in files:
         filename, ext = os.path.splitext(dag_module)
 
