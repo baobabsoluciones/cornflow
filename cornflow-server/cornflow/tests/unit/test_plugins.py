@@ -133,7 +133,7 @@ class OtherResourcesPlugin(ResourcesPlugin):
 
 
 class CustomRolePlugin(ResourcesPlugin):
-    """Test plugin with its own role, like the MSC roles."""
+    """Test plugin that declares its own role."""
 
     url = CUSTOM_ROLE_PLUGIN_URL
     endpoint = "custom-role-plugin-items"
