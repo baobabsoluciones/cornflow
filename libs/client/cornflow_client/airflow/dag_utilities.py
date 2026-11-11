@@ -4,6 +4,7 @@
 
 import json
 import os
+import traceback
 from datetime import datetime, timedelta
 from urllib.parse import urlparse, urljoin
 
@@ -121,33 +122,100 @@ def get_base_log_folder(kwargs):
         return os.path.join(os.environ.get("AIRFLOW_HOME", ""), "logs")
 
 
-def try_to_save_airflow_log(client, exec_id, ti, base_log_folder):
-    # Airflow >= 2.3 (and Airflow 3) layout
-    log_file = os.path.join(
-        base_log_folder,
-        f"dag_id={ti.dag_id}",
-        f"run_id={ti.run_id}",
-        f"task_id={ti.task_id}",
-        f"attempt={ti.try_number}.log",
-    )
-    if not os.path.exists(log_file):
-        # legacy layout kept for older deployments
-        log_file = os.path.join(
-            base_log_folder,
-            f"{ti.dag_id}",
-            f"{ti.task_id}",
-            f"{ti.run_id}".replace("manual__", "").replace("scheduled__", ""),
-            f"{ti.try_number}.log",
-        )
-    if os.path.exists(log_file):
-        with open(log_file, "r") as fd:
-            log_file_txt = fd.read()
+def get_log_filename_template(kwargs):
+    """
+    Return the ``[logging] log_filename_template`` Airflow uses to name task logs, or None.
+
+    Like :func:`get_base_log_folder`, it is read from the task context on Airflow 2 and from
+    ``airflow.configuration`` on Airflow 3.
+    """
+    try:
+        if "conf" in kwargs:
+            return kwargs["conf"].get("logging", "log_filename_template", fallback=None)
+        from airflow.configuration import conf
+
+        return conf.get("logging", "log_filename_template", fallback=None)
+    except Exception:
+        return None
+
+
+MAX_AIRFLOW_LOG_CHARS = 100_000  # the tail is kept: the end of the log is where the failure is
+
+
+def _airflow_log_file(base_log_folder, ti, log_filename_template=None):
+    """Path of the task log of ``ti``, or None when it cannot be found.
+
+    No Airflow version is sniffed: the path is rendered from the same setting Airflow uses to write the file
+    (``[logging] log_filename_template``, passed in by the caller), which changes between versions and deployments.
+    The default layouts of Airflow >= 2.3 / 3 and of older versions are the fallbacks."""
+    candidates = []
+    if log_filename_template:
         try:
-            client.raw.put_api_for_id(
-                "dag/", id=exec_id, payload=dict(log_text=log_file_txt)
+            from jinja2 import Template
+
+            run_date = getattr(ti, "execution_date", None)
+            candidates.append(
+                Template(log_filename_template).render(
+                    ti=ti,
+                    try_number=ti.try_number,
+                    run_id=ti.run_id,
+                    ts=run_date.isoformat() if run_date is not None else "",
+                )
             )
         except Exception as e:
-            print(f"An exception occurred while trying to register airflow log: {e}")
+            print(f"Could not render the Airflow log filename template: {e}")
+    run_id = f"{ti.run_id}"
+    # Airflow >= 2.3 (and Airflow 3) default layout
+    candidates.append(
+        os.path.join(
+            f"dag_id={ti.dag_id}",
+            f"run_id={run_id}",
+            f"task_id={ti.task_id}",
+            f"attempt={ti.try_number}.log",
+        )
+    )
+    # layout of older Airflow versions
+    candidates.append(
+        os.path.join(
+            f"{ti.dag_id}",
+            f"{ti.task_id}",
+            run_id.replace("manual__", "").replace("scheduled__", ""),
+            f"{ti.try_number}.log",
+        )
+    )
+    for relative in candidates:
+        path = os.path.join(base_log_folder, relative)
+        if os.path.exists(path):
+            return path
+    return None
+
+
+def try_to_save_airflow_log(
+    client, exec_id, ti, base_log_folder, error_detail="", log_filename_template=None
+):
+    """Save the Airflow task log of a failed execution as the execution's ``log_text``, so the user can read it
+    through the Cornflow API. ``error_detail`` (a traceback) is appended: Airflow writes the traceback of the failure
+    to the log only after the task function has returned, so it is not in the file yet. When the file is not found
+    the traceback alone is still saved."""
+    log_file = _airflow_log_file(base_log_folder, ti, log_filename_template)
+    if log_file is None:
+        print("The Airflow task log file was not found: saving only the error detail")
+    log_file_txt = ""
+    if log_file is not None:
+        with open(log_file, "r", errors="replace") as fd:
+            log_file_txt = fd.read()
+    if error_detail:
+        log_file_txt = f"{log_file_txt}\n{error_detail}"
+    if not log_file_txt:
+        return
+    try:
+        client.raw.put_api_for_id(
+            "dag/",
+            id=exec_id,
+            payload=dict(log_text=log_file_txt[-MAX_AIRFLOW_LOG_CHARS:]),
+        )
+    except Exception as e:
+        print(f"An exception occurred while trying to register airflow log: {e}")
 
 
 def try_to_write_solution(client, exec_id, payload):
@@ -221,6 +289,7 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
     """
     ti = kwargs["ti"]
     base_log_folder = get_base_log_folder(kwargs)
+    log_filename_template = get_log_filename_template(kwargs)
     config = dict()
     try:
         client = connect_to_cornflow(secrets)
@@ -313,7 +382,14 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
         client = connect_to_cornflow(secrets)
         try_to_save_error(client, exec_id, -1)
         client.update_status(exec_id, {"status": -1})
-        try_to_save_airflow_log(client, exec_id, ti, base_log_folder)
+        try_to_save_airflow_log(
+            client,
+            exec_id,
+            ti,
+            base_log_folder,
+            traceback.format_exc(),
+            log_filename_template,
+        )
         raise AirflowDagException(f"There was an error during the solving: {e}")
 
 
