@@ -385,10 +385,9 @@ def register_dag_permissions_command(
             and (user.is_service_user() or user.is_admin())
         ]
 
-    if len(permissions) > 0:
-        db.session.bulk_save_objects(permissions)
-
     try:
+        if len(permissions) > 0:
+            db.session.bulk_save_objects(permissions)
         db.session.commit()
     except IntegrityError as e:
         db.session.rollback()
