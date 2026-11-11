@@ -18,8 +18,15 @@ for various data check scenarios.
 import json
 from unittest.mock import patch
 
+from flask import current_app
+
 # Import from internal modules
 from cornflow.models import ExecutionModel, InstanceModel, CaseModel
+from cornflow.shared.const import (
+    EXEC_STATE_ERROR_START,
+    EXEC_STATE_QUEUED,
+    PULSE_BACKEND,
+)
 from cornflow.tests.const import (
     INSTANCE_PATH,
     EXECUTION_PATH,
@@ -345,3 +352,97 @@ class TestDataChecksCaseEndpoint(CustomTestCase):
         self.assertEqual(row.id, response["id"])
         self.assertTrue(row.config.get("checks_and_kpis_only"))
         self.assertTrue(row.checks_and_kpis_only)
+
+
+def patch_pulse_client(pulse_client_class, alive=True, run_id="pulse-run-1"):
+    """Pulse.from_config returns a mock: alive, and run_workflow answers with run_id."""
+    pulse_client = pulse_client_class.from_config.return_value
+    pulse_client.is_alive.return_value = alive
+    pulse_client.run_workflow.return_value.json.return_value = {"run_id": run_id}
+    return pulse_client
+
+
+class TestDataChecksPulse(CustomTestCase):
+    """
+    Data check endpoints with the Pulse backend (CORNFLOW_BACKEND=3): the checks
+    are launched in Pulse (checks_and_kpis_only), never in Airflow.
+    """
+
+    def setUp(self):
+        super().setUp()
+        current_app.config["CORNFLOW_BACKEND"] = PULSE_BACKEND
+        with open(INSTANCE_PATH) as f:
+            payload = json.load(f)
+        self.instance_id = self.create_new_row(INSTANCE_URL, InstanceModel, payload)
+        self.model = ExecutionModel
+
+    def post_check(self, url):
+        return self.client.post(
+            url, follow_redirects=True, headers=self.get_header_with_auth(self.token)
+        )
+
+    def assert_queued_in_pulse(self, response, pulse_client, schema, case_id=None):
+        self.assertEqual(201, response.status_code)
+        row = self.model.query.get(response.json["id"])
+        self.assertEqual("pulse-run-1", row.run_id)
+        self.assertEqual(EXEC_STATE_QUEUED, row.state)
+        # Set on every data check, also when an existing execution is checked
+        # (checks_and_kpis_only is only set on the executions cornflow creates for it)
+        self.assertTrue(row.last_run_checks_and_kpis)
+        pulse_client.run_workflow.assert_called_once_with(
+            row.id, workflow_name=schema, checks_and_kpis_only=True, case_id=case_id
+        )
+
+    @patch("cornflow.endpoints.data_check.Airflow")
+    @patch("cornflow.endpoints.data_check.Pulse")
+    def test_instance_check_runs_in_pulse(self, pulse_client_class, af_client_class):
+        pulse_client = patch_pulse_client(pulse_client_class)
+        response = self.post_check(DATA_CHECK_INSTANCE_URL + self.instance_id + "/")
+        instance = InstanceModel.query.get(self.instance_id)
+        self.assert_queued_in_pulse(response, pulse_client, instance.schema)
+        self.assertTrue(self.model.query.get(response.json["id"]).checks_and_kpis_only)
+        af_client_class.from_config.assert_not_called()
+
+    @patch("cornflow.endpoints.data_check.Airflow")
+    @patch("cornflow.endpoints.data_check.Pulse")
+    def test_execution_check_runs_in_pulse(self, pulse_client_class, af_client_class):
+        pulse_client = patch_pulse_client(pulse_client_class)
+        with open(EXECUTION_PATH) as f:
+            payload = json.load(f)
+        payload["instance_id"] = self.instance_id
+        exec_id = self.create_new_row(EXECUTION_URL_NORUN, self.model, payload=payload)
+
+        response = self.post_check(DATA_CHECK_EXECUTION_URL + exec_id + "/")
+
+        self.assertEqual(exec_id, response.json["id"])
+        execution = ExecutionModel.query.get(exec_id)
+        self.assert_queued_in_pulse(response, pulse_client, execution.schema)
+        af_client_class.from_config.assert_not_called()
+
+    @patch("cornflow.endpoints.data_check.Airflow")
+    @patch("cornflow.endpoints.data_check.Pulse")
+    def test_case_check_runs_in_pulse(self, pulse_client_class, af_client_class):
+        pulse_client = patch_pulse_client(pulse_client_class)
+        with open(CASE_PATH) as f:
+            payload = json.load(f)
+        case_id = self.create_new_row(CASE_URL, CaseModel, payload)
+
+        response = self.post_check(DATA_CHECK_CASE_URL + str(case_id) + "/")
+
+        case = CaseModel.query.get(case_id)
+        self.assert_queued_in_pulse(
+            response, pulse_client, case.schema or "solve_model_dag", case_id=case_id
+        )
+        af_client_class.from_config.assert_not_called()
+
+    @patch("cornflow.endpoints.data_check.Pulse")
+    def test_pulse_not_reachable(self, pulse_client_class):
+        pulse_client = patch_pulse_client(pulse_client_class, alive=False)
+
+        response = self.post_check(DATA_CHECK_INSTANCE_URL + self.instance_id + "/")
+
+        self.assertEqual(400, response.status_code)
+        self.assertEqual("Pulse is not accessible", response.json["error"])
+        pulse_client.run_workflow.assert_not_called()
+        row = self.model.query.filter_by(instance_id=self.instance_id).one()
+        self.assertEqual(EXEC_STATE_ERROR_START, row.state)

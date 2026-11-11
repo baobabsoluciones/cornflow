@@ -5,7 +5,8 @@ External endpoints to launch the solution check on an execution
 # Import from libraries
 from cornflow_client.airflow.api import Airflow
 from cornflow_client.airflow.dag_utilities import get_workflow_name_check_kpis
-from cornflow_client.constants import INSTANCE_SCHEMA, SOLUTION_SCHEMA
+from cornflow_client.constants import INSTANCE_SCHEMA, SOLUTION_SCHEMA, PulseError
+from cornflow_client.pulse.api import Pulse
 from flask import request, current_app
 from flask_apispec import marshal_with, doc
 
@@ -26,6 +27,8 @@ from cornflow.shared.const import (
     VIEWER_ROLE,
     PLANNER_ROLE,
     ADMIN_ROLE,
+    PULSE_BACKEND,
+    config_orchestrator,
 )
 from cornflow.shared.exceptions import (
     AirflowError,
@@ -115,6 +118,95 @@ def _run_airflow_data_check(
     execution.update_state(EXEC_STATE_QUEUED)
 
 
+def _run_pulse_data_check(
+    pulse_client: Pulse,
+    execution: ExecutionModel,
+    schema: str,
+    user,
+    context_str: str,
+    case_id=None,
+):
+    """
+    Helper function to launch a data check (checks and kpis only, nothing is solved)
+    in Pulse. Pulse runs the model's check_generate_kpis in a Kubernetes Job, which
+    writes the checks back to cornflow, like the <schema>_check_kpis DAG of Airflow.
+
+    :param pulse_client: Initialized Pulse client.
+    :param execution: The ExecutionModel object to update.
+    :param schema: The name of the schema (app) whose checks are run.
+    :param user: The user object performing the action.
+    :param context_str: A string describing the context (e.g., "execution {id}") for logging.
+    :param case_id: id of the case, when the checks are the ones of a case.
+    :return: None. Updates execution object in place and raises PulseError on failure.
+    """
+    name = config_orchestrator["pulse"]["name"]
+    if not pulse_client.is_alive(config=current_app.config):
+        error = f"{name} is not accessible"
+        current_app.logger.error(error)
+        execution.update_state(EXEC_STATE_ERROR_START)
+        raise PulseError(
+            error=error,
+            payload=dict(
+                message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR_START],
+                state=EXEC_STATE_ERROR_START,
+            ),
+            log_txt=f"Error while user {user} tries to run data checks on {context_str}. "
+            + error,
+        )
+
+    try:
+        response = pulse_client.run_workflow(
+            execution.id,
+            workflow_name=schema,
+            checks_and_kpis_only=True,
+            case_id=case_id,
+        )
+    except PulseError as err:
+        error = f"{name} responded with an error: {err}"
+        current_app.logger.error(error)
+        execution.update_state(EXEC_STATE_ERROR)
+        raise PulseError(
+            error=error,
+            payload=dict(
+                message=EXECUTION_STATE_MESSAGE_DICT[EXEC_STATE_ERROR],
+                state=EXEC_STATE_ERROR,
+            ),
+            log_txt=f"Error while user {user} tries to run data checks on {context_str}. "
+            + error,
+        )
+
+    execution.run_id = response.json()[config_orchestrator["pulse"]["run_id"]]
+    execution.last_run_checks_and_kpis = True
+    execution.update_state(EXEC_STATE_QUEUED)
+
+
+def _run_data_check(execution, schema, user, context_str, case_id=None):
+    """
+    Launches a data check in the orchestrator of the deployment (CORNFLOW_BACKEND):
+    Pulse, or Airflow otherwise (as before, also with Databricks).
+    """
+    config = current_app.config
+    if config["CORNFLOW_BACKEND"] == PULSE_BACKEND:
+        _run_pulse_data_check(
+            Pulse.from_config(config),
+            execution,
+            schema,
+            user,
+            context_str,
+            case_id=case_id,
+        )
+        return
+    run_dag_kwargs = {} if case_id is None else {"case_id": case_id}
+    _run_airflow_data_check(
+        Airflow.from_config(config),
+        execution,
+        schema,
+        user,
+        context_str,
+        **run_dag_kwargs,
+    )
+
+
 class DataCheckKPIsExecutionEndpoint(BaseMetaResource):
     """
     Endpoint used to execute the instance and solution checks on an execution
@@ -142,7 +234,6 @@ class DataCheckKPIsExecutionEndpoint(BaseMetaResource):
           the reference_id for the newly created execution if successful) and an integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        config = current_app.config
         user = self.get_user()
         context_str = f"execution {idx}"
 
@@ -171,11 +262,8 @@ class DataCheckKPIsExecutionEndpoint(BaseMetaResource):
             execution.update_state(EXEC_STATE_NOT_RUN)
             return execution, 201
 
-        # Initialize Airflow client
-        af_client = Airflow.from_config(config)
-
-        # Call the shared Airflow execution logic
-        _run_airflow_data_check(af_client, execution, schema, user, context_str)
+        # Airflow or Pulse, depending on CORNFLOW_BACKEND
+        _run_data_check(execution, schema, user, context_str)
 
         current_app.logger.info(
             "User {} launches checks of execution {}".format(
@@ -215,7 +303,6 @@ class DataCheckInstanceEndpoint(BaseMetaResource):
           the reference_id for the newly created execution if successful) and an integer with the HTTP status code
         :rtype: Tuple(dict, integer)
         """
-        config = current_app.config
         user = self.get_user()
         context_str = f"instance {idx}"
 
@@ -245,11 +332,8 @@ class DataCheckInstanceEndpoint(BaseMetaResource):
             execution.update_state(EXEC_STATE_NOT_RUN)
             return execution, 201
 
-        # Initialize Airflow client
-        af_client = Airflow.from_config(config)
-
-        # Call the shared Airflow execution logic
-        _run_airflow_data_check(af_client, execution, schema, user, context_str)
+        # Airflow or Pulse, depending on CORNFLOW_BACKEND
+        _run_data_check(execution, schema, user, context_str)
 
         current_app.logger.info(
             "User {} creates instance check execution {}".format(
@@ -373,13 +457,8 @@ class DataCheckCaseKPIsEndpoint(BaseMetaResource):
             execution.update_state(EXEC_STATE_NOT_RUN)
             return execution, 201
 
-        # Initialize Airflow client
-        af_client = Airflow.from_config(config)
-
-        # Call the shared Airflow execution logic, passing case_id
-        _run_airflow_data_check(
-            af_client, execution, schema, user, context_str, case_id=idx
-        )
+        # Airflow or Pulse, depending on CORNFLOW_BACKEND (with the case_id)
+        _run_data_check(execution, schema, user, context_str, case_id=idx)
 
         current_app.logger.info(
             "User {} creates case check execution {}".format(
