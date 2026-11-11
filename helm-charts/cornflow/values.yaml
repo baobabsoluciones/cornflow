@@ -40,8 +40,8 @@
 #
 # 3. In the airflow.env section:
 #    - AIRFLOW_CONN_CF_URI: Automatically configured based on EXTERNAL_APP setting
-#      If EXTERNAL_APP=0: "http://service_user:Service_user1234@RELEASE_NAME-cornflow-server:5000/"
-#      If EXTERNAL_APP=1: "http://service_user:Service_user1234@RELEASE_NAME-cornflow-server:5000/cornflow/"
+#      If EXTERNAL_APP=0: "http://service_user:Mimbre-Faro-Ciervo4@RELEASE_NAME-cornflow-server:5000/"
+#      If EXTERNAL_APP=1: "http://service_user:Mimbre-Faro-Ciervo4@RELEASE_NAME-cornflow-server:5000/cornflow/"
 #
 # =============================================================================
 
@@ -255,13 +255,13 @@ cornflow:
     # SERVICE USER CONFIGURATION
     # =============================================================================
     CORNFLOW_SERVICE_USER: "service_user"
-    CORNFLOW_SERVICE_PWD: "Service_user1234" # CHANGE THIS FOR PRODUCTION
+    CORNFLOW_SERVICE_PWD: "Mimbre-Faro-Ciervo4" # CHANGE THIS FOR PRODUCTION
 
     # =============================================================================
     # ADMIN USER CONFIGURATION
     # =============================================================================
     CORNFLOW_ADMIN_USER: "cornflow_admin"
-    CORNFLOW_ADMIN_PWD: "Cornflow_admin1234" # CHANGE THIS FOR PRODUCTION
+    CORNFLOW_ADMIN_PWD: "Granito-Vela-Oruga7" # CHANGE THIS FOR PRODUCTION
 
     # =============================================================================
     # AIRFLOW CONFIGURATION
@@ -485,10 +485,10 @@ airflow:
     # Cornflow configuration for Airflow
     - name: AIRFLOW_CONN_CF_URI
       # IMPORTANT: Change RELEASE_NAME to your release name (e.g., decision-ops-cornflow, my-project-cornflow, local-cornflow-cornflow, production-porject--cornflow, etc.)
-      # Example: value: "http://service_user:Service_user1234@my-project-cornflow-server:5000/" for helm install my-project ./helm-charts/cornflow
+      # Example: value: "http://service_user:Mimbre-Faro-Ciervo4@my-project-cornflow-server:5000/" for helm install my-project ./helm-charts/cornflow
       # Note: If EXTERNAL_APP=1, the URL should include /cornflow (e.g., :5000/cornflow/)
-      #value: "http://service_user:Service_user1234@RELEASE_NAME-cornflow-server:5000/"  # Change RELEASE_NAME to your release name
-      value: "http://service_user:Service_user1234@my-cornflow-cornflow-server:5000/" # This is the default value for the cornflow-server service
+      #value: "http://service_user:Mimbre-Faro-Ciervo4@RELEASE_NAME-cornflow-server:5000/"  # Change RELEASE_NAME to your release name
+      value: "http://service_user:Mimbre-Faro-Ciervo4@my-cornflow-cornflow-server:5000/" # This is the default value for the cornflow-server service
 
 
 # =============================================================================

@@ -211,12 +211,12 @@ def _setup_environment_variables():
     cornflow_admin_email = os.getenv(
         "CORNFLOW_ADMIN_EMAIL", "cornflow_admin@cornflow.com"
     )
-    cornflow_admin_pwd = os.getenv("CORNFLOW_ADMIN_PWD", "Cornflow_admin1234")
+    cornflow_admin_pwd = os.getenv("CORNFLOW_ADMIN_PWD", "Granito-Vela-Oruga7")
     cornflow_service_user = os.getenv("CORNFLOW_SERVICE_USER", "service_user")
     cornflow_service_email = os.getenv(
         "CORNFLOW_SERVICE_EMAIL", "service_user@cornflow.com"
     )
-    cornflow_service_pwd = os.getenv("CORNFLOW_SERVICE_PWD", "Service_user1234")
+    cornflow_service_pwd = os.getenv("CORNFLOW_SERVICE_PWD", "Mimbre-Faro-Ciervo4")
 
     # Cornflow logging and deployment config
     cornflow_logging = os.getenv("CORNFLOW_LOGGING", "console")

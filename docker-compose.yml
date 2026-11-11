@@ -62,9 +62,9 @@ x-airflow-common: &airflow-common
     # Python requirements of the DAGs are installed here by airflow-init
     PYTHONPATH: /opt/airflow/deps
     # Connection used by the DAGs to send the results back to cornflow
-    AIRFLOW_CONN_CF_URI: cornflow://service_user:Service_user1234@cornflow:5000
+    AIRFLOW_CONN_CF_URI: cornflow://service_user:Mimbre-Faro-Ciervo4@cornflow:5000
     CORNFLOW_SERVICE_USER: service_user
-    CORNFLOW_SERVICE_PWD: Service_user1234
+    CORNFLOW_SERVICE_PWD: Mimbre-Faro-Ciervo4
   volumes:
     - ./cornflow-dags/DAG:/opt/airflow/dags
     - ./cornflow-dags/requirements.txt:/requirements.txt:ro
@@ -89,9 +89,9 @@ x-cornflow-common: &cornflow-common
   #  context: ./cornflow-server
   environment: &cornflow-common-env
     CORNFLOW_ADMIN_USER: cornflow_admin
-    CORNFLOW_ADMIN_PWD: Cornflow_admin1234
+    CORNFLOW_ADMIN_PWD: Granito-Vela-Oruga7
     CORNFLOW_SERVICE_USER: service_user
-    CORNFLOW_SERVICE_PWD: Service_user1234
+    CORNFLOW_SERVICE_PWD: Mimbre-Faro-Ciervo4
     CORNFLOW_DB_HOST: cornflow_db
     CORNFLOW_DB_PORT: 5432
     CORNFLOW_DB_USER: cornflow
