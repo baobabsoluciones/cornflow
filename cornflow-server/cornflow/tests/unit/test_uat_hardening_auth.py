@@ -294,7 +294,7 @@ class PasswordPolicyTests(UatTestCase):
         )
         env = {**os.environ, "PWD_MIN_LENGTH": "6", "FLASK_ENV": "testing"}
         result = subprocess.run(
-            [sys.executable, "-I", "-c", code],
+            [sys.executable, "-c", code],
             env=env,
             capture_output=True,
             text=True,
