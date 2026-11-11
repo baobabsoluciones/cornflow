@@ -117,9 +117,11 @@ class DagUtilities(unittest.TestCase):
 
         du.try_to_save_airflow_log(client, "exec1", ti, base, "KeyError: (36, 3)", template)
 
-        text = client.raw.put_api_for_id.call_args.kwargs["payload"]["log_text"]
-        self.assertIn("task started", text)
-        self.assertIn("KeyError: (36, 3)", text)
+        payload = client.raw.put_api_for_id.call_args.kwargs["payload"]
+        self.assertIn("task started", payload["log_text"])
+        self.assertIn("KeyError: (36, 3)", payload["log_text"])
+        # the endpoint turns a missing state into "correct": the failure state must travel with the log
+        self.assertEqual(payload["state"], -1)
 
     def test_the_log_layout_of_old_airflow_versions_is_still_found(self):
         base, ti = self._failed_task(["rostering", "rostering", "2026-11-11T20:21:33+00:00", "1.log"])

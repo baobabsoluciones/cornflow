@@ -191,12 +191,19 @@ def _airflow_log_file(base_log_folder, ti, log_filename_template=None):
 
 
 def try_to_save_airflow_log(
-    client, exec_id, ti, base_log_folder, error_detail="", log_filename_template=None
+    client,
+    exec_id,
+    ti,
+    base_log_folder,
+    error_detail="",
+    log_filename_template=None,
+    state=-1,
 ):
     """Save the Airflow task log of a failed execution as the execution's ``log_text``, so the user can read it
     through the Cornflow API. ``error_detail`` (a traceback) is appended: Airflow writes the traceback of the failure
     to the log only after the task function has returned, so it is not in the file yet. When the file is not found
-    the traceback alone is still saved."""
+    the traceback alone is still saved. ``state`` is the failure state of the execution: the endpoint that stores the
+    log treats a missing state as "correct", so it has to be sent again or the failed execution would turn successful."""
     log_file = _airflow_log_file(base_log_folder, ti, log_filename_template)
     if log_file is None:
         print("The Airflow task log file was not found: saving only the error detail")
@@ -212,7 +219,7 @@ def try_to_save_airflow_log(
         client.raw.put_api_for_id(
             "dag/",
             id=exec_id,
-            payload=dict(log_text=log_file_txt[-MAX_AIRFLOW_LOG_CHARS:]),
+            payload=dict(state=state, log_text=log_file_txt[-MAX_AIRFLOW_LOG_CHARS:]),
         )
     except Exception as e:
         print(f"An exception occurred while trying to register airflow log: {e}")
@@ -467,7 +474,9 @@ def cf_check_generate_kpis(fun_check_generate_kpis, dag_name, secrets, **kwargs)
                 try_to_save_error(client, exec_id, -6)
                 if config.get("msg", True):
                     print("An error occurred while trying to save the checks")
-                try_to_save_airflow_log(client, exec_id, ti, base_log_folder)
+                try_to_save_airflow_log(
+                    client, exec_id, ti, base_log_folder, state=-6
+                )
                 raise AirflowDagException("The writing of the case checks failed")
 
         # # The validation went correctly: can save the solution without problem
