@@ -189,7 +189,13 @@ def _setup_environment_variables():
     # Cornflow app config
     os.environ.setdefault("cornflow_url", "http://cornflow:5000")
     os.environ["FLASK_APP"] = "cornflow.app"
-    os.environ["SECRET_KEY"] = os.getenv("FERNET_KEY", Fernet.generate_key().decode())
+    # The key must be stable across restarts: it signs the sessions and encrypts
+    # the MFA secrets. A random one is only generated when none is configured.
+    os.environ["SECRET_KEY"] = (
+        os.getenv("FERNET_KEY")
+        or os.getenv("SECRET_KEY")
+        or Fernet.generate_key().decode()
+    )
 
     # Cornflow db defaults
     os.environ["DEFAULT_POSTGRES"] = "1"
