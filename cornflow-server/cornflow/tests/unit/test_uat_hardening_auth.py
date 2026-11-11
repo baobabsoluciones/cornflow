@@ -42,7 +42,6 @@ from cornflow.tests.uat_hardening_support import (
     auth_header,
     is_relaxed,
     is_strict,
-    pending_fix,
     profile_env_name,
     ui_only,
 )
@@ -479,10 +478,6 @@ class PasswordRotationTests(UatTestCase):
             body = self.login("provisioned", password, self.totp_now("provisioned")).json
         self.assertIn("token", body)
         self.assertIs(True, body["change_password"])
-
-    test_uat_3_1_user_created_by_admin_must_change_password = pending_fix(
-        "24629024"
-    )(test_uat_3_1_user_created_by_admin_must_change_password)
 
     def test_uat_3_2_flagged_password_blocks_other_endpoints(self):
         """3.2 Password flagged for change, GET /instance/: 403 password_rotation."""

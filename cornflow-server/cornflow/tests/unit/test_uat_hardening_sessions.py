@@ -50,7 +50,6 @@ from cornflow.tests.uat_hardening_support import (
     auth_header,
     is_relaxed,
     JSON_HEADER,
-    pending_fix,
     ui_only,
 )
 
@@ -236,7 +235,6 @@ class TestUatPasswordRecovery(SessionsTestCase):
         # against its own endpoint the same token is valid
         self.assertEqual(200, self.reset(token).status_code)
 
-    @pending_fix("4deffdf5")
     def test_uat_5_6_reset_link_expires(self):
         """5.6 Wait more than PWD_RESET_TOKEN_DURATION_MINUTES and open the
         link: expired-link error."""
@@ -299,7 +297,6 @@ class TestUatSessions(SessionsTestCase):
         self.assertNotEqual(body["token"], response.json["token"])
         self.assertNotEqual(body["refresh_token"], response.json["refresh_token"])
 
-    @pending_fix("2f64a0df")
     def test_uat_6_5_refresh_reuse_revokes_session(self):
         """6.5 Repeat POST /token/refresh/ with the old refresh_token: 401 and
         the session is revoked; the new token is no longer valid either."""
@@ -314,7 +311,6 @@ class TestUatSessions(SessionsTestCase):
         self.assertEqual(401, self.get(INSTANCE_URL, rotated.json["token"]).status_code)
         self.assertEqual(401, self.get(INSTANCE_URL, body["token"]).status_code)
 
-    @pending_fix("4deffdf5")
     def test_uat_6_6_expired_access_token_gives_401(self):
         """6.6 Wait longer than the access token duration and use the access
         token: 401 (expired)."""
@@ -407,7 +403,6 @@ class TestUatSessions(SessionsTestCase):
         """6.13 In the UI, leave the tab idle longer than the window and
         click any action: redirect to login with an expired-session notice."""
 
-    @pending_fix("4deffdf5")
     def test_uat_6_14_continuous_work_renews_transparently(self):
         """6.14 Work continuously longer than the access token duration:
         nothing is noticed, the token is renewed transparently (server part:
@@ -430,7 +425,6 @@ class TestUatSessions(SessionsTestCase):
         """6.15 In the UI, download a file (Excel) after the access token
         expires: the download works (renews and retries)."""
 
-    @pending_fix("4deffdf5")
     def test_uat_6_16_logout_revokes_and_audits_actor(self):
         """6.16 Log out: the session is revoked on the server and the
         session.logout event is audited with who closed it."""
@@ -586,7 +580,6 @@ class TestUatPlatformRoles(SessionsTestCase):
         self.assertNotIn(pexecution, self.ids(EXECUTION_URL, token))
         self.assertIn(cexecution, self.ids(EXECUTION_URL, token))
 
-    @pending_fix("e86f9a3f")
     def test_uat_7_12_client_admin_does_not_see_platform_data(self):
         """7.12 The same instance, listed by a client admin: it does not
         appear (although the admin sees everything else of the client)."""

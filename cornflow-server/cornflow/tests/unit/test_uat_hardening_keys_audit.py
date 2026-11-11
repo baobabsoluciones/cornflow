@@ -53,7 +53,6 @@ from cornflow.tests.uat_hardening_support import (
     auth_header,
     is_relaxed,
     is_strict,
-    pending_fix,
     ui_only,
 )
 
@@ -745,7 +744,6 @@ class TestUatAudit(CommonSetup):
         self.assertEqual(target.id, revoked["target_id"])
         self.assertEqual(PLANNER_ROLE, revoked["role_id"])
 
-    @pending_fix("4deffdf5")
     def test_uat_10_10_session_refreshed_and_logout_have_actor(self):
         """10.10 Refresh and logout: session.refreshed, session.logout (with actor)."""
         login = self.full_login("cfplanner")
@@ -957,7 +955,6 @@ class TestUatRegression(CommonSetup):
         )
         self.assertEqual(200, response.status_code, response.json)
 
-    @pending_fix("42b50338")
     def test_uat_12_1_instance_execution_solution_flow(self):
         """12.1 Create an instance, launch an execution and fetch the solution."""
         self.make_user("service_user", [SERVICE_ROLE])
@@ -1078,7 +1075,6 @@ class TestUatRegression(CommonSetup):
         solution = client.get_solution(execution_id)
         self.assertEqual(load_json(INSTANCE_PATH)["data"], solution["data"])
 
-    @pending_fix("4deffdf5")
     def test_uat_12_5_client_renews_expired_access_token(self):
         """12.5 cornflow-client working longer than the access token duration."""
         self.token_of("cfplanner")
