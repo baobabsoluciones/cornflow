@@ -1,6 +1,9 @@
 import logging
 import os
 
+from flask import current_app
+
+from cornflow.shared.plugins import register_plugins_access
 from .actions import register_actions_command
 from .permissions import register_base_permissions_command
 from .roles import register_roles_command
@@ -31,3 +34,5 @@ def access_init_command(verbose: bool = False):
         register_base_permissions_command(external_app=external_app, verbose=verbose)
     else:
         register_base_permissions_command(verbose=verbose)
+        # Plugin mode: each plugin registers its roles, views and permissions
+        register_plugins_access(current_app)

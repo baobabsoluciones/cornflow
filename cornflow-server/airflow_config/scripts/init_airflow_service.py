@@ -38,7 +38,7 @@ global_env_vars = [
     ("AIRFLOW_PWD", "admin"),
     ("AIRFLOW_USER_EMAIL", "admin@example.com"),
     ("CORNFLOW_SERVICE_USER", "service_user"),
-    ("CORNFLOW_SERVICE_PWD", "Service_user1234"),
+    ("CORNFLOW_SERVICE_PWD", "Mimbre-Faro-Ciervo4"),
     ("AIRFLOW_LDAP_ENABLE", "False"),
 ]
 # update environ set

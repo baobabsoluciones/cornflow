@@ -25,7 +25,11 @@ from cornflow.commands.dag import register_deployed_dags_command_test
 from cornflow.commands.permissions import register_dag_permissions_command
 from cornflow.shared.const import ADMIN_ROLE, SERVICE_ROLE
 from cornflow.models import DeployedWorkflow, PermissionsDAG, UserModel, UserRoleModel
-from cornflow.shared.const import EXEC_STATE_CORRECT, EXEC_STATE_MANUAL
+from cornflow.shared.const import (
+    EXEC_STATE_CORRECT,
+    EXEC_STATE_ERROR,
+    EXEC_STATE_MANUAL,
+)
 from cornflow.shared import db
 from cornflow.tests.const import (
     CASE_PATH,
@@ -193,6 +197,73 @@ class TestDagDetailEndpoint(TestExecutionsDetailEndpointMock):
             self.assertEqual(data["log"][key], log_json[key])
 
         self.assertNotIn("some_other_key", data["log"].keys())
+
+    def _service_token(self):
+        if not hasattr(self, "_cached_service_token"):
+            self._cached_service_token = self.create_service_user()
+        return self._cached_service_token
+
+    def _put_dag(self, idx, change):
+        token = self._service_token()
+        return self.update_row(
+            url=f"{DAG_URL}{idx}/",
+            payload_to_check={},
+            change=change,
+            token=token,
+            check_payload=False,
+        )
+
+    def _get_state(self, idx):
+        token = self._service_token()
+        response = self.client.get(
+            f"{EXECUTION_URL}{idx}/",
+            follow_redirects=True,
+            headers=self.get_header_with_auth(token),
+        )
+        self.assertEqual(200, response.status_code)
+        return response.json["state"]
+
+    def test_put_dag_log_only_keeps_error_state(self):
+        """
+        A PUT that only carries a log must not change the state of the execution.
+        """
+        idx = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
+        self._put_dag(idx, dict(state=EXEC_STATE_ERROR))
+        self.assertEqual(EXEC_STATE_ERROR, self._get_state(idx))
+
+        self._put_dag(idx, dict(log_text="the airflow log"))
+
+        self.assertEqual(EXEC_STATE_ERROR, self._get_state(idx))
+        self.assertEqual("the airflow log", self.model.query.get(idx).log_text)
+
+    def test_put_dag_data_without_state_is_correct(self):
+        """
+        A PUT with a solution and no state leaves the execution as correct.
+        """
+        idx = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
+        with open(CASE_PATH) as f:
+            payload = json.load(f)
+
+        self._put_dag(idx, dict(data=payload["data"]))
+
+        self.assertEqual(EXEC_STATE_CORRECT, self._get_state(idx))
+
+    def test_put_dag_explicit_state_is_kept(self):
+        """
+        A PUT with an explicit state stores that state, with or without data.
+        """
+        idx = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
+        with open(CASE_PATH) as f:
+            payload = json.load(f)
+
+        self._put_dag(idx, dict(state=EXEC_STATE_ERROR))
+        self.assertEqual(EXEC_STATE_ERROR, self._get_state(idx))
+
+        self._put_dag(idx, dict(state=EXEC_STATE_ERROR, log_text="the airflow log"))
+        self.assertEqual(EXEC_STATE_ERROR, self._get_state(idx))
+
+        self._put_dag(idx, dict(state=EXEC_STATE_CORRECT, data=payload["data"]))
+        self.assertEqual(EXEC_STATE_CORRECT, self._get_state(idx))
 
     def test_get_dag(self):
         """
@@ -497,7 +568,9 @@ class TestDeployedDAG(TestCase):
             headers=headers,
         )
         self.assertEqual(response.status_code, 201)
-        self.assertTrue(PermissionsDAG.check_if_has_permissions(self.admin["id"], "new_dag"))
+        self.assertTrue(
+            PermissionsDAG.check_if_has_permissions(self.admin["id"], "new_dag")
+        )
         self.assertFalse(PermissionsDAG.check_if_has_permissions(planner_id, "new_dag"))
 
         PermissionsDAG.query.filter_by(dag_id="solve_model_dag").delete()
