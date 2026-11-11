@@ -576,7 +576,6 @@ class TestUatPlatformRoles(SessionsTestCase):
         offered = {role["id"] for role in response.json}
         self.assertTrue(set(PLATFORM_ROLES) <= offered, offered)
 
-    @pending_fix("e86f9a3f")
     def test_uat_7_11_client_planner_does_not_see_platform_data(self):
         """7.11 platform_planner creates an instance; list it as client
         planner: it does not appear."""

@@ -12,6 +12,7 @@ import logging
 import os
 from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
+from importlib import import_module
 from unittest.mock import Mock, patch
 from urllib.parse import urlparse
 
@@ -216,9 +217,9 @@ class CommonSetup(UatTestCase):
     def run_cli(self, *args):
         """Runs a cornflow CLI command against the application under test."""
         app = current_app._get_current_object()
-        with patch("cornflow.cli.users.get_app", lambda: app), patch(
-            "cornflow.cli.tokens.get_app", lambda: app
-        ):
+        with patch.object(
+            import_module("cornflow.cli.users"), "get_app", lambda: app
+        ), patch.object(import_module("cornflow.cli.tokens"), "get_app", lambda: app):
             result = CliRunner().invoke(cli, list(args))
         db.session.expire_all()
         return result

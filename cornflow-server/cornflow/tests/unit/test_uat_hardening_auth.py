@@ -14,6 +14,7 @@ import subprocess
 import sys
 import unittest
 from datetime import datetime, timedelta, timezone
+from importlib import import_module
 from unittest.mock import patch
 
 from click.testing import CliRunner
@@ -127,7 +128,7 @@ class EnvironmentTests(UatTestCase):
             self.assertEqual(name, roles[role_id])
         # The CLI command is idempotent and ends with exit code 0 (the CLI
         # builds its own app, so it is pointed at the one under test)
-        with patch("cornflow.cli.roles.get_app", return_value=self.app):
+        with patch.object(import_module("cornflow.cli.roles"), "get_app", return_value=self.app):
             with self.assertLogs(current_app.logger, level="INFO") as logs:
                 result = CliRunner().invoke(cli, ["roles", "init", "-v"])
         self.assertEqual(0, result.exit_code, result.output)
@@ -151,7 +152,7 @@ class EnvironmentTests(UatTestCase):
         )
         self.assertIsNone(UserModel.get_one_user_by_username("admin"))
         # The same happens through the CLI command
-        with patch("cornflow.cli.users.get_app", return_value=self.app):
+        with patch.object(import_module("cornflow.cli.users"), "get_app", return_value=self.app):
             result = CliRunner().invoke(
                 cli,
                 [
@@ -624,7 +625,7 @@ class LockoutTests(UatTestCase):
         self.make_user("lockme", [VIEWER_ROLE])
         self.lock("lockme")
         self.assertTrue(UserModel.get_one_user_by_username("lockme").locked)
-        with patch("cornflow.cli.users.get_app", return_value=self.app):
+        with patch.object(import_module("cornflow.cli.users"), "get_app", return_value=self.app):
             with self.assertLogs("cornflow.audit", level="INFO") as logs:
                 result = CliRunner().invoke(cli, ["users", "unlock", "-u", "lockme"])
         self.assertEqual(0, result.exit_code, result.output)
