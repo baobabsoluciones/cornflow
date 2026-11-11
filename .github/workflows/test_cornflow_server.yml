@@ -121,7 +121,7 @@ jobs:
           AIRFLOW__API_AUTH__JWT_SECRET: 4f8c1b2e9d7a6c5b3e2f1a0d9c8b7a6e5f4d3c2b1a0f9e8d7c6b5a4f3e2d1c0b
           AIRFLOW__API__SECRET_KEY: e9adafa751fd35adfc1fdd3285019be15eea0758f76e38e1e37a1154fb36
           AIRFLOW__CORE__LOAD_EXAMPLES: 0
-          AIRFLOW_CONN_CF_URI: http://airflow:Airflow_test_password1@localhost:5050
+          AIRFLOW_CONN_CF_URI: http://airflow:Xq7-mBv.Ld9Rn2@localhost:5050
       - name: Run unit tests
         run: |
           coverage run --source=./cornflow/ --rcfile=./.coveragerc -m unittest discover -s cornflow/tests/unit

@@ -34,6 +34,7 @@ from cornflow.shared.const import (
     AUTH_LDAP,
     AUTH_OID,
     ADMIN_ROLE,
+    PLATFORM_ADMIN_ROLE,
     SERVICE_ROLE,
     PLANNER_ROLE,
     DATABRICKS_BACKEND,
@@ -188,7 +189,13 @@ def _setup_environment_variables():
     # Cornflow app config
     os.environ.setdefault("cornflow_url", "http://cornflow:5000")
     os.environ["FLASK_APP"] = "cornflow.app"
-    os.environ["SECRET_KEY"] = os.getenv("FERNET_KEY", Fernet.generate_key().decode())
+    # The key must be stable across restarts: it signs the sessions and encrypts
+    # the MFA secrets. A random one is only generated when none is configured.
+    os.environ["SECRET_KEY"] = (
+        os.getenv("FERNET_KEY")
+        or os.getenv("SECRET_KEY")
+        or Fernet.generate_key().decode()
+    )
 
     # Cornflow db defaults
     os.environ["DEFAULT_POSTGRES"] = "1"
@@ -210,12 +217,12 @@ def _setup_environment_variables():
     cornflow_admin_email = os.getenv(
         "CORNFLOW_ADMIN_EMAIL", "cornflow_admin@cornflow.com"
     )
-    cornflow_admin_pwd = os.getenv("CORNFLOW_ADMIN_PWD", "Cornflow_admin1234")
+    cornflow_admin_pwd = os.getenv("CORNFLOW_ADMIN_PWD", "Granito-Vela-Oruga7")
     cornflow_service_user = os.getenv("CORNFLOW_SERVICE_USER", "service_user")
     cornflow_service_email = os.getenv(
         "CORNFLOW_SERVICE_EMAIL", "service_user@cornflow.com"
     )
-    cornflow_service_pwd = os.getenv("CORNFLOW_SERVICE_PWD", "Service_user1234")
+    cornflow_service_pwd = os.getenv("CORNFLOW_SERVICE_PWD", "Mimbre-Faro-Ciervo4")
 
     # Cornflow logging and deployment config
     cornflow_logging = os.getenv("CORNFLOW_LOGGING", "console")
@@ -352,6 +359,32 @@ def _create_initial_users(
             SERVICE_ROLE,
             verbose=True,
         )
+        # Optionally create a platform administrator (needed to manage roles
+        # and unlock accounts). Only created when its credentials are
+        # provided, so we do not ship a weak default that would fail the
+        # password policy anyway.
+        platform_admin_user = os.getenv("CORNFLOW_PLATFORM_ADMIN_USER")
+        platform_admin_pwd = os.getenv("CORNFLOW_PLATFORM_ADMIN_PWD")
+        platform_admin_email = os.getenv(
+            "CORNFLOW_PLATFORM_ADMIN_EMAIL", "platform_admin@cornflow.com"
+        )
+        if platform_admin_user and platform_admin_pwd:
+            create_user_with_role(
+                platform_admin_user,
+                platform_admin_email,
+                platform_admin_pwd,
+                "platform_admin",
+                PLATFORM_ADMIN_ROLE,
+                verbose=True,
+            )
+        else:
+            logger.info(
+                "No platform administrator created (set "
+                "CORNFLOW_PLATFORM_ADMIN_USER and CORNFLOW_PLATFORM_ADMIN_PWD "
+                "to create one, or run `cornflow users create platform_admin`). "
+                "A platform administrator is required to manage roles and "
+                "unlock accounts."
+            )
 
 
 def _sync_with_airflow(

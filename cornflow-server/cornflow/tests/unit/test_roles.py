@@ -22,17 +22,32 @@ from cornflow.shared.const import (
     ALL_DEFAULT_ROLES,
     DUMMY_ROLE,
     PLANNER_ROLE,
+    PLATFORM_ADMIN_ROLE,
     ROLES_MAP,
     SERVICE_ROLE,
     VIEWER_ROLE,
 )
+from cornflow.shared.plugins import get_loaded_plugins
 from cornflow.tests.const import ROLES_URL, USER_ROLE_URL
 from cornflow.tests.custom_test_case import CustomTestCase
+
+
+def remove_plugin_roles(app):
+    """
+    These tests count the cornflow roles. When plugins are loaded, access_init
+    also registers their own roles: they are removed so only the cornflow
+    roles are left.
+    """
+    if get_loaded_plugins(app):
+        for role in RoleModel.get_all_objects():
+            if role.id not in ROLES_MAP:
+                role.delete()
 
 
 class TestRolesListEndpoint(CustomTestCase):
     def setUp(self):
         super().setUp()
+        remove_plugin_roles(self.app)
         self.payload = {"name": "new_role"}
         self.payloads = [{"id": key, "name": value} for key, value in ROLES_MAP.items()]
         self.url = ROLES_URL
@@ -84,7 +99,7 @@ class TestRolesListEndpoint(CustomTestCase):
         )
 
         self.assertEqual(200, response.status_code)
-        self.assertEqual(6, len(response.json))
+        self.assertEqual(9, len(response.json))
 
     def test_get_no_roles(self):
         for role in ROLES_MAP:
@@ -189,7 +204,7 @@ class TestRolesDetailEndpoint(CustomTestCase):
                 )
 
     def test_delete_role_authorized(self):
-        self.token = self.create_user_with_role(ADMIN_ROLE)
+        self.token = self.create_user_with_role(PLATFORM_ADMIN_ROLE)
         response = self.client.delete(
             self.url + str(VIEWER_ROLE) + "/",
             follow_redirects=True,
@@ -281,8 +296,10 @@ class TestUserRolesListEndpoint(CustomTestCase):
             self.create_new_row(self.url, self.model, self.new_user_role)
 
     def test_post_role_assignment_not_authorized_user(self):
+        # The platform admin role is a superset of the client admin role, so it
+        # also has access to the user role endpoints
         for role in ROLES_MAP:
-            if role not in self.roles_with_access:
+            if role not in self.roles_with_access and role != PLATFORM_ADMIN_ROLE:
                 self.token = self.create_user_with_role(role)
                 self.create_new_row(
                     self.url, self.model, {}, expected_status=403, check_payload=False
@@ -343,8 +360,10 @@ class TestUserRolesDetailEndpoint(CustomTestCase):
             self.assertEqual(self.payload, response.json)
 
     def test_get_user_role_not_authorized_user(self):
+        # The platform admin role is a superset of the client admin role, so it
+        # also has access to the user role endpoints
         for role in ROLES_MAP:
-            if role not in self.roles_with_access:
+            if role not in self.roles_with_access and role != PLATFORM_ADMIN_ROLE:
                 self.token = self.create_user_with_role(role)
                 response = self.client.get(
                     self.url
@@ -376,7 +395,7 @@ class TestUserRolesDetailEndpoint(CustomTestCase):
         data = {
             "username": "testuser" + str(role),
             "email": "testemail" + str(role) + "@test.org",
-            "password": "Testpassword1!",
+            "password": "Kx9#tR2m!Qw7Zp",
         }
         user_response = self.create_user(data)
 
@@ -397,8 +416,10 @@ class TestUserRolesDetailEndpoint(CustomTestCase):
         self.assertEqual(self.payload_2, role_response.json)
 
     def test_delete_user_role_not_authorized_user(self):
+        # The platform admin role is a superset of the client admin role, so it
+        # also has access to the user role endpoints
         for role in ROLES_MAP:
-            if role not in self.roles_with_access:
+            if role not in self.roles_with_access and role != PLATFORM_ADMIN_ROLE:
                 self.token = self.create_user_with_role(role)
                 response = self.client.delete(
                     self.url
@@ -416,7 +437,7 @@ class TestUserRolesDetailEndpoint(CustomTestCase):
         data = {
             "username": "testuser",
             "email": "testemail" + "@test.org",
-            "password": "Testpassword1!",
+            "password": "Kx9#tR2m!Qw7Zp",
         }
         user_response = self.create_user(data)
         user_id = user_response.json["id"]
@@ -435,13 +456,14 @@ class TestUserRolesDetailEndpoint(CustomTestCase):
 class TestRolesModelMethods(CustomTestCase):
     def setUp(self):
         super().setUp()
+        remove_plugin_roles(self.app)
         self.url = ROLES_URL
         self.model = RoleModel
         self.payload = {"name": "test_role"}
 
     def test_user_role_delete_cascade(self):
         payload = {"user_id": self.user.id}
-        self.token = self.create_user_with_role(ADMIN_ROLE)
+        self.token = self.create_user_with_role(PLATFORM_ADMIN_ROLE)
         self.cascade_delete(
             self.url,
             self.model,
@@ -453,7 +475,7 @@ class TestRolesModelMethods(CustomTestCase):
         )
 
     def test_permission_delete_cascade(self):
-        self.token = self.create_user_with_role(ADMIN_ROLE)
+        self.token = self.create_user_with_role(PLATFORM_ADMIN_ROLE)
         idx = self.create_new_row(self.url, self.model, self.payload)
         payload = {"action_id": 1, "api_view_id": 1, "role_id": idx}
         PermissionViewRoleModel(payload).save()
@@ -473,12 +495,12 @@ class TestRolesModelMethods(CustomTestCase):
         self.assertIsNone(permission)
 
     def test_repr_method(self):
-        self.token = self.create_user_with_role(ADMIN_ROLE)
+        self.token = self.create_user_with_role(PLATFORM_ADMIN_ROLE)
         idx = self.create_new_row(self.url, self.model, self.payload)
         self.repr_method(idx, "<Role test_role>")
 
     def test_str_method(self):
-        self.token = self.create_user_with_role(ADMIN_ROLE)
+        self.token = self.create_user_with_role(PLATFORM_ADMIN_ROLE)
         idx = self.create_new_row(self.url, self.model, self.payload)
         self.str_method(idx, "<Role test_role>")
 
@@ -486,9 +508,9 @@ class TestRolesModelMethods(CustomTestCase):
         """
         Tests the get_all_objects method
         """
-        # We expect 5 roles to be present (from ROLES_MAP constant)
+        # We expect 8 roles to be present (from ROLES_MAP constant)
         instances = RoleModel.get_all_objects().all()
-        self.assertEqual(len(instances), 5)
+        self.assertEqual(len(instances), 8)
 
         # Check that all the roles from ROLES_MAP are present
         role_names = [role.name for role in instances]
@@ -503,7 +525,7 @@ class TestRolesModelMethods(CustomTestCase):
 
         # Test offset parameter - should get all except the first role
         instances = RoleModel.get_all_objects(offset=1).all()
-        self.assertEqual(len(instances), 4)
+        self.assertEqual(len(instances), 7)
 
         # Get the names of all roles except the first one
         remaining_roles = [role.name for role in instances]

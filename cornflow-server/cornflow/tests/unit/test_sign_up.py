@@ -36,7 +36,7 @@ class TestSignUp(TestCase):
         self.data = {
             "username": "testname",
             "email": "test@test.com",
-            "password": "Testpassword1!",
+            "password": "Kx9#tR2m!Qw7Zp",
         }
 
     def tearDown(self):
@@ -116,7 +116,7 @@ class TestSignUpDeactivated(TestCase):
         payload = {
             "username": "testname",
             "email": "test@test.com",
-            "password": "Testpassword1!",
+            "password": "Kx9#tR2m!Qw7Zp",
         }
 
         response = self.client.post(
@@ -146,7 +146,7 @@ class TestSignUpAuthenticated(TestCase):
         self.data = {
             "username": "testname",
             "email": "test@test.com",
-            "password": "Testpassword1!",
+            "password": "Kx9#tR2m!Qw7Zp",
         }
 
         # Create an admin user for testing
@@ -154,7 +154,7 @@ class TestSignUpAuthenticated(TestCase):
             {
                 "username": "admin",
                 "email": "admin@test.com",
-                "password": "Adminpassword1!",
+                "password": "Am9!cV4b#Ls6Qe",
             }
         )
         self.admin_user.save()
@@ -170,7 +170,7 @@ class TestSignUpAuthenticated(TestCase):
             {
                 "username": "regular",
                 "email": "regular@test.com",
-                "password": "Regularpassword1!",
+                "password": "Rg3$hJ7u!Pw9Bn",
             }
         )
         self.regular_user.save()
@@ -273,7 +273,7 @@ class TestSignUpAuthenticated(TestCase):
         self.assertIsNotNone(
             signup_view, "Signup endpoint should be registered in views table"
         )
-        self.assertEqual("/signup/", signup_view.url_rule)
+        self.assertEqual("/cornflow/signup/", signup_view.url_rule)
 
         # Check that admin role has permissions for signup endpoint
         admin_permissions = PermissionViewRoleModel.query.filter_by(

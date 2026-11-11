@@ -4,8 +4,17 @@ from cornflow.cli.arguments import username, password, email, verbose
 from cornflow.cli.utils import get_app
 from cornflow.commands import create_user_with_role
 from cornflow.models import UserModel
+from cornflow.shared.audit import audit
 from cornflow.shared.authentication.auth import BIAuth
-from cornflow.shared.const import SERVICE_ROLE, VIEWER_ROLE
+from cornflow.shared.const import (
+    API_KEY_SCOPE_FULL,
+    API_KEY_SCOPE_READ,
+    PLATFORM_ADMIN_ROLE,
+    PLATFORM_PLANNER_ROLE,
+    PLATFORM_VIEWER_ROLE,
+    SERVICE_ROLE,
+    VIEWER_ROLE,
+)
 from cornflow.shared.exceptions import (
     ObjectDoesNotExist,
     NoPermission,
@@ -57,6 +66,163 @@ def create_viewer_user(username, password, email, verbose):
         create_user_with_role(
             username, email, password, "viewer user", VIEWER_ROLE, verbose=verbose
         )
+
+
+@create.command(name="platform_admin", help="Create a platform administrator user")
+@username
+@password
+@email
+@verbose
+def create_platform_admin_user(username, password, email, verbose):
+    app = get_app()
+    with app.app_context():
+        create_user_with_role(
+            username,
+            email,
+            password,
+            "platform administrator",
+            PLATFORM_ADMIN_ROLE,
+            verbose=verbose,
+        )
+
+
+@create.command(
+    name="platform_viewer",
+    help="Create a platform viewer user (internal, same permissions as a "
+    "client viewer)",
+)
+@username
+@password
+@email
+@verbose
+def create_platform_viewer_user(username, password, email, verbose):
+    app = get_app()
+    with app.app_context():
+        create_user_with_role(
+            username,
+            email,
+            password,
+            "platform viewer",
+            PLATFORM_VIEWER_ROLE,
+            verbose=verbose,
+        )
+
+
+@create.command(
+    name="platform_planner",
+    help="Create a platform planner user (internal, same permissions as a "
+    "client planner)",
+)
+@username
+@password
+@email
+@verbose
+def create_platform_planner_user(username, password, email, verbose):
+    app = get_app()
+    with app.app_context():
+        create_user_with_role(
+            username,
+            email,
+            password,
+            "platform planner",
+            PLATFORM_PLANNER_ROLE,
+            verbose=verbose,
+        )
+
+
+@users.command(
+    name="unlock",
+    help="Unlock a user account locked after too many failed login attempts. "
+    "This is the break-glass alternative to the platform administrator "
+    "unlock endpoint.",
+)
+@username
+def unlock_user(username):
+    app = get_app()
+    with app.app_context():
+        user = UserModel.get_one_user_by_username(username)
+        if not user:
+            raise ObjectDoesNotExist("User does not exist")
+        user.unlock_account()
+        audit(
+            "account.unlocked",
+            actor="cli",
+            target_id=user.id,
+            target=username,
+            source="cli",
+        )
+        click.echo(f"User {username} has been unlocked")
+        return True
+
+
+@users.command(
+    name="bi_token",
+    help="Generate a BI token for a user (valid for BI_TOKEN_DURATION_DAYS "
+    "days). Intended to be run inside the server with database access; no "
+    "further authentication is required because CLI access is already "
+    "privileged. Use it to (re)generate Power BI tokens.",
+)
+@username
+def issue_bi_token(username):
+    app = get_app()
+    with app.app_context():
+        user = UserModel.get_one_user_by_username(username)
+        if not user:
+            raise ObjectDoesNotExist("User does not exist")
+        token = BIAuth.generate_token(user.id)
+        app.logger.info(f"A BI token was generated for user {username} via the CLI")
+        audit(
+            "bitoken.issued",
+            actor="cli",
+            target_id=user.id,
+            target=username,
+            source="cli",
+        )
+        click.echo(token)
+        return True
+
+
+@users.command(
+    name="api_key",
+    help="Generate a personal API key for a user (valid for "
+    "API_KEY_DURATION_DAYS days). Intended to be run inside the server with "
+    "database access; no TOTP step-up is required because CLI access is "
+    "already privileged. Generating a new key revokes the previous one. "
+    "Useful for the cornflow<->airflow service account.",
+)
+@username
+@click.option(
+    "--read-only",
+    is_flag=True,
+    default=False,
+    help="Generate a read-only key: it is refused on any request that is not "
+    "a GET (useful for reporting / BI consumers).",
+)
+def issue_api_key(username, read_only):
+    from cornflow.shared.authentication.auth import Auth
+
+    app = get_app()
+    with app.app_context():
+        user = UserModel.get_one_user_by_username(username)
+        if not user:
+            raise ObjectDoesNotExist("User does not exist")
+        scope = API_KEY_SCOPE_READ if read_only else API_KEY_SCOPE_FULL
+        user.rotate_api_key(scope=scope)
+        token = Auth.generate_api_key(user.id, scope=scope)
+        app.logger.info(
+            f"A personal API key was generated for user {username} via the "
+            f"CLI (scope {scope})"
+        )
+        audit(
+            "apikey.issued",
+            actor="cli",
+            target_id=user.id,
+            target=username,
+            source="cli",
+            scope=scope,
+        )
+        click.echo(token)
+        return True
 
 
 @create.command(

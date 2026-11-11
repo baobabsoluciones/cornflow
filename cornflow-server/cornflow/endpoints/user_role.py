@@ -11,9 +11,14 @@ from flask_apispec import doc, marshal_with, use_kwargs
 from cornflow.endpoints.meta_resource import BaseMetaResource
 from cornflow.models import UserRoleModel
 from cornflow.schemas.user_role import UserRoleRequest, UserRoleResponse
+from cornflow.shared.audit import audit
 from cornflow.shared.authentication import Auth, authenticate
-from cornflow.shared.const import ADMIN_ROLE, AUTH_LDAP
-from cornflow.shared.exceptions import EndpointNotImplemented, ObjectAlreadyExists
+from cornflow.shared.const import ADMIN_ROLE, AUTH_LDAP, PLATFORM_ROLES
+from cornflow.shared.exceptions import (
+    EndpointNotImplemented,
+    NoPermission,
+    ObjectAlreadyExists,
+)
 
 
 class UserRoleListEndpoint(BaseMetaResource):
@@ -81,10 +86,30 @@ class UserRoleListEndpoint(BaseMetaResource):
                 + err,
             )
 
+        # Platform roles are internal: only a platform administrator can
+        # grant them. Without this check a client admin could escalate
+        # themselves (or anyone) into the platform side.
+        if (
+            kwargs.get("role_id") in PLATFORM_ROLES
+            and not self.get_user().is_platform_admin()
+        ):
+            raise NoPermission(
+                error="Only a platform administrator can grant a platform role",
+                log_txt=f"Error while user {self.get_user()} tries to grant "
+                f"platform role {kwargs.get('role_id')} to user "
+                f"{kwargs.get('user_id')}. Only platform administrators can "
+                f"grant platform roles.",
+            )
+
         # Check if the assignation is disabled, or it does exist
         if UserRoleModel.check_if_role_assigned_disabled(**kwargs):
             current_app.logger.info(
                 f"User {self.get_user()} creates a new role assignment"
+            )
+            audit(
+                "role.granted",
+                target_id=kwargs.get("user_id"),
+                role_id=kwargs.get("role_id"),
             )
             return self.activate_detail(**kwargs)
         elif UserRoleModel.check_if_role_assigned(**kwargs):
@@ -97,6 +122,11 @@ class UserRoleListEndpoint(BaseMetaResource):
             # the request that doesn't have to be the user that is getting a role
             current_app.logger.info(
                 f"User {self.get_user()} creates a new role assignment"
+            )
+            audit(
+                "role.granted",
+                target_id=kwargs.get("user_id"),
+                role_id=kwargs.get("role_id"),
             )
             return self.post_list(kwargs, trace_field="admin_id")
 
@@ -153,7 +183,19 @@ class UserRoleDetailEndpoint(BaseMetaResource):
                 log_txt=f"Error while user {self.get_user()} tries to delete a user role assignment. "
                 + err,
             )
+        # A client admin can not strip the admin role from another admin nor
+        # touch the platform roles; only a platform administrator can
+        if (
+            role_id == ADMIN_ROLE or role_id in PLATFORM_ROLES
+        ) and not self.get_user().is_platform_admin():
+            raise NoPermission(
+                error="Only a platform administrator can revoke this role",
+                log_txt=f"Error while user {self.get_user()} tries to remove "
+                f"role {role_id} of user {user_id}. Only platform "
+                f"administrators can revoke admin or platform roles.",
+            )
         current_app.logger.info(
             f"User {self.get_user()} deletes user role assignment for user {user_id} and role {role_id}"
         )
+        audit("role.revoked", target_id=user_id, role_id=role_id)
         return self.delete_detail(user_id=user_id, role_id=role_id)

@@ -11,7 +11,13 @@ from cornflow.endpoints.meta_resource import BaseMetaResource
 from cornflow.models import PermissionsDAG, UserRoleModel, UserModel
 from cornflow.schemas.user import SignupRequest
 from cornflow.shared.authentication import Auth, authenticate
-from cornflow.shared.const import AUTH_LDAP, AUTH_OID, ADMIN_ROLE, SIGNUP_WITH_NO_AUTH
+from cornflow.shared.const import (
+    ADMIN_ROLE,
+    AUTH_LDAP,
+    AUTH_OID,
+    SIGNUP_WITH_NO_AUTH,
+    TOKEN_PURPOSE_MFA_SETUP,
+)
 from cornflow.shared.exceptions import (
     EndpointNotImplemented,
     InvalidCredentials,
@@ -96,12 +102,29 @@ class SignUpEndpoint(BaseMetaResource):
         user_role.save()
 
         try:
-            token = self.auth_class.generate_token(user.id)
+            if int(current_app.config.get("MFA_REQUIRED", 0)) == 1:
+                # The new user still has to enroll in two-factor
+                # authentication: a temporary enrollment token is issued
+                # instead of a full session token
+                token = self.auth_class.generate_token(
+                    user.id, purpose=TOKEN_PURPOSE_MFA_SETUP
+                )
+                current_app.logger.info(f"New user created: {user}")
+                return {
+                    "token": token,
+                    "id": user.id,
+                    "mfa_setup_required": True,
+                }, 201
+            tokens = self.auth_class.issue_session_tokens(user)
+        except InvalidUsage:
+            raise
         except Exception as e:
             raise InvalidUsage(
-                error="Error in generating user token: " + str(e),
+                error="Could not complete the sign up. Please try again or "
+                "contact an administrator.",
                 status_code=400,
-                log_txt="Error while user tries to sign up. Unable to generate token.",
+                log_txt="Error while user tries to sign up. Unable to "
+                f"generate token: {str(e)}",
             )
         current_app.logger.info(f"New user created: {user}")
-        return {"token": token, "id": user.id}, 201
+        return {"id": user.id, **tokens}, 201

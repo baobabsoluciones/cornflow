@@ -13,14 +13,38 @@ LEVEL_CONVERTER = {
 def log_config(level=20):
     return {
         'version': 1,
-        'formatters': {'default': {
-            'format': '[%(asctime)s] [%(levelname)s] in %(module)s: %(message)s',
-        }},
-        'handlers': {'wsgi': {
-            'class': 'logging.StreamHandler',
-            'stream': 'ext://flask.logging.wsgi_errors_stream',
-            'formatter': 'default'
-        }},
+        'disable_existing_loggers': False,
+        'formatters': {
+            'default': {
+                'format': '[%(asctime)s] [%(levelname)s] in %(module)s: %(message)s',
+            },
+            # The audit records are already JSON, so the handler emits the
+            # message verbatim (one JSON object per line).
+            'audit': {
+                'format': '%(message)s',
+            },
+        },
+        'handlers': {
+            'wsgi': {
+                'class': 'logging.StreamHandler',
+                'stream': 'ext://flask.logging.wsgi_errors_stream',
+                'formatter': 'default'
+            },
+            'audit': {
+                'class': 'logging.StreamHandler',
+                'stream': 'ext://sys.stdout',
+                'formatter': 'audit',
+            },
+        },
+        'loggers': {
+            # Dedicated security audit channel, kept separate from the
+            # application log so a pipeline / SIEM can collect and retain it.
+            'cornflow.audit': {
+                'level': 'INFO',
+                'handlers': ['audit'],
+                'propagate': False,
+            },
+        },
         'root': {
             'level': LEVEL_CONVERTER[level],
             'handlers': ['wsgi']

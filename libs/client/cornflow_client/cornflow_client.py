@@ -88,6 +88,16 @@ class CornFlow:
         """Sets the token"""
         self.raw.token = token
 
+    @property
+    def refresh_token(self):
+        """Gets the refresh token (None outside an interactive session)"""
+        return self.raw.refresh_token
+
+    @refresh_token.setter
+    def refresh_token(self, refresh_token):
+        """Sets the refresh token"""
+        self.raw.refresh_token = refresh_token
+
     @staticmethod
     def expect_status(func, expected_status=None):
         """
@@ -116,19 +126,94 @@ class CornFlow:
             f"Connection failed with status code: {response.status_code}: {response.text}"
         )
 
-    def login(self, username, pwd, encoding=None):
+    def login(self, username, pwd, totp_code=None, encoding=None):
         """
         Log-in to the server.
 
         :param str username: username
         :param str pwd: password
+        :param str totp_code: the TOTP (or backup) code from the
+          authenticator app, needed when the user has two-factor
+          authentication enabled
         :param str encoding: the type of encoding used in the call. Defaults to 'br'
 
         :return: a dictionary with a token inside
         """
-        response = self.raw.login(username, pwd, encoding=encoding)
+        response = self.raw.login(username, pwd, totp_code=totp_code, encoding=encoding)
         if response.status_code != 200:
             raise CornFlowApiError(
                 f"Login failed with status code: {response.status_code}: {response.text}"
             )
+        result = response.json()
+        if "token" not in result:
+            raise CornFlowApiError(
+                "Login did not return a token: the user must complete the "
+                f"two-factor authentication step: {result}"
+            )
+        return result
+
+    def refresh(self, encoding=None):
+        """
+        Renews the short-lived access token using the refresh token obtained
+        at login (interactive sessions). Call it when the access token has
+        expired (or proactively for long-running interactive scripts); for
+        unattended automation prefer a personal API key.
+
+        :param str encoding: the type of encoding used in the call
+        :return: a dictionary with the new token inside
+        """
+        response = self.raw.refresh(encoding=encoding)
+        if response.status_code != 200:
+            raise CornFlowApiError(
+                f"Token refresh failed with status code: "
+                f"{response.status_code}: {response.text}"
+            )
         return response.json()
+
+    def logout(self, encoding=None):
+        """
+        Revokes the current refresh-token session on the server and clears the
+        local credentials.
+
+        :param str encoding: the type of encoding used in the call
+        """
+        self.raw.logout(encoding=encoding)
+
+    def set_api_key(self, api_key):
+        """
+        Uses a personal API key as the credential for subsequent calls,
+        instead of logging in. The API key is a long-lived bearer token
+        generated beforehand (UI, create_api_key() or the
+        `cornflow users api_key` CLI). Useful for unattended automation and
+        for the cornflow<->airflow service connection.
+
+        :param str api_key: the personal API key
+        """
+        self.raw.set_api_key(api_key)
+
+    def create_api_key(self, totp_code=None, read_only=False, encoding=None):
+        """
+        Generates a personal API key for the currently logged-in user (a
+        prior login() is required). Returns the key string; it is shown only
+        once and generating a new one supersedes the previous key (which keeps
+        working during the server's rotation grace window).
+
+        :param str totp_code: a fresh TOTP code, required when the user has
+          two-factor authentication enabled and the server enforces the
+          step-up
+        :param bool read_only: request a read-only key: the server refuses it
+          on any request that is not a GET (for reporting / BI consumers)
+        :param str encoding: the type of encoding used in the call. Defaults to 'br'
+
+        :return: the personal API key
+        :rtype: str
+        """
+        response = self.raw.create_api_key(
+            totp_code=totp_code, read_only=read_only, encoding=encoding
+        )
+        if response.status_code != 201:
+            raise CornFlowApiError(
+                f"API key generation failed with status code: "
+                f"{response.status_code}: {response.text}"
+            )
+        return response.json()["api_key"]
