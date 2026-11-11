@@ -137,12 +137,17 @@ class SessionsTestCase(UatTestCase):
         self.assertEqual(200, response.status_code, response.json)
         return [item["id"] for item in response.json]
 
-    def grant(self, token, user_id, role_id):
+    def grant(self, token, user_id, role_id, totp_code=None):
+        body = {"user_id": user_id, "role_id": role_id}
+        if totp_code:
+            body["totp_code"] = totp_code
         return self.client.post(
-            USER_ROLE_URL,
-            data=json.dumps({"user_id": user_id, "role_id": role_id}),
-            headers=auth_header(token),
+            USER_ROLE_URL, data=json.dumps(body), headers=auth_header(token)
         )
+
+    def step_up_code(self, username):
+        """TOTP code to grant a platform role, when the user has MFA enrolled."""
+        return self.totp_now(username) if username in self.mfa_secrets else None
 
     def revoke(self, token, user_id, role_id):
         return self.client.delete(
@@ -515,13 +520,23 @@ class TestUatPlatformRoles(SessionsTestCase):
         self.assertEqual(403, response.status_code)
         self.assertIn("Only a platform administrator", response.json["error"])
         # the same call by a platform admin works
-        response = self.grant(self.token_of("padmin"), self.target.id, PLATFORM_ADMIN_ROLE)
+        response = self.grant(
+            self.token_of("padmin"),
+            self.target.id,
+            PLATFORM_ADMIN_ROLE,
+            self.step_up_code("padmin"),
+        )
         self.assertIn(response.status_code, (200, 201), response.json)
 
     def test_uat_7_6_client_admin_cannot_revoke_platform_viewer(self):
         """7.6 Client admin tries to revoke platform_viewer from a user: 403."""
         self.assertIn(
-            self.grant(self.token_of("padmin"), self.target.id, PLATFORM_VIEWER_ROLE).status_code,
+            self.grant(
+                self.token_of("padmin"),
+                self.target.id,
+                PLATFORM_VIEWER_ROLE,
+                self.step_up_code("padmin"),
+            ).status_code,
             (200, 201),
         )
         response = self.revoke(self.token_of("cadmin"), self.target.id, PLATFORM_VIEWER_ROLE)
@@ -533,7 +548,9 @@ class TestUatPlatformRoles(SessionsTestCase):
         both cases, audited."""
         token = self.token_of("padmin")
         with self.assertLogs("cornflow.audit", level="INFO") as logs:
-            granted = self.grant(token, self.target.id, PLATFORM_PLANNER_ROLE)
+            granted = self.grant(
+                token, self.target.id, PLATFORM_PLANNER_ROLE, self.step_up_code("padmin")
+            )
             revoked = self.revoke(token, self.target.id, PLATFORM_PLANNER_ROLE)
         self.assertIn(granted.status_code, (200, 201), granted.json)
         self.assertEqual(200, revoked.status_code, revoked.json)
