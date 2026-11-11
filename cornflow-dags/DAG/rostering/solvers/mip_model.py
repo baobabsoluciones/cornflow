@@ -322,6 +322,10 @@ class MipModel(Experiment):
         # RQ02: employees work their weekly hours
         if self.instance.get_requirement("rq02") != "deactivated":
             for (w, e), max_slots in self.max_working_ts_week.items():
+                # An employee with no workable slot that week (all of it on holiday or downtime) has no
+                # entry in workable_ts_week and nothing to constrain.
+                if (w, e) not in self.workable_ts_week:
+                    continue
                 model += (
                     pl.lpSum(self.works[ts, e] for ts in self.workable_ts_week[w, e])
                     - (self.instance.get_requirement("rq02") == "soft")
