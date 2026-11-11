@@ -3,7 +3,6 @@ def update_schemas_command(url, user, pwd, verbose: bool = False):
     from flask import current_app
 
     from cornflow_client.airflow.api import Airflow
-    from cornflow_client.constants import AirflowError
     from cornflow.shared.const import AIRFLOW_NOT_REACHABLE_MSG
 
     af_client = Airflow(url, user, pwd)
@@ -20,11 +19,7 @@ def update_schemas_command(url, user, pwd, verbose: bool = False):
             current_app.logger.info(f"{AIRFLOW_NOT_REACHABLE_MSG}")
         return False
 
-    try:
-        response = af_client.update_schemas()
-    except AirflowError as err:
-        current_app.logger.warning(f"The DAGs schemas were not updated: {err}")
-        return False
+    response = af_client.update_schemas()
     if response.status_code == 200:
         if verbose:
             current_app.logger.info("DAGs schemas updated")
@@ -40,7 +35,6 @@ def update_dag_registry_command(url, user, pwd, verbose: bool = False):
     from flask import current_app
 
     from cornflow_client.airflow.api import Airflow
-    from cornflow_client.constants import AirflowError
     from cornflow.shared.const import AIRFLOW_NOT_REACHABLE_MSG
 
     af_client = Airflow(url, user, pwd)
@@ -57,11 +51,7 @@ def update_dag_registry_command(url, user, pwd, verbose: bool = False):
             current_app.logger.info(f"{AIRFLOW_NOT_REACHABLE_MSG}")
         return False
 
-    try:
-        response = af_client.update_dag_registry()
-    except AirflowError as err:
-        current_app.logger.warning(f"The DAG registry was not updated: {err}")
-        return False
+    response = af_client.update_dag_registry()
     if response.status_code == 200:
         if verbose:
             current_app.logger.info("DAGs schemas updated on cornflow")
