@@ -52,7 +52,7 @@ class RosteringTestCase(BaseDAGTests.SolvingTests):
             {"id_employee": 3, "day": f"2021-09-{day:02d}"} for day in range(6, 11)
         ]
 
-        solution, _, _, _, _ = self.app.solve(instance_data, self.config, None)
+        solution = self.app.solve(instance_data, self.config, None)[0]
 
         self.assertIsNotNone(solution)
         self.assertEqual(
