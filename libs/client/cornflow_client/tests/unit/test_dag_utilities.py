@@ -92,3 +92,52 @@ class DagUtilities(unittest.TestCase):
             )
 
         self.assertEqual(2, client.write_execution_files.call_count)
+
+    def _failed_task(self, layout):
+        """A temp log folder with one task log written in ``layout``; returns (folder, ti)."""
+        import os
+        import tempfile
+
+        base = tempfile.mkdtemp()
+        ti = Mock(dag_id="rostering", task_id="rostering", run_id="manual__2026-11-11T20:21:33+00:00", try_number=1)
+        ti.execution_date = None
+        path = os.path.join(base, *layout)
+        os.makedirs(os.path.dirname(path))
+        with open(path, "w") as fd:
+            fd.write("task started\n")
+        return base, ti
+
+    def test_airflow_log_of_a_failed_execution_is_saved_with_the_traceback(self):
+        # Airflow 2 layout, found through the configured template
+        base, ti = self._failed_task(
+            ["dag_id=rostering", "run_id=manual__2026-11-11T20:21:33+00:00", "task_id=rostering", "attempt=1.log"]
+        )
+        template = "dag_id={{ ti.dag_id }}/run_id={{ ti.run_id }}/task_id={{ ti.task_id }}/attempt={{ try_number }}.log"
+        client = Mock()
+
+        du.try_to_save_airflow_log(client, "exec1", ti, base, "KeyError: (36, 3)", template)
+
+        payload = client.raw.put_api_for_id.call_args.kwargs["payload"]
+        self.assertIn("task started", payload["log_text"])
+        self.assertIn("KeyError: (36, 3)", payload["log_text"])
+        # the endpoint turns a missing state into "correct": the failure state must travel with the log
+        self.assertEqual(payload["state"], -1)
+
+    def test_the_log_layout_of_old_airflow_versions_is_still_found(self):
+        base, ti = self._failed_task(["rostering", "rostering", "2026-11-11T20:21:33+00:00", "1.log"])
+        client = Mock()
+
+        du.try_to_save_airflow_log(client, "exec1", ti, base, "boom")
+
+        self.assertIn("task started", client.raw.put_api_for_id.call_args.kwargs["payload"]["log_text"])
+
+    def test_without_a_log_file_the_traceback_is_still_saved(self):
+        import tempfile
+
+        ti = Mock(dag_id="d", task_id="t", run_id="r", try_number=1)
+        ti.execution_date = None
+        client = Mock()
+
+        du.try_to_save_airflow_log(client, "exec1", ti, tempfile.mkdtemp(), "boom")
+
+        self.assertEqual(client.raw.put_api_for_id.call_args.kwargs["payload"]["log_text"].strip(), "boom")
