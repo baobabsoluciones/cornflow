@@ -717,10 +717,15 @@ class Instance(InstanceCore):
 
         return SuperDict(
             {
-                key: contract_hours[key]
-                - employee_holiday_hours.get(key, 0)
-                - store_holiday_hours.get(key, 0)
-                - downtime_hours.get(key, 0)
+                # Holidays are charged per day (ceil(hours / days)), so a week fully on holiday can exceed the
+                # contract hours: never go below 0.
+                key: max(
+                    0,
+                    contract_hours[key]
+                    - employee_holiday_hours.get(key, 0)
+                    - store_holiday_hours.get(key, 0)
+                    - downtime_hours.get(key, 0),
+                )
                 for key in contract_hours
             }
         )

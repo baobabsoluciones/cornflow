@@ -36,6 +36,30 @@ class RosteringTestCase(BaseDAGTests.SolvingTests):
 
         self.assertEqual(instance_checks, {"timeslot_length": 120})
 
+    def test_employee_on_holiday_the_whole_week(self):
+        """
+        An employee on holiday every day of a week (the holiday hours reach or exceed the contract hours)
+        must not break the solver: the week simply has nothing to schedule for them.
+        """
+        instance_data = load_json(
+            os.path.join(
+                os.path.dirname(__file__),
+                "../../DAG/rostering/data/test_instance_1.json",
+            )
+        )
+        # employee 3: 24 h in 5 days, so 5 holiday days charge 25 h
+        instance_data["employee_holidays"] = [
+            {"id_employee": 3, "day": f"2021-09-{day:02d}"} for day in range(6, 11)
+        ]
+
+        solution = self.app.solve(instance_data, self.config, None)[0]
+
+        self.assertIsNotNone(solution)
+        self.assertEqual(
+            [w for w in solution["works"] if w["id_employee"] == 3],
+            [],
+        )
+
     def test_incoherent_foreign_keys(self):
         """
         Test that the foreign keys are incoherent
