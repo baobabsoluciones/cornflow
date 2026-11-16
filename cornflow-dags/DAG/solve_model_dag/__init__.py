@@ -112,10 +112,7 @@ class PuLP(ApplicationCore):
         try:
             return self._solve(data, config, log_path)
         finally:
-            try:
-                os.remove(log_path)
-            except FileNotFoundError:
-                pass
+            os.remove(log_path)
 
     def _solve(self, data: dict, config: dict, log_path: str):
         algo = PuLPSolve(Instance.from_dict(data), None)
