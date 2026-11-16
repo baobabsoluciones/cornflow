@@ -72,8 +72,8 @@ helm install my-cornflow ./helm-charts/cornflow
    AIRFLOW_CONN_CF_URI: This must be configured manually
    ```
    The URL must be configured based on the `EXTERNAL_APP` setting in `cornflow.env`:
-   - If `EXTERNAL_APP=0`: `http://service_user:Service_user1234@RELEASE_NAME-cornflow-server:5000/`
-   - If `EXTERNAL_APP=1`: `http://service_user:Service_user1234@RELEASE_NAME-cornflow-server:5000/cornflow/`
+   - If `EXTERNAL_APP=0`: `http://service_user:Mimbre-Faro-Ciervo4@RELEASE_NAME-cornflow-server:5000/`
+   - If `EXTERNAL_APP=1`: `http://service_user:Mimbre-Faro-Ciervo4@RELEASE_NAME-cornflow-server:5000/cornflow/`
 
 **Examples:**
 
@@ -82,7 +82,7 @@ For release "cornflow":
 # CORNFLOW_DB_HOST: Automatically configured as "cornflow-cornflow-postgresql"
 # AIRFLOW_URL: Automatically configured as "http://cornflow-webserver:8080"
 claimName: cornflow-airflow-dags
-AIRFLOW_CONN_CF_URI: "http://service_user:Service_user1234@cornflow-cornflow-server:5000/"
+AIRFLOW_CONN_CF_URI: "http://service_user:Mimbre-Faro-Ciervo4@cornflow-cornflow-server:5000/"
 ```
 
 For release "cornflow-staging":
@@ -90,7 +90,7 @@ For release "cornflow-staging":
 # CORNFLOW_DB_HOST: Automatically configured as "cornflow-staging-cornflow-postgresql"
 # AIRFLOW_URL: Automatically configured as "http://cornflow-staging-webserver:8080"
 claimName: cornflow-staging-airflow-dags
-AIRFLOW_CONN_CF_URI: "http://service_user:Service_user1234@cornflow-staging-cornflow-server:5000/"
+AIRFLOW_CONN_CF_URI: "http://service_user:Mimbre-Faro-Ciervo4@cornflow-staging-cornflow-server:5000/"
 ```
 
 For release "my-project":
@@ -98,7 +98,7 @@ For release "my-project":
 # CORNFLOW_DB_HOST: Automatically configured as "my-project-cornflow-postgresql"
 # AIRFLOW_URL: Automatically configured as "http://my-project-webserver:8080"
 claimName: my-project-airflow-dags
-AIRFLOW_CONN_CF_URI: "http://service_user:Service_user1234@my-project-cornflow-server:5000/"
+AIRFLOW_CONN_CF_URI: "http://service_user:Mimbre-Faro-Ciervo4@my-project-cornflow-server:5000/"
 ```
 
 ### Installation with Custom Values
@@ -223,11 +223,11 @@ cornflow:
 
 **When `EXTERNAL_APP=0` (default):**
 - Cornflow runs at the root URL: `http://my-project-cornflow-server:5000/`
-- Airflow connects to: `http://service_user:Service_user1234@my-project-cornflow-server:5000/`
+- Airflow connects to: `http://service_user:Mimbre-Faro-Ciervo4@my-project-cornflow-server:5000/`
 
 **When `EXTERNAL_APP=1`:**
 - Cornflow runs at a specific path: `http://my-project-cornflow-server:5000/cornflow/`
-- Airflow connects to: `http://service_user:Service_user1234@my-project-cornflow-server:5000/cornflow/`
+- Airflow connects to: `http://service_user:Mimbre-Faro-Ciervo4@my-project-cornflow-server:5000/cornflow/`
 
 ### Airflow Configuration
 
@@ -348,14 +348,15 @@ persistence:
 | `USER_ACCESS_ALL_OBJECTS` | Planner access to other users' objects | `0` |
 | `TOKEN_DURATION` | Token duration in hours | `24` |
 | `PWD_ROTATION_TIME` | Password rotation time in days | `120` |
+| `RATELIMIT_STORAGE_URI` | Shared storage of the rate-limit counters (e.g. `redis://<host>:6379/0`); `memory://` counts per gunicorn worker | `memory://` |
 
 ### Authentication Variables
 
 | Variable | Description | Default Value |
 |----------|-------------|---------------|
 | `CORNFLOW_ADMIN_USER` | Admin user | `cornflow_admin` |
-| `CORNFLOW_ADMIN_PWD` | Admin password | `Cornflow_admin1234` |
-| `CORNFLOW_SERVICE_PWD` | Service user password | `Service_user1234` |
+| `CORNFLOW_ADMIN_PWD` | Admin password | `Granito-Vela-Oruga7` |
+| `CORNFLOW_SERVICE_PWD` | Service user password | `Mimbre-Faro-Ciervo4` |
 
 ### LDAP Configuration (for LDAP authentication)
 

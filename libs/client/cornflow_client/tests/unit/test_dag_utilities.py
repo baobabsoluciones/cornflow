@@ -1,3 +1,5 @@
+import os
+import tempfile
 import unittest
 from cornflow_client.constants import EXECUTION_FILES_STATUS_ERROR
 from cornflow_client.raw_cornflow_client import CornFlowApiError
@@ -41,6 +43,20 @@ class DagUtilities(unittest.TestCase):
             )
             CornFlow.assert_called_with(url=url)
 
+    @patch("cornflow_client.airflow.dag_utilities.CornFlow")
+    def test_connection_with_api_key(self, CornFlow):
+        # When CORNFLOW_SERVICE_API_KEY is set, the service connection uses
+        # the API key and does not log in
+        secrets = Mock()
+        secrets.get_conn_value.return_value = (
+            "cornflow://service_user:pwd@localhost:5000"
+        )
+        client_instance = CornFlow.return_value
+        with patch.dict(os.environ, {"CORNFLOW_SERVICE_API_KEY": "the-api-key"}):
+            du.connect_to_cornflow(secrets)
+        client_instance.set_api_key.assert_called_with("the-api-key")
+        client_instance.login.assert_not_called()
+
     def test_try_to_write_file(self):
         """
         Validates that execution files are written once when the upload succeeds.
@@ -59,7 +75,10 @@ class DagUtilities(unittest.TestCase):
         Validates that a failed file upload records an execution-files error status.
         """
         client = Mock()
-        client.write_execution_files.side_effect = [CornFlowApiError("upload failed"), None]
+        client.write_execution_files.side_effect = [
+            CornFlowApiError("upload failed"),
+            None,
+        ]
 
         with self.assertRaises(du.AirflowDagException):
             du.try_to_write_file(
@@ -95,9 +114,6 @@ class DagUtilities(unittest.TestCase):
 
     def _failed_task(self, layout):
         """A temp log folder with one task log written in ``layout``; returns (folder, ti)."""
-        import os
-        import tempfile
-
         base = tempfile.mkdtemp()
         ti = Mock(dag_id="rostering", task_id="rostering", run_id="manual__2026-11-11T20:21:33+00:00", try_number=1)
         ti.execution_date = None
@@ -115,12 +131,11 @@ class DagUtilities(unittest.TestCase):
         template = "dag_id={{ ti.dag_id }}/run_id={{ ti.run_id }}/task_id={{ ti.task_id }}/attempt={{ try_number }}.log"
         client = Mock()
 
-        du.try_to_save_airflow_log(client, "exec1", ti, base, "KeyError: (36, 3)", template)
+        du.try_to_save_airflow_log(client, "exec1", ti, base, "KeyError: (36, 3)", template, state=-1)
 
         payload = client.raw.put_api_for_id.call_args.kwargs["payload"]
         self.assertIn("task started", payload["log_text"])
         self.assertIn("KeyError: (36, 3)", payload["log_text"])
-        # the endpoint turns a missing state into "correct": the failure state must travel with the log
         self.assertEqual(payload["state"], -1)
 
     def test_the_log_layout_of_old_airflow_versions_is_still_found(self):
@@ -132,8 +147,6 @@ class DagUtilities(unittest.TestCase):
         self.assertIn("task started", client.raw.put_api_for_id.call_args.kwargs["payload"]["log_text"])
 
     def test_without_a_log_file_the_traceback_is_still_saved(self):
-        import tempfile
-
         ti = Mock(dag_id="d", task_id="t", run_id="r", try_number=1)
         ti.execution_date = None
         client = Mock()
@@ -141,3 +154,70 @@ class DagUtilities(unittest.TestCase):
         du.try_to_save_airflow_log(client, "exec1", ti, tempfile.mkdtemp(), "boom")
 
         self.assertEqual(client.raw.put_api_for_id.call_args.kwargs["payload"]["log_text"].strip(), "boom")
+
+class DagUtilitiesErrorLog(unittest.TestCase):
+    def _task_instance(self, folder):
+        ti = Mock(dag_id="dag", run_id="run", task_id="task", try_number=1)
+        log_dir = os.path.join(folder, "dag_id=dag", "run_id=run", "task_id=task")
+        os.makedirs(log_dir)
+        with open(os.path.join(log_dir, "attempt=1.log"), "w") as fd:
+            fd.write("the airflow log")
+        return ti
+
+    def _put_payloads(self, client):
+        return [
+            call.kwargs["payload"] for call in client.raw.put_api_for_id.call_args_list
+        ]
+
+    def test_try_to_save_airflow_log_without_state(self):
+        with tempfile.TemporaryDirectory() as folder:
+            ti = self._task_instance(folder)
+            client = Mock()
+            du.try_to_save_airflow_log(client, "exec-id", ti, folder)
+        self.assertEqual([dict(log_text="the airflow log")], self._put_payloads(client))
+
+    def test_try_to_save_airflow_log_with_state(self):
+        with tempfile.TemporaryDirectory() as folder:
+            ti = self._task_instance(folder)
+            client = Mock()
+            du.try_to_save_airflow_log(client, "exec-id", ti, folder, state=-1)
+        self.assertEqual(
+            [dict(log_text="the airflow log", state=-1)], self._put_payloads(client)
+        )
+
+    @patch("cornflow_client.airflow.dag_utilities.connect_to_cornflow")
+    def test_cf_solve_error_log_keeps_error_state(self, connect):
+        client = Mock()
+        client.get_data.return_value = dict(
+            data={}, solution_data=None, config={"msg": False}, id="inst-id"
+        )
+        connect.return_value = client
+
+        def failing_solver(*args):
+            raise ValueError("boom")
+
+        with tempfile.TemporaryDirectory() as folder:
+            ti = self._task_instance(folder)
+            with self.assertRaises(du.AirflowDagException):
+                self._run_cf_solve(failing_solver, ti, folder)
+
+        payloads = self._put_payloads(client)
+        self.assertIn(dict(state=-1), payloads)
+        log_payloads = [p for p in payloads if "log_text" in p]
+        self.assertEqual(1, len(log_payloads))
+        self.assertEqual(-1, log_payloads[0]["state"])
+        # the last write to the execution must not be a state-less one
+        self.assertIn("state", payloads[-1])
+
+    def _run_cf_solve(self, fun, ti, folder):
+        with patch(
+            "cornflow_client.airflow.dag_utilities.get_base_log_folder",
+            return_value=folder,
+        ):
+            return du.cf_solve(
+                fun,
+                "dag",
+                {},
+                ti=ti,
+                dag_run=Mock(conf={"exec_id": "exec-id"}),
+            )

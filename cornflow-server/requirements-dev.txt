@@ -5,6 +5,7 @@ colorama
 coverage
 docutils
 Flask-Testing
+freezegun
 imagesize
 orloge
 packaging

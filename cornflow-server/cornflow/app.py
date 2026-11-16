@@ -9,7 +9,7 @@ from logging.config import dictConfig
 import click
 
 # Partial imports
-from flask import Flask
+from flask import Flask, Blueprint
 from flask.cli import with_appcontext
 from flask_apispec.extension import FlaskApiSpec
 from flask_cors import CORS
@@ -17,6 +17,7 @@ from flask_migrate import Migrate
 from flask_restful import Api
 from werkzeug.exceptions import NotFound
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 # Module imports
 from cornflow.commands import (
@@ -34,19 +35,108 @@ from cornflow.commands import (
 from cornflow.config import app_config
 from cornflow.endpoints import resources, alarms_resources
 from cornflow.endpoints.login import LoginEndpoint, LoginOpenAuthEndpoint
+from cornflow.endpoints.refresh import LogoutEndpoint, RefreshTokenEndpoint
 from cornflow.endpoints.signup import SignUpEndpoint
 from cornflow.shared import db, bcrypt
 from cornflow.shared.compress import init_compress
+from cornflow.shared.rate_limit import limiter
 from cornflow.shared.const import (
     AUTH_DB,
     AUTH_LDAP,
     AUTH_OID,
     CONDITIONAL_ENDPOINTS,
+    LEGACY_ENDPOINT_SUFFIX,
     SIGNUP_WITH_AUTH,
     SIGNUP_WITH_NO_AUTH,
 )
 from cornflow.shared.exceptions import initialize_errorhandlers, ConfigurationError
 from cornflow.shared.log_config import log_config
+from cornflow.shared.plugins import load_plugins
+from cornflow.shared.security import init_security_headers, resolve_cors_origins
+
+
+# Minimum length in bytes of the JWT signing keys. HMAC-SHA256 requires keys
+# of at least 256 bits (RFC 7518, section 3.2) and CCN-STIC-807 requires
+# equivalent strength for the employed cryptography.
+MINIMUM_SECRET_KEY_LENGTH = 32
+
+
+def _check_secret_keys(app):
+    """
+    Refuses to start the application when a JWT signing key is configured
+    with less than MINIMUM_SECRET_KEY_LENGTH bytes, so weak keys can not be
+    used to sign session tokens.
+
+    :param app: the Flask application being created
+    """
+    for key_name in ("SECRET_TOKEN_KEY", "SECRET_BI_KEY"):
+        value = app.config.get(key_name)
+        if value is None:
+            # Token generation will fail at runtime with a clear error;
+            # deployments must provide the keys through the environment
+            app.logger.warning(
+                f"{key_name} is not configured: authentication tokens can "
+                f"not be issued until it is set"
+            )
+            continue
+        if len(str(value).encode("utf8")) < MINIMUM_SECRET_KEY_LENGTH:
+            raise ConfigurationError(
+                f"{key_name} must be at least {MINIMUM_SECRET_KEY_LENGTH} "
+                f"bytes long (256 bits). Generate one with: "
+                f'python -c "import secrets; print(secrets.token_hex(32))"'
+            )
+
+
+def _check_rate_limit_storage(app):
+    """
+    Warns at startup when the rate limiter keeps its counters in memory.
+    The in-memory storage is per process: behind gunicorn every worker counts
+    on its own, so a client is only throttled after the configured limit
+    times the number of workers, and the remaining-requests header jumps up
+    and down depending on the worker that answers. Production deployments
+    must point RATELIMIT_STORAGE_URI to a shared storage (e.g. redis://).
+
+    :param app: the Flask application being created
+    """
+    if not int(app.config.get("RATELIMIT_ENABLED", 0)):
+        return
+    storage = str(app.config.get("RATELIMIT_STORAGE_URI") or "memory://")
+    if storage.startswith("memory://"):
+        app.logger.warning(
+            "RATELIMIT_STORAGE_URI is memory://: the rate-limit counters are "
+            "kept per process, so with several gunicorn workers each one "
+            "counts on its own and the effective limit is the configured one "
+            "times the number of workers. Set RATELIMIT_STORAGE_URI to a "
+            "shared storage (e.g. redis://<host>:6379/0) in production."
+        )
+
+
+def _register_legacy_routes(app, resources, alarms_resources, auth_type):
+    """
+    Registers the unprefixed routes (e.g. ``/login/``) kept for backwards
+    compatibility. The canonical routes live under ``/cornflow/``.
+
+    Every alias is named ``<endpoint>`` + ``LEGACY_ENDPOINT_SUFFIX``. To remove
+    the unprefixed routes, delete this function and its call in ``create_app``.
+    """
+    suffix = LEGACY_ENDPOINT_SUFFIX
+    api_legacy = Api(app)
+    for res in resources:
+        api_legacy.add_resource(res["resource"], res["urls"], endpoint=res["endpoint"] + suffix)
+    if app.config["ALARMS_ENDPOINTS"]:
+        for res in alarms_resources:
+            api_legacy.add_resource(res["resource"], res["urls"], endpoint=res["endpoint"] + suffix)
+    if auth_type == AUTH_DB:
+        signup_activated = int(app.config["SIGNUP_ACTIVATED"])
+        if signup_activated in [SIGNUP_WITH_AUTH, SIGNUP_WITH_NO_AUTH]:
+            api_legacy.add_resource(SignUpEndpoint, CONDITIONAL_ENDPOINTS["signup"], endpoint="signup" + suffix)
+        api_legacy.add_resource(LoginEndpoint, CONDITIONAL_ENDPOINTS["login"], endpoint="login" + suffix)
+    elif auth_type == AUTH_LDAP:
+        api_legacy.add_resource(LoginEndpoint, CONDITIONAL_ENDPOINTS["login"], endpoint="login" + suffix)
+    elif auth_type == AUTH_OID:
+        api_legacy.add_resource(LoginOpenAuthEndpoint, CONDITIONAL_ENDPOINTS["login"], endpoint="login" + suffix)
+    api_legacy.add_resource(RefreshTokenEndpoint, "/token/refresh/", endpoint="token-refresh" + suffix)
+    api_legacy.add_resource(LogoutEndpoint, "/logout/", endpoint="logout" + suffix)
 
 
 def create_app(env_name="development", dataconn=None):
@@ -66,13 +156,27 @@ def create_app(env_name="development", dataconn=None):
     app.logger.setLevel(app_config[env_name].LOG_LEVEL)
 
     app.config.from_object(app_config[env_name])
+    _check_secret_keys(app)
     # initialization for init_cornflow_service.py
     if dataconn is not None:
         app.config["SQLALCHEMY_DATABASE_URI"] = dataconn
-    CORS(app)
+    # Cross-origin access is driven by CORS_ORIGINS: "*" allows any origin
+    # (development default), an explicit list restricts it and an empty value
+    # (production default) is default-closed.
+    CORS(app, origins=resolve_cors_origins(app.config.get("CORS_ORIGINS", "*")))
     bcrypt.init_app(app)
     db.init_app(app)
     Migrate(app=app, db=db)
+
+    # When behind a trusted reverse proxy, honour the forwarded headers so the
+    # rate limiter and the logs see the real client IP instead of the proxy's
+    if int(app.config.get("RATELIMIT_TRUST_FORWARDED_FOR", 0)):
+        app.wsgi_app = ProxyFix(
+            app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1
+        )
+
+    limiter.init_app(app)
+    _check_rate_limit_storage(app)
 
     if "sqlite" in app.config["SQLALCHEMY_DATABASE_URI"]:
 
@@ -84,19 +188,14 @@ def create_app(env_name="development", dataconn=None):
 
             event.listen(db.engine, "connect", _fk_pragma_on_connect)
 
-    api = Api(app)
+    # Rutas del Core bajo /cornflow/ via Blueprint (URLs canónicas)
+    cornflow_bp = Blueprint("cornflow", __name__, url_prefix="/cornflow")
+    api = Api(cornflow_bp)
     for res in resources:
         api.add_resource(res["resource"], res["urls"], endpoint=res["endpoint"])
     if app.config["ALARMS_ENDPOINTS"]:
         for res in alarms_resources:
             api.add_resource(res["resource"], res["urls"], endpoint=res["endpoint"])
-
-    docs = FlaskApiSpec(app)
-    for res in resources:
-        docs.register(target=res["resource"], endpoint=res["endpoint"])
-    if app.config["ALARMS_ENDPOINTS"]:
-        for res in alarms_resources:
-            docs.register(target=res["resource"], endpoint=res["endpoint"])
 
     # Resource for the log-in
     auth_type = app.config["AUTH_TYPE"]
@@ -124,8 +223,31 @@ def create_app(env_name="development", dataconn=None):
             log_txt="Error while configuring authentication. The authentication type is not valid.",
         )
 
+    # Refresh-token session endpoints. Like login, they validate the token in
+    # the request themselves, so they are registered outside the permission
+    # system (no ViewModel / permission entries).
+    api.add_resource(RefreshTokenEndpoint, "/token/refresh/", endpoint="token-refresh")
+    api.add_resource(LogoutEndpoint, "/logout/", endpoint="logout")
+
+    app.register_blueprint(cornflow_bp)
+
+    _register_legacy_routes(app, resources, alarms_resources, auth_type)
+
+    # The interactive API docs (Swagger UI) are registered only when enabled.
+    # They are off by default in production so the deny-by-default CSP holds
+    # and the OpenAPI schema is not exposed. Only the Blueprint routes are
+    # documented; the legacy aliases are not duplicated in the schema.
+    if int(app.config.get("DOCS_ENABLED", 1)):
+        docs = FlaskApiSpec(app)
+        for res in resources:
+            docs.register(target=res["resource"], endpoint=res["endpoint"], blueprint="cornflow")
+        if app.config["ALARMS_ENDPOINTS"]:
+            for res in alarms_resources:
+                docs.register(target=res["resource"], endpoint=res["endpoint"], blueprint="cornflow")
+
     initialize_errorhandlers(app)
     init_compress(app)
+    init_security_headers(app)
 
     app.cli.add_command(create_service_user)
     app.cli.add_command(create_admin_user)
@@ -138,10 +260,16 @@ def create_app(env_name="development", dataconn=None):
     app.cli.add_command(register_deployed_dags)
     app.cli.add_command(register_dag_permissions)
 
-    if app.config["APPLICATION_ROOT"] != "/" and app.config["EXTERNAL_APP"] == 0:
-        app.wsgi_app = DispatcherMiddleware(
-            NotFound(), {app.config["APPLICATION_ROOT"]: app.wsgi_app}
-        )
+    if int(app.config["EXTERNAL_APP"]) == 1:
+        # Legacy mode: DispatcherMiddleware mounts cornflow under APPLICATION_ROOT.
+        # The external app is responsible for combining both apps via wsgi.py.
+        if app.config["APPLICATION_ROOT"] != "/":
+            app.wsgi_app = DispatcherMiddleware(
+                NotFound(), {app.config["APPLICATION_ROOT"]: app.wsgi_app}
+            )
+    else:
+        # Plugin mode: autodiscover and mount plugins registered under cornflow.plugins.
+        load_plugins(app)
 
     return app
 

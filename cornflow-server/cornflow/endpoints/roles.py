@@ -14,12 +14,12 @@ from cornflow.schemas.role import (
     RolesResponse,
 )
 from cornflow.shared.authentication import Auth, authenticate
-from cornflow.shared.const import ADMIN_ROLE, AUTH_LDAP
+from cornflow.shared.const import AUTH_LDAP, PLATFORM_ADMIN_ROLE
 from cornflow.shared.exceptions import EndpointNotImplemented
 
 
 class RolesListEndpoint(BaseMetaResource):
-    ROLES_WITH_ACCESS = [ADMIN_ROLE]
+    ROLES_WITH_ACCESS = [PLATFORM_ADMIN_ROLE]
     DESCRIPTION = "Endpoint to get or create the current roles in the application"
 
     def __init__(self):
@@ -71,7 +71,7 @@ class RolesListEndpoint(BaseMetaResource):
 
 
 class RoleDetailEndpoint(BaseMetaResource):
-    ROLES_WITH_ACCESS = [ADMIN_ROLE]
+    ROLES_WITH_ACCESS = [PLATFORM_ADMIN_ROLE]
     DESCRIPTION = "Endpoint to get, modify or delete a specific role of the application"
 
     def __init__(self):

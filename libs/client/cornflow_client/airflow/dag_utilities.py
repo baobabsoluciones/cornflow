@@ -12,6 +12,7 @@ from cornflow_client import CornFlow, CornFlowApiError
 from cornflow_client.constants import (
     EXECUTION_FILES_STATUS_ERROR,
     EXECUTION_FILES_STATUS_NOT_GENERATED,
+    MAX_AIRFLOW_LOG_CHARS,
 )
 
 # TODO: convert everything to an object that encapsulates everything
@@ -73,9 +74,15 @@ def get_requirements(path):
 
 def connect_to_cornflow(secrets):
     """
-    Create a connection to cornflow and log in with airflow admin user.
+    Create a connection to cornflow for the service account.
 
-    :return: A logged and connected cornflow client class instance
+    If a personal API key is provided through the CORNFLOW_SERVICE_API_KEY
+    environment variable, it is used as the credential (a long-lived bearer
+    token, so the connection is not affected by the short session-token
+    expiry and needs no re-login). Otherwise it falls back to logging in with
+    the username and password from the CF_URI connection.
+
+    :return: A connected cornflow client class instance
     """
     # This secret comes from airflow configuration
     print("Getting connection information from ENV VAR=CF_URI")
@@ -90,7 +97,12 @@ def connect_to_cornflow(secrets):
     if conn.path:
         url = urljoin(url, conn.path)
     airflow_user = CornFlow(url=url)
-    airflow_user.login(username=conn.username, pwd=conn.password)
+    api_key = os.getenv("CORNFLOW_SERVICE_API_KEY")
+    if api_key:
+        # Long-lived credential: no login and no session expiry to worry about
+        airflow_user.set_api_key(api_key)
+    else:
+        airflow_user.login(username=conn.username, pwd=conn.password)
     return airflow_user
 
 
@@ -137,9 +149,6 @@ def get_log_filename_template(kwargs):
         return conf.get("logging", "log_filename_template", fallback=None)
     except Exception:
         return None
-
-
-MAX_AIRFLOW_LOG_CHARS = 100_000  # the tail is kept: the end of the log is where the failure is
 
 
 def _airflow_log_file(base_log_folder, ti, log_filename_template=None):
@@ -197,13 +206,13 @@ def try_to_save_airflow_log(
     base_log_folder,
     error_detail="",
     log_filename_template=None,
-    state=-1,
+    state=None,
 ):
     """Save the Airflow task log of a failed execution as the execution's ``log_text``, so the user can read it
     through the Cornflow API. ``error_detail`` (a traceback) is appended: Airflow writes the traceback of the failure
     to the log only after the task function has returned, so it is not in the file yet. When the file is not found
-    the traceback alone is still saved. ``state`` is the failure state of the execution: the endpoint that stores the
-    log treats a missing state as "correct", so it has to be sent again or the failed execution would turn successful."""
+    the traceback alone is still saved. ``state``, if given, is sent together with the log so that the execution keeps
+    it (e.g. the error state in failure paths)."""
     log_file = _airflow_log_file(base_log_folder, ti, log_filename_template)
     if log_file is None:
         print("The Airflow task log file was not found: saving only the error detail")
@@ -216,11 +225,10 @@ def try_to_save_airflow_log(
     if not log_file_txt:
         return
     try:
-        client.raw.put_api_for_id(
-            "dag/",
-            id=exec_id,
-            payload=dict(state=state, log_text=log_file_txt[-MAX_AIRFLOW_LOG_CHARS:]),
-        )
+        payload = dict(log_text=log_file_txt[-MAX_AIRFLOW_LOG_CHARS:])
+        if state is not None:
+            payload["state"] = state
+        client.raw.put_api_for_id("dag/", id=exec_id, payload=payload)
     except Exception as e:
         print(f"An exception occurred while trying to register airflow log: {e}")
 
@@ -380,7 +388,7 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
         client = connect_to_cornflow(secrets)
         try_to_save_error(client, exec_id, -1)
         client.update_status(exec_id, {"status": -1})
-        try_to_save_airflow_log(client, exec_id, ti, base_log_folder)
+        try_to_save_airflow_log(client, exec_id, ti, base_log_folder, state=-1)
         raise AirflowDagException(e)
     except Exception as e:
         if config.get("msg", True):
@@ -396,6 +404,7 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
             base_log_folder,
             traceback.format_exc(),
             log_filename_template,
+            state=-1,
         )
         raise AirflowDagException(f"There was an error during the solving: {e}")
 
@@ -474,9 +483,7 @@ def cf_check_generate_kpis(fun_check_generate_kpis, dag_name, secrets, **kwargs)
                 try_to_save_error(client, exec_id, -6)
                 if config.get("msg", True):
                     print("An error occurred while trying to save the checks")
-                try_to_save_airflow_log(
-                    client, exec_id, ti, base_log_folder, state=-6
-                )
+                try_to_save_airflow_log(client, exec_id, ti, base_log_folder, state=-6)
                 raise AirflowDagException("The writing of the case checks failed")
 
         # # The validation went correctly: can save the solution without problem
@@ -487,7 +494,7 @@ def cf_check_generate_kpis(fun_check_generate_kpis, dag_name, secrets, **kwargs)
             print("Some unknown error happened")
         try_to_save_error(client, exec_id, -1)
         client.update_status(exec_id, {"status": -1})
-        try_to_save_airflow_log(client, exec_id, ti, base_log_folder)
+        try_to_save_airflow_log(client, exec_id, ti, base_log_folder, state=-1)
         raise AirflowDagException(
             "There was an error during the verification of the data"
         )
