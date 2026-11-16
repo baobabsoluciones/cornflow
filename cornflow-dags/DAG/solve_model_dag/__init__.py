@@ -19,6 +19,7 @@ import cornflow_client.airflow.dag_utilities as utils
 import pulp as pl
 import orloge as ol
 import os
+import tempfile
 
 
 config = get_pulp_jsonschema("solver_config.json")
@@ -103,8 +104,17 @@ class PuLP(ApplicationCore):
     def solve(
         self, data: dict, config: dict, solution_data: dict = None
     ) -> Tuple[Dict, Union[Dict, None], Union[Dict, None], str, Dict]:
-        # we overwrite the logPath argument before solving.
-        log_path = config["logPath"] = "temp.log"
+        # we overwrite the logPath argument before solving. Each solve gets its own file: Airflow runs several
+        # tasks at once in the same working directory, and a shared name let one solve delete another's log.
+        fd, log_path = tempfile.mkstemp(prefix="solve_model_dag_", suffix=".log")
+        os.close(fd)
+        config["logPath"] = log_path
+        try:
+            return self._solve(data, config, log_path)
+        finally:
+            os.remove(log_path)
+
+    def _solve(self, data: dict, config: dict, log_path: str):
         algo = PuLPSolve(Instance.from_dict(data), None)
         simple_log = algo.solve(config)
         solution = algo.solution.to_dict()
@@ -137,11 +147,6 @@ class PuLP(ApplicationCore):
                 log_dict["progress"] = (
                     log_dict["progress"].fillna("").to_dict(orient="list")
                 )
-
-        try:
-            os.remove(log_path)
-        except FileNotFoundError:
-            pass
 
         return (
             solution,

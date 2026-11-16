@@ -131,13 +131,19 @@ class DAGDetailEndpoint(BaseMetaResource):
                     f"Solution data do not match the jsonschema.",
                 )
 
-        state = kwargs.get("state", EXEC_STATE_CORRECT)
+        # The state is only touched when the request carries one, or when it
+        # carries a solution (which defaults to correct). Requests that only
+        # add a log, checks or kpis must not change the state of the execution.
+        state = kwargs.get("state")
+        if state is None and data is not None:
+            state = EXEC_STATE_CORRECT
         new_data = dict(
-            state=state,
-            state_message=EXECUTION_STATE_MESSAGE_DICT[state],
             # because we do not want to store airflow's user:
             user_id=execution.user_id,
         )
+        if state is not None:
+            new_data["state"] = state
+            new_data["state_message"] = EXECUTION_STATE_MESSAGE_DICT[state]
 
         # newly validated data from marshmallow
         if data is not None:

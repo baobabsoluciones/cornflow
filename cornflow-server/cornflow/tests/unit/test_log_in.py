@@ -30,7 +30,7 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
         self.data = {
             "username": "testname",
             "email": "test@test.com",
-            "password": "Testpassword1!",
+            "password": "Kx9#tR2m!Qw7Zp",
         }
         user = UserModel(data=self.data)
         user.save()
@@ -46,9 +46,9 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
         super().test_successful_log_in()
         self.assertEqual(self.idx, self.response.json["id"])
 
-    @mock.patch("cornflow.endpoints.login.Auth.generate_token")
+    @mock.patch("cornflow.endpoints.login.Auth.issue_session_tokens")
     def test_exception_on_token_generation(self, mock_generate_token):
-        # Simulate an exception when generate_token is called
+        # Simulate an exception when the session tokens are issued
         mock_generate_token.side_effect = Exception("Custom exception")
 
         # Prepare login payload
@@ -64,8 +64,10 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
 
         # Assert that the response is a 400 error
         self.assertEqual(400, response.status_code)
-        # Assert that the error message contains the expected text
-        self.assertIn("Error in generating user token", response.json["error"])
+        # The client-facing message is generic (the internal exception detail
+        # is only written to the server log, not leaked to the caller)
+        self.assertIn("Could not complete the login", response.json["error"])
+        self.assertNotIn("Custom exception", response.json["error"])
 
 
 class TestLogInOpenAuth(CustomTestCase):
@@ -88,7 +90,7 @@ class TestLogInOpenAuth(CustomTestCase):
         self.user_data = {
             "username": "testname",
             "email": "test@test.com",
-            "password": "Testpassword1!",
+            "password": "Kx9#tR2m!Qw7Zp",
         }
 
         test_user = UserModel(data=self.user_data)
@@ -101,7 +103,7 @@ class TestLogInOpenAuth(CustomTestCase):
         self.service_data = {
             "username": "service_user",
             "email": "service@test.com",
-            "password": "Testpassword1!",
+            "password": "Kx9#tR2m!Qw7Zp",
         }
 
         service_user = UserModel(data=self.service_data)
@@ -470,7 +472,7 @@ class TestLogInOpenAuthService(CustomTestCase):
         self.user_data = {
             "username": "testname",
             "email": "test@test.com",
-            "password": "Testpassword1!",
+            "password": "Kx9#tR2m!Qw7Zp",
         }
 
         test_user = UserModel(data=self.user_data)
@@ -483,7 +485,7 @@ class TestLogInOpenAuthService(CustomTestCase):
         self.service_data = {
             "username": "service_user",
             "email": "service@test.com",
-            "password": "Testpassword1!",
+            "password": "Kx9#tR2m!Qw7Zp",
         }
 
         service_user = UserModel(data=self.service_data)

@@ -10,11 +10,11 @@ from cornflow.endpoints.meta_resource import BaseMetaResource
 from cornflow.models import ActionModel
 from cornflow.schemas.action import ActionsResponse
 from cornflow.shared.authentication import Auth, authenticate
-from cornflow.shared.const import ADMIN_ROLE
+from cornflow.shared.const import PLATFORM_ADMIN_ROLE
 
 
 class ActionListEndpoint(BaseMetaResource):
-    ROLES_WITH_ACCESS = [ADMIN_ROLE]
+    ROLES_WITH_ACCESS = [PLATFORM_ADMIN_ROLE]
     DESCRIPTION = "Endpoint which allows to get the actions defined in the application"
 
     def __init__(self):
