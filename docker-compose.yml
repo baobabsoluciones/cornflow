@@ -34,7 +34,7 @@
 x-airflow-common: &airflow-common
   # In order to add custom dependencies or upgrade provider packages you can use your extended image.
   # Comment the image line and uncomment the "build" and "context" lines below, Then run `docker-compose build` to build the images.
-  image: baobabsoluciones/airflow-k8s:release-v2.0.0rc4
+  image: baobabsoluciones/airflow-k8s:release-v1.4.0rc1
   platform: linux/amd64
   #build:
   #  context: ./cornflow-server/airflow_config
@@ -62,9 +62,9 @@ x-airflow-common: &airflow-common
     # Python requirements of the DAGs are installed here by airflow-init
     PYTHONPATH: /opt/airflow/deps
     # Connection used by the DAGs to send the results back to cornflow
-    AIRFLOW_CONN_CF_URI: cornflow://service_user:Service_user1234@cornflow:5000
+    AIRFLOW_CONN_CF_URI: cornflow://service_user:Mimbre-Faro-Ciervo4@cornflow:5000
     CORNFLOW_SERVICE_USER: service_user
-    CORNFLOW_SERVICE_PWD: Service_user1234
+    CORNFLOW_SERVICE_PWD: Mimbre-Faro-Ciervo4
   volumes:
     - ./cornflow-dags/DAG:/opt/airflow/dags
     - ./cornflow-dags/requirements.txt:/requirements.txt:ro
@@ -83,15 +83,15 @@ x-airflow-common: &airflow-common
 x-cornflow-common: &cornflow-common
   # In order to add custom dependencies or upgrade provider packages you can use your extended image.
   # Comment the image line and uncomment the "build" and "context" lines below, Then run `docker-compose build` to build the images.
-  image: baobabsoluciones/cornflow:release-v2.0.0rc4
+  image: baobabsoluciones/cornflow:release-v1.4.0rc1
   platform: linux/amd64
   #build:
   #  context: ./cornflow-server
   environment: &cornflow-common-env
     CORNFLOW_ADMIN_USER: cornflow_admin
-    CORNFLOW_ADMIN_PWD: Cornflow_admin1234
+    CORNFLOW_ADMIN_PWD: Granito-Vela-Oruga7
     CORNFLOW_SERVICE_USER: service_user
-    CORNFLOW_SERVICE_PWD: Service_user1234
+    CORNFLOW_SERVICE_PWD: Mimbre-Faro-Ciervo4
     CORNFLOW_DB_HOST: cornflow_db
     CORNFLOW_DB_PORT: 5432
     CORNFLOW_DB_USER: cornflow
@@ -101,6 +101,9 @@ x-cornflow-common: &cornflow-common
     # airflow user and password created by airflow-init
     AIRFLOW_USER: admin
     AIRFLOW_PWD: admin
+    # Rate-limit counters are per gunicorn worker with the default memory://.
+    # Use a shared Redis when the limits must be exact, e.g.:
+    # RATELIMIT_STORAGE_URI: redis://redis:6379/0
   depends_on: &cornflow-common-depends-on
     cornflow_db:
       condition: service_healthy

@@ -132,7 +132,13 @@ def get_base_log_folder(kwargs):
         return os.path.join(os.environ.get("AIRFLOW_HOME", ""), "logs")
 
 
-def try_to_save_airflow_log(client, exec_id, ti, base_log_folder):
+def try_to_save_airflow_log(client, exec_id, ti, base_log_folder, state=None):
+    """
+    Save the airflow log of the task in the execution.
+
+    :param state: if given, it is sent together with the log so that the
+        execution keeps this state (e.g. the error state in failure paths).
+    """
     # Airflow >= 2.3 (and Airflow 3) layout
     log_file = os.path.join(
         base_log_folder,
@@ -154,9 +160,10 @@ def try_to_save_airflow_log(client, exec_id, ti, base_log_folder):
         with open(log_file, "r") as fd:
             log_file_txt = fd.read()
         try:
-            client.raw.put_api_for_id(
-                "dag/", id=exec_id, payload=dict(log_text=log_file_txt)
-            )
+            payload = dict(log_text=log_file_txt)
+            if state is not None:
+                payload["state"] = state
+            client.raw.put_api_for_id("dag/", id=exec_id, payload=payload)
         except Exception as e:
             print(f"An exception occurred while trying to register airflow log: {e}")
 
@@ -315,7 +322,7 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
         client = connect_to_cornflow(secrets)
         try_to_save_error(client, exec_id, -1)
         client.update_status(exec_id, {"status": -1})
-        try_to_save_airflow_log(client, exec_id, ti, base_log_folder)
+        try_to_save_airflow_log(client, exec_id, ti, base_log_folder, state=-1)
         raise AirflowDagException(e)
     except Exception as e:
         if config.get("msg", True):
@@ -324,7 +331,7 @@ def cf_solve(fun, dag_name, secrets, **kwargs):
         client = connect_to_cornflow(secrets)
         try_to_save_error(client, exec_id, -1)
         client.update_status(exec_id, {"status": -1})
-        try_to_save_airflow_log(client, exec_id, ti, base_log_folder)
+        try_to_save_airflow_log(client, exec_id, ti, base_log_folder, state=-1)
         raise AirflowDagException(f"There was an error during the solving: {e}")
 
 
@@ -402,7 +409,7 @@ def cf_check_generate_kpis(fun_check_generate_kpis, dag_name, secrets, **kwargs)
                 try_to_save_error(client, exec_id, -6)
                 if config.get("msg", True):
                     print("An error occurred while trying to save the checks")
-                try_to_save_airflow_log(client, exec_id, ti, base_log_folder)
+                try_to_save_airflow_log(client, exec_id, ti, base_log_folder, state=-6)
                 raise AirflowDagException("The writing of the case checks failed")
 
         # # The validation went correctly: can save the solution without problem
@@ -413,7 +420,7 @@ def cf_check_generate_kpis(fun_check_generate_kpis, dag_name, secrets, **kwargs)
             print("Some unknown error happened")
         try_to_save_error(client, exec_id, -1)
         client.update_status(exec_id, {"status": -1})
-        try_to_save_airflow_log(client, exec_id, ti, base_log_folder)
+        try_to_save_airflow_log(client, exec_id, ti, base_log_folder, state=-1)
         raise AirflowDagException(
             "There was an error during the verification of the data"
         )

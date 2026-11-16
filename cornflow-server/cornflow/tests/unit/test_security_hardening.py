@@ -21,7 +21,12 @@ import pyotp
 from flask import Flask, current_app
 from flask_testing import TestCase
 
-from cornflow.app import MINIMUM_SECRET_KEY_LENGTH, _check_secret_keys, create_app
+from cornflow.app import (
+    MINIMUM_SECRET_KEY_LENGTH,
+    _check_rate_limit_storage,
+    _check_secret_keys,
+    create_app,
+)
 from cornflow.commands.access import access_init_command
 from cornflow.commands.dag import register_deployed_dags_command_test
 from cornflow.commands.permissions import register_dag_permissions_command
@@ -1253,6 +1258,50 @@ class TestRateLimiting(TestCase):
             headers={**JSON_HEADER, "X-Forwarded-For": "10.0.0.1"},
         )
         self.assertEqual(429, response.status_code)
+
+
+class TestRateLimitStorageWarning(unittest.TestCase):
+    """
+    The in-memory rate-limit storage is per process: the startup must warn
+    so that deployments with several gunicorn workers configure a shared one.
+    """
+
+    @staticmethod
+    def _app(**config):
+        app = Flask("ratelimit-storage")
+        app.config.update(config)
+        return app
+
+    def test_warns_with_memory_storage(self):
+        app = self._app(RATELIMIT_ENABLED=1, RATELIMIT_STORAGE_URI="memory://")
+        with self.assertLogs(app.logger, level="WARNING") as logs:
+            _check_rate_limit_storage(app)
+        self.assertIn("RATELIMIT_STORAGE_URI", logs.output[0])
+        self.assertIn("workers", logs.output[0])
+
+    def test_warns_when_storage_is_not_set(self):
+        app = self._app(RATELIMIT_ENABLED=1)
+        with self.assertLogs(app.logger, level="WARNING"):
+            _check_rate_limit_storage(app)
+
+    def test_silent_with_shared_storage(self):
+        app = self._app(
+            RATELIMIT_ENABLED=1, RATELIMIT_STORAGE_URI="redis://redis:6379/2"
+        )
+        with self.assertNoLogs(app.logger, level="WARNING"):
+            _check_rate_limit_storage(app)
+
+    def test_silent_when_rate_limit_is_disabled(self):
+        app = self._app(RATELIMIT_ENABLED=0, RATELIMIT_STORAGE_URI="memory://")
+        with self.assertNoLogs(app.logger, level="WARNING"):
+            _check_rate_limit_storage(app)
+
+    def test_create_app_warns_with_memory_storage(self):
+        with self.assertLogs("cornflow.app", level="WARNING") as logs:
+            create_app("testing-ratelimit")
+        self.assertTrue(
+            any("RATELIMIT_STORAGE_URI" in line for line in logs.output)
+        )
 
 
 class TestPasswordResetLink(TestCase):

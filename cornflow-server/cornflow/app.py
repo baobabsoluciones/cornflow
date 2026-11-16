@@ -51,6 +51,7 @@ from cornflow.shared.const import (
 )
 from cornflow.shared.exceptions import initialize_errorhandlers, ConfigurationError
 from cornflow.shared.log_config import log_config
+from cornflow.shared.plugins import load_plugins
 from cornflow.shared.security import init_security_headers, resolve_cors_origins
 
 
@@ -84,6 +85,30 @@ def _check_secret_keys(app):
                 f"bytes long (256 bits). Generate one with: "
                 f'python -c "import secrets; print(secrets.token_hex(32))"'
             )
+
+
+def _check_rate_limit_storage(app):
+    """
+    Warns at startup when the rate limiter keeps its counters in memory.
+    The in-memory storage is per process: behind gunicorn every worker counts
+    on its own, so a client is only throttled after the configured limit
+    times the number of workers, and the remaining-requests header jumps up
+    and down depending on the worker that answers. Production deployments
+    must point RATELIMIT_STORAGE_URI to a shared storage (e.g. redis://).
+
+    :param app: the Flask application being created
+    """
+    if not int(app.config.get("RATELIMIT_ENABLED", 0)):
+        return
+    storage = str(app.config.get("RATELIMIT_STORAGE_URI") or "memory://")
+    if storage.startswith("memory://"):
+        app.logger.warning(
+            "RATELIMIT_STORAGE_URI is memory://: the rate-limit counters are "
+            "kept per process, so with several gunicorn workers each one "
+            "counts on its own and the effective limit is the configured one "
+            "times the number of workers. Set RATELIMIT_STORAGE_URI to a "
+            "shared storage (e.g. redis://<host>:6379/0) in production."
+        )
 
 
 def _register_legacy_routes(app, resources, alarms_resources, auth_type):
@@ -151,6 +176,7 @@ def create_app(env_name="development", dataconn=None):
         )
 
     limiter.init_app(app)
+    _check_rate_limit_storage(app)
 
     if "sqlite" in app.config["SQLALCHEMY_DATABASE_URI"]:
 
@@ -243,9 +269,7 @@ def create_app(env_name="development", dataconn=None):
             )
     else:
         # Plugin mode: autodiscover and mount plugins registered under cornflow.plugins.
-        from importlib.metadata import entry_points
-        for ep in entry_points(group="cornflow.plugins"):
-            ep.load()().init_app(app)
+        load_plugins(app)
 
     return app
 
