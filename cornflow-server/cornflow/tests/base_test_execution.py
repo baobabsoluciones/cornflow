@@ -404,7 +404,9 @@ class BaseExecutionDetail(BaseTestCases.DetailEndpoint, ABC):
             check_payload=False,
         )
 
-    def test_create_delete_instance_load(self):
+    @patch("cornflow.endpoints.execution.Airflow")
+    def test_create_delete_instance_load(self, af_client_class):
+        patch_af_client(af_client_class)
         idx = self.create_new_row(self.url + "?run=0", self.model, self.payload)
         keys_to_check = [
             "message",
