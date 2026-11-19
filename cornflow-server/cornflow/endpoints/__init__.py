@@ -14,12 +14,12 @@ from .case import (
     CaseFromInstanceExecutionEndpoint,
     CaseCopyEndpoint,
     CaseDetailsEndpoint,
-    CaseDataEndpoint,
+    CaseDataEndpointRaw,
     CaseToInstance,
     CaseCompare,
 )
 from .dag import (
-    DAGDetailEndpoint,
+    DAGDetailEndpointRaw,
     DAGEndpointManual,
     DAGCaseEndpoint,
     DAGInstanceEndpoint,
@@ -36,7 +36,7 @@ from .execution import (
     ExecutionEndpoint,
     ExecutionDetailsEndpoint,
     ExecutionStatusEndpoint,
-    ExecutionDataEndpoint,
+    ExecutionDataEndpointRaw,
     ExecutionLogEndpoint,
     ExecutionRelaunchEndpoint,
     ExecutionFilesEndpoint,
@@ -47,7 +47,7 @@ from .instance import (
     InstanceEndpoint,
     InstanceDetailsEndpoint,
     InstanceFileEndpoint,
-    InstanceDataEndpoint,
+    InstanceDataEndpointRaw,
 )
 from .licenses import LicensesEndpoint
 from .main_alarms import MainAlarmsEndpoint
@@ -67,7 +67,7 @@ resources = [
         endpoint="instances-detail",
     ),
     dict(
-        resource=InstanceDataEndpoint,
+        resource=InstanceDataEndpointRaw,
         urls="/instance/<string:idx>/data/",
         endpoint="instances-data",
     ),
@@ -115,7 +115,7 @@ resources = [
         endpoint="execution-status",
     ),
     dict(
-        resource=ExecutionDataEndpoint,
+        resource=ExecutionDataEndpointRaw,
         urls="/execution/<string:idx>/data/",
         endpoint="execution-data",
     ),
@@ -132,7 +132,7 @@ resources = [
     dict(resource=ExecutionEndpoint, urls="/execution/", endpoint="execution"),
     dict(resource=ExecutionFilesEndpoint, urls="/execution/files/<string:idx>/", endpoint="execution-files"),
     dict(resource=ExecutionFilesCleanupEndpoint, urls="/execution/files/cleanup/", endpoint="execution-files-cleanup"),
-    dict(resource=DAGDetailEndpoint, urls="/dag/<string:idx>/", endpoint="dag"),
+    dict(resource=DAGDetailEndpointRaw, urls="/dag/<string:idx>/", endpoint="dag"),
     dict(resource=DAGEndpointManual, urls="/dag/", endpoint="dag-manual"),
     dict(
         resource=DAGInstanceEndpoint,
@@ -187,7 +187,9 @@ resources = [
     dict(resource=CaseCopyEndpoint, urls="/case/<int:idx>/copy/", endpoint="case-copy"),
     dict(resource=CaseEndpoint, urls="/case/", endpoint="case"),
     dict(resource=CaseDetailsEndpoint, urls="/case/<int:idx>/", endpoint="case-detail"),
-    dict(resource=CaseDataEndpoint, urls="/case/<int:idx>/data/", endpoint="case-data"),
+    dict(
+        resource=CaseDataEndpointRaw, urls="/case/<int:idx>/data/", endpoint="case-data"
+    ),
     dict(
         resource=CaseToInstance,
         urls="/case/<int:idx>/instance/",

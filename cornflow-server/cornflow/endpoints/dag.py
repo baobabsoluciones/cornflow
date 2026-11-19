@@ -7,9 +7,11 @@ These are the endpoints used by airflow in its communication with cornflow
 from cornflow_client.constants import SOLUTION_SCHEMA
 from flask import current_app
 from flask_apispec import use_kwargs, doc, marshal_with
+from sqlalchemy import cast
 
 # Import from internal modules
 from cornflow.endpoints.meta_resource import BaseMetaResource
+from cornflow.endpoints.raw_json import raw_json_object_response
 from cornflow.models import DeployedWorkflow, ExecutionModel, InstanceModel, CaseModel
 from cornflow.schemas import DeployedDAGSchema, DeployedDAGEditSchema
 from cornflow.schemas.case import CaseChecksKPIsRequest
@@ -20,6 +22,7 @@ from cornflow.schemas.execution import (
     ExecutionDetailsEndpointResponse,
 )
 
+from cornflow.shared import db
 from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.const import (
     ADMIN_ROLE,
@@ -35,7 +38,11 @@ from cornflow.shared.validators import json_schema_validate_as_string
 
 class DAGDetailEndpoint(BaseMetaResource):
     """
-    Endpoint used for the DAG endpoint
+    DEPRECATED: superseded by :class:`DAGDetailEndpointRaw`, which is now
+    routed at this endpoint's former URL. Not routed anymore -- kept
+    around because :class:`DAGDetailEndpointRaw` inherits its ``put`` from
+    here, and for the benchmark scripts in ``cornflow.tests.load`` that
+    compare it against the optimized variants.
     """
 
     ROLES_WITH_ACCESS = [ADMIN_ROLE, SERVICE_ROLE]
@@ -151,6 +158,74 @@ class DAGDetailEndpoint(BaseMetaResource):
 
         current_app.logger.info(f"User {self.get_user()} edits execution {idx}")
         return {"message": "results successfully saved"}, 200
+
+
+class DAGDetailEndpointRaw(DAGDetailEndpoint):
+    """
+    Optimized variant of :class:`DAGDetailEndpoint`'s GET, now routed at
+    ``/dag/<idx>/`` in place of it. Inherits ``put`` unchanged from
+    :class:`DAGDetailEndpoint`.
+
+    ``data``, ``solution_data`` and ``config`` are returned completely
+    verbatim by this endpoint (no server-side transformation), so the
+    normal decode-into-Python / re-encode-to-JSON round trip on those
+    columns is pure overhead. This variant casts them to text at the SQL
+    layer -- so SQLAlchemy never runs ``json.loads`` on them -- and
+    splices that already-valid JSON text directly into a hand-built
+    response body via :func:`raw_json_object_response`.
+    """
+
+    ROLES_WITH_ACCESS = [ADMIN_ROLE, SERVICE_ROLE]
+
+    @doc(
+        description="Get input data and configuration for an execution (raw JSON passthrough)",
+        tags=["DAGs"],
+    )
+    @authenticate(auth_class=Auth())
+    def get(self, idx):
+        """
+        API method to get the data of the instance that is going to be executed.
+        Same response contract as :meth:`DAGDetailEndpoint.get`.
+
+        :param str idx: ID of the execution
+        :return: the execution data (body) in a dictionary with structure of :class:`ConfigSchema`
+          and :class:`DataSchema` and an integer for HTTP status code
+        :rtype: `flask.Response`
+        """
+        row = (
+            db.session.query(
+                InstanceModel.id,
+                cast(InstanceModel.data, db.Text),
+                cast(ExecutionModel.data, db.Text),
+                cast(ExecutionModel.config, db.Text),
+            )
+            .join(ExecutionModel, ExecutionModel.instance_id == InstanceModel.id)
+            .filter(
+                ExecutionModel.id == idx,
+                ExecutionModel.deleted_at.is_(None),
+                InstanceModel.deleted_at.is_(None),
+            )
+            .first()
+        )
+        if row is None:
+            err = "The execution does not exist."
+            raise ObjectDoesNotExist(
+                error=err,
+                log_txt=f"Error while user {self.get_user()} tries to get input data for execution {idx}."
+                + err,
+            )
+        instance_id, instance_data_raw, solution_data_raw, config_raw = row
+        current_app.logger.info(
+            f"User {self.get_user()} gets input data of execution {idx}"
+        )
+        return raw_json_object_response(
+            [
+                ("id", instance_id, False),
+                ("data", instance_data_raw, True),
+                ("solution_data", solution_data_raw, True),
+                ("config", config_raw, True),
+            ]
+        )
 
 
 class DAGInstanceEndpoint(BaseMetaResource):
