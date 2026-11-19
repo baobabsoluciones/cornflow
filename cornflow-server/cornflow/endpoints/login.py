@@ -13,7 +13,7 @@ from sqlalchemy.exc import IntegrityError, DBAPIError
 from cornflow.endpoints.meta_resource import BaseMetaResource
 from cornflow.models import UserModel, UserRoleModel, PermissionsDAG
 from cornflow.schemas.user import LoginEndpointRequest, LoginOpenAuthRequest
-from cornflow.shared import db
+from cornflow.shared import db, bcrypt
 from cornflow.shared.authentication import Auth, LDAPBase
 from cornflow.shared.const import (
     AUTH_DB,
@@ -107,6 +107,10 @@ class LoginBaseEndpoint(BaseMetaResource):
         user = self.data_model.get_one_object(username=username)
 
         if not user:
+            # Spend comparable time to a real password check so that a
+            # non-existent username cannot be distinguished from a wrong
+            # password through response timing (user enumeration).
+            bcrypt.generate_password_hash(password or "", rounds=10)
             raise InvalidCredentials()
 
         if not user.check_hash(password):
