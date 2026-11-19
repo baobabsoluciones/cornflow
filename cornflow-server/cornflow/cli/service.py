@@ -139,7 +139,7 @@ def init_cornflow_service():
 def _setup_environment_variables():
     """Reads environment variables, sets defaults, and returns config values."""
 
-    environment = os.getenv("FLASK_ENV", "development")
+    environment = os.getenv("FLASK_ENV", "production")
     os.environ["FLASK_ENV"] = environment
 
     ###################################
