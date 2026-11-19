@@ -11,6 +11,60 @@ cornflow logs are written to console output (stdout) by default. In this way you
 
 If you want to know about the possibilities offered by the docker log engine, you can visit the official documentation `here <https://docs.docker.com/engine/reference/commandline/logs/>`_.
 
+Log output configuration
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The destination and format of the logs (application logs and gunicorn access/error logs) can be configured through environment variables:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 35 45 20
+
+   * - Variable
+     - Description
+     - Default
+   * - ``CORNFLOW_LOG_STREAM``
+     - Console stream for the logs: ``stdout`` or ``stderr``.
+     - ``stdout``
+   * - ``CORNFLOW_LOG_FORMAT``
+     - ``text`` for plain text or ``json`` for one JSON object per line (recommended for log collectors such as Fluent Bit, CloudWatch or Cloud Logging).
+     - ``text``
+   * - ``LOG_LEVEL``
+     - Minimum level of the records: 10 (debug), 20 (info), 30 (warning), 40 (error), 50 (critical).
+     - ``20``
+
+In JSON mode each line contains the fields ``timestamp`` (ISO 8601, UTC), ``level``, ``logger``, ``module``, ``message`` and, when present, ``exception``.
+
+Shipping logs to S3 or Google Cloud Storage
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In Kubernetes or docker deployments the recommended pattern is to write JSON logs to stdout and let a cluster agent (Fluent Bit, Vector, CloudWatch agent...) ship them to their final destination. Nevertheless, cornflow can also upload the logs directly to a bucket, in addition to the console output:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 35 45 20
+
+   * - Variable
+     - Description
+     - Default
+   * - ``CORNFLOW_LOG_S3_BUCKET``
+     - Name of the AWS S3 bucket to upload logs to. Requires ``boto3`` (``pip install cornflow[s3-logs]``) and credentials resolved the standard AWS way (environment variables, instance profile, IRSA...).
+     - (disabled)
+   * - ``CORNFLOW_LOG_GCS_BUCKET``
+     - Name of the Google Cloud Storage bucket to upload logs to. Requires ``google-cloud-storage`` (``pip install cornflow[gcs-logs]``) and credentials resolved the standard GCP way (``GOOGLE_APPLICATION_CREDENTIALS``, workload identity...).
+     - (disabled)
+   * - ``CORNFLOW_LOG_UPLOAD_PREFIX``
+     - Key prefix of the uploaded objects.
+     - ``cornflow-logs``
+   * - ``CORNFLOW_LOG_UPLOAD_INTERVAL``
+     - Seconds between uploads.
+     - ``60``
+   * - ``CORNFLOW_LOG_UPLOAD_MAX_BUFFER``
+     - Number of buffered records that forces an immediate upload.
+     - ``5000``
+
+Records are buffered in memory and periodically uploaded as objects named ``{prefix}/{date}/{hostname}-{pid}-{time}-{id}.log``. Note that if a container is killed abruptly, the records buffered since the last upload may be lost (they are still written to the console output).
+
 If you want to activate the persistent log storage in files, you must pass the value ``file`` to the environment variable ``CORNFLOW_LOGGING`` in the cornflow server deployment.
 Once the log storage is activated, these will be saved in the path ``/usr/src/app/log`` inside the cornflow container.
 To permanently store the logs even if the service is destroyed, you can mount a volume against the directory as follows::

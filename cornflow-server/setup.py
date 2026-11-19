@@ -17,6 +17,10 @@ setuptools.setup(
     url="https://github.com/baobabsoluciones/cornflow",
     packages=setuptools.find_packages(),
     install_requires=required,
+    extras_require={
+        "s3-logs": ["boto3"],
+        "gcs-logs": ["google-cloud-storage"],
+    },
     include_package_data=True,
     classifiers=[
         "Programming Language :: Python :: 3",
