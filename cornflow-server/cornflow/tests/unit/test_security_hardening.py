@@ -854,58 +854,69 @@ class TestGetDbConn(unittest.TestCase):
 
 class TestConfigSecurityClamping(unittest.TestCase):
     """
-    Tests that the helpers reading security configuration values from the
-    environment clamp them to their floors/ceilings, so a tampered
-    environment can not weaken the policy. The helpers are tested directly
-    (with scratch variable names) to avoid reloading the config module,
-    which would corrupt the app_config references used by other tests.
+    Tests that the inventory resolution clamps the values to the limits of
+    the level, so a tampered environment can not weaken the policy. The pure
+    resolution is tested with mappings, which avoids reloading the config
+    module (that would corrupt the app_config references used by other tests).
     """
 
-    ENV_NAME = "CORNFLOW_TEST_CLAMP_VALUE"
+    LEVEL = {"CORNFLOW_SECURITY_LEVEL": "3"}
 
-    def tearDown(self):
-        os.environ.pop(self.ENV_NAME, None)
+    def _resolve(self, **env):
+        from cornflow.shared.security_levels import resolve_security_settings
 
-    def _set(self, value):
-        os.environ[self.ENV_NAME] = value
+        return resolve_security_settings({**self.LEVEL, **env})
 
     def test_floor_blocks_weaker_values(self):
-        from cornflow.config import _env_int_floor
-
-        self._set("4")
-        self.assertEqual(12, _env_int_floor(self.ENV_NAME, 12, 12))
-        self._set("20")
-        self.assertEqual(20, _env_int_floor(self.ENV_NAME, 12, 12))
+        self.assertEqual(12, self._resolve(PWD_MIN_LENGTH="4").values["PWD_MIN_LENGTH"])
+        self.assertEqual(20, self._resolve(PWD_MIN_LENGTH="20").values["PWD_MIN_LENGTH"])
 
     def test_ceiling_blocks_weaker_values(self):
-        from cornflow.config import _env_float_ceiling, _env_int_ceiling
-
-        self._set("9999")
-        self.assertEqual(24, _env_int_ceiling(self.ENV_NAME, 8, 24))
-        self.assertEqual(24.0, _env_float_ceiling(self.ENV_NAME, 8, 24))
-        self._set("4")
-        self.assertEqual(4, _env_int_ceiling(self.ENV_NAME, 8, 24))
+        resolved = self._resolve(
+            TOKEN_DURATION="9999", ACCESS_TOKEN_DURATION_MINUTES="9999"
+        )
+        self.assertEqual(24.0, resolved.values["TOKEN_DURATION"])
+        self.assertEqual(60, resolved.values["ACCESS_TOKEN_DURATION_MINUTES"])
+        resolved = self._resolve(ACCESS_TOKEN_DURATION_MINUTES="4")
+        self.assertEqual(4, resolved.values["ACCESS_TOKEN_DURATION_MINUTES"])
 
     def test_invalid_values_fall_back_to_defaults(self):
-        from cornflow.config import _env_int_ceiling, _env_int_floor
+        from cornflow.shared.security_levels import INVALID_VALUE
 
-        self._set("not-a-number")
-        self.assertEqual(12, _env_int_floor(self.ENV_NAME, 12, 12))
-        self.assertEqual(8, _env_int_ceiling(self.ENV_NAME, 8, 24))
+        resolved = self._resolve(
+            PWD_MIN_LENGTH="not-a-number",
+            ACCESS_TOKEN_DURATION_MINUTES="not-a-number",
+        )
+        self.assertEqual(12, resolved.values["PWD_MIN_LENGTH"])
+        self.assertEqual(15, resolved.values["ACCESS_TOKEN_DURATION_MINUTES"])
+        self.assertEqual(
+            [INVALID_VALUE, INVALID_VALUE], [a.reason for a in resolved.adjusted]
+        )
 
-    def test_default_config_uses_hardened_values(self):
-        from cornflow.config import DefaultConfig
+    def test_level_3_defaults_respect_the_thresholds(self):
+        from cornflow.config import Testing
+        from cornflow.shared.security_levels import default_values
 
-        # The values loaded at import time must respect the thresholds
-        # whatever the environment says
-        self.assertLessEqual(DefaultConfig.TOKEN_DURATION, 24)
-        self.assertLessEqual(DefaultConfig.PWD_ROTATION_TIME, 365)
-        self.assertGreaterEqual(DefaultConfig.PWD_MIN_LENGTH, 12)
-        self.assertGreaterEqual(DefaultConfig.PWD_MIN_ZXCVBN_SCORE, 3)
-        self.assertGreaterEqual(DefaultConfig.PWD_HISTORY_SIZE, 10)
-        self.assertLessEqual(DefaultConfig.PWD_MAX_SIMILARITY, 0.9)
-        self.assertLessEqual(DefaultConfig.LOGIN_MAX_ATTEMPTS, 10)
-        self.assertLessEqual(DefaultConfig.MFA_SETUP_TOKEN_DURATION_MINUTES, 30)
+        # The values of the level must respect the thresholds whatever the
+        # environment says (Testing ignores it, and BCRYPT_LOG_ROUNDS is the
+        # fast one of the test suite)
+        sources = {
+            "default_values(3)": default_values(3),
+            "Testing": {
+                key: getattr(Testing, key) for key in default_values(3)
+            },
+        }
+        for name, values in sources.items():
+            with self.subTest(source=name):
+                self.assertLessEqual(values["TOKEN_DURATION"], 24)
+                self.assertLessEqual(values["PWD_ROTATION_TIME"], 365)
+                self.assertGreaterEqual(values["PWD_MIN_LENGTH"], 12)
+                self.assertGreaterEqual(values["PWD_MIN_ZXCVBN_SCORE"], 3)
+                self.assertGreaterEqual(values["PWD_HISTORY_SIZE"], 10)
+                self.assertLessEqual(values["PWD_MAX_SIMILARITY"], 0.9)
+                self.assertGreaterEqual(values["LOGIN_MAX_ATTEMPTS"], 1)
+                self.assertLessEqual(values["LOGIN_MAX_ATTEMPTS"], 10)
+                self.assertLessEqual(values["MFA_SETUP_TOKEN_DURATION_MINUTES"], 30)
 
 
 class TestSecretKeyLength(unittest.TestCase):
@@ -2008,7 +2019,7 @@ class TestSecurityHeaders(TestCase):
 
 class TestCorsOrigins(unittest.TestCase):
     """
-    Tests for the CORS_ORIGINS normalisation (default-closed in production).
+    Tests for the CORS_ORIGINS normalisation (default-closed at security level 3).
     """
 
     def test_wildcard_allows_any(self):

@@ -287,12 +287,17 @@ class PasswordPolicyTests(UatTestCase):
         self.assertIn("last 10 password", json.dumps(response.json))
 
     def test_uat_1_10_environment_cannot_weaken_the_minimum_length(self):
-        """1.10 PWD_MIN_LENGTH=6 in the environment: 12 is still required."""
+        """1.10 PWD_MIN_LENGTH=6 at security level 2: 12 is still required."""
         code = (
             "from cornflow.config import DefaultConfig; "
             "print(DefaultConfig.PWD_MIN_LENGTH)"
         )
-        env = {**os.environ, "PWD_MIN_LENGTH": "6", "FLASK_ENV": "testing"}
+        env = {
+            **os.environ,
+            "CORNFLOW_SECURITY_LEVEL": "2",
+            "PWD_MIN_LENGTH": "6",
+            "FLASK_ENV": "testing",
+        }
         result = subprocess.run(
             [sys.executable, "-c", code],
             env=env,

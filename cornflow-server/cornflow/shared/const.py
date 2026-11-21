@@ -13,10 +13,10 @@ INTERNAL_TOKEN_ISSUER = "cornflow"
 # ---------------------------------------------------------------------------
 # Password policy (CCN-STIC-807)
 # ---------------------------------------------------------------------------
-# These are the single source of truth for the policy defaults. config.py
-# reads the environment using them as fallbacks (and clamps them to their
-# security floor/ceiling); validators.py uses them when there is no
-# application context (e.g. some CLI usages).
+# Password policy values of security levels 2 and 3. The per-level defaults
+# and limits live in the inventory of cornflow/shared/security_levels.py,
+# which uses these constants; validators.py falls back to them when there is
+# no application context (e.g. some CLI usages).
 DEFAULT_PWD_MIN_LENGTH = 12
 DEFAULT_PWD_MIN_ZXCVBN_SCORE = 3
 DEFAULT_PWD_HISTORY_SIZE = 10
