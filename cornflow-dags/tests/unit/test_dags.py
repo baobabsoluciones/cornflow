@@ -270,6 +270,22 @@ class PuLPTestCase(BaseDAGTests.SolvingTests):
         self.app = PuLP()
         self.config.update(dict(solver="PULP_CBC_CMD"))
 
+    def test_simultaneous_solves_each_keep_their_log(self):
+        # Airflow runs several solves at once in the same working directory: none of them may lose its log
+        from concurrent.futures import ThreadPoolExecutor
+
+        instance = self.app.test_cases[0]["instance"]
+
+        def solve(_):
+            return self.app.solve(instance, dict(self.config))
+
+        with ThreadPoolExecutor(max_workers=8) as pool:
+            results = list(pool.map(solve, range(16)))
+
+        for solution, *_, log, log_json in results:
+            self.assertTrue(solution)
+            self.assertIn("Optimal", log)
+
 
 class TwoBinPackingTestCase(BaseDAGTests.SolvingTests):
     def setUp(self):
