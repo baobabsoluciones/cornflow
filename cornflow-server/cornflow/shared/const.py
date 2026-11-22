@@ -23,6 +23,15 @@ DEFAULT_PWD_HISTORY_SIZE = 10
 DEFAULT_PWD_MAX_SIMILARITY = 0.8
 DEFAULT_PWD_ROTATION_TIME = 120
 
+# Security level from which the full password policy applies (levels 2 and
+# 3): no whitespace, no personal data, no digit runs, zxcvbn score, history
+# reuse, similarity with the last password and current_password on a self
+# change. Level 1 keeps the 1.3.9 rules.
+PWD_POLICY_MIN_SECURITY_LEVEL = 2
+
+# Minimum password length of the 1.3.9 rules (level 1 fallback).
+LEGACY_PWD_MIN_LENGTH = 5
+
 # Personal data (username, names, email local part) shorter than this is not
 # searched for inside the password, to avoid false positives with very short
 # names.

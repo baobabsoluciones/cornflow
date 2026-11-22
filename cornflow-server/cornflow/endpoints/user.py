@@ -49,6 +49,7 @@ from cornflow.shared.rate_limit import (
 from cornflow.shared.validators import (
     check_email_pattern,
     check_password_pattern,
+    password_policy_enforced,
     passwords_too_similar,
 )
 
@@ -207,20 +208,26 @@ class UserDetailsEndpoint(BaseMetaResource):
                     f"The new password is not valid.",
                 )
             if self.get_user_id() == user_id:
-                # A user changing their own password must confirm the one in use
-                if not current_password or not user_obj.check_hash(current_password):
-                    raise InvalidCredentials(
-                        "The current password is missing or incorrect",
-                        log_txt=f"Error while user {self.get_user()} tries to change "
-                        f"their password. The current password is missing or incorrect.",
-                    )
-                if passwords_too_similar(new_password, current_password):
-                    raise InvalidCredentials(
-                        "The new password is too similar to the current one",
-                        log_txt=f"Error while user {self.get_user()} tries to change "
-                        f"their password. The new password is too similar to the "
-                        f"current one.",
-                    )
+                # From security level 2 a user changing their own password must
+                # confirm the one in use and can not just tweak it. Level 1 keeps
+                # the 1.3.9 behaviour: current_password is neither required nor
+                # checked.
+                if password_policy_enforced():
+                    if not current_password or not user_obj.check_hash(
+                        current_password
+                    ):
+                        raise InvalidCredentials(
+                            "The current password is missing or incorrect",
+                            log_txt=f"Error while user {self.get_user()} tries to change "
+                            f"their password. The current password is missing or incorrect.",
+                        )
+                    if passwords_too_similar(new_password, current_password):
+                        raise InvalidCredentials(
+                            "The new password is too similar to the current one",
+                            log_txt=f"Error while user {self.get_user()} tries to change "
+                            f"their password. The new password is too similar to the "
+                            f"current one.",
+                        )
             else:
                 # A password set by an admin is temporary: the user must
                 # change it at their next access

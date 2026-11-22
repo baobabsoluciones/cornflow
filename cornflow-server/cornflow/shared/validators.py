@@ -4,7 +4,7 @@ This file has several validators
 
 import re
 from difflib import SequenceMatcher
-from typing import Tuple, Union
+from typing import Optional, Tuple, Union
 
 from flask import current_app
 from jsonschema import Draft7Validator, validators
@@ -16,8 +16,10 @@ from cornflow.shared.const import (
     DEFAULT_PWD_MIN_LENGTH,
     DEFAULT_PWD_MIN_ZXCVBN_SCORE,
     EMAIL_PATTERN,
+    LEGACY_PWD_MIN_LENGTH,
     MIN_PERSONAL_TOKEN_LENGTH,
     PASSWORD_SPECIAL_CHARACTERS,
+    PWD_POLICY_MIN_SECURITY_LEVEL,
     PWD_FORBIDDEN_DIGIT_SEQUENCE_LENGTH,
 )
 
@@ -74,26 +76,101 @@ def _get_personal_tokens(user_data: dict) -> list:
     return [token.lower() for token in tokens if len(token) >= MIN_PERSONAL_TOKEN_LENGTH]
 
 
+def password_policy_enforced() -> bool:
+    """
+    Tells whether the full password policy (security levels 2 and 3) applies.
+    Without an application context (some CLI usages) the strictest rules
+    apply, as before the security levels existed.
+
+    :return: True if the full password policy applies
+    :rtype: bool
+    """
+    level = _get_config_value("SECURITY_LEVEL", PWD_POLICY_MIN_SECURITY_LEVEL)
+    return level >= PWD_POLICY_MIN_SECURITY_LEVEL
+
+
+def _check_zxcvbn_score(
+    password: str, personal_tokens: list, min_score: int
+) -> Tuple[bool, Optional[str]]:
+    """
+    Checks the zxcvbn strength score of a password against a minimum.
+    """
+    result = zxcvbn(password, user_inputs=personal_tokens or None)
+    if result["score"] < min_score:
+        warning = (result.get("feedback") or {}).get("warning") or (
+            "It is too similar to commonly used passwords or patterns."
+        )
+        return False, f"Password is too easy to guess. {warning}"
+    return True, None
+
+
 def check_password_pattern(
-    password: str, user_data: dict = None
+    password: str, user_data: dict = None, strict: bool = None
 ) -> Tuple[bool, Union[str, None]]:
     """
-    Method to validate the pattern of a password following the CCN-STIC-807
-    hardening guidelines: minimum length, character variety, no personal
-    information, no long digit sequences (dates, phone numbers...) and a
-    minimum zxcvbn strength score that rejects common or leaked passwords
-    while allowing long passphrases.
+    Method to validate the pattern of a password. There are two variants:
+
+    - The full policy (security levels 2 and 3), following the CCN-STIC-807
+      hardening guidelines: minimum length, character variety, no whitespace,
+      no personal information, no long digit sequences (dates, phone numbers...)
+      and a minimum zxcvbn strength score.
+    - The 1.3.9 rules (security level 1): minimum length, upper and lower case
+      letters, a number and a special character, and a zxcvbn score only if
+      one is configured.
 
     :param str password: password to be validated
     :param dict user_data: optional dict with the user's username, first_name,
-      last_name and email, used to reject passwords containing personal data
+      last_name and email, used by the full policy to reject passwords
+      containing personal data
+    :param bool strict: if True the full policy is applied whatever the
+      security level; if None the security level decides
     :return: a tuple with a boolean (valid or not) and the error message
     :rtype: Tuple[bool, Union[str, None]]
     """
     # TODO: handle better None passwords that can be found when using ldap
     if password is None:
         return True, None
-    min_length = _get_config_value("PWD_MIN_LENGTH", DEFAULT_PWD_MIN_LENGTH)
+    if strict is None:
+        strict = password_policy_enforced()
+    if strict:
+        return _check_policy_password_pattern(password, user_data)
+    return _check_legacy_password_pattern(password, user_data)
+
+
+def _check_legacy_password_pattern(
+    password: str, user_data: dict = None
+) -> Tuple[bool, Optional[str]]:
+    """
+    Password rules of version 1.3.9, applied at security level 1.
+    """
+    min_length = _get_config_value("PWD_MIN_LENGTH", LEGACY_PWD_MIN_LENGTH)
+    if len(password) < min_length:
+        return False, f"Password must contain at least {min_length} characters."
+    if password.islower() or password.isupper():
+        return False, "Password must contain uppercase and lowercase letters."
+    special_msg = "Password must contain at least one number and one special character."
+    if not any(char.isdigit() for char in password):
+        return False, special_msg
+    if not any(is_special_character(char) for char in password):
+        return False, special_msg
+    min_score = _get_config_value("PWD_MIN_ZXCVBN_SCORE", 0)
+    if min_score > 0:
+        return _check_zxcvbn_score(
+            password, _get_personal_tokens(user_data), min_score
+        )
+    return True, None
+
+
+def _check_policy_password_pattern(
+    password: str, user_data: dict = None
+) -> Tuple[bool, Optional[str]]:
+    """
+    Full password policy, applied at security levels 2 and 3.
+    """
+    min_length = max(
+        _get_config_value("PWD_MIN_LENGTH", DEFAULT_PWD_MIN_LENGTH),
+        DEFAULT_PWD_MIN_LENGTH,
+    )
     if len(password) < min_length:
         return False, f"Password must contain at least {min_length} characters."
     if not any(char.islower() for char in password):
@@ -123,17 +200,11 @@ def check_password_pattern(
                 "Password must not contain your username, name or email address.",
             )
 
-    min_score = _get_config_value(
-        "PWD_MIN_ZXCVBN_SCORE", DEFAULT_PWD_MIN_ZXCVBN_SCORE
+    min_score = max(
+        _get_config_value("PWD_MIN_ZXCVBN_SCORE", DEFAULT_PWD_MIN_ZXCVBN_SCORE),
+        DEFAULT_PWD_MIN_ZXCVBN_SCORE,
     )
-    result = zxcvbn(password, user_inputs=personal_tokens or None)
-    if result["score"] < min_score:
-        warning = (result.get("feedback") or {}).get("warning") or (
-            "It is too similar to commonly used passwords or patterns."
-        )
-        return False, f"Password is too easy to guess. {warning}"
-
-    return True, None
+    return _check_zxcvbn_score(password, personal_tokens, min_score)
 
 
 def passwords_too_similar(new_password: str, old_password: str) -> bool:

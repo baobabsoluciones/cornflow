@@ -21,12 +21,17 @@ from cornflow.shared import (
     db,
 )
 from cornflow.shared.audit import audit
-from cornflow.shared.const import API_KEY_SCOPE_FULL, PASSWORD_SPECIAL_CHARACTERS
+from cornflow.shared.const import (
+    API_KEY_SCOPE_FULL,
+    DEFAULT_PWD_HISTORY_SIZE,
+    PASSWORD_SPECIAL_CHARACTERS,
+)
 from cornflow.shared.encryption import decrypt_value, encrypt_value
 from cornflow.shared.exceptions import InvalidCredentials
 from cornflow.shared.validators import (
     check_password_pattern,
     check_email_pattern,
+    password_policy_enforced,
 )
 
 
@@ -184,6 +189,17 @@ class UserModel(TraceAttributesModel):
             for key in ("username", "first_name", "last_name", "email")
         }
 
+    @staticmethod
+    def _password_history_size() -> int:
+        """
+        Number of previous passwords kept. Never negative, as level 1 has no
+        limits on PWD_HISTORY_SIZE.
+        """
+        return max(
+            int(current_app.config.get("PWD_HISTORY_SIZE", DEFAULT_PWD_HISTORY_SIZE)),
+            0,
+        )
+
     def check_password_reuse(self, new_password: str) -> bool:
         """
         Checks if the given password matches the current password or any of
@@ -193,7 +209,7 @@ class UserModel(TraceAttributesModel):
         :return: True if the password was already used
         :rtype: bool
         """
-        history_size = int(current_app.config.get("PWD_HISTORY_SIZE", 10))
+        history_size = self._password_history_size()
         hashes = []
         if self.password:
             hashes.append(self.password)
@@ -223,23 +239,24 @@ class UserModel(TraceAttributesModel):
                     msg,
                     log_txt=f"Error while trying to update user {self.id}. " + msg,
                 )
-            if self.check_password_reuse(new_password):
+            if password_policy_enforced() and self.check_password_reuse(new_password):
                 err = (
                     "The new password can not be one of the last "
-                    f"{current_app.config.get('PWD_HISTORY_SIZE', 10)} "
+                    f"{self._password_history_size()} "
                     "passwords used."
                 )
                 raise InvalidCredentials(
                     err,
                     log_txt=f"Error while trying to update user {self.id}. " + err,
                 )
-            # The replaced hash is kept so the old password can not be reused
+            # The replaced hash is stored at every security level, even if the
+            # reuse check only runs from level 2
             if self.password and self.id is not None:
                 UserPasswordHistoryModel(
                     {"user_id": self.id, "password_hash": self.password}
                 ).save()
                 UserPasswordHistoryModel.trim_history(
-                    self.id, int(current_app.config.get("PWD_HISTORY_SIZE", 10))
+                    self.id, self._password_history_size()
                 )
             new_password = self.__generate_hash(new_password)
             data["password"] = new_password
@@ -599,7 +616,9 @@ class UserModel(TraceAttributesModel):
             chars = upper_letters + lower_letters + numbers + symbols
             _secure_random.shuffle(chars)
             pwd = "".join(chars)
-            check, _ = check_password_pattern(pwd)
+            # Random passwords always follow the full policy, whatever the
+            # security level
+            check, _ = check_password_pattern(pwd, strict=True)
             if check:
                 return pwd
 
