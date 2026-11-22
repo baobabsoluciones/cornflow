@@ -54,12 +54,100 @@ from cornflow.shared.exceptions import initialize_errorhandlers, ConfigurationEr
 from cornflow.shared.log_config import log_config
 from cornflow.shared.plugins import load_plugins
 from cornflow.shared.security import init_security_headers, resolve_cors_origins
+from cornflow.shared.security_levels import (
+    CONFIG_KEY_ADJUSTED,
+    CONFIG_KEY_CHANGED,
+    CONFIG_KEY_ERRORS,
+    CONFIG_KEY_LEVEL,
+    CONFIG_KEY_LEVEL_ERROR,
+)
 
 
 # Minimum length in bytes of the JWT signing keys. HMAC-SHA256 requires keys
 # of at least 256 bits (RFC 7518, section 3.2) and CCN-STIC-807 requires
 # equivalent strength for the employed cryptography.
 MINIMUM_SECRET_KEY_LENGTH = 32
+
+# Settings that only work with the MFA endpoints enabled
+MFA_DEPENDENT_SETTINGS = ("MFA_REQUIRED", "API_KEY_STEPUP_TOTP", "PLATFORM_ROLE_STEPUP_TOTP")
+
+
+def _check_security_level(app):
+    """
+    Refuses to start with an invalid CORNFLOW_SECURITY_LEVEL. config.py
+    records the error instead of raising, so the import never fails.
+    """
+    message = app.config.get(CONFIG_KEY_LEVEL_ERROR)
+    if message:
+        raise ConfigurationError(error=message, log_txt=message)
+
+
+def _check_disabling_zeros(app):
+    """
+    Refuses to start when a security setting is set to a value <= 0 that turns
+    a control off and the security level does not allow it (LOGIN_MAX_ATTEMPTS
+    at levels 2 and 3, BI_TOKEN_DURATION_DAYS at level 3).
+    """
+    errors = tuple(app.config.get(CONFIG_KEY_ERRORS) or ())
+    if errors:
+        message = "; ".join(errors)
+        raise ConfigurationError(error=message, log_txt=message)
+
+
+def _check_mfa_coherence(app):
+    """
+    Refuses to start when a setting that needs the MFA endpoints is on while
+    MFA_ENABLED is off. MFA_ENABLED is never forced to 1.
+    """
+    mfa_enabled = int(app.config.get("MFA_ENABLED", 0))
+    if mfa_enabled == 1:
+        return
+    enabled = [
+        name for name in MFA_DEPENDENT_SETTINGS if int(app.config.get(name, 0)) == 1
+    ]
+    if not enabled:
+        return
+    names = ", ".join(enabled)
+    assignments = ", ".join(f"{name}=1" for name in enabled)
+    verb = "needs" if len(enabled) == 1 else "need"
+    message = (
+        f"{assignments} {verb} MFA_ENABLED=1, but MFA_ENABLED is {mfa_enabled}: "
+        f"set MFA_ENABLED=1, or set {names} to 0"
+    )
+    raise ConfigurationError(error=message, log_txt=message)
+
+
+def _log_security_level(app):
+    """
+    Logs the effective security level, the variables that change a level
+    default (INFO) and the ones clamped to a limit or not parseable (WARNING).
+    Key values are never logged: the sensitive settings hide their value.
+    """
+    level = app.config.get(CONFIG_KEY_LEVEL)
+    app.logger.info(f"Security level: {level}")
+    for change in app.config.get(CONFIG_KEY_CHANGED) or ():
+        app.logger.info(
+            f"Security level {level}, changed setting: {change.as_log_text()}"
+        )
+    for adjustment in app.config.get(CONFIG_KEY_ADJUSTED) or ():
+        app.logger.warning(
+            f"Security level {level}, adjusted setting: {adjustment.as_log_text()}"
+        )
+
+
+def _run_startup_checks(app):
+    """
+    Startup checks of the security configuration, in this order: security
+    level, disabling zeros the level does not allow, secret keys, MFA_ENABLED
+    coherence, security level log and session windows. The checks raise
+    ConfigurationError when cornflow must not start; the last two only log.
+    """
+    _check_security_level(app)
+    _check_disabling_zeros(app)
+    _check_secret_keys(app)
+    _check_mfa_coherence(app)
+    _log_security_level(app)
+    _check_session_windows(app)
 
 
 def _check_secret_keys(app):
@@ -201,8 +289,7 @@ def create_app(env_name="development", dataconn=None):
     app.logger.setLevel(app_config[env_name].LOG_LEVEL)
 
     app.config.from_object(app_config[env_name])
-    _check_secret_keys(app)
-    _check_session_windows(app)
+    _run_startup_checks(app)
     # initialization for init_cornflow_service.py
     if dataconn is not None:
         app.config["SQLALCHEMY_DATABASE_URI"] = dataconn

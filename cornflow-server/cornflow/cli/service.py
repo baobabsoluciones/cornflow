@@ -39,16 +39,28 @@ from cornflow.shared.const import (
     PLANNER_ROLE,
     DATABRICKS_BACKEND,
     AIRFLOW_BACKEND,
-    SIGNUP_WITH_AUTH,
     OID_PROVIDER_AZURE,
     OID_OTHER,
     USER_ACCESS_ALL_OBJECTS_NO,
 )
 from cornflow.shared import db
+from cornflow.shared.exceptions import ConfigurationError
 from cryptography.fernet import Fernet
 from flask_migrate import Migrate, upgrade
 
 MAIN_WD = "/usr/src/app"
+
+
+def _create_app_or_exit(factory, environment, cornflow_db_conn):
+    """
+    Creates the application and stops `service init` with exit code 1 when the
+    configuration is not valid: no users are created and gunicorn is not started.
+    """
+    try:
+        return factory(environment, cornflow_db_conn)
+    except ConfigurationError as exc:
+        logger.error(f"Cornflow can not start: {exc.error}")
+        sys.exit(f"FATAL: {exc.error}")
 
 
 @click.group(name="service", help="Commands to run the cornflow service")
@@ -77,7 +89,7 @@ def init_cornflow_service():
 
     if external_application == 0:
         click.echo("Initializing standard Cornflow application")
-        app = create_app(environment, cornflow_db_conn)
+        app = _create_app_or_exit(create_app, environment, cornflow_db_conn)
         with app.app_context():
             _initialize_database(app)
             _create_initial_users(
@@ -108,7 +120,9 @@ def init_cornflow_service():
         from importlib import import_module
 
         external_app_lib = import_module(external_app_module)
-        app = external_app_lib.create_wsgi_app(environment, cornflow_db_conn)
+        app = _create_app_or_exit(
+            external_app_lib.create_wsgi_app, environment, cornflow_db_conn
+        )
         with app.app_context():
 
             _initialize_database(app, external_app_module)
@@ -217,20 +231,18 @@ def _setup_environment_variables():
     cornflow_admin_email = os.getenv(
         "CORNFLOW_ADMIN_EMAIL", "cornflow_admin@cornflow.com"
     )
-    cornflow_admin_pwd = os.getenv("CORNFLOW_ADMIN_PWD", "Granito-Vela-Oruga7")
+    cornflow_admin_pwd = os.getenv("CORNFLOW_ADMIN_PWD", "Cornflow_admin1234")
     cornflow_service_user = os.getenv("CORNFLOW_SERVICE_USER", "service_user")
     cornflow_service_email = os.getenv(
         "CORNFLOW_SERVICE_EMAIL", "service_user@cornflow.com"
     )
-    cornflow_service_pwd = os.getenv("CORNFLOW_SERVICE_PWD", "Mimbre-Faro-Ciervo4")
+    cornflow_service_pwd = os.getenv("CORNFLOW_SERVICE_PWD", "Service_user1234")
 
     # Cornflow logging and deployment config
     cornflow_logging = os.getenv("CORNFLOW_LOGGING", "console")
     os.environ["CORNFLOW_LOGGING"] = cornflow_logging
     open_deployment = os.getenv("OPEN_DEPLOYMENT", 1)
     os.environ["OPEN_DEPLOYMENT"] = str(open_deployment)
-    signup_activated = os.getenv("SIGNUP_ACTIVATED", SIGNUP_WITH_AUTH)
-    os.environ["SIGNUP_ACTIVATED"] = str(signup_activated)
     user_access_all_objects = os.getenv("USER_ACCESS_ALL_OBJECTS", USER_ACCESS_ALL_OBJECTS_NO)
     os.environ["USER_ACCESS_ALL_OBJECTS"] = str(user_access_all_objects)
     default_role = int(os.getenv("DEFAULT_ROLE", PLANNER_ROLE))
