@@ -18,6 +18,7 @@ from cornflow.schemas.user import (
     UserSchema,
 )
 from cornflow.shared import db
+from cornflow.shared.admin_access import client_admin_can_revoke_admin
 from cornflow.shared.audit import audit
 from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.const import (
@@ -261,9 +262,14 @@ class UserDetailsEndpoint(BaseMetaResource):
 class UserUnlockEndpoint(BaseMetaResource):
     """
     Endpoint to unlock an account locked after too many failed login
-    attempts. Only platform administrators can unlock accounts.
+    attempts. Platform administrators can unlock any account; at security
+    levels 1 and 2 the client admin can unlock the accounts of users without
+    platform roles.
     """
 
+    # At security levels 1 and 2 the client admin also reaches this endpoint
+    # (LEVEL_PERMISSION_ASSIGNATION); it can only unlock users without platform
+    # roles.
     ROLES_WITH_ACCESS = [PLATFORM_ADMIN_ROLE]
 
     def __init__(self):
@@ -288,10 +294,19 @@ class UserUnlockEndpoint(BaseMetaResource):
                 log_txt=f"Error while user {self.get_user()} tries to unlock "
                 f"user {user_id}. The user does not exist."
             )
+        if not self.get_user().is_platform_admin() and UserRoleModel.is_platform_user(
+            user_id
+        ):
+            raise NoPermission(
+                error="Only a platform administrator can unlock the account of a "
+                "platform user",
+                log_txt=f"Error while user {self.get_user()} tries to unlock user "
+                f"{user_id}. The user has a platform role and only platform "
+                f"administrators can unlock it.",
+            )
         user_obj.unlock_account()
         current_app.logger.info(
-            f"User {user_id} was unlocked by platform administrator "
-            f"{self.get_user()}"
+            f"User {user_id} was unlocked by user {self.get_user()}"
         )
         audit("account.unlocked", target_id=user_id, target=user_obj.username)
         return {"message": "The user account has been unlocked"}, 200
@@ -335,9 +350,12 @@ class ToggleUserAdmin(BaseMetaResource):
                 role="admin",
             )
         else:
-            # A client admin can not revoke the admin role from another admin;
-            # only a platform administrator can do it
-            if not self.get_user().is_platform_admin():
+            # Level 1 keeps the 1.3.9 behaviour (a client admin can revoke the
+            # admin role); from level 2 only a platform administrator can.
+            if (
+                not self.get_user().is_platform_admin()
+                and not client_admin_can_revoke_admin()
+            ):
                 raise NoPermission(
                     error="Only a platform administrator can revoke the admin "
                     "role from a user",

@@ -14,11 +14,50 @@ from cornflow.schemas.role import (
     RolesResponse,
 )
 from cornflow.shared.authentication import Auth, authenticate
-from cornflow.shared.const import AUTH_LDAP, PLATFORM_ADMIN_ROLE
-from cornflow.shared.exceptions import EndpointNotImplemented
+from cornflow.shared.admin_access import is_reserved_role_id
+from cornflow.shared.const import AUTH_LDAP, PLATFORM_ADMIN_ROLE, RESERVED_ROLE_RANGE
+from cornflow.shared.exceptions import (
+    EndpointNotImplemented,
+    InvalidUsage,
+    NoPermission,
+    ObjectAlreadyExists,
+)
+
+_RESERVED_LOW, _RESERVED_HIGH = RESERVED_ROLE_RANGE
+
+RESERVED_ROLE_ERROR = (
+    f"Role ids {_RESERVED_LOW}-{_RESERVED_HIGH} are reserved for the cornflow "
+    "platform roles: only a platform administrator can manage them"
+)
+RESERVED_ROLE_ID_ERROR = (
+    f"Role ids {_RESERVED_LOW}-{_RESERVED_HIGH} are reserved for the cornflow "
+    "platform roles and a custom role there would stop cornflow from starting: "
+    f"leave the id out or use an id outside {_RESERVED_LOW}-{_RESERVED_HIGH}"
+)
+NO_FREE_ROLE_ID_ERROR = (
+    f"There is no free role id below {_RESERVED_LOW}: create the role with an "
+    f"explicit id outside {_RESERVED_LOW}-{_RESERVED_HIGH}"
+)
+
+
+def _deny_reserved_role(actor, role_id, action):
+    """
+    403 when an actor that is not a platform administrator touches a role in
+    the reserved range (DA7).
+    """
+    if is_reserved_role_id(role_id) and not actor.is_platform_admin():
+        raise NoPermission(
+            error=RESERVED_ROLE_ERROR,
+            log_txt=f"Error while user {actor} tries to {action} role {role_id}. "
+            f"Role ids {_RESERVED_LOW}-{_RESERVED_HIGH} are reserved for the "
+            f"platform roles.",
+        )
 
 
 class RolesListEndpoint(BaseMetaResource):
+    # At security level 1 the client admin also reaches this endpoint
+    # (LEVEL_PERMISSION_ASSIGNATION in shared/const.py); the reserved role range
+    # stays with the platform administrator at every level.
     ROLES_WITH_ACCESS = [PLATFORM_ADMIN_ROLE]
     DESCRIPTION = "Endpoint to get or create the current roles in the application"
 
@@ -66,11 +105,40 @@ class RolesListEndpoint(BaseMetaResource):
                 log_txt=f"Error while user {self.get_user()} tries to create "
                         f"a new role through the endpoint. " + err
             )
-        current_app.logger.info(f"User {self.get_user()} creates a new role")
+        actor = self.get_user()
+        role_id = kwargs.get("id")
+        if role_id is not None:
+            _deny_reserved_role(actor, role_id, "create")
+            if is_reserved_role_id(role_id):
+                raise InvalidUsage(
+                    error=RESERVED_ROLE_ID_ERROR,
+                    status_code=400,
+                    log_txt=f"Error while user {actor} tries to create role "
+                    f"{role_id}. " + RESERVED_ROLE_ID_ERROR,
+                )
+            if RoleModel.query.get(role_id) is not None:
+                raise ObjectAlreadyExists(
+                    log_txt=f"Error while user {actor} tries to create role "
+                    f"{role_id}. The role already exists."
+                )
+        else:
+            role_id = RoleModel.next_free_id_below_reserved_range()
+            if role_id is None:
+                raise InvalidUsage(
+                    error=NO_FREE_ROLE_ID_ERROR,
+                    status_code=400,
+                    log_txt=f"Error while user {actor} tries to create a role. "
+                    + NO_FREE_ROLE_ID_ERROR,
+                )
+            kwargs["id"] = role_id
+        current_app.logger.info(f"User {actor} creates a new role")
         return self.post_list(kwargs)
 
 
 class RoleDetailEndpoint(BaseMetaResource):
+    # At security level 1 the client admin also reaches this endpoint
+    # (LEVEL_PERMISSION_ASSIGNATION in shared/const.py); the reserved role range
+    # stays with the platform administrator at every level.
     ROLES_WITH_ACCESS = [PLATFORM_ADMIN_ROLE]
     DESCRIPTION = "Endpoint to get, modify or delete a specific role of the application"
 
@@ -120,7 +188,11 @@ class RoleDetailEndpoint(BaseMetaResource):
                 log_txt=f"Error while user {self.get_user()} tries to edit "
                         f"a role through the endpoint. " + err
             )
-        current_app.logger.info(f"User {self.get_user()} edits role {idx}")
+        actor = self.get_user()
+        _deny_reserved_role(actor, idx, "edit")
+        if kwargs.get("id") is not None:
+            _deny_reserved_role(actor, kwargs["id"], "move a role into")
+        current_app.logger.info(f"User {actor} edits role {idx}")
         return self.put_detail(kwargs, idx=idx, track_user=False)
 
     @doc(description="Deletes one role", tags=["Roles"])
@@ -138,6 +210,7 @@ class RoleDetailEndpoint(BaseMetaResource):
         and an integer with the HTTP status code.
         :rtype: Tuple(dict, integer)
         """
+        _deny_reserved_role(self.get_user(), idx, "delete")
         current_app.logger.error(f"User {self.get_user()} tries to delete role {idx}")
         err = "Roles can not be deleted"
         raise EndpointNotImplemented(

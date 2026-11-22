@@ -14,6 +14,8 @@ from cornflow.shared.const import PLATFORM_ADMIN_ROLE
 
 
 class ActionListEndpoint(BaseMetaResource):
+    # At security level 1 the client admin also reaches this endpoint
+    # (LEVEL_PERMISSION_ASSIGNATION in shared/const.py)
     ROLES_WITH_ACCESS = [PLATFORM_ADMIN_ROLE]
     DESCRIPTION = "Endpoint which allows to get the actions defined in the application"
 

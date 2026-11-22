@@ -161,8 +161,8 @@ def create_platform_planner_user(username, password, email, verbose, force_passw
 @users.command(
     name="unlock",
     help="Unlock a user account locked after too many failed login attempts. "
-    "This is the break-glass alternative to the platform administrator "
-    "unlock endpoint.",
+    "This is the break-glass alternative to the unlock endpoint and works at "
+    "every security level.",
 )
 @username
 def unlock_user(username):

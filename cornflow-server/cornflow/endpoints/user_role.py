@@ -11,6 +11,7 @@ from flask_apispec import doc, marshal_with, use_kwargs
 from cornflow.endpoints.meta_resource import BaseMetaResource
 from cornflow.models import RoleModel, UserModel, UserRoleModel
 from cornflow.schemas.user_role import UserRoleRequest, UserRoleResponse
+from cornflow.shared.admin_access import client_admin_can_revoke_admin
 from cornflow.shared.audit import audit
 from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.const import ADMIN_ROLE, AUTH_LDAP, PLATFORM_ROLES
@@ -223,17 +224,20 @@ class UserRoleDetailEndpoint(BaseMetaResource):
                 log_txt=f"Error while user {self.get_user()} tries to delete a user role assignment. "
                 + err,
             )
-        # A client admin can not strip the admin role from another admin nor
-        # touch the platform roles; only a platform administrator can
-        if (
-            role_id == ADMIN_ROLE or role_id in PLATFORM_ROLES
-        ) and not self.get_user().is_platform_admin():
-            raise NoPermission(
-                error="Only a platform administrator can revoke this role",
-                log_txt=f"Error while user {self.get_user()} tries to remove "
-                f"role {role_id} of user {user_id}. Only platform "
-                f"administrators can revoke admin or platform roles.",
-            )
+        actor = self.get_user()
+        if not actor.is_platform_admin():
+            # Platform roles are only revoked by a platform administrator, at
+            # every level
+            revoking_platform_role = role_id in PLATFORM_ROLES
+            # The admin role: level 1 keeps the 1.3.9 behaviour
+            revoking_admin = role_id == ADMIN_ROLE and not client_admin_can_revoke_admin()
+            if revoking_platform_role or revoking_admin:
+                raise NoPermission(
+                    error="Only a platform administrator can revoke this role",
+                    log_txt=f"Error while user {actor} tries to remove "
+                    f"role {role_id} of user {user_id}. Only platform "
+                    f"administrators can revoke this role.",
+                )
         current_app.logger.info(
             f"User {self.get_user()} deletes user role assignment for user {user_id} and role {role_id}"
         )

@@ -391,8 +391,9 @@ class UserModel(TraceAttributesModel):
     def unlock_account(self):
         """
         Unlocks the account and clears the failed login counter. Called by the
-        unlock endpoint (the administrators allowed depend on the security
-        level) and by the break-glass CLI command.
+        unlock endpoint (platform administrators, and at security levels 1 and 2
+        also the client admin for users without platform roles) and by the
+        break-glass CLI command.
         """
         self.locked = False
         self.failed_login_attempts = 0

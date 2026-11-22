@@ -255,8 +255,10 @@ SERVICE_ROLE = 4
 PLATFORM_ROLE_OFFSET = 900
 RESERVED_ROLE_RANGE = (900, 999)
 
-# Platform administrators operate the platform itself: they are the only
-# ones that can unlock accounts locked after too many failed login attempts
+# Platform administrators operate the platform itself. At every security level
+# they are the only ones that can manage the reserved role range, the
+# permissions of the platform roles, grant or revoke platform roles and unlock
+# platform users
 PLATFORM_ADMIN_ROLE = ADMIN_ROLE + PLATFORM_ROLE_OFFSET  # 903
 # Platform counterparts of the client viewer/planner roles: same permissions
 # as their client equivalent, used to tell internal (platform operator) users
@@ -373,6 +375,53 @@ EXTRA_PERMISSION_ASSIGNATION = [
     (VIEWER_ROLE, POST_ACTION, "user-api-key"),
     (VIEWER_ROLE, DELETE_ACTION, "user-api-key"),
 ]
+
+# Administration rights that depend on the security level (CORNFLOW_SECURITY_LEVEL).
+# They are registered with the base permissions (access_init, which service init
+# runs on every start and which deletes the permissions that are no longer in
+# the code), so changing the level adds or removes them on the next start. At
+# run time the permission table rules, as for any other permission.
+
+# Views of the access model: roles, permissions, actions and API views
+ACCESS_MANAGEMENT_ENDPOINTS = (
+    "roles",
+    "roles-detail",
+    "permissions",
+    "permission-detail",
+    "actions",
+    "api-view",
+)
+
+# The actions the client admin has on its own views (all the default ones)
+ADMIN_BASE_ACTIONS = tuple(
+    action for role, action in BASE_PERMISSION_ASSIGNATION if role == ADMIN_ROLE
+)
+
+# Level 1 keeps the 1.3.9 rights of the client admin: managing roles,
+# permissions, actions and views. Levels 1 and 2 also let the client admin
+# unlock accounts (only of users without platform roles, checked in the
+# endpoint). Level 3 leaves all of it to the platform administrator.
+_ADMIN_ACCESS_MANAGEMENT_PERMISSIONS = [
+    (ADMIN_ROLE, action, endpoint)
+    for endpoint in ACCESS_MANAGEMENT_ENDPOINTS
+    for action in ADMIN_BASE_ACTIONS
+]
+_ADMIN_UNLOCK_PERMISSIONS = [(ADMIN_ROLE, PUT_ACTION, "user-unlock")]
+
+LEVEL_PERMISSION_ASSIGNATION = {
+    1: _ADMIN_ACCESS_MANAGEMENT_PERMISSIONS + _ADMIN_UNLOCK_PERMISSIONS,
+    2: list(_ADMIN_UNLOCK_PERMISSIONS),
+    3: [],
+}
+
+# Highest security level at which a client admin can revoke the admin role
+# from a user (1.3.9 behaviour). From level 2 only a platform administrator can.
+CLIENT_ADMIN_REVOKE_ADMIN_MAX_LEVEL = 1
+
+# Security level used when the application has none (e.g. an external
+# application whose configuration does not inherit from cornflow.config): the
+# strictest one, which is the behaviour before the security levels existed.
+STRICTEST_SECURITY_LEVEL = 3
 
 # are there execution files?
 EXECUTION_FILES_STATUS_NOT_GENERATED = 0
