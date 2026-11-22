@@ -921,34 +921,75 @@ class TestConfigSecurityClamping(unittest.TestCase):
 
 class TestSecretKeyLength(unittest.TestCase):
     """
-    Tests that the application refuses to start with a JWT signing key
-    shorter than 256 bits.
+    Tests the minimum length of the JWT signing keys (256 bits) per security
+    level: levels 2 and 3 refuse to start with a shorter key, level 1 only warns.
     """
 
+    LEVELS = (1, 2, 3)
+    LONG = "x" * MINIMUM_SECRET_KEY_LENGTH
+    SHORT = "tooshort"
+
     @staticmethod
-    def build_app(token_key, bi_key):
+    def build_app(token_key, bi_key, level, source="config"):
         app = Flask(__name__)
+        app.config["SECURITY_LEVEL"] = level
+        app.config["SECRET_KEY_SOURCE"] = source
         app.config["SECRET_TOKEN_KEY"] = token_key
         app.config["SECRET_BI_KEY"] = bi_key
         return app
 
-    def test_short_secret_key_is_rejected(self):
+    def warnings_of(self, app):
+        with self.assertLogs(app.logger, "WARNING") as logs:
+            _check_secret_keys(app)
+        return [record.getMessage() for record in logs.records]
+
+    def test_short_keys_are_rejected_at_levels_2_and_3(self):
         from cornflow.shared.exceptions import ConfigurationError
 
-        long_key = "x" * MINIMUM_SECRET_KEY_LENGTH
-        app = self.build_app("tooshort", long_key)
-        with self.assertRaises(ConfigurationError):
-            _check_secret_keys(app)
+        for level in (2, 3):
+            with self.subTest(level=level, key="SECRET_TOKEN_KEY"):
+                app = self.build_app(self.SHORT, self.LONG, level)
+                with self.assertRaises(ConfigurationError) as ctx:
+                    _check_secret_keys(app)
+                self.assertIn("at least 32 bytes", ctx.exception.error)
+                self.assertIn("SECRET_TOKEN_KEY", ctx.exception.error)
+                self.assertNotIn(self.SHORT, ctx.exception.error)
+            with self.subTest(level=level, key="SECRET_BI_KEY"):
+                app = self.build_app(self.LONG, self.SHORT, level)
+                with self.assertRaises(ConfigurationError) as ctx:
+                    _check_secret_keys(app)
+                self.assertIn("at least 32 bytes", ctx.exception.error)
+                self.assertIn("SECRET_BI_KEY", ctx.exception.error)
+                self.assertNotIn(self.SHORT, ctx.exception.error)
 
-        app = self.build_app(long_key, "tooshort")
-        with self.assertRaises(ConfigurationError):
-            _check_secret_keys(app)
+    def test_short_keys_only_warn_at_level_1(self):
+        app = self.build_app(self.SHORT, self.SHORT, 1)
+        messages = self.warnings_of(app)
+        self.assertEqual(2, len(messages), messages)
+        self.assertIn("SECRET_TOKEN_KEY", messages[0])
+        self.assertIn("SECRET_BI_KEY", messages[1])
 
-    def test_long_or_missing_keys_are_accepted(self):
-        long_key = "x" * MINIMUM_SECRET_KEY_LENGTH
-        _check_secret_keys(self.build_app(long_key, long_key))
-        # Missing keys only log a warning: token generation fails at runtime
-        _check_secret_keys(self.build_app(None, None))
+    def test_long_keys_are_accepted(self):
+        for level in self.LEVELS:
+            with self.subTest(level=level):
+                app = self.build_app(self.LONG, self.LONG, level)
+                with self.assertNoLogs(app.logger, "WARNING"):
+                    _check_secret_keys(app)
+
+    def test_missing_keys(self):
+        from cornflow.shared import secret_keys
+        from cornflow.shared.exceptions import ConfigurationError
+
+        app = self.build_app(None, None, 1)
+        self.assertEqual(
+            [secret_keys.TOKEN_KEY_MISSING_WARNING, secret_keys.BI_KEY_MISSING_WARNING],
+            self.warnings_of(app),
+        )
+
+        app = self.build_app(None, None, 2)
+        with self.assertRaises(ConfigurationError) as ctx:
+            _check_secret_keys(app)
+        self.assertEqual(secret_keys.missing_key_error(2), ctx.exception.error)
 
 
 class TestLoginLockout(TestCase):

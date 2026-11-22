@@ -15,7 +15,8 @@ from cornflow.shared.exceptions import ConfigurationError, InvalidUsage
 
 def _get_fernet() -> Fernet:
     """
-    Builds a Fernet instance with a key derived from SECRET_TOKEN_KEY.
+    Builds a Fernet instance with a key derived from SECRET_TOKEN_KEY, the
+    effective secret key (FERNET_KEY, else SECRET_KEY).
 
     :return: the Fernet instance
     :rtype: Fernet
@@ -23,7 +24,8 @@ def _get_fernet() -> Fernet:
     secret = current_app.config.get("SECRET_TOKEN_KEY")
     if not secret:
         raise ConfigurationError(
-            "SECRET_KEY must be configured to encrypt secrets at rest"
+            "No secret key is configured (set FERNET_KEY, or SECRET_KEY): "
+            "secrets can not be encrypted at rest"
         )
     key = base64.urlsafe_b64encode(hashlib.sha256(secret.encode("utf8")).digest())
     return Fernet(key)
@@ -58,6 +60,8 @@ def decrypt_value(value: str) -> str:
         raise InvalidUsage(
             "An internal error occurred. Please contact an administrator.",
             status_code=500,
-            log_txt="A stored secret could not be decrypted. Check that the "
-            "application SECRET_KEY has not changed.",
+            log_txt="A stored secret could not be decrypted: the secret key "
+            "(FERNET_KEY, or SECRET_KEY when FERNET_KEY is not set) is not the "
+            "one it was encrypted with. If it is the MFA secret of a user, an "
+            "administrator can reset it with DELETE /user/<id>/mfa/.",
         )

@@ -22,6 +22,10 @@ from cornflow.endpoints.meta_resource import BaseMetaResource
 from cornflow.models import UserModel
 from cornflow.schemas.user import ApiKeyRequest, ApiKeyResponse
 from cornflow.shared.audit import audit
+from cornflow.shared.secret_keys import (
+    api_key_random_key_warning,
+    uses_random_secret_key,
+)
 from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.const import (
     ALL_DEFAULT_ROLES,
@@ -101,6 +105,8 @@ class UserApiKeyEndpoint(BaseMetaResource):
         superseded = user.api_key_issued_at is not None
         user.rotate_api_key(scope=scope)
         api_key = self.auth_class.generate_api_key(user.id, scope=scope)
+        if uses_random_secret_key(current_app.config):
+            current_app.logger.warning(api_key_random_key_warning(user.id))
         expires_at = user.api_key_expires_at()
         current_app.logger.info(
             f"User {user.id} generated a personal API key (scope {scope})"

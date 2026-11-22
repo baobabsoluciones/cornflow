@@ -60,13 +60,16 @@ from cornflow.shared.security_levels import (
     CONFIG_KEY_ERRORS,
     CONFIG_KEY_LEVEL,
     CONFIG_KEY_LEVEL_ERROR,
+    DEFAULT_SECURITY_LEVEL,
+)
+from cornflow.shared.secret_keys import (
+    CONFIG_KEY_SECRET_KEY_SOURCE,
+    CONFIG_KEY_SECRET_KEYS_DIFFER,
+    KEY_SOURCE_CONFIG,
+    MINIMUM_SECRET_KEY_LENGTH,  # noqa: F401 (imported by the tests from here)
+    check_secret_keys,
 )
 
-
-# Minimum length in bytes of the JWT signing keys. HMAC-SHA256 requires keys
-# of at least 256 bits (RFC 7518, section 3.2) and CCN-STIC-807 requires
-# equivalent strength for the employed cryptography.
-MINIMUM_SECRET_KEY_LENGTH = 32
 
 # Settings that only work with the MFA endpoints enabled
 MFA_DEPENDENT_SETTINGS = ("MFA_REQUIRED", "API_KEY_STEPUP_TOTP", "PLATFORM_ROLE_STEPUP_TOTP")
@@ -152,28 +155,24 @@ def _run_startup_checks(app):
 
 def _check_secret_keys(app):
     """
-    Refuses to start the application when a JWT signing key is configured
-    with less than MINIMUM_SECRET_KEY_LENGTH bytes, so weak keys can not be
-    used to sign session tokens.
-
-    :param app: the Flask application being created
+    Step 3 of the startup checks: the effective secret key (FERNET_KEY, else
+    SECRET_KEY, else random at level 1) and SECRET_BI_KEY, per security level.
+    Logs the warnings and raises ConfigurationError with every error joined
+    with "; ". Key values are never logged.
     """
-    for key_name in ("SECRET_TOKEN_KEY", "SECRET_BI_KEY"):
-        value = app.config.get(key_name)
-        if value is None:
-            # Token generation will fail at runtime with a clear error;
-            # deployments must provide the keys through the environment
-            app.logger.warning(
-                f"{key_name} is not configured: authentication tokens can "
-                f"not be issued until it is set"
-            )
-            continue
-        if len(str(value).encode("utf8")) < MINIMUM_SECRET_KEY_LENGTH:
-            raise ConfigurationError(
-                f"{key_name} must be at least {MINIMUM_SECRET_KEY_LENGTH} "
-                f"bytes long (256 bits). Generate one with: "
-                f'python -c "import secrets; print(secrets.token_hex(32))"'
-            )
+    warnings, errors = check_secret_keys(
+        level=app.config.get(CONFIG_KEY_LEVEL, DEFAULT_SECURITY_LEVEL),
+        token_key=app.config.get("SECRET_TOKEN_KEY"),
+        source=app.config.get(CONFIG_KEY_SECRET_KEY_SOURCE, KEY_SOURCE_CONFIG),
+        keys_differ=bool(app.config.get(CONFIG_KEY_SECRET_KEYS_DIFFER, False)),
+        bi_key=app.config.get("SECRET_BI_KEY"),
+        mfa_enabled=int(app.config.get("MFA_ENABLED", 0)) == 1,
+    )
+    for message in warnings:
+        app.logger.warning(message)
+    if errors:
+        message = "; ".join(errors)
+        raise ConfigurationError(error=message, log_txt=message)
 
 
 def _check_session_windows(app):

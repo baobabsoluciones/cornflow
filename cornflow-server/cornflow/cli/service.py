@@ -45,10 +45,27 @@ from cornflow.shared.const import (
 )
 from cornflow.shared import db
 from cornflow.shared.exceptions import ConfigurationError
-from cryptography.fernet import Fernet
+from cornflow.shared.secret_keys import (
+    EPHEMERAL_KEY_SHARED_INFO,
+    EPHEMERAL_SECRET_KEY_ENV_VAR,
+    uses_random_secret_key,
+)
 from flask_migrate import Migrate, upgrade
 
 MAIN_WD = "/usr/src/app"
+
+
+def _share_ephemeral_secret_key(app):
+    """
+    Security level 1 without FERNET_KEY / SECRET_KEY: passes the random key of
+    this startup (generated once, when config.py was imported) to the gunicorn
+    workers, so that all of them, and the ones gunicorn recycles, sign with the
+    same key. Never writes FERNET_KEY nor SECRET_KEY, and never logs the key.
+    """
+    if not uses_random_secret_key(app.config):
+        return
+    os.environ[EPHEMERAL_SECRET_KEY_ENV_VAR] = app.config["SECRET_TOKEN_KEY"]
+    logger.info(EPHEMERAL_KEY_SHARED_INFO)
 
 
 def _create_app_or_exit(factory, environment, cornflow_db_conn):
@@ -90,6 +107,7 @@ def init_cornflow_service():
     if external_application == 0:
         click.echo("Initializing standard Cornflow application")
         app = _create_app_or_exit(create_app, environment, cornflow_db_conn)
+        _share_ephemeral_secret_key(app)
         with app.app_context():
             _initialize_database(app)
             _create_initial_users(
@@ -123,6 +141,7 @@ def init_cornflow_service():
         app = _create_app_or_exit(
             external_app_lib.create_wsgi_app, environment, cornflow_db_conn
         )
+        _share_ephemeral_secret_key(app)
         with app.app_context():
 
             _initialize_database(app, external_app_module)
@@ -203,13 +222,6 @@ def _setup_environment_variables():
     # Cornflow app config
     os.environ.setdefault("cornflow_url", "http://cornflow:5000")
     os.environ["FLASK_APP"] = "cornflow.app"
-    # Respect an operator-provided SECRET_KEY: it signs the tokens and the
-    # secrets encrypted at rest (TOTP) derive from it. FERNET_KEY stays as
-    # the fallback so deployments that never set SECRET_KEY keep the key
-    # their stored secrets were derived from after an upgrade.
-    os.environ.setdefault(
-        "SECRET_KEY", os.getenv("FERNET_KEY", Fernet.generate_key().decode())
-    )
 
     # Cornflow db defaults
     os.environ["DEFAULT_POSTGRES"] = "1"

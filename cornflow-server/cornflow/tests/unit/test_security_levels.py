@@ -450,6 +450,7 @@ class TestSecurityInventory(unittest.TestCase):
             "FERNET_KEY",
             "SECRET_KEY",
             "SECRET_BI_KEY",
+            "CORNFLOW_EPHEMERAL_SECRET_KEY",
             "CORNFLOW_SECURITY_LEVEL",
             "CORNFLOW_SERVICE_API_KEY",
             "DATABASE_URL",

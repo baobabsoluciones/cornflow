@@ -9,6 +9,11 @@ from cornflow.shared.const import (
     DATABRICKS_BACKEND,
     USER_ACCESS_ALL_OBJECTS_NO,
 )
+from cornflow.shared.secret_keys import (
+    KEY_SOURCE_CONFIG,
+    apply_secret_keys,
+    resolve_secret_keys,
+)
 from cornflow.shared.security_levels import (
     SECURITY_LEVEL_ENV_VAR,
     apply_security_settings,
@@ -23,6 +28,9 @@ from apispec.ext.marshmallow import MarshmallowPlugin
 # in SECURITY_LEVEL_ERROR / SECURITY_CONFIG_ERRORS and create_app refuses to
 # start with them.
 _SECURITY = resolve_security_settings(os.environ)
+# FERNET_KEY > SECRET_KEY > random (level 1 only), resolved once at import so
+# that the server and the CLI sign with the same key.
+_SECRET_KEYS = resolve_secret_keys(os.environ, _SECURITY.level)
 # Testing does not depend on the environment: level 3 defaults.
 _TESTING_SECURITY = resolve_security_settings({SECURITY_LEVEL_ENV_VAR: "3"})
 
@@ -35,8 +43,6 @@ class DefaultConfig(object):
     APPLICATION_ROOT = os.getenv("APPLICATION_ROOT", "/")
     EXTERNAL_APP = int(os.getenv("EXTERNAL_APP", 0))
     SERVICE_NAME = os.getenv("SERVICE_NAME", "Cornflow")
-    SECRET_TOKEN_KEY = os.getenv("SECRET_KEY")
-    SECRET_BI_KEY = os.getenv("SECRET_BI_KEY")
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///cornflow.db")
 
     AUTH_TYPE = int(os.getenv("AUTH_TYPE", AUTH_DB))
@@ -133,6 +139,7 @@ class DefaultConfig(object):
 
 
 apply_security_settings(DefaultConfig, _SECURITY)
+apply_secret_keys(DefaultConfig, _SECRET_KEYS)
 
 
 class Development(DefaultConfig):
@@ -155,6 +162,8 @@ class Testing(DefaultConfig):
     PROPAGATE_EXCEPTIONS = True
     SECRET_TOKEN_KEY = "TESTINGSECRETKEY_TESTINGSECRETKEY_32B"
     SECRET_BI_KEY = "THISISANOTHERKEY_THISISANOTHERKEY_32B"
+    SECRET_KEY_SOURCE = KEY_SOURCE_CONFIG
+    SECRET_KEYS_DIFFER = False
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///cornflow_test.db")
     AIRFLOW_URL = os.getenv("AIRFLOW_URL", "http://localhost:8080")
     PRESERVE_CONTEXT_ON_EXCEPTION = False

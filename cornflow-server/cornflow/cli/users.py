@@ -15,6 +15,10 @@ from cornflow.shared.const import (
     SERVICE_ROLE,
     VIEWER_ROLE,
 )
+from cornflow.shared.secret_keys import (
+    cli_api_key_random_key_warning,
+    uses_random_secret_key,
+)
 from cornflow.shared.exceptions import (
     ObjectDoesNotExist,
     NoPermission,
@@ -233,6 +237,8 @@ def issue_api_key(username, read_only):
         scope = API_KEY_SCOPE_READ if read_only else API_KEY_SCOPE_FULL
         user.rotate_api_key(scope=scope)
         token = Auth.generate_api_key(user.id, scope=scope)
+        if uses_random_secret_key(app.config):
+            app.logger.warning(cli_api_key_random_key_warning(username))
         app.logger.info(
             f"A personal API key was generated for user {username} via the "
             f"CLI (scope {scope})"

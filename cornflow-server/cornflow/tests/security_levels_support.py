@@ -27,7 +27,9 @@ def _to_env_string(value):
     return str(value)
 
 
-def build_security_level_config(level=1, environ=None, **overrides) -> type:
+def build_security_level_config(
+    level=1, environ=None, key_environ=None, **overrides
+) -> type:
     """
     Builds a Testing subclass with the values of the given security level.
 
@@ -35,6 +37,11 @@ def build_security_level_config(level=1, environ=None, **overrides) -> type:
                   None leaves CORNFLOW_SECURITY_LEVEL unset.
     :param environ: raw environment strings (env var name -> str) passed as is to
                     the resolution, e.g. {"LOGIN_MAX_ATTEMPTS": "abc"}.
+    :param key_environ: None keeps the fixed keys of Testing. A mapping (also
+                        an empty one) resolves the secret keys from it as
+                        config.py does with os.environ: FERNET_KEY, SECRET_KEY,
+                        SECRET_BI_KEY and CORNFLOW_EPHEMERAL_SECRET_KEY.
+                        Explicit SECRET_TOKEN_KEY / SECRET_BI_KEY overrides win.
     :param overrides: app.config keys. Inventory keys are converted to their
                       environment variable and go through the same resolution as
                       the environment. Any other key is set on the class as is.
@@ -71,21 +78,39 @@ def build_security_level_config(level=1, environ=None, **overrides) -> type:
         attrs["RATELIMIT_ENABLED"] = 0
 
     cls = type("SecurityLevelTestingConfig", (Testing,), attrs)
-    return apply_security_settings(cls, resolve_security_settings(env))
+    resolved = resolve_security_settings(env)
+    cls = apply_security_settings(cls, resolved)
+    if key_environ is not None:
+        # Imported here so that the other tests of the suite do not depend on it
+        from cornflow.shared import secret_keys
+
+        cls = secret_keys.apply_secret_keys(
+            cls, secret_keys.resolve_secret_keys(dict(key_environ), resolved.level)
+        )
+    return cls
 
 
-def security_level_config(level=1, environ=None, **overrides) -> str:
+def security_level_config(
+    level=1, environ=None, key_environ=None, **overrides
+) -> str:
     """
     Registers (once) build_security_level_config(...) in app_config and returns
     its name, ready for create_app(name).
     """
     name = "testing-level-" + json.dumps(
-        {"level": level, "environ": environ or {}, "overrides": overrides},
+        {
+            "level": level,
+            "environ": environ or {},
+            "key_environ": key_environ,
+            "overrides": overrides,
+        },
         sort_keys=True,
         default=str,
     )
     if name not in app_config:
-        app_config[name] = build_security_level_config(level, environ, **overrides)
+        app_config[name] = build_security_level_config(
+            level, environ, key_environ, **overrides
+        )
     return name
 
 
@@ -96,11 +121,15 @@ class SecurityLevelTestMixin:
 
     security_level = 1
     security_environ = {}
+    key_environ = None
     config_overrides = {}
 
     def create_app(self):
         return create_app(
             security_level_config(
-                self.security_level, self.security_environ, **self.config_overrides
+                self.security_level,
+                self.security_environ,
+                self.key_environ,
+                **self.config_overrides,
             )
         )
