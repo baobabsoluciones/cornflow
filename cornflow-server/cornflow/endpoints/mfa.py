@@ -15,16 +15,25 @@ Both endpoints accept either a regular session token or the temporary
 enrollment token issued by the login endpoint when MFA is required but the
 user has not enrolled yet.
 
+Enrollment is only available when MFA_ENABLED=1 (the default of security
+level 3). With MFA_ENABLED off, POST /mfa/setup/ and POST /mfa/verify/ stay
+registered but answer 501 to every user and token. Users that already
+enrolled keep being asked for their code at login, and the reset below
+stays available.
+
 DELETE /user/<user_id>/mfa/ resets the MFA of a user (self service or admin,
 e.g. when a phone is lost). On deployments where MFA is required the user
-will be asked to enroll again at their next login.
+will be asked to enroll again at their next login; where enrollment is
+disabled (MFA_ENABLED off) the user logs in with the password only and can
+not enroll again.
 """
 
 # Imports from external libraries
 import secrets
+from functools import wraps
 
 import pyotp
-from flask import current_app
+from flask import current_app, g, request
 from flask_apispec import doc, use_kwargs
 
 # Imports from internal modules
@@ -43,6 +52,47 @@ from cornflow.shared.exceptions import (
     ObjectDoesNotExist,
 )
 
+MFA_ENROLLMENT_DISABLED_MESSAGE = (
+    "Two-factor authentication enrollment is disabled on this deployment"
+)
+
+
+def mfa_enrollment_enabled() -> bool:
+    """
+    Whether users can enroll in two-factor authentication on this deployment
+    (MFA_ENABLED=1). Users that are already enrolled keep using their second
+    factor whatever the value, and the MFA reset stays available.
+
+    :return: True if MFA_ENABLED is 1
+    :rtype: bool
+    """
+    return int(current_app.config.get("MFA_ENABLED", 0)) == 1
+
+
+def require_mfa_enrollment_enabled(func):
+    """
+    Decorator for the enrollment endpoints (setup and verify): with
+    MFA_ENABLED off they stay registered but answer 501, like the personal
+    API key endpoint with PERSONAL_TOKEN_ENABLED=0. It goes right after
+    ``authenticate`` and before ``use_kwargs``, so the request body is not
+    validated and nothing is written to the database.
+    """
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if not mfa_enrollment_enabled():
+            user = getattr(g, "user", None)
+            raise EndpointNotImplemented(
+                MFA_ENROLLMENT_DISABLED_MESSAGE,
+                log_txt=f"Error while user {getattr(user, 'id', None)} calls "
+                f"{request.path}. Two-factor authentication enrollment is "
+                f"disabled (MFA_ENABLED="
+                f"{current_app.config.get('MFA_ENABLED', 0)}).",
+            )
+        return func(*args, **kwargs)
+
+    return wrapper
+
 
 class MFASetupEndpoint(BaseMetaResource):
     """
@@ -58,9 +108,11 @@ class MFASetupEndpoint(BaseMetaResource):
 
     @doc(description="Start the two-factor authentication enrollment", tags=["Users"])
     @authenticate(auth_class=Auth())
+    @require_mfa_enrollment_enabled
     def post(self, **kwargs):
         """
         API (POST) method to generate a new TOTP secret for the user.
+        Answers 501 when MFA_ENABLED is off (see require_mfa_enrollment_enabled).
 
         :return: a dict with the plain secret and the otpauth provisioning
           URI to render the QR code, and an integer with the HTTP status code
@@ -109,12 +161,14 @@ class MFAVerifyEndpoint(BaseMetaResource):
 
     @doc(description="Verify and activate two-factor authentication", tags=["Users"])
     @authenticate(auth_class=Auth())
+    @require_mfa_enrollment_enabled
     @use_kwargs(MFAVerifyRequest, location="json")
     def post(self, **kwargs):
         """
         API (POST) method to verify the first TOTP code. On success MFA gets
         activated, the one-time backup codes are generated and a full session
         token is returned.
+        Answers 501 when MFA_ENABLED is off (see require_mfa_enrollment_enabled).
 
         :return: a dict with the backup codes, a session token and the user
           id, and an integer with the HTTP status code
