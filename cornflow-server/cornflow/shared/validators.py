@@ -19,6 +19,7 @@ from cornflow.shared.const import (
     LEGACY_PWD_MIN_LENGTH,
     MIN_PERSONAL_TOKEN_LENGTH,
     PASSWORD_SPECIAL_CHARACTERS,
+    PWD_CHANGE_FLAG_MIN_SECURITY_LEVEL,
     PWD_POLICY_MIN_SECURITY_LEVEL,
     PWD_FORBIDDEN_DIGIT_SEQUENCE_LENGTH,
 )
@@ -87,6 +88,34 @@ def password_policy_enforced() -> bool:
     """
     level = _get_config_value("SECURITY_LEVEL", PWD_POLICY_MIN_SECURITY_LEVEL)
     return level >= PWD_POLICY_MIN_SECURITY_LEVEL
+
+
+def password_change_flag_enforced() -> bool:
+    """
+    Tells whether passwords set by someone other than their owner are
+    single-use and whether the pwd_change_required flag forces a password
+    change (security levels 2 and 3). Without an application context the
+    flag applies, as before the security levels existed.
+
+    :return: True if the forced password change applies
+    :rtype: bool
+    """
+    level = _get_config_value("SECURITY_LEVEL", PWD_CHANGE_FLAG_MIN_SECURITY_LEVEL)
+    return level >= PWD_CHANGE_FLAG_MIN_SECURITY_LEVEL
+
+
+def password_rotation_enforced() -> bool:
+    """
+    Tells whether an expired password (older than PWD_ROTATION_TIME days)
+    blocks every endpoint but the password change (PWD_ROTATION_ENFORCE=1,
+    the security level 3 default). Without an application context, or if the
+    setting is missing, rotation is enforced, as before the security levels
+    existed.
+
+    :return: True if password rotation is enforced
+    :rtype: bool
+    """
+    return _get_config_value("PWD_ROTATION_ENFORCE", 1) == 1
 
 
 def _check_zxcvbn_score(

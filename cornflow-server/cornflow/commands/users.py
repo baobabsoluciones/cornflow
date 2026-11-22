@@ -34,6 +34,17 @@ def create_user_with_role(
         user_role.save()
         from cornflow.shared.audit import audit
 
+        if force_password_change:
+            from cornflow.shared.validators import password_change_flag_enforced
+
+            if not password_change_flag_enforced():
+                current_app.logger.warning(
+                    f"User {username} is flagged to change the password on "
+                    f"first login, but security level "
+                    f"{current_app.config.get('SECURITY_LEVEL')} ignores the "
+                    f"flag: it only applies from security level 2."
+                )
+
         audit(
             "user.created",
             actor="cli",

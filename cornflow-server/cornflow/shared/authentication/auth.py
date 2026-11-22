@@ -4,7 +4,7 @@ This file contains the auth class that can be used for authentication on the req
 
 from datetime import datetime, timedelta, timezone
 from functools import wraps
-from typing import Tuple
+from typing import Optional, Tuple
 
 # Imports from external libraries
 import jwt
@@ -32,6 +32,8 @@ from cornflow.shared.const import (
     PERMISSION_METHOD_MAP,
     INTERNAL_TOKEN_ISSUER,
     OID_PROVIDER_AZURE,
+    PWD_CHANGE_REASON_EXPIRED,
+    PWD_CHANGE_REASON_FLAGGED,
     PWD_ROTATION_ALLOWED_ENDPOINTS,
     TOKEN_PURPOSE_ALLOWED_ENDPOINTS,
     TOKEN_PURPOSE_MFA_SETUP,
@@ -41,6 +43,10 @@ from cornflow.shared.const import (
     TOKEN_TYPE_REFRESH,
 )
 from cornflow.shared.audit import audit
+from cornflow.shared.validators import (
+    password_change_flag_enforced,
+    password_rotation_enforced,
+)
 from cornflow.shared.exceptions import (
     CommunicationError,
     InvalidCredentials,
@@ -189,21 +195,57 @@ class Auth:
         )
 
     @staticmethod
+    def password_change_flag_applies(user) -> bool:
+        """
+        Tells whether the user's pwd_change_required flag is in force: the flag
+        is only enforced from security level 2. At level 1 it is ignored but
+        kept in the database.
+
+        :param user: the user object
+        :return: True if the user is flagged and the flag applies
+        :rtype: bool
+        """
+        return bool(user.pwd_change_required) and password_change_flag_enforced()
+
+    @staticmethod
+    def password_change_blocking_reason(user) -> Optional[str]:
+        """
+        Gives the reason why the user can only change their password, or None if
+        the user has full access:
+
+        - PWD_CHANGE_REASON_FLAGGED: the password is flagged for a forced change
+          and the security level enforces the flag (levels 2 and 3), whatever
+          PWD_ROTATION_ENFORCE is;
+        - PWD_CHANGE_REASON_EXPIRED: the password is older than PWD_ROTATION_TIME
+          days and PWD_ROTATION_ENFORCE=1.
+
+        Exemptions (service user, external provider) are checked by the caller.
+
+        :param user: the user object
+        :rtype: str or None
+        """
+        if Auth.password_change_flag_applies(user):
+            return PWD_CHANGE_REASON_FLAGGED
+        if password_rotation_enforced() and Auth.password_rotation_expired(user):
+            return PWD_CHANGE_REASON_EXPIRED
+        return None
+
+    @staticmethod
     def _check_password_rotation(user):
         """
-        When password rotation is enforced, users whose password has expired
-        or is flagged for a forced change can only access the endpoints
-        needed to review their profile and set a new password.
+        Users that must change their password can only access the endpoints
+        needed to review their profile and set a new password. That is the case
+        when the password is flagged for a forced change (from security level 2,
+        even without rotation) or has expired while rotation is enforced
+        (PWD_ROTATION_ENFORCE=1). The service user and users from an external
+        provider are exempt.
 
         :param user: the user object
         """
-        if int(current_app.config.get("PWD_ROTATION_ENFORCE", 1)) != 1:
-            return
         if user.comes_from_external_provider():
             return
-        if not (
-            user.pwd_change_required or Auth.password_rotation_expired(user)
-        ):
+        reason = Auth.password_change_blocking_reason(user)
+        if reason is None:
             return
         if user.is_service_user():
             return
@@ -215,14 +257,17 @@ class Auth:
             target_user_id = (request.view_args or {}).get("user_id")
             if target_user_id == user.id:
                 return
+        if reason == PWD_CHANGE_REASON_FLAGGED:
+            cause = "The user's password is flagged for a forced change."
+        else:
+            cause = "The user's password has expired and rotation is enforced."
         raise NoPermission(
             error="Your password has expired or must be renewed. "
             "Please change your password before continuing.",
             status_code=403,
             payload={"error_code": "password_rotation"},
             log_txt=f"Error while user {user.id} tries to access endpoint "
-            f"{endpoint}. The user's password has expired and rotation "
-            f"is enforced.",
+            f"{endpoint}. {cause}",
         )
 
     @staticmethod

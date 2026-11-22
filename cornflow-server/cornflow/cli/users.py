@@ -29,9 +29,10 @@ force_password_change = click.option(
     "--force-password-change",
     is_flag=True,
     default=False,
-    help="Mark the password as single-use: the user must change it on first "
-    "login. Meant for provisioning accounts for other people. Not available "
-    "for service users, which are exempt from rotation.",
+    help="Mark the password as single-use: from security level 2 the user "
+    "must change it on first login (security level 1 keeps the flag but "
+    "ignores it). Meant for provisioning accounts for other people. Not "
+    "available for service users, which are exempt from rotation.",
 )
 
 

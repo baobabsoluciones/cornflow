@@ -32,6 +32,18 @@ PWD_POLICY_MIN_SECURITY_LEVEL = 2
 # Minimum password length of the 1.3.9 rules (level 1 fallback).
 LEGACY_PWD_MIN_LENGTH = 5
 
+# Security level from which the forced password change applies (levels 2
+# and 3): passwords set by an admin (signup or edit) and temporary recovery
+# passwords are single-use, and a password flagged with pwd_change_required
+# (by those flows, by the CLI or by migration b7a1c9d807e5) can only be
+# changed. Level 1 neither flags nor enforces (1.3.9 behaviour); the flags
+# stay in the database and apply again if the level is raised.
+PWD_CHANGE_FLAG_MIN_SECURITY_LEVEL = 2
+
+# Why a user must change their password before using the API (log only)
+PWD_CHANGE_REASON_FLAGGED = "flagged"
+PWD_CHANGE_REASON_EXPIRED = "expired"
+
 # Personal data (username, names, email local part) shorter than this is not
 # searched for inside the password, to avoid false positives with very short
 # names.
@@ -109,10 +121,12 @@ API_KEY_FORBIDDEN_ENDPOINTS = {
     "user-roles-detail": ["DELETE"],
 }
 
-# Endpoints (name -> allowed methods) that stay reachable when the user's
-# password has expired and password rotation is enforced: the user can check
-# their token, review their own profile (and roles, needed by the web client
-# to render the settings screen) and change their password.
+# Endpoints (name -> allowed methods) that stay reachable when the user must
+# change their password: the password is flagged for a forced change (from
+# security level 2) or has expired while rotation is enforced
+# (PWD_ROTATION_ENFORCE=1). The user can check their token, review their own
+# profile (and roles, needed by the web client to render the settings
+# screen) and change their password.
 PWD_ROTATION_ALLOWED_ENDPOINTS = {
     "user-detail": ["GET", "PUT"],
     "token": ["GET"],

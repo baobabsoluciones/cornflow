@@ -49,6 +49,7 @@ from cornflow.shared.rate_limit import (
 from cornflow.shared.validators import (
     check_email_pattern,
     check_password_pattern,
+    password_change_flag_enforced,
     password_policy_enforced,
     passwords_too_similar,
 )
@@ -229,9 +230,13 @@ class UserDetailsEndpoint(BaseMetaResource):
                             f"current one.",
                         )
             else:
-                # A password set by an admin is temporary: the user must
-                # change it at their next access
-                data["pwd_change_required"] = True
+                # From security level 2 a password set by an admin is
+                # single-use: the user must change it at their next access.
+                # Level 1 keeps the 1.3.9 behaviour: it works as a normal
+                # password (and, as any password change, clears a pending
+                # flag in UserModel.update).
+                if password_change_flag_enforced():
+                    data["pwd_change_required"] = True
 
         if data.get("email") is not None:
             check, msg = check_email_pattern(data.get("email"))
@@ -492,8 +497,7 @@ class RecoverPassword(BaseMetaResource):
             return {"message": message}, 200
 
         # Legacy fallback (CORNFLOW_UI_URL not configured, e.g. API-only
-        # deployments): a temporary password that must be changed at the
-        # next login
+        # deployments): a temporary password, single-use from security level 2
         new_password = self.data_model.generate_random_password()
 
         text_email = get_password_recover_email(
@@ -512,8 +516,10 @@ class RecoverPassword(BaseMetaResource):
             receiver=receiver,
         )
 
-        # The temporary password must be changed at the next login
-        data = {"password": new_password, "pwd_change_required": True}
+        # Level 1 keeps the 1.3.9 behaviour: it works as a normal password.
+        data = {"password": new_password}
+        if password_change_flag_enforced():
+            data["pwd_change_required"] = True
         user_obj.update(data)
 
         current_app.logger.info(

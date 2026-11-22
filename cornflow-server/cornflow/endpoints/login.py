@@ -415,15 +415,17 @@ class LoginBaseEndpoint(BaseMetaResource):
 def check_last_password_change(user):
     """
     Check if the user needs to change their password, either because the
-    password rotation time has passed or because the password was flagged
-    for a forced change (first login after the policy hardening, a password
-    reset by an admin or a recovery with a temporary password).
+    password rotation time (PWD_ROTATION_TIME) has passed, at every security
+    level, or because the password is flagged for a forced change and the
+    level enforces the flag (levels 2 and 3: a password set by an admin, a
+    temporary recovery password, the CLI or the policy hardening migration).
+    Level 1 only reports the password age, as in 1.3.9.
 
     :param user: The user object to check
     :return: True if password needs to be changed, False otherwise
     :rtype: bool
     """
-    if user.pwd_change_required:
+    if Auth.password_change_flag_applies(user):
         return True
     return Auth.password_rotation_expired(user)
 
