@@ -46,6 +46,11 @@ LEGACY_PWD_MIN_LENGTH = 5
 # stay in the database and apply again if the level is raised.
 PWD_CHANGE_FLAG_MIN_SECURITY_LEVEL = 2
 
+# Security level from which BI tokens without an expiration date ("exp"
+# claim) are rejected (level 3). Levels 1 and 2 accept them, as in 1.3.9; a
+# token that carries "exp" is always checked against it.
+BI_TOKEN_EXPIRY_REQUIRED_MIN_SECURITY_LEVEL = 3
+
 # Why a user must change their password before using the API (log only)
 PWD_CHANGE_REASON_FLAGGED = "flagged"
 PWD_CHANGE_REASON_EXPIRED = "expired"

@@ -185,11 +185,14 @@ def unlock_user(username):
 
 @users.command(
     name="bi_token",
-    help="[DEPRECATED] Generate a BI token for a user (valid for "
-    "BI_TOKEN_DURATION_DAYS days). BI tokens are superseded by the read-only "
-    "personal API keys (users api_key --read-only), which are individually "
-    "revocable and get expiry warnings; this command is kept for backwards "
-    "compatibility and will be removed in a future release.",
+    help="[DEPRECATED] Generate a BI token for a user. The token expires after "
+    "BI_TOKEN_DURATION_DAYS days, or does not expire when "
+    "BI_TOKEN_DURATION_DAYS is 0 (the default at security levels 1 and 2). "
+    "Security level 3 rejects BI tokens without an expiration date. BI tokens "
+    "are superseded by the read-only personal API keys (users api_key "
+    "--read-only), which are individually revocable and get expiry warnings; "
+    "this command is kept for backwards compatibility and will be removed in a "
+    "future release.",
 )
 @username
 def issue_bi_token(username):
@@ -258,7 +261,11 @@ def issue_api_key(username, read_only):
 
 @create.command(
     name="token",
-    help="Creates a token for a user that is never going to expire. This token can only be used on BI endpoints",
+    help="Creates a BI token for a user. The token expires after "
+    "BI_TOKEN_DURATION_DAYS days, or does not expire when "
+    "BI_TOKEN_DURATION_DAYS is 0 (the default at security levels 1 and 2). "
+    "Security level 3 rejects BI tokens without an expiration date. This token "
+    "can only be used on BI endpoints",
 )
 @click.option(
     "--idx", "-i", type=int, help="The id of the user to generate the token for"

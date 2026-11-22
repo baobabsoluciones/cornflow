@@ -28,6 +28,7 @@ from cornflow.shared.const import (
     API_KEY_SCOPE_FULL,
     API_KEY_SCOPE_READ,
     AUTH_OID,
+    BI_TOKEN_EXPIRY_REQUIRED_MIN_SECURITY_LEVEL,
     READ_ONLY_HTTP_METHODS,
     PERMISSION_METHOD_MAP,
     INTERNAL_TOKEN_ISSUER,
@@ -43,6 +44,7 @@ from cornflow.shared.const import (
     TOKEN_TYPE_REFRESH,
 )
 from cornflow.shared.audit import audit
+from cornflow.shared.security_levels import CONFIG_KEY_LEVEL, DEFAULT_SECURITY_LEVEL
 from cornflow.shared.validators import (
     password_change_flag_enforced,
     password_rotation_enforced,
@@ -1090,6 +1092,12 @@ class BIAuth(Auth):
        Migrate those endpoints to ``Auth`` and hand out read-only API keys
        (``cornflow users api_key -u <user> --read-only``); this class will be
        removed in a future release.
+
+    Expiry depends on the security level: BI tokens expire after
+    BI_TOKEN_DURATION_DAYS days, or carry no expiration date when it is 0 (the
+    default at levels 1 and 2). Level 3 (1 to 365 days, 90 by default) also
+    rejects the tokens without an expiration date, so the BI integrations have
+    to regenerate them.
     """
 
     CHECK_TOKEN_VERSION = False
@@ -1098,12 +1106,27 @@ class BIAuth(Auth):
         super().__init__(user_model)
 
     @staticmethod
+    def expiry_required() -> bool:
+        """
+        Tells whether BI tokens must carry an expiration date ("exp" claim):
+        only from security level 3. A configuration without SECURITY_LEVEL is
+        treated as the default level, as app.py does.
+
+        :return: True if a BI token without "exp" must be rejected
+        :rtype: bool
+        """
+        level = current_app.config.get(CONFIG_KEY_LEVEL, DEFAULT_SECURITY_LEVEL)
+        return int(level) >= BI_TOKEN_EXPIRY_REQUIRED_MIN_SECURITY_LEVEL
+
+    @staticmethod
     def decode_token(token: str = None) -> dict:
         """
-        Decodes a given JSON Web token and extracts the username from the sub claim.
+        Decodes a BI token and returns its payload (the username is in the sub
+        claim). A token that carries "exp" is rejected once expired; from
+        security level 3 a token without "exp" is rejected too.
 
         :param str token: the given JSON Web Token
-        :return: dictionary containing the username from the token's sub claim
+        :return: the decoded payload
         :rtype: dict
         """
         if not token:
@@ -1112,15 +1135,26 @@ class BIAuth(Auth):
                 log_txt="Error while trying to decode a BI token. Token is missing.",
                 status_code=400,
             )
+        options = {"require": ["exp"]} if BIAuth.expiry_required() else None
         try:
             return jwt.decode(
-                token, current_app.config["SECRET_BI_KEY"], algorithms="HS256"
+                token,
+                current_app.config["SECRET_BI_KEY"],
+                algorithms="HS256",
+                options=options,
             )
 
         except jwt.ExpiredSignatureError:
             raise InvalidToken(
                 "The BI token has expired, please generate a new one",
                 log_txt="Error while trying to decode a BI token. The token has expired.",
+            )
+        except jwt.MissingRequiredClaimError:
+            raise InvalidToken(
+                "The BI token has no expiration date and is no longer accepted, "
+                "please regenerate the BI token",
+                log_txt="Error while trying to decode a BI token. The token has no "
+                "expiration date (exp claim), which security level 3 requires.",
             )
         except jwt.InvalidTokenError:
             raise InvalidToken(
@@ -1132,8 +1166,11 @@ class BIAuth(Auth):
     def generate_token(user_id: int = None) -> str:
         """
         Generates a BI token given a user_id. The token contains the username
-        in the sub claim and expires after BI_TOKEN_DURATION_DAYS days (it can
-        be regenerated with `cornflow users bi_token`).
+        in the sub claim and expires after BI_TOKEN_DURATION_DAYS days; with 0
+        (the default at security levels 1 and 2) it carries no expiration date.
+        Security level 3 does not start with 0, so it never issues tokens
+        without an expiration date. A token can be regenerated with
+        `cornflow users bi_token`.
 
         :param int user_id: user id to generate the token for
         :return: the generated token
@@ -1152,13 +1189,15 @@ class BIAuth(Auth):
                 err, log_txt="Error while trying to generate token. " + err
             )
 
+        now = datetime.now(timezone.utc)
         payload = {
-            "exp": datetime.now(timezone.utc)
-            + timedelta(days=int(current_app.config["BI_TOKEN_DURATION_DAYS"])),
-            "iat": datetime.now(timezone.utc),
+            "iat": now,
             "sub": user.username,
             "iss": INTERNAL_TOKEN_ISSUER,
         }
+        duration_days = int(current_app.config["BI_TOKEN_DURATION_DAYS"])
+        if duration_days > 0:
+            payload["exp"] = now + timedelta(days=duration_days)
 
         return jwt.encode(
             payload, current_app.config["SECRET_BI_KEY"], algorithm="HS256"
