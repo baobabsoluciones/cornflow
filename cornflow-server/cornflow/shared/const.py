@@ -29,6 +29,12 @@ DEFAULT_PWD_ROTATION_TIME = 120
 # change. Level 1 keeps the 1.3.9 rules.
 PWD_POLICY_MIN_SECURITY_LEVEL = 2
 
+# Consecutive failed logins that lock an account when the configuration does
+# not define LOGIN_MAX_ATTEMPTS (only configurations that do not inherit from
+# cornflow.config). The security levels set it: 0 (no lockout) at level 1 and
+# 5 at levels 2 and 3.
+DEFAULT_LOGIN_MAX_ATTEMPTS = 5
+
 # Minimum password length of the 1.3.9 rules (level 1 fallback).
 LEGACY_PWD_MIN_LENGTH = 5
 

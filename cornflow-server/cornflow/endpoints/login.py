@@ -38,6 +38,12 @@ from cornflow.shared.exceptions import (
     InvalidUsage,
 )
 
+ACCOUNT_LOCKED_ERROR_CODE = "account_locked"
+ACCOUNT_LOCKED_MESSAGE = (
+    "The account is locked due to too many failed login attempts. "
+    "Please contact an administrator to unlock it."
+)
+
 
 class LoginBaseEndpoint(BaseMetaResource):
     """
@@ -197,6 +203,7 @@ class LoginBaseEndpoint(BaseMetaResource):
                     )
             if not valid:
                 # Wrong second-factor codes also count towards the lockout
+                # (when LOGIN_MAX_ATTEMPTS is above 0)
                 user.register_failed_login()
                 audit(
                     "login.failure",
@@ -289,10 +296,9 @@ class LoginBaseEndpoint(BaseMetaResource):
         :param user: the locked user
         """
         raise InvalidCredentials(
-            "The account is locked due to too many failed login attempts. "
-            "Please contact a platform administrator to unlock it.",
+            ACCOUNT_LOCKED_MESSAGE,
             status_code=403,
-            payload={"error_code": "account_locked"},
+            payload={"error_code": ACCOUNT_LOCKED_ERROR_CODE},
             log_txt=f"Error while user {user.id} tries to log in. "
             f"The account is locked.",
         )

@@ -23,6 +23,7 @@ from cornflow.shared import (
 from cornflow.shared.audit import audit
 from cornflow.shared.const import (
     API_KEY_SCOPE_FULL,
+    DEFAULT_LOGIN_MAX_ATTEMPTS,
     DEFAULT_PWD_HISTORY_SIZE,
     PASSWORD_SPECIAL_CHARACTERS,
 )
@@ -301,45 +302,80 @@ class UserModel(TraceAttributesModel):
     def is_login_locked(self) -> bool:
         """
         Returns True while the account is locked because of too many
-        consecutive failed login attempts. Locked accounts can only be
-        unlocked by a platform administrator.
+        consecutive failed login attempts. The lock does not expire: the
+        account stays locked until it is unlocked through the API or the
+        break-glass CLI command, also when the lockout is later disabled
+        (LOGIN_MAX_ATTEMPTS=0).
 
         :rtype: bool
         """
         return bool(self.locked)
 
+    @staticmethod
+    def login_max_attempts() -> int:
+        """
+        Consecutive failed logins (wrong password or wrong second-factor code)
+        that lock an account, as configured with LOGIN_MAX_ATTEMPTS. A value of
+        0 or lower means there is no lockout and failures are not counted (the
+        default at security level 1, where the setting has no limits).
+        """
+        return int(
+            current_app.config.get("LOGIN_MAX_ATTEMPTS", DEFAULT_LOGIN_MAX_ATTEMPTS)
+        )
+
+    @staticmethod
+    def login_lockout_enabled() -> bool:
+        """
+        Returns True when failed logins lock accounts (LOGIN_MAX_ATTEMPTS
+        above 0).
+        """
+        return UserModel.login_max_attempts() > 0
+
+    def _lock_after_failed_logins(self, max_attempts: int):
+        """
+        Locks the account after max_attempts consecutive failed logins. Locking
+        revokes every outstanding session (token version and refresh-token
+        sessions) and the personal API key, with no rotation grace, at every
+        security level. The lock does not expire. Added to the session but not
+        committed (the calling flow commits).
+        """
+        self.locked = True
+        self.revoke_all_sessions()
+        self._clear_api_key_state()
+        current_app.logger.warning(
+            f"User {self.username} locked after {max_attempts} failed login "
+            f"attempts. An administrator must unlock the account."
+        )
+        audit(
+            "account.locked",
+            outcome="locked",
+            target_id=self.id,
+            target=self.username,
+            attempts=self.failed_login_attempts,
+        )
+
     def register_failed_login(self):
         """
-        Registers a failed login attempt (wrong password or wrong TOTP code)
-        and locks the account once LOGIN_MAX_ATTEMPTS consecutive failures
-        are reached. The account stays locked until a platform administrator
-        unlocks it. Service users are exempt from the lockout so the
-        machine-to-machine communication can not be denial-of-serviced.
+        Registers a failed login attempt (wrong password or wrong TOTP code).
+        With LOGIN_MAX_ATTEMPTS above 0, the account is locked once that many
+        consecutive failures are reached and stays locked until it is unlocked
+        (there is no automatic unlock). With LOGIN_MAX_ATTEMPTS at 0 or lower
+        (the default at security level 1) failures are neither counted nor
+        lock the account; accounts that were already locked stay locked.
+        Service users are exempt from the lockout so the machine-to-machine
+        communication can not be denial-of-serviced.
         """
         if self.is_service_user():
             current_app.logger.warning(
                 f"Failed login attempt for service user {self.username}"
             )
             return
-        max_attempts = int(current_app.config.get("LOGIN_MAX_ATTEMPTS", 5))
+        max_attempts = self.login_max_attempts()
+        if max_attempts <= 0:
+            return
         self.failed_login_attempts = (self.failed_login_attempts or 0) + 1
-        if self.failed_login_attempts >= max_attempts:
-            self.locked = True
-            # Locking revokes every outstanding session and personal API key
-            self.revoke_all_sessions()
-            self.api_key_version = (self.api_key_version or 0) + 1
-            current_app.logger.warning(
-                f"User {self.username} locked after {max_attempts} failed "
-                f"login attempts. A platform administrator must unlock the "
-                f"account."
-            )
-            audit(
-                "account.locked",
-                outcome="locked",
-                target_id=self.id,
-                target=self.username,
-                attempts=self.failed_login_attempts,
-            )
+        if not self.locked and self.failed_login_attempts >= max_attempts:
+            self._lock_after_failed_logins(max_attempts)
         db.session.add(self)
         db.session.commit()
 
@@ -354,8 +390,9 @@ class UserModel(TraceAttributesModel):
 
     def unlock_account(self):
         """
-        Unlocks the account and clears the failed login counter. Only
-        platform administrators (or the break-glass CLI command) call this.
+        Unlocks the account and clears the failed login counter. Called by the
+        unlock endpoint (the administrators allowed depend on the security
+        level) and by the break-glass CLI command.
         """
         self.locked = False
         self.failed_login_attempts = 0
@@ -409,11 +446,11 @@ class UserModel(TraceAttributesModel):
         db.session.add(self)
         db.session.commit()
 
-    def revoke_api_keys(self):
+    def _clear_api_key_state(self):
         """
-        Invalidates the user's personal API key without issuing a new one
-        (explicit disable, and on account lock / MFA reset). The rotation
-        grace does not apply here: an explicit revocation is immediate.
+        Invalidates the user's personal API key, including the key superseded by
+        the last rotation that may still be inside its grace window. Added to
+        the session but not committed (the calling flow commits).
         """
         self.api_key_version = (self.api_key_version or 0) + 1
         self.api_key_issued_at = None
@@ -422,6 +459,14 @@ class UserModel(TraceAttributesModel):
         self.api_key_previous_version = None
         self.api_key_grace_until = None
         db.session.add(self)
+
+    def revoke_api_keys(self):
+        """
+        Invalidates the user's personal API key without issuing a new one
+        (explicit disable, and on account lock / MFA reset). The rotation
+        grace does not apply here: an explicit revocation is immediate.
+        """
+        self._clear_api_key_state()
         db.session.commit()
 
     def api_key_expires_at(self):
