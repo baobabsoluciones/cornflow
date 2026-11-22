@@ -8,10 +8,10 @@ This document contains the recommended best practices for deploying and managing
 
 **❌ DON'T do:**
 ```yaml
-# Never include passwords in values.yaml
+# Never include keys or passwords in values.yaml
 cornflow:
   env:
-    SECRET_KEY: "my-secret-key"
+    FERNET_KEY: "my-secret-key"  # rejected by the chart: keys go in a Secret
     CORNFLOW_ADMIN_PWD: "admin123"
 ```
 
@@ -20,17 +20,46 @@ cornflow:
 # Use Kubernetes Secrets
 cornflow:
   env:
-    SECRET_KEY: ${SECRET_KEY}
     CORNFLOW_ADMIN_PWD: ${ADMIN_PASSWORD}
 ```
 
 Create a Secret:
 ```bash
 kubectl create secret generic cornflow-secrets \
-  --from-literal=SECRET_KEY="your-super-secret-key" \
   --from-literal=ADMIN_PASSWORD="your-secure-password" \
   --from-literal=DB_PASSWORD="your-db-password"
 ```
+
+### Secret keys (`FERNET_KEY` and `SECRET_BI_KEY`)
+
+- By default the chart creates the Secret `<release>-cornflow-keys` with random keys on install, reuses them on every upgrade and keeps the Secret on `helm uninstall`. Back it up together with the database: a new `FERNET_KEY` invalidates every session and API key and locks out the users with MFA until an administrator resets it, and a new `SECRET_BI_KEY` invalidates the BI tokens.
+- With `helm template` or GitOps tools that render without the cluster (for example Argo CD), or when you manage the keys yourself, create the Secret and set `cornflow.keys.existingSecret`. Otherwise the keys change on every render.
+
+```bash
+kubectl create secret generic cornflow-keys \
+  --from-literal=FERNET_KEY="$(python -c 'import secrets; print(secrets.token_hex(32))')" \
+  --from-literal=SECRET_BI_KEY="$(python -c 'import secrets; print(secrets.token_hex(32))')"
+```
+
+```yaml
+cornflow:
+  keys:
+    existingSecret: cornflow-keys
+```
+
+- Never set `FERNET_KEY`, `SECRET_KEY` or `SECRET_BI_KEY` in `cornflow.env`: the chart fails to render. `SECRET_KEY` is only a fallback of `FERNET_KEY` in cornflow and is not needed with this chart.
+
+Details, including how to upgrade from a previous version of the chart: [Secret keys](cornflow/README.md#secret-keys).
+
+### Security level
+
+Set `CORNFLOW_SECURITY_LEVEL` in `cornflow.env` (1 by default):
+
+- `1`: same behaviour as cornflow 1.3.9.
+- `2`: password policy, single-use password on user creation, account lockout after 5 failed logins, 8-hour sessions and a mandatory secret key of 32 bytes or more.
+- `3`: level 2 plus mandatory MFA, sessions with token refresh, password rotation, BI tokens that expire, and production CORS, Swagger and HSTS settings.
+
+`SIGNUP_ACTIVATED`, `CORS_ORIGINS`, `TOKEN_DURATION` and `PWD_ROTATION_TIME` are set in the chart's `values.yaml` and override the level: at levels 2 and 3 set them to `null` (or to the value you want). See [Security level](cornflow/README.md#security-level) and the cornflow documentation in [`docs/source/deploy/access.rst`](../docs/source/deploy/access.rst).
 
 ### RBAC Configuration
 
@@ -240,24 +269,27 @@ kubectl apply -f ingress.yaml
 **Security Variables:**
 ```yaml
 cornflow:
+  keys:
+    existingSecret: "cornflow-keys"  # or leave it empty and let the chart generate the keys
   env:
+    # Security level (1, 2 or 3): sets the defaults of the security settings
+    CORNFLOW_SECURITY_LEVEL: "3"
+
     # Authentication
     AUTH_TYPE: "2"  # Use OID for production
-    SECRET_KEY: "your-super-secure-secret"
-    SECRET_BI_KEY: "your-super-secure-bi-secret"
-    
+
     # User Management
-    SIGNUP_ACTIVATED: "0"  # Disable in production
+    SIGNUP_ACTIVATED: null  # let the security level decide (a value here overrides it)
     SERVICE_USER_ALLOW_PASSWORD_LOGIN: "0"  # Disable in production
     OPEN_DEPLOYMENT: "0"  # Disable in production
-    
+
     # Access Control
-    CORS_ORIGINS: "https://your-domain.com"
+    CORS_ORIGINS: "https://your-domain.com"  # overrides the level (closed at level 3)
     USER_ACCESS_ALL_OBJECTS: "0"
-    
-    # Token Management
-    TOKEN_DURATION: "24"  # Hours
-    PWD_ROTATION_TIME: "90"  # Days
+
+    # Token Management: let the security level decide
+    TOKEN_DURATION: null
+    PWD_ROTATION_TIME: null
 ```
 
 **Authentication Configuration:**
@@ -299,20 +331,18 @@ cornflow:
 ```yaml
 cornflow:
   env:
-    # Security
-    SECRET_KEY: ${SECRET_KEY}
-    SECRET_BI_KEY: ${SECRET_BI_KEY}
+    # Security: FERNET_KEY and SECRET_BI_KEY come from the keys Secret (cornflow.keys)
     
     # Database
     DATABASE_URL: "postgresql://cornflow:${DB_PASSWORD}@cornflow-postgresql:5432/cornflow"
     
     # Application configuration
     AUTH_TYPE: "1"  # Database authentication
-    SIGNUP_ACTIVATED: "0"  # Disable in production
+    SIGNUP_ACTIVATED: "0"  # Disable in production (overrides the security level)
     SERVICE_USER_ALLOW_PASSWORD_LOGIN: "0"  # More secure
     OPEN_DEPLOYMENT: "0"  # More restrictive
     
-    # Token configuration
+    # Token configuration (overrides the security level; null lets the level decide)
     TOKEN_DURATION: "24"
     PWD_ROTATION_TIME: "90"
 ```
@@ -449,9 +479,13 @@ Use tools like:
 - External Secrets Operator
 - HashiCorp Vault
 
+Point `cornflow.keys.existingSecret` to the Secret these tools create.
+
 ## 📋 Production Checklist
 
 - [ ] Secrets configured correctly
+- [ ] Keys Secret backed up with the database, or `cornflow.keys.existingSecret` set (required with tools that render with `helm template`)
+- [ ] `CORNFLOW_SECURITY_LEVEL` set, and `SIGNUP_ACTIVATED`, `CORS_ORIGINS`, `TOKEN_DURATION` and `PWD_ROTATION_TIME` reviewed (they override the level)
 - [ ] RBAC enabled
 - [ ] Network Policies configured
 - [ ] External Ingress with TLS configured
