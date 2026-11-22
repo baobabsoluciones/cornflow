@@ -34,10 +34,18 @@ Before running cornflow we have to create some environment variables::
 
   export FLASK_APP=cornflow.app
   export FLASK_ENV=development
-  export SECRET_KEY=THISNEEDSTOBECHANGED
+  export FERNET_KEY=THIS_NEEDS_TO_BE_CHANGED_TO_32_BYTES_OR_MORE
   export AIRFLOW_URL=http://localhost:8080
   export AIRFLOW_USER=admin
   export AIRFLOW_PWD=admin
+
+``FERNET_KEY`` is the secret key that signs the sessions and the API keys
+(``SECRET_KEY`` is still read when ``FERNET_KEY`` is not set). Give it a
+value of at least 32 bytes, for example the output of
+``python -c "import secrets; print(secrets.token_hex(32))"``. At security
+level 1, the default, cornflow also starts without it, using a random key
+that changes on every start; at levels 2 and 3 it is mandatory (see
+:ref:`Security levels`).
 
 Then we run the following commands::
 

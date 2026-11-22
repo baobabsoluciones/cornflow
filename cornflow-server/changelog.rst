@@ -1,3 +1,66 @@
+version 1.4.0rc1
+----------------
+- released: pending
+- description: Security levels and secret key handling
+- changelog:
+    - Security levels
+        New variable ``CORNFLOW_SECURITY_LEVEL`` (1, 2 or 3; 1 by default) that sets the default value
+        of every security setting. Level 1 behaves as version 1.3.9, so upgrading needs no change in
+        deployments or clients (except the 401 answer to invalid tokens described below); level 2 adds
+        the password policy, one-time passwords, account lockout after 5 failed logins, a mandatory
+        secret key and 8-hour sessions; level 3 adds mandatory two-factor authentication, renewable
+        sessions, password rotation, user sign-up restricted to platform administrators, BI tokens that
+        expire after 90 days, closed CORS, Swagger off and HSTS on, whatever ``FLASK_ENV`` is. An invalid
+        level stops cornflow from starting. The effective level and the variables that change its
+        defaults are logged at startup; the level is not exposed through the API.
+
+    - Settings by level
+        Every security setting keeps its own variable, which overrides the level default within the
+        limits of the level. A value outside the limits is replaced by the limit, with a warning in the
+        log; a 0 that turns off a control the level requires (``LOGIN_MAX_ATTEMPTS`` at levels 2 and 3,
+        ``BI_TOKEN_DURATION_DAYS`` at level 3) stops cornflow from starting. ``BI_TOKEN_DURATION_DAYS=0``
+        issues BI tokens without expiration date. ``CORS_ORIGINS``, ``CORNFLOW_DOCS_ENABLED`` and
+        ``HSTS_ENABLED`` no longer depend on ``FLASK_ENV``.
+
+    - Two-factor enrollment
+        New variable ``MFA_ENABLED`` (0 at levels 1 and 2, 1 at level 3). With ``MFA_ENABLED=0``,
+        ``/mfa/setup/`` and ``/mfa/verify/`` answer 501 and users who already enrolled keep using their
+        second factor. ``MFA_REQUIRED``, ``API_KEY_STEPUP_TOTP`` and ``PLATFORM_ROLE_STEPUP_TOTP`` set to
+        1 need ``MFA_ENABLED=1``, or cornflow does not start.
+
+    - Secret key
+        The secret key comes from ``FERNET_KEY`` and, if it is not set, from ``SECRET_KEY``. An empty
+        variable counts as unset, and a warning is logged when both are set with different values. The
+        key is resolved in the configuration, so the server and the CLI sign with the same one. Levels 2
+        and 3 do not start without a key of at least 32 bytes; at level 1 without a key, cornflow uses a
+        random key generated once per start and shared by all the gunicorn workers, with a warning.
+        ``cornflow service init`` no longer writes ``SECRET_KEY`` (it used to fill it with ``FERNET_KEY``
+        or with a new random key on every start) and no longer sets ``SIGNUP_ACTIVATED``.
+
+    - Invalid tokens
+        At every level, an expired token, a token with a wrong signature or format (also from OpenID
+        Connect), a revoked session or API key, the token of a user that no longer exists and an expired
+        or invalid BI token answer 401 with the header ``WWW-Authenticate: Bearer error="invalid_token"``.
+        Several of these cases answered 400 in version 1.3.9. Requests without a token, or with a header
+        that does not follow ``Bearer <token>``, still answer 400.
+
+    - Rate limits
+        The per-IP limit of login, token refresh and logout only counts failed responses, so successful
+        logins (also those of the Airflow tasks) no longer use it up. Password recovery and reset still
+        count every request.
+
+    - Default passwords
+        ``cornflow service init`` and the Airflow initialization script go back to the default passwords
+        of version 1.3.9 for the admin and service users. They do not comply with the password policy
+        of levels 2 and 3, where ``CORNFLOW_ADMIN_PWD`` and ``CORNFLOW_SERVICE_PWD`` must be set.
+
+    - Docker and Helm
+        The docker-compose files set a development-only ``FERNET_KEY`` and ``SECRET_BI_KEY`` and include
+        ``CORNFLOW_SECURITY_LEVEL`` commented out. The Helm chart generates ``FERNET_KEY`` and
+        ``SECRET_BI_KEY`` in a Secret that is kept across upgrades (or uses an existing one with
+        ``cornflow.keys.existingSecret``), no longer sets ``SECRET_KEY``, adds
+        ``CORNFLOW_SECURITY_LEVEL`` and requires Helm 3.5 or later.
+
 version 1.3.5
 --------------
 - released: 2026-06-03
