@@ -118,6 +118,12 @@ class TestRefreshTokenFlow(TestCase):
             f"{USER_URL}{self.user_id}/", headers=auth_header(refresh_token)
         )
         self.assertEqual(401, response.status_code)
+        self.assertIn("WWW-Authenticate", response.headers)
+        self.assertTrue(
+            response.headers["WWW-Authenticate"].startswith(
+                'Bearer error="invalid_token", error_description="'
+            )
+        )
 
     # -- rotation ----------------------------------------------------------
 
@@ -142,6 +148,12 @@ class TestRefreshTokenFlow(TestCase):
         # replaying the original (superseded) token is detected as reuse
         replay = self.refresh(login["refresh_token"])
         self.assertEqual(401, replay.status_code)
+        self.assertIn("WWW-Authenticate", replay.headers)
+        self.assertTrue(
+            replay.headers["WWW-Authenticate"].startswith(
+                'Bearer error="invalid_token", error_description="'
+            )
+        )
         # and the whole session is revoked: even the valid rotated token fails
         after = self.refresh(rotated)
         self.assertEqual(401, after.status_code)
@@ -277,7 +289,14 @@ class TestRefreshTokenFlow(TestCase):
     def test_logout_revokes_session(self):
         refresh_token = self.login().json["refresh_token"]
         self.assertEqual(200, self.logout(refresh_token).status_code)
-        self.assertEqual(401, self.refresh(refresh_token).status_code)
+        response = self.refresh(refresh_token)
+        self.assertEqual(401, response.status_code)
+        self.assertIn("WWW-Authenticate", response.headers)
+        self.assertTrue(
+            response.headers["WWW-Authenticate"].startswith(
+                'Bearer error="invalid_token", error_description="'
+            )
+        )
         self.assertTrue(self._session().revoked)
 
     def test_logout_is_idempotent(self):
@@ -301,13 +320,21 @@ class TestRefreshTokenFlow(TestCase):
         )
         self.assertEqual(200, change.status_code)
         # the token version was bumped, so the refresh token is rejected
-        self.assertEqual(401, self.refresh(refresh_token).status_code)
+        response = self.refresh(refresh_token)
+        self.assertEqual(401, response.status_code)
+        self.assertIn("WWW-Authenticate", response.headers)
+        self.assertTrue(
+            response.headers["WWW-Authenticate"].startswith(
+                'Bearer error="invalid_token", error_description="'
+            )
+        )
 
     def test_missing_refresh_token_is_rejected(self):
         response = self.client.post(
             REFRESH_URL, data=json.dumps({}), headers=JSON_HEADER
         )
         self.assertEqual(400, response.status_code)
+        self.assertNotIn("WWW-Authenticate", response.headers)
 
     # -- service users / feature toggle -----------------------------------
 

@@ -45,6 +45,7 @@ from cornflow.shared.exceptions import (
     CommunicationError,
     InvalidCredentials,
     InvalidData,
+    InvalidToken,
     InvalidUsage,
     NoPermission,
 )
@@ -68,9 +69,8 @@ class Auth:
         if token_type == TOKEN_TYPE_REFRESH:
             # A refresh token is only valid at the refresh endpoint; it must
             # never grant access to a normal endpoint.
-            raise InvalidCredentials(
+            raise InvalidToken(
                 "A refresh token can not be used to access this endpoint",
-                status_code=401,
                 log_txt=f"Error while user {user.id} tries to authenticate with "
                 f"a refresh token on endpoint {logical_endpoint_name(request.endpoint)}.",
             )
@@ -115,9 +115,8 @@ class Auth:
                 f"inside the rotation grace window"
             )
             return
-        raise InvalidCredentials(
+        raise InvalidToken(
             "The API key has been revoked, please generate a new one",
-            status_code=401,
             log_txt=f"Error while user {user.id} authenticates with an API "
             f"key. The key version is stale (revoked).",
         )
@@ -466,32 +465,28 @@ class Auth:
             )
         payload = Auth.decode_token(refresh_token)
         if not isinstance(payload, dict) or payload.get("type") != TOKEN_TYPE_REFRESH:
-            raise InvalidCredentials(
+            raise InvalidToken(
                 "Invalid refresh token",
-                status_code=401,
                 log_txt="Error while refreshing a session. The token is not a "
                 "refresh token.",
             )
         user = UserModel.get_one_object(username=payload.get("sub"))
         if user is None:
-            raise InvalidCredentials(
+            raise InvalidToken(
                 "Invalid refresh token",
-                status_code=401,
                 log_txt="Error while refreshing a session. The user does not "
                 "exist.",
             )
         if int(payload.get("tv", 0)) != int(user.token_version or 0):
-            raise InvalidCredentials(
+            raise InvalidToken(
                 "The session has been revoked, please log in again",
-                status_code=401,
                 log_txt=f"Error while user {user.id} refreshes a session. The "
                 f"token version is stale (revoked).",
             )
         session = SessionModel.get_active(payload.get("sid"))
         if session is None:
-            raise InvalidCredentials(
+            raise InvalidToken(
                 "The session is no longer valid, please log in again",
-                status_code=401,
                 log_txt=f"Error while user {user.id} refreshes a session. The "
                 f"session does not exist or is revoked.",
             )
@@ -506,17 +501,15 @@ class Auth:
                 actor=user.username,
                 session_id=session.session_id,
             )
-            raise InvalidCredentials(
+            raise InvalidToken(
                 "The session has been revoked, please log in again",
-                status_code=401,
                 log_txt=f"Error while user {user.id} refreshes a session. A "
                 f"superseded refresh token was reused; session revoked.",
             )
         if session.is_expired() or session.is_inactive():
             session.revoke()
-            raise InvalidCredentials(
+            raise InvalidToken(
                 "The session has expired, please log in again",
-                status_code=401,
                 log_txt=f"Error while user {user.id} refreshes a session. The "
                 f"session expired (inactivity or absolute cap).",
             )
@@ -615,7 +608,7 @@ class Auth:
         :return: dictionary containing the username from the token's sub claim
         :rtype: dict
         """
-        if token is None:
+        if not token:
             raise InvalidCredentials(
                 "Must provide a token in Authorization header",
                 log_txt="Error while trying to decode token. Token is missing.",
@@ -635,14 +628,13 @@ class Auth:
 
         except jwt.ExpiredSignatureError:
             # Handle expiration specifically, could apply to either token type if caught here first
-            raise InvalidCredentials(
+            raise InvalidToken(
                 "The token has expired, please login again",
                 log_txt="Error while trying to decode token. The token has expired.",
                 # 401 and not 400: an expired credential is an authentication
                 # failure, and it is the status every client (the web app, the
                 # cornflow-client library) uses to decide to renew the session
                 # instead of surfacing the error.
-                status_code=401,
             )
         except (
             jwt.InvalidSignatureError,
@@ -660,10 +652,9 @@ class Auth:
                     )
                 except jwt.ExpiredSignatureError:
                     # OIDC token expired
-                    raise InvalidCredentials(
+                    raise InvalidToken(
                         "The token has expired, please login again",
                         log_txt="Error while trying to decode OIDC token. The token has expired.",
-                        status_code=401,
                     )
                 except (
                     jwt.InvalidTokenError,
@@ -677,10 +668,9 @@ class Auth:
                         f"OIDC verification failed ({type(e_oidc).__name__}: {str(e_oidc)})."
                     )
                     current_app.logger.warning(log_message)
-                    raise InvalidCredentials(
+                    raise InvalidToken(
                         "Invalid token format, signature, or configuration",
                         log_txt=log_message,
-                        status_code=400,
                     )
             else:
                 # Internal verification failed, and OIDC is not configured
@@ -689,10 +679,9 @@ class Auth:
                     f"OIDC is not configured."
                 )
                 current_app.logger.warning(log_message)
-                raise InvalidCredentials(
+                raise InvalidToken(
                     "Invalid token format or signature",
                     log_txt=log_message,
-                    status_code=400,
                 )
         except Exception as e:
             # Catch any other unexpected errors during the process
@@ -773,14 +762,13 @@ class Auth:
         token = self.get_token_from_header(headers)
         data = self.decode_token(token)
 
-        user = self.user_model.get_one_object(username=data["sub"])
+        user = self.user_model.get_one_object(username=data.get("sub"))
 
         if user is None:
             err = "User not found. Please ensure you are using valid credentials"
-            raise InvalidCredentials(
+            raise InvalidToken(
                 err,
                 log_txt="Error while trying to get user from header. User does not exist.",
-                status_code=400,
             )
 
         self._check_token_version(user, data)
@@ -820,16 +808,14 @@ class Auth:
             return
         session = SessionModel.get_active(session_id)
         if session is None:
-            raise InvalidCredentials(
+            raise InvalidToken(
                 "The session has been closed, please log in again",
-                status_code=401,
                 log_txt=f"Error while user {user.id} authenticates. The session "
                 f"backing the access token is revoked or no longer exists.",
             )
         if session.is_expired():
-            raise InvalidCredentials(
+            raise InvalidToken(
                 "The session has expired, please log in again",
-                status_code=401,
                 log_txt=f"Error while user {user.id} authenticates. The session "
                 f"backing the access token reached its absolute lifetime.",
             )
@@ -854,9 +840,8 @@ class Auth:
             # External (OIDC) tokens are managed by the identity provider
             return
         if int(payload.get("tv", 0)) != int(user.token_version or 0):
-            raise InvalidCredentials(
+            raise InvalidToken(
                 "The session has been revoked, please log in again",
-                status_code=401,
                 log_txt=f"Error while user {user.id} tries to authenticate. "
                 f"The token version is stale (revoked session).",
             )
@@ -881,11 +866,10 @@ class Auth:
                 status_code=403,
             )
         if isinstance(data, dict) and data.get("type") == TOKEN_TYPE_REFRESH:
-            raise InvalidCredentials(
+            raise InvalidToken(
                 "A refresh token can not be used to access this endpoint",
                 log_txt="Error while trying to get user from header. "
                 "The token is a refresh token.",
-                status_code=401,
             )
         return user
 
@@ -1077,22 +1061,26 @@ class BIAuth(Auth):
         :return: dictionary containing the username from the token's sub claim
         :rtype: dict
         """
+        if not token:
+            raise InvalidCredentials(
+                "Must provide a token in Authorization header",
+                log_txt="Error while trying to decode a BI token. Token is missing.",
+                status_code=400,
+            )
         try:
             return jwt.decode(
                 token, current_app.config["SECRET_BI_KEY"], algorithms="HS256"
             )
 
         except jwt.ExpiredSignatureError:
-            raise InvalidCredentials(
+            raise InvalidToken(
                 "The BI token has expired, please generate a new one",
                 log_txt="Error while trying to decode a BI token. The token has expired.",
-                status_code=400,
             )
         except jwt.InvalidTokenError:
-            raise InvalidCredentials(
+            raise InvalidToken(
                 "Invalid token, please try again with a new token",
                 log_txt="Error while trying to decode token. The token is invalid.",
-                status_code=400,
             )
 
     @staticmethod

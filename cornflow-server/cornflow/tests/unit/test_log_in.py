@@ -174,9 +174,14 @@ class TestLogInOpenAuth(CustomTestCase):
             },
         )
 
-        self.assertEqual(400, response.status_code)
+        self.assertEqual(401, response.status_code)
         self.assertEqual(
-            response.json["error"], "Invalid token format, signature, or configuration"
+            "Invalid token format, signature, or configuration", response.json["error"]
+        )
+        self.assertEqual(
+            'Bearer error="invalid_token", error_description='
+            '"Invalid token format, signature, or configuration"',
+            response.headers.get("WWW-Authenticate"),
         )
 
     @mock.patch("cornflow.shared.authentication.auth.jwt")
@@ -212,9 +217,14 @@ class TestLogInOpenAuth(CustomTestCase):
             },
         )
 
-        self.assertEqual(400, response.status_code)
+        self.assertEqual(401, response.status_code)
         self.assertEqual(
             "Invalid token format, signature, or configuration", response.json["error"]
+        )
+        self.assertEqual(
+            'Bearer error="invalid_token", error_description='
+            '"Invalid token format, signature, or configuration"',
+            response.headers.get("WWW-Authenticate"),
         )
 
     @mock.patch("cornflow.shared.authentication.auth.requests.get")
@@ -266,10 +276,14 @@ class TestLogInOpenAuth(CustomTestCase):
             },
         )
 
-        self.assertEqual(400, response.status_code)
+        self.assertEqual(401, response.status_code)
         self.assertEqual(
-            "Invalid token format, signature, or configuration",
-            response.json["error"],
+            "Invalid token format, signature, or configuration", response.json["error"]
+        )
+        self.assertEqual(
+            'Bearer error="invalid_token", error_description='
+            '"Invalid token format, signature, or configuration"',
+            response.headers.get("WWW-Authenticate"),
         )
 
     @mock.patch("cornflow.shared.authentication.Auth.decode_token")
@@ -421,6 +435,11 @@ class TestLogInOpenAuth(CustomTestCase):
         self.assertEqual(
             "The token has expired, please login again", response.json["error"]
         )
+        self.assertEqual(
+            'Bearer error="invalid_token", error_description='
+            '"The token has expired, please login again"',
+            response.headers.get("WWW-Authenticate"),
+        )
 
     def test_missing_auth_header(self):
         """
@@ -432,6 +451,7 @@ class TestLogInOpenAuth(CustomTestCase):
 
         self.assertEqual(400, response.status_code)
         self.assertEqual(response.json["error"], "Authorization header is missing")
+        self.assertNotIn("WWW-Authenticate", response.headers)
 
     def test_invalid_auth_header(self):
         """
@@ -451,6 +471,7 @@ class TestLogInOpenAuth(CustomTestCase):
             "Invalid Authorization header format. Must be 'Bearer <token>'",
             response.json["error"],
         )
+        self.assertNotIn("WWW-Authenticate", response.headers)
 
 
 class TestLogInOpenAuthService(CustomTestCase):
@@ -523,6 +544,7 @@ class TestLogInOpenAuthService(CustomTestCase):
 
         self.assertEqual(400, response.status_code)
         self.assertEqual(response.json["error"], "Authorization header is missing")
+        self.assertNotIn("WWW-Authenticate", response.headers)
 
     def test_other_user_password(self):
         """
@@ -569,7 +591,12 @@ class TestLogInOpenAuthService(CustomTestCase):
             },
         )
 
-        self.assertEqual(400, response.status_code)
+        self.assertEqual(401, response.status_code)
         self.assertEqual(
-            response.json["error"], "Invalid token format, signature, or configuration"
+            "Invalid token format, signature, or configuration", response.json["error"]
+        )
+        self.assertEqual(
+            'Bearer error="invalid_token", error_description='
+            '"Invalid token format, signature, or configuration"',
+            response.headers.get("WWW-Authenticate"),
         )

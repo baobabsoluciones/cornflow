@@ -12,6 +12,24 @@ import traceback
 from cornflow.shared.const import DATA_DOES_NOT_EXIST_MSG
 
 
+WWW_AUTHENTICATE_HEADER = "WWW-Authenticate"
+INVALID_TOKEN_ERROR_CODE = "invalid_token"
+
+
+def _quote_auth_param(value) -> str:
+    """Escapes a value for a quoted-string auth-param (one printable ASCII line)."""
+    text = "".join(ch if " " <= ch <= "~" else " " for ch in str(value))
+    return text.replace("\\", "\\\\").replace('"', '\\"')
+
+
+def bearer_challenge(description: str) -> str:
+    """WWW-Authenticate value for a rejected bearer token (RFC 6750, 3.1)."""
+    return (
+        f'Bearer error="{INVALID_TOKEN_ERROR_CODE}", '
+        f'error_description="{_quote_auth_param(description)}"'
+    )
+
+
 class InvalidUsage(Exception):
     """
     This is the base exception for all the defined ones
@@ -21,8 +39,11 @@ class InvalidUsage(Exception):
     error = "Unknown error"
     log_txt = "Unknown error"
 
-    def __init__(self, error=None, status_code=None, payload=None, log_txt=None):
+    def __init__(
+        self, error=None, status_code=None, payload=None, log_txt=None, headers=None
+    ):
         Exception.__init__(self, error)
+        self.headers = dict(headers or {})
         if error is not None:
             self.error = error
         if status_code is not None:
@@ -78,6 +99,21 @@ class InvalidCredentials(InvalidUsage):
 
     status_code = 400
     error = "Invalid credentials"
+
+
+class InvalidToken(InvalidCredentials):
+    """
+    A bearer token was presented but is not valid: expired, bad signature or
+    format, revoked, unknown user, refresh token misused. Always 401 with an
+    RFC 6750 challenge, at every security level.
+    """
+
+    status_code = 401
+    error = "Invalid token"
+
+    def __init__(self, error=None, payload=None, log_txt=None):
+        super().__init__(error=error, status_code=401, payload=payload, log_txt=log_txt)
+        self.headers[WWW_AUTHENTICATE_HEADER] = bearer_challenge(self.error)
 
 
 class EndpointNotImplemented(InvalidUsage):
@@ -146,6 +182,7 @@ def initialize_errorhandlers(app):
     @app.errorhandler(ObjectAlreadyExists)
     @app.errorhandler(NoPermission)
     @app.errorhandler(InvalidCredentials)
+    @app.errorhandler(InvalidToken)
     @app.errorhandler(EndpointNotImplemented)
     @app.errorhandler(AirflowError)
     @app.errorhandler(DatabricksError)
@@ -165,6 +202,8 @@ def initialize_errorhandlers(app):
         app.logger.error(error.log_txt)
         response = jsonify(error.to_dict())
         response.status_code = error.status_code
+        for name, value in (getattr(error, "headers", None) or {}).items():
+            response.headers[name] = value
         return response
 
     @app.errorhandler(Exception)

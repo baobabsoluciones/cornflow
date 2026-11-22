@@ -19,6 +19,7 @@ from cornflow.commands.dag import register_deployed_dags_command_test
 from cornflow.models import UserModel, UserRoleModel, ViewModel, PermissionViewRoleModel
 from cornflow.shared import db
 from cornflow.shared.authentication import Auth
+from cornflow.shared.exceptions import bearer_challenge
 from cornflow.shared.const import (
     ADMIN_ROLE,
     NO_SIGNUP,
@@ -299,9 +300,14 @@ class TestSignUpAuthenticated(TestCase):
             },
         )
 
-        # Should return 400 Bad Request due to invalid token
-        self.assertEqual(400, response.status_code)
+        # A presented token that is not valid is an authentication failure:
+        # 401 with the WWW-Authenticate challenge (it is not a malformed request)
+        self.assertEqual(401, response.status_code)
         self.assertIn("error", response.json)
+        self.assertEqual(
+            bearer_challenge("Invalid token format or signature"),
+            response.headers.get("WWW-Authenticate"),
+        )
 
     def test_signup_permissions_are_registered_in_database(self):
         """Test that signup permissions are properly registered in the database"""

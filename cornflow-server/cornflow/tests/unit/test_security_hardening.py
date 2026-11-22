@@ -34,7 +34,10 @@ from cornflow.models import UserModel, UserRoleModel
 from cornflow.shared import db
 from cornflow.shared.authentication.auth import BIAuth
 from cornflow.shared.const import ADMIN_ROLE, PLATFORM_ADMIN_ROLE, SERVICE_ROLE
-from cornflow.shared.exceptions import InvalidCredentials
+from cornflow.shared.exceptions import (
+    InvalidToken,
+    bearer_challenge,
+)
 from cornflow.shared.security import resolve_cors_origins
 from cornflow.shared.validators import check_password_pattern, passwords_too_similar
 from cornflow.tests.const import PREFIX, LOGIN_URL, SIGNUP_URL, USER_URL, INSTANCE_URL
@@ -612,8 +615,13 @@ class TestBITokenExpiry(TestCase):
         expired = jwt.encode(
             payload, current_app.config["SECRET_BI_KEY"], algorithm="HS256"
         )
-        with self.assertRaises(InvalidCredentials):
+        with self.assertRaises(InvalidToken) as ctx:
             BIAuth.decode_token(expired)
+        self.assertEqual(401, ctx.exception.status_code)
+        self.assertEqual(
+            bearer_challenge("The BI token has expired, please generate a new one"),
+            ctx.exception.headers["WWW-Authenticate"],
+        )
 
 
 class TestApiKey(TestCase):
