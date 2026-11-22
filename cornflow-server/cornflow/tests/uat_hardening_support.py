@@ -2,33 +2,48 @@
 Shared support for the server UAT battery of the security hardening
 (``cornflow/tests/unit/test_uat_hardening_*.py``).
 
-Each test of the battery is named after the id of its case in the UAT sheet
-(``test_uat_6_5_...`` covers case 6.5) and runs against one of two profiles,
-selected with the ``CORNFLOW_UAT_PROFILE`` environment variable:
+Each test is named after the id of its case in the UAT sheet
+(``test_uat_6_5_...`` covers case 6.5) and checks what that case means at the
+security level selected with ``CORNFLOW_SECURITY_LEVEL``: 1, 2 or 3, and level
+1 when the variable is unset, as in cornflow itself. Any other value stops the
+battery before it runs.
 
-- ``strict`` (default): the hardened defaults of a production deployment.
-  The expected behaviour is the one written in the UAT sheet.
-- ``relaxed``: the relaxed profile documented in ``docs/source/deploy/access.rst``
-  for projects that do not need the full hardening. The relaxed controls
-  must behave as relaxed and every other control must keep working.
+Every case runs with the default values of its level
+(``cornflow.shared.security_levels``) plus a few settings of the test suite:
+rate limiting off except in the cases that check it, a low bcrypt work factor
+and fixed keys. A case that changes a setting on purpose (for example
+``LOGIN_MAX_ATTEMPTS=3`` to check the account lockout at level 1, where it is
+off by default) does it through the same resolution as the environment, so the
+limits of the level still apply.
 
-Run the battery in both profiles::
+A case that does not apply at a level is skipped with a reason that names the
+level (for example the token renewal cases at levels 1 and 2). The cases that
+can only be checked in the web client are skipped at every level with
+:func:`ui_only` and belong to the cornflow-ui battery.
 
-    CORNFLOW_UAT_PROFILE=strict python -m unittest discover -s cornflow/tests/unit -p "test_uat_hardening_*.py"
-    CORNFLOW_UAT_PROFILE=relaxed python -m unittest discover -s cornflow/tests/unit -p "test_uat_hardening_*.py"
+Run the battery at each level from ``cornflow-server/``, with the environment
+of the unit tests (``FLASK_ENV=testing``, ``DATABASE_URL``...)::
+
+    CORNFLOW_SECURITY_LEVEL=1 python -m unittest discover -s cornflow/tests/unit -p "test_uat_hardening_*.py"
+    CORNFLOW_SECURITY_LEVEL=2 python -m unittest discover -s cornflow/tests/unit -p "test_uat_hardening_*.py"
+    CORNFLOW_SECURITY_LEVEL=3 python -m unittest discover -s cornflow/tests/unit -p "test_uat_hardening_*.py"
+
+The whole unit test suite runs the battery at level 1.
 
 The cases the kit could not run are covered too: e-mail with the SMTP client
 replaced by an in-process fake (:class:`FakeSMTP`), TLS through the
 ``X-Forwarded-Proto`` header and session windows with a simulated clock
-(``freezegun``). The cases that can only be checked in the web client are
-skipped with :func:`ui_only` and belong to the cornflow-ui battery.
+(``freezegun``).
 """
 
 import json
 import os
+import sys
 import unittest
+from types import MappingProxyType
 from unittest.mock import patch
 
+import jwt
 import pyotp
 from flask import current_app
 from flask_testing import TestCase
@@ -37,69 +52,39 @@ from cornflow.app import create_app
 from cornflow.commands.access import access_init_command
 from cornflow.commands.dag import register_deployed_dags_command_test
 from cornflow.commands.permissions import register_dag_permissions_command
-from cornflow.config import Testing, app_config
 from cornflow.models import UserModel, UserRoleModel
 from cornflow.shared import db
-from cornflow.shared.const import SIGNUP_WITH_AUTH, SIGNUP_WITH_NO_AUTH
+from cornflow.shared.exceptions import (
+    INVALID_TOKEN_ERROR_CODE,
+    WWW_AUTHENTICATE_HEADER,
+)
+from cornflow.shared.security_levels import (
+    SECURITY_LEVEL_ENV_VAR,
+    default_values,
+    parse_security_level,
+)
 from cornflow.tests.const import LOGIN_URL, PREFIX
+from cornflow.tests.security_levels_support import security_level_config
 
 MFA_SETUP_URL = PREFIX + "/mfa/setup/"
 MFA_VERIFY_URL = PREFIX + "/mfa/verify/"
 
-STRICT = "strict"
-RELAXED = "relaxed"
+def read_security_level(environ=None) -> int:
+    """Level of the battery: CORNFLOW_SECURITY_LEVEL, 1 when unset. ValueError otherwise."""
+    environ = os.environ if environ is None else environ
+    level, error = parse_security_level(environ.get(SECURITY_LEVEL_ENV_VAR))
+    if error:
+        raise ValueError(
+            f"{error}: the UAT battery runs at security level 1, 2 or 3 "
+            f"(leave {SECURITY_LEVEL_ENV_VAR} unset for level 1)"
+        )
+    return level
 
-PROFILE = os.getenv("CORNFLOW_UAT_PROFILE", STRICT).strip().lower()
-if PROFILE not in (STRICT, RELAXED):
-    raise ValueError(
-        f"CORNFLOW_UAT_PROFILE must be '{STRICT}' or '{RELAXED}', not '{PROFILE}'"
-    )
 
-# Hardening settings of each profile. The strict one reproduces the defaults
-# of a production deployment; the relaxed one is the profile documented for
-# less demanding projects. Everything not listed here (password policy
-# floors, reuse detection, API key scope, platform roles, audit...) is the
-# same in both profiles because it must never be relaxed.
-PROFILES = {
-    STRICT: {
-        "MFA_REQUIRED": 1,
-        "SIGNUP_ACTIVATED": SIGNUP_WITH_AUTH,
-        "LOGIN_MAX_ATTEMPTS": 5,
-        "RATELIMIT_LOGIN": "10 per minute",
-        "RATELIMIT_RECOVER": "5 per hour",
-        "REFRESH_TOKEN_ENABLED": 1,
-        "ACCESS_TOKEN_DURATION_MINUTES": 15,
-        "REFRESH_TOKEN_INACTIVITY_MINUTES": 30,
-        "REFRESH_TOKEN_ABSOLUTE_HOURS": 12,
-        "PERSONAL_TOKEN_ENABLED": 1,
-        "API_KEY_STEPUP_TOTP": 1,
-        "API_KEY_ROTATION_GRACE_MINUTES": 60,
-        "PWD_ROTATION_TIME": 120,
-        "HSTS_ENABLED": 1,
-        "DOCS_ENABLED": 0,
-        "CORS_ORIGINS": "",
-    },
-    RELAXED: {
-        "MFA_REQUIRED": 0,
-        "SIGNUP_ACTIVATED": SIGNUP_WITH_NO_AUTH,
-        "LOGIN_MAX_ATTEMPTS": 10,
-        "RATELIMIT_LOGIN": "30 per minute",
-        "RATELIMIT_RECOVER": "20 per hour",
-        "REFRESH_TOKEN_ENABLED": 1,
-        "ACCESS_TOKEN_DURATION_MINUTES": 60,
-        "REFRESH_TOKEN_INACTIVITY_MINUTES": 480,
-        "REFRESH_TOKEN_ABSOLUTE_HOURS": 24,
-        "PERSONAL_TOKEN_ENABLED": 1,
-        "API_KEY_STEPUP_TOTP": 0,
-        "API_KEY_ROTATION_GRACE_MINUTES": 1440,
-        "PWD_ROTATION_TIME": 365,
-        "HSTS_ENABLED": 0,
-        "DOCS_ENABLED": 1,
-        "CORS_ORIGINS": "",
-    },
-}
+LEVEL = read_security_level()
+LEVEL_DEFAULTS = MappingProxyType(default_values(LEVEL))
+sys.stderr.write(f"UAT hardening battery: security level {LEVEL}\n")
 
-SETTINGS = PROFILES[PROFILE]
 
 JSON_HEADER = {"Content-Type": "application/json"}
 
@@ -112,12 +97,45 @@ PASSWORDS = {
 DEFAULT_PASSWORD = "Gv5-pLx.Wr8Tm3"
 
 
-def is_relaxed() -> bool:
-    return PROFILE == RELAXED
+def level() -> int:
+    return LEVEL
 
 
-def is_strict() -> bool:
-    return PROFILE == STRICT
+def at_least(minimum: int) -> bool:
+    return LEVEL >= minimum
+
+
+def by_level(level1, level2, level3):
+    """Value that applies at the battery level (expected values of table 4.2)."""
+    return (level1, level2, level3)[LEVEL - 1]
+
+
+def level_overrides(level1=None, level2=None, level3=None) -> dict:
+    """Settings a case changes on purpose at some levels (precedence over the level)."""
+    return dict((level1, level2, level3)[LEVEL - 1] or {})
+
+
+def only_at_levels(*levels, reason: str):
+    """Skips the test at the other levels with a reason that names the level."""
+    return unittest.skipUnless(LEVEL in levels, f"security level {LEVEL}: {reason}")
+
+
+NO_RENEWAL_REASON = (
+    "no token renewal at security levels 1 and 2 (REFRESH_TOKEN_ENABLED=0)"
+)
+requires_token_renewal = only_at_levels(3, reason=NO_RENEWAL_REASON)
+
+# Settings changed on purpose by some cases (they go through the same
+# resolution as the environment, see security_levels_support)
+MFA_ENROLLMENT_OVERRIDES = level_overrides(
+    level1={"MFA_ENABLED": 1}, level2={"MFA_ENABLED": 1}
+)
+LOCKOUT_OVERRIDES = level_overrides(level1={"LOGIN_MAX_ATTEMPTS": 3})
+ROTATION_OVERRIDES = level_overrides(level1={"PWD_ROTATION_ENFORCE": 1})
+
+# Who can sign up users at the level: SIGNUP_ACTIVATED is 2 at level 1 (any
+# admin) and 3 at levels 2 and 3 (platform administrators only)
+SIGNUP_ADMIN = "cfadmin" if LEVEL == 1 else "cfplatform"
 
 
 def ui_only(reason: str):
@@ -135,20 +153,9 @@ def auth_header(token: str) -> dict:
     }
 
 
-def profile_env_name(**overrides) -> str:
-    """
-    Registers (once) a configuration class with the settings of the active
-    profile plus the given overrides and returns its name for create_app.
-    """
-    settings = {**SETTINGS, **overrides}
-    key = "uat-" + PROFILE + "-" + json.dumps(settings, sort_keys=True)
-    if key not in app_config:
-        attrs = dict(settings)
-        # Rate limiting is enabled only by the cases that check it, so that
-        # the many logins of the battery are not throttled.
-        attrs.setdefault("RATELIMIT_ENABLED", 0)
-        app_config[key] = type("UatProfileConfig", (Testing,), attrs)
-    return key
+def uat_env_name(key_environ=None, **overrides) -> str:
+    """Name of the configuration of the battery level plus the overrides, for create_app."""
+    return security_level_config(LEVEL, key_environ=key_environ, **overrides)
 
 
 class FakeSMTP:
@@ -188,7 +195,7 @@ class UatTestCase(TestCase):
     """
     Base class of the UAT battery: a fresh database with the access model and
     the test DAGs, helpers to provision users and to log in through the MFA
-    flow when the profile requires it.
+    flow when the level requires it.
 
     Subclasses can set ``config_overrides`` to change settings that are read
     when the application is created (e.g. ``RATELIMIT_ENABLED``).
@@ -197,7 +204,7 @@ class UatTestCase(TestCase):
     config_overrides = {}
 
     def create_app(self):
-        return create_app(profile_env_name(**self.config_overrides))
+        return create_app(uat_env_name(**self.config_overrides))
 
     def setUp(self):
         db.create_all()
@@ -285,7 +292,7 @@ class UatTestCase(TestCase):
 
     def full_login(self, username, password=None):
         """
-        Logs in completing the MFA step when the profile requires it (enrolls
+        Logs in completing the MFA step when the user has it (enrolls
         the user on the first login). Returns the full login response json
         (``token``, ``refresh_token``...).
         """
@@ -305,6 +312,67 @@ class UatTestCase(TestCase):
     def token_of(self, username, password=None):
         return self.full_login(username, password)["token"]
 
+    # Assertions and helpers by level
+
+    def assert_invalid_token(self, response, message=None):
+        """401 with the Bearer ``invalid_token`` challenge naming the error."""
+        self.assertEqual(401, response.status_code, response.json)
+        challenge = response.headers.get(WWW_AUTHENTICATE_HEADER, "")
+        self.assertTrue(
+            challenge.startswith(f'Bearer error="{INVALID_TOKEN_ERROR_CODE}"'),
+            challenge,
+        )
+        self.assertIn(f'error_description="{response.json["error"]}"', challenge)
+        if message is not None:
+            self.assertEqual(message, response.json["error"])
+
+    def ensure_mfa(self, username):
+        """
+        Leaves the user with MFA enrolled and the secret in ``mfa_secrets``:
+        mandatory enrollment at level 3, voluntary one at levels 1 and 2.
+        """
+        if username in self.mfa_secrets:
+            return
+        response = self.login(username)
+        self.assertEqual(200, response.status_code, response.json)
+        if response.json.get("mfa_setup_required"):
+            self.enroll_mfa(response.json["temp_token"], username)
+            return
+        self.assertIn("token", response.json)
+        if int(current_app.config["MFA_ENABLED"]) != 1:
+            self.fail(
+                "MFA enrollment is disabled in this configuration: "
+                "add MFA_ENROLLMENT_OVERRIDES to the test class"
+            )
+        self.enroll_mfa(response.json["token"], username)
+
+    def lock_account(self, username, password="Wrong-password-0!"):
+        """Fails the login LOGIN_MAX_ATTEMPTS times and checks the lock. Returns the attempts."""
+        attempts = int(current_app.config["LOGIN_MAX_ATTEMPTS"])
+        if attempts <= 0:
+            self.fail(
+                "the account lockout is off in this configuration: "
+                "add LOCKOUT_OVERRIDES to the test class"
+            )
+        for _ in range(attempts):
+            self.login(username, password)
+        db.session.expire_all()
+        self.assertTrue(UserModel.get_one_user_by_username(username).locked)
+        return attempts
+
+    @staticmethod
+    def session_minutes():
+        """Life in minutes of the token returned by the login of an interactive user."""
+        if int(current_app.config["REFRESH_TOKEN_ENABLED"]) == 1:
+            return int(current_app.config["ACCESS_TOKEN_DURATION_MINUTES"])
+        return int(float(current_app.config["TOKEN_DURATION"]) * 60)
+
+    @staticmethod
+    def token_claims(token):
+        return jwt.decode(
+            token, current_app.config["SECRET_TOKEN_KEY"], algorithms=["HS256"]
+        )
+
     # E-mail
 
     def fake_smtp(self):
@@ -321,19 +389,3 @@ class UatTestCase(TestCase):
             SERVICE_EMAIL_PORT=465,
         )
         return patch("cornflow.shared.email.SMTP_SSL", FakeSMTP)
-
-
-def pending_fix(commit: str):
-    """
-    Marks a case whose fix lives in a commit of
-    ``feature/hardening-uat-fixes`` that is not integrated in this branch yet:
-    the test asserts the behaviour of the UAT sheet and is an expected
-    failure until the commit is integrated (then it reports an unexpected
-    success and the marker must be removed).
-    """
-
-    def decorator(func):
-        func.pending_fix = commit
-        return unittest.expectedFailure(func)
-
-    return decorator

@@ -4,18 +4,22 @@ log (block 10), HTTP headers / CORS / docs (block 11) and functional
 regression (block 12).
 
 One test per case of the UAT sheet, named after its id (``test_uat_8_4_...``
-covers case 8.4). Run it in both profiles with ``CORNFLOW_UAT_PROFILE``.
+covers case 8.4). Each test checks what the case means at the security level
+selected with ``CORNFLOW_SECURITY_LEVEL`` (see ``uat_hardening_support``).
 """
 
 import json
 import logging
 import os
+import subprocess
+import sys
 from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 from importlib import import_module
 from unittest.mock import Mock, patch
 from urllib.parse import urlparse
 
+import jwt
 from click.testing import CliRunner
 from flask import current_app
 from freezegun import freeze_time
@@ -23,6 +27,12 @@ from freezegun import freeze_time
 from cornflow.cli import cli
 from cornflow.models import PermissionsDAG, UserModel
 from cornflow.shared import db
+from cornflow.shared.authentication.auth import BIAuth
+from cornflow.shared.exceptions import InvalidToken
+from cornflow.shared.security_levels import (
+    SECURITY_LEVEL_ENV_VAR,
+    SETTINGS_BY_ENV_VAR,
+)
 from cornflow.shared.const import (
     ADMIN_ROLE,
     PLANNER_ROLE,
@@ -48,11 +58,15 @@ from cornflow.tests.const import (
     USER_URL,
 )
 from cornflow.tests.uat_hardening_support import (
-    SETTINGS,
+    LEVEL,
+    LEVEL_DEFAULTS,
+    LOCKOUT_OVERRIDES,
+    MFA_ENROLLMENT_OVERRIDES,
     UatTestCase,
+    at_least,
     auth_header,
-    is_relaxed,
-    is_strict,
+    by_level,
+    requires_token_renewal,
     ui_only,
 )
 
@@ -235,12 +249,6 @@ class CommonSetup(UatTestCase):
         db.session.add(user)
         db.session.commit()
 
-    def enroll_if_relaxed(self, username):
-        """In the relaxed profile MFA is not forced: enrol the user on purpose."""
-        if is_relaxed() and username not in self.mfa_secrets:
-            token = self.login(username).json["token"]
-            self.enroll_mfa(token, username)
-
 
 # ---------------------------------------------------------------------------
 # Block 8: API keys
@@ -248,31 +256,32 @@ class CommonSetup(UatTestCase):
 
 
 class TestUatApiKeys(CommonSetup):
+    config_overrides = MFA_ENROLLMENT_OVERRIDES
+
     def test_uat_8_1_generate_key_with_mfa_without_totp(self):
-        """8.1 Generate a key with MFA active, without a TOTP code."""
-        self.enroll_if_relaxed("cfplanner")
-        if is_strict():
-            self.token_of("cfplanner")  # enrols the user
+        """8.1 Generate a key with MFA active, without a TOTP code: refused at level 3, issued at levels 1 and 2."""
+        self.ensure_mfa("cfplanner")
         token = self.token_of("cfplanner")
         self.assertTrue(self.user_row("cfplanner").mfa_enabled)
         response = self.client.post(
             API_KEY_URL, data=json.dumps({}), headers=auth_header(token)
         )
-        if is_strict():
-            self.assertEqual(SETTINGS["API_KEY_STEPUP_TOTP"], 1)
+        self.assertEqual(
+            by_level(0, 0, 1), int(current_app.config["API_KEY_STEPUP_TOTP"])
+        )
+        if at_least(3):
             self.assertNotIn(response.status_code, (200, 201))
             self.assertIn("two-factor", response.json["error"])
             self.assertNotIn("api_key", response.json)
             self.assertIsNone(self.user_row("cfplanner").api_key_issued_at)
         else:
-            # Relaxed: the step-up is off, so even a user with MFA enrolled
-            # gets the key without a code (the code only checks the flag)
-            self.assertEqual(SETTINGS["API_KEY_STEPUP_TOTP"], 0)
+            # The step-up is off: even a user with MFA enrolled gets the key
+            # without a code
             self.assertEqual(201, response.status_code, response.json)
 
     def test_uat_8_2_generate_key_with_valid_totp(self):
         """8.2 Generate a key with a valid TOTP: 201, shown only once."""
-        self.enroll_if_relaxed("cfplanner")
+        self.ensure_mfa("cfplanner")
         response = self.mint("cfplanner")
         key = response.json["api_key"]
         self.assertTrue(key)
@@ -348,9 +357,7 @@ class TestUatApiKeys(CommonSetup):
 
     def test_uat_8_9_cli_issues_read_only_key_without_totp(self):
         """8.9 cornflow users api_key -u <user> --read-only issues a read-only key."""
-        self.enroll_if_relaxed("cfplanner")
-        if is_strict():
-            self.token_of("cfplanner")
+        self.ensure_mfa("cfplanner")
         with capture_audit() as audit:
             result = self.run_cli("users", "api_key", "-u", "cfplanner", "--read-only")
         self.assertEqual(0, result.exit_code, result.output)
@@ -365,8 +372,8 @@ class TestUatApiKeys(CommonSetup):
 
     def test_uat_8_10_previous_key_works_in_grace(self):
         """8.10 Generate a new key: the previous one works inside the grace window."""
-        grace = int(SETTINGS["API_KEY_ROTATION_GRACE_MINUTES"])
-        self.assertGreater(grace, 0)
+        grace = int(current_app.config["API_KEY_ROTATION_GRACE_MINUTES"])
+        self.assertEqual(60, grace)
         first = self.key_of()
         second = self.key_of()
         self.assertEqual(200, self.get_instances(second).status_code)
@@ -376,13 +383,13 @@ class TestUatApiKeys(CommonSetup):
 
     def test_uat_8_11_previous_key_dies_after_grace(self):
         """8.11 After API_KEY_ROTATION_GRACE_MINUTES the previous key is 401."""
-        grace = int(SETTINGS["API_KEY_ROTATION_GRACE_MINUTES"])
+        grace = int(current_app.config["API_KEY_ROTATION_GRACE_MINUTES"])
+        self.assertEqual(60, grace)
         first = self.key_of()
         second = self.key_of()
         with freeze_time(datetime.now(timezone.utc) + timedelta(minutes=grace + 1)):
             response = self.get_instances(first)
-            self.assertEqual(401, response.status_code)
-            self.assertEqual(REVOKED_MESSAGE, response.json["error"])
+            self.assert_invalid_token(response, REVOKED_MESSAGE)
             self.assertEqual(200, self.get_instances(second).status_code)
 
     def test_uat_8_12_grace_covers_only_the_previous_key(self):
@@ -391,8 +398,7 @@ class TestUatApiKeys(CommonSetup):
         middle = self.key_of()
         newest = self.key_of()
         response = self.get_instances(oldest)
-        self.assertEqual(401, response.status_code)
-        self.assertEqual(REVOKED_MESSAGE, response.json["error"])
+        self.assert_invalid_token(response, REVOKED_MESSAGE)
         self.assertEqual(200, self.get_instances(middle).status_code)
         self.assertEqual(200, self.get_instances(newest).status_code)
 
@@ -406,26 +412,7 @@ class TestUatApiKeys(CommonSetup):
         self.assertEqual("The API key has been revoked", response.json["message"])
         for key in (second, first):
             response = self.get_instances(key)
-            self.assertEqual(401, response.status_code)
-            self.assertEqual(REVOKED_MESSAGE, response.json["error"])
-
-    def test_uat_8_14_locking_the_account_revokes_its_keys(self):
-        """8.14 Lock the account and use its key: 401."""
-        key = self.key_of()
-        self.assertEqual(200, self.get_instances(key).status_code)
-        for _ in range(int(SETTINGS["LOGIN_MAX_ATTEMPTS"])):
-            self.login("cfplanner", password="Wrong-pass.1x")
-        self.assertTrue(self.user_row("cfplanner").locked)
-        response = self.get_instances(key)
-        self.assertEqual(401, response.status_code)
-        self.assertEqual(REVOKED_MESSAGE, response.json["error"])
-        # unlocking does not bring the key back
-        admin_token = self.token_of("cfplatform")
-        response = self.client.put(
-            f"{USER_URL}{self.planner.id}/unlock/", headers=auth_header(admin_token)
-        )
-        self.assertEqual(200, response.status_code, response.json)
-        self.assertEqual(401, self.get_instances(key).status_code)
+            self.assert_invalid_token(response, REVOKED_MESSAGE)
 
     def test_uat_8_15_password_change_keeps_the_key(self):
         """8.15 Change the password and use the key: it keeps working."""
@@ -590,6 +577,25 @@ class TestUatApiKeys(CommonSetup):
         self.assertEqual([], audit.by_event("login.success"))
 
 
+class TestUatApiKeysLockout(CommonSetup):
+    config_overrides = LOCKOUT_OVERRIDES
+
+    def test_uat_8_14_locking_the_account_revokes_its_keys(self):
+        """8.14 Lock the account and use its key: 401 (level 1 with LOGIN_MAX_ATTEMPTS=3)."""
+        key = self.key_of()
+        self.assertEqual(200, self.get_instances(key).status_code)
+        self.lock_account("cfplanner", "Wrong-pass.1x")
+        response = self.get_instances(key)
+        self.assert_invalid_token(response, REVOKED_MESSAGE)
+        # unlocking does not bring the key back
+        admin_token = self.token_of("cfplatform")
+        response = self.client.put(
+            f"{USER_URL}{self.planner.id}/unlock/", headers=auth_header(admin_token)
+        )
+        self.assertEqual(200, response.status_code, response.json)
+        self.assertEqual(401, self.get_instances(key).status_code)
+
+
 class TestUatApiKeysDisabled(CommonSetup):
     config_overrides = {"PERSONAL_TOKEN_ENABLED": 0}
 
@@ -610,7 +616,45 @@ class TestUatApiKeysDisabled(CommonSetup):
 # ---------------------------------------------------------------------------
 
 
+class TestUatAuditLockout(CommonSetup):
+    config_overrides = LOCKOUT_OVERRIDES
+
+    def unlock_event(self, actor_username):
+        token = self.token_of(actor_username)
+        with capture_audit() as audit:
+            response = self.client.put(
+                f"{USER_URL}{self.planner.id}/unlock/", headers=auth_header(token)
+            )
+        self.assertEqual(200, response.status_code, response.json)
+        return audit.by_event("account.unlocked")[0]
+
+    def test_uat_10_4_lock_by_attempts(self):
+        """10.4 Lock by attempts: account.locked with the number of attempts."""
+        with capture_audit() as audit:
+            attempts = self.lock_account("cfplanner", "Wrong-pass.1x")
+        event = audit.by_event("account.locked")[0]
+        self.assertEqual("cfplanner", event["target"])
+        self.assertEqual(attempts, event["attempts"])
+        self.assertEqual(by_level(3, 5, 5), attempts)
+
+    def test_uat_10_5_unlock(self):
+        """10.5 Unlock: account.unlocked with actor and target (client admins too at levels 1 and 2)."""
+        self.lock_account("cfplanner", "Wrong-pass.1x")
+        event = self.unlock_event("cfplatform")
+        self.assertEqual("cfplatform", event["actor"])
+        self.assertEqual("cfplanner", event["target"])
+        self.assertEqual(self.planner.id, event["target_id"])
+        if not at_least(3):
+            self.make_user("cfadmin", [ADMIN_ROLE])
+            self.lock_account("cfplanner", "Wrong-pass.1x")
+            event = self.unlock_event("cfadmin")
+            self.assertEqual("cfadmin", event["actor"])
+            self.assertEqual("cfplanner", event["target"])
+
+
 class TestUatAudit(CommonSetup):
+    config_overrides = MFA_ENROLLMENT_OVERRIDES
+
     def test_uat_10_1_login_success(self):
         """10.1 Successful login: login.success with actor, ip, method."""
         self.full_login("cfplanner")  # enrols when MFA is required
@@ -640,31 +684,6 @@ class TestUatAudit(CommonSetup):
         event = audit.by_event("login.failure")[0]
         self.assertEqual("unknown_user", event["reason"])
 
-    def test_uat_10_4_lock_by_attempts(self):
-        """10.4 Lock by attempts: account.locked with the number of attempts."""
-        attempts = int(SETTINGS["LOGIN_MAX_ATTEMPTS"])
-        with capture_audit() as audit:
-            for _ in range(attempts):
-                self.login("cfplanner", password="Wrong-pass.1x")
-        event = audit.by_event("account.locked")[0]
-        self.assertEqual("cfplanner", event["target"])
-        self.assertEqual(attempts, event["attempts"])
-
-    def test_uat_10_5_unlock(self):
-        """10.5 Unlock: account.unlocked with actor and target."""
-        for _ in range(int(SETTINGS["LOGIN_MAX_ATTEMPTS"])):
-            self.login("cfplanner", password="Wrong-pass.1x")
-        token = self.token_of("cfplatform")
-        with capture_audit() as audit:
-            response = self.client.put(
-                f"{USER_URL}{self.planner.id}/unlock/", headers=auth_header(token)
-            )
-        self.assertEqual(200, response.status_code, response.json)
-        event = audit.by_event("account.unlocked")[0]
-        self.assertEqual("cfplatform", event["actor"])
-        self.assertEqual("cfplanner", event["target"])
-        self.assertEqual(self.planner.id, event["target_id"])
-
     def test_uat_10_6_password_changed(self):
         """10.6 Password change: password.changed."""
         token = self.token_of("cfplanner")
@@ -687,10 +706,7 @@ class TestUatAudit(CommonSetup):
     def test_uat_10_7_mfa_enrolled_and_reset(self):
         """10.7 MFA enrolment and reset: mfa.enrolled, mfa.reset."""
         with capture_audit() as audit:
-            if is_strict():
-                self.token_of("cfplanner")
-            else:
-                self.enroll_if_relaxed("cfplanner")
+            self.ensure_mfa("cfplanner")
         event = audit.by_event("mfa.enrolled")[0]
         self.assertEqual("cfplanner", event["actor"])
         token = self.token_of("cfplatform")
@@ -744,6 +760,7 @@ class TestUatAudit(CommonSetup):
         self.assertEqual(target.id, revoked["target_id"])
         self.assertEqual(PLANNER_ROLE, revoked["role_id"])
 
+    @requires_token_renewal
     def test_uat_10_10_session_refreshed_and_logout_have_actor(self):
         """10.10 Refresh and logout: session.refreshed, session.logout (with actor)."""
         login = self.full_login("cfplanner")
@@ -765,6 +782,7 @@ class TestUatAudit(CommonSetup):
         )
         self.assertEqual("cfplanner", audit.by_event("session.logout")[0].get("actor"))
 
+    @requires_token_renewal
     def test_uat_10_11_refresh_reuse_detected(self):
         """10.11 Reuse of a refresh token: session.reuse_detected, outcome revoked."""
         login = self.full_login("cfplanner")
@@ -781,7 +799,7 @@ class TestUatAudit(CommonSetup):
                 data=json.dumps({"refresh_token": login["refresh_token"]}),
                 headers=headers,
             )
-        self.assertEqual(401, replay.status_code)
+        self.assert_invalid_token(replay)
         event = audit.by_event("session.reuse_detected")[0]
         self.assertEqual("revoked", event["outcome"])
         self.assertEqual("cfplanner", event["actor"])
@@ -856,6 +874,67 @@ class TestUatHsts(CommonSetup):
         hsts = response.headers["Strict-Transport-Security"]
         self.assertIn("max-age=", hsts)
         self.assertIn("includeSubDomains", hsts)
+
+
+class TestUatBrowserLevelDefaults(CommonSetup):
+    """Cases 11.3, 11.4 and 11.6 with the default values of the level."""
+
+    config_overrides = {"RATELIMIT_TRUST_FORWARDED_FOR": 1}
+
+    def assert_level_default_with_any_flask_env(self, config_key):
+        """The level default of config_key is the same in Development and Production."""
+        env = {k: v for k, v in os.environ.items() if k not in SETTINGS_BY_ENV_VAR}
+        env[SECURITY_LEVEL_ENV_VAR] = str(LEVEL)
+        code = (
+            "import json; from cornflow.config import Development, Production; "
+            f"print(json.dumps([Development.{config_key}, Production.{config_key}]))"
+        )
+        for flask_env in ("development", "production"):
+            result = subprocess.run(
+                [sys.executable, "-c", code],
+                env={**env, "FLASK_ENV": flask_env},
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+            values = json.loads(result.stdout.strip().splitlines()[-1])
+            self.assertEqual([LEVEL_DEFAULTS[config_key]] * 2, values, flask_env)
+
+    def test_uat_11_3_hsts_level_default(self):
+        """11.3 HSTS behind TLS with the level default: only at level 3."""
+        self.assertEqual(by_level(0, 0, 1), LEVEL_DEFAULTS["HSTS_ENABLED"])
+        response = self.client.get(HEALTH_URL, headers={"X-Forwarded-Proto": "https"})
+        if at_least(3):
+            hsts = response.headers["Strict-Transport-Security"]
+            self.assertIn("max-age=", hsts)
+            self.assertIn("includeSubDomains", hsts)
+        else:
+            self.assertNotIn("Strict-Transport-Security", response.headers)
+        self.assert_level_default_with_any_flask_env("HSTS_ENABLED")
+
+    def test_uat_11_4_cors_level_default(self):
+        """11.4 A foreign Origin with the level default: allowed at levels 1 and 2, closed at level 3."""
+        self.assertEqual(by_level("*", "*", ""), LEVEL_DEFAULTS["CORS_ORIGINS"])
+        headers = {"Origin": "https://foreign.example"}
+        response = self.client.get(HEALTH_URL, headers=headers)
+        preflight = self.client.options(
+            LOGIN_URL,
+            headers={**headers, "Access-Control-Request-Method": "POST"},
+        )
+        if at_least(3):
+            self.assertNotIn("Access-Control-Allow-Origin", response.headers)
+            self.assertNotIn("Access-Control-Allow-Origin", preflight.headers)
+        else:
+            self.assertIn("Access-Control-Allow-Origin", response.headers)
+        self.assert_level_default_with_any_flask_env("CORS_ORIGINS")
+
+    def test_uat_11_6_docs_level_default(self):
+        """11.6 Swagger with the level default: served at levels 1 and 2, 404 at level 3."""
+        self.assertEqual(by_level(1, 1, 0), LEVEL_DEFAULTS["DOCS_ENABLED"])
+        expected = by_level(200, 200, 404)
+        self.assertEqual(expected, self.client.get("/swagger-ui/").status_code)
+        self.assertEqual(expected, self.client.get("/swagger/").status_code)
+        self.assert_level_default_with_any_flask_env("DOCS_ENABLED")
 
 
 class TestUatCorsClosed(CommonSetup):
@@ -1046,7 +1125,7 @@ class TestUatRegression(CommonSetup):
 
     def test_uat_12_4_cornflow_client_flow(self):
         """12.4 cornflow-client: login, create instance, run, read results."""
-        self.token_of("cfplanner")  # enrols MFA when the profile requires it
+        self.token_of("cfplanner")  # enrols MFA when the level requires it
         client = self.make_client()
         totp = self.totp_now("cfplanner") if "cfplanner" in self.mfa_secrets else None
         body = client.login("cfplanner", self.password_of("cfplanner"), totp_code=totp)
@@ -1075,6 +1154,7 @@ class TestUatRegression(CommonSetup):
         solution = client.get_solution(execution_id)
         self.assertEqual(load_json(INSTANCE_PATH)["data"], solution["data"])
 
+    @requires_token_renewal
     def test_uat_12_5_client_renews_expired_access_token(self):
         """12.5 cornflow-client working longer than the access token duration."""
         self.token_of("cfplanner")
@@ -1082,13 +1162,13 @@ class TestUatRegression(CommonSetup):
         totp = self.totp_now("cfplanner") if "cfplanner" in self.mfa_secrets else None
         client.login("cfplanner", self.password_of("cfplanner"), totp_code=totp)
         self.assertIsInstance(client.get_all_instances(), list)
-        minutes = int(SETTINGS["ACCESS_TOKEN_DURATION_MINUTES"]) + 1
+        minutes = int(current_app.config["ACCESS_TOKEN_DURATION_MINUTES"]) + 1
         with freeze_time(datetime.now(timezone.utc) + timedelta(minutes=minutes)):
             # server contract: an expired access token is a 401
             expired = self.client.get(
                 INSTANCE_URL, headers=auth_header(client.token)
             )
-            self.assertEqual(401, expired.status_code, expired.json)
+            self.assert_invalid_token(expired)
             # and the client renews and retries transparently
             self.assertIsInstance(client.get_all_instances(), list)
 
@@ -1112,6 +1192,34 @@ class TestUatRegression(CommonSetup):
         token = result.output.strip().splitlines()[-1]
         self.assertTrue(token)
         self.assertEqual(1, len(audit.by_event("bitoken.issued")))
+        claims = jwt.decode(
+            token,
+            current_app.config["SECRET_BI_KEY"],
+            algorithms=["HS256"],
+            options={"verify_exp": False},
+        )
+        if at_least(3):
+            self.assertEqual(90 * 86400, claims["exp"] - claims["iat"])
+        else:
+            self.assertNotIn("exp", claims)
+        self.assertEqual("cfplanner", BIAuth.decode_token(token)["sub"])
+        # A BI token without expiration date: accepted at levels 1 and 2, refused at level 3
+        legacy = jwt.encode(
+            {"iat": datetime.now(timezone.utc), "sub": "cfplanner"},
+            current_app.config["SECRET_BI_KEY"],
+            algorithm="HS256",
+        )
+        if at_least(3):
+            with self.assertRaises(InvalidToken) as ctx:
+                BIAuth.decode_token(legacy)
+            self.assertEqual(401, ctx.exception.status_code)
+            self.assertEqual(
+                "The BI token has no expiration date and is no longer accepted, "
+                "please regenerate the BI token",
+                ctx.exception.error,
+            )
+        else:
+            self.assertEqual("cfplanner", BIAuth.decode_token(legacy)["sub"])
         with open(ACCESS_RST, encoding="utf-8") as handler:
             text = handler.read()
         self.assertIn("BI tokens (deprecated)", text)
