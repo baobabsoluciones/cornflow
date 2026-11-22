@@ -7,6 +7,13 @@ from urllib.parse import urljoin
 
 import requests
 
+# Raised when the server refuses to renew an interactive session (the refresh
+# token answers 401): the session was closed and only a new login helps.
+SESSION_CLOSED_MESSAGE = (
+    "The session has been closed (inactivity or maximum session length). "
+    "Log in again; for unattended processes use a personal API key "
+    "(set_api_key, or CORNFLOW_SERVICE_API_KEY in Airflow)."
+)
 
 
 def _is_expired_token(response) -> bool:
@@ -62,6 +69,12 @@ class RawCornFlow(object):
                 refresh_response = self.refresh()
                 if refresh_response.status_code == 200:
                     response = func(self, *args, **kwargs)
+                elif refresh_response.status_code == 401:
+                    # The server refused the refresh token: the session was
+                    # closed (inactivity, maximum length or revocation), so
+                    # retrying cannot help. Any other failure (429, 5xx...)
+                    # keeps returning the original response.
+                    raise CornFlowApiError(SESSION_CLOSED_MESSAGE)
             return response
 
         return wrapper

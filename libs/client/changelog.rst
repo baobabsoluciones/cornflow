@@ -1,3 +1,39 @@
+version 1.4.0rc1
+----------------
+- released: pending
+- description: Two-factor login, renewable sessions and personal API keys
+- changelog:
+    - Two-factor authentication
+        ``login`` accepts a ``totp_code`` argument (the code from the authenticator app or a backup
+        code) for users with two-factor authentication enabled. ``CornFlow.login`` raises
+        ``CornFlowApiError`` when the server answers without a token because the second factor is
+        still pending.
+
+    - Session renewal
+        When the server issues refresh tokens, ``login`` stores the refresh token next to the access
+        token. If a call is rejected because the access token has expired (401, or the 400 with the
+        expiry message that older servers return), the client renews the session once through
+        ``token/refresh/`` and repeats the call. ``refresh`` renews the session explicitly.
+
+    - Closed session error
+        If the renewal is rejected with 401 because the session has been closed (inactivity or
+        maximum session length), the call raises ``CornFlowApiError`` with a message that asks to log
+        in again and recommends a personal API key for unattended processes.
+
+    - Logout
+        ``logout`` revokes the session on the server and clears the tokens stored in the client.
+
+    - Personal API keys
+        ``set_api_key`` uses a personal API key instead of a session token: a long-lived credential
+        with no session to renew, meant for unattended processes. ``create_api_key`` generates one for
+        the logged-in user (``totp_code`` when the server asks for it, ``read_only`` for a key that
+        only allows GET requests). Generating a new key replaces the previous one, which keeps working
+        during the rotation grace period of the server.
+
+    - Airflow
+        ``connect_to_cornflow`` uses the personal API key in ``CORNFLOW_SERVICE_API_KEY`` when it is
+        defined, instead of logging in with the credentials of the ``CF_URI`` connection.
+
 version 1.3.5
 --------------
 - released: 2026-06-03
