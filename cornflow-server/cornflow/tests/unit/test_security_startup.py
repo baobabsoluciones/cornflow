@@ -459,6 +459,9 @@ class TestServiceInitSecurity(TestCase):
             "FLASK_ENV": name,
             "CORNFLOW_BACKEND": "1",
             "AUTH_TYPE": "1",
+            # Other test modules may leave different user names in os.environ
+            "CORNFLOW_ADMIN_USER": "cornflow_admin",
+            "CORNFLOW_SERVICE_USER": "service_user",
             "CORNFLOW_ADMIN_PWD": self.ADMIN_PWD,
             "CORNFLOW_SERVICE_PWD": self.SERVICE_PWD,
         }
