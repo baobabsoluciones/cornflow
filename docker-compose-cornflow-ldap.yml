@@ -103,6 +103,21 @@ x-cornflow-common: &cornflow-common
   #build:
   #  context: ./cornflow-server
   environment: &cornflow-common-env
+    # Development-only keys. Never use them outside local development: set your own
+    # keys of at least 32 bytes, e.g. python -c "import secrets; print(secrets.token_hex(32))".
+    # FERNET_KEY signs the sessions and API keys and encrypts the TOTP secrets of MFA:
+    # changing it invalidates all of them. It takes precedence over SECRET_KEY.
+    FERNET_KEY: "GkaSW-plxVw3k4b07Dk3yPeaUyKhO3R0qj-12LXNkz4="
+    # SECRET_BI_KEY signs the BI tokens: changing it invalidates them.
+    SECRET_BI_KEY: "dev-only-bi-secret-key-change-me-1877912554d4e272"
+    # Security level of cornflow: 1, 2 or 3 (1 when unset).
+    #   1: same behaviour as cornflow 1.3.9 (default).
+    #   2: password policy, single-use password on user creation, account lockout after
+    #      5 failed logins, 8-hour sessions and a mandatory secret key (32 bytes or more).
+    #   3: level 2 plus mandatory MFA, sessions with token refresh, password rotation,
+    #      BI tokens that expire, and production CORS, Swagger and HSTS settings.
+    # Before raising the level, replace the development keys and the example passwords.
+    # CORNFLOW_SECURITY_LEVEL: "1"
     CORNFLOW_DB_HOST: cornflow_db
     CORNFLOW_DB_PORT: 5432
     CORNFLOW_DB_USER: cornflow
