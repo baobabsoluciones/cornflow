@@ -21,11 +21,7 @@ from cornflow.schemas.user import LoginEndpointRequest, LoginOpenAuthRequest
 from cornflow.shared import db
 from cornflow.shared.audit import audit
 from cornflow.shared.authentication import Auth, LDAPBase
-from cornflow.shared.rate_limit import (
-    limiter,
-    login_rate_limit,
-    RATE_LIMIT_MESSAGE,
-)
+from cornflow.shared.rate_limit import failed_attempts_limit
 from cornflow.shared.const import (
     AUTH_DB,
     AUTH_LDAP,
@@ -449,8 +445,10 @@ class LoginEndpoint(LoginBaseEndpoint):
 
     # Per-IP rate limit applied around the whole endpoint (flask-restful
     # discovers class-level decorators; a per-method decorator would not be
-    # enforced through its dispatch)
-    decorators = [limiter.shared_limit(login_rate_limit, scope="login", error_message=RATE_LIMIT_MESSAGE)]
+    # enforced through its dispatch). Only failed responses consume it, so
+    # successful logins (and the intermediate step that asks for the second
+    # factor) never use it up
+    decorators = [failed_attempts_limit("login")]
 
     @doc(description="Log in", tags=["Users"])
     @use_kwargs(LoginEndpointRequest, location="json")
@@ -469,7 +467,7 @@ class LoginEndpoint(LoginBaseEndpoint):
 class LoginOpenAuthEndpoint(LoginBaseEndpoint):
     """ """
 
-    decorators = [limiter.shared_limit(login_rate_limit, scope="login", error_message=RATE_LIMIT_MESSAGE)]
+    decorators = [failed_attempts_limit("login")]
 
     def __init__(self):
         super().__init__()
