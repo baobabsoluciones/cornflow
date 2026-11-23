@@ -30,7 +30,7 @@ from cornflow.models import (
     UserPasswordHistoryModel,
 )
 from cornflow.shared import db
-from cornflow.endpoints.mfa import MFA_ENROLLMENT_DISABLED_MESSAGE
+from cornflow.shared.const import MFA_ENROLLMENT_DISABLED_MESSAGE
 from cornflow.shared.const import (
     ADMIN_ROLE,
     PLATFORM_ADMIN_ROLE,

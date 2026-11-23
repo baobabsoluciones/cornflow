@@ -9,11 +9,11 @@ from cornflow_client.constants import AirflowError, DatabricksError
 from werkzeug.exceptions import HTTPException
 import traceback
 
-from cornflow.shared.const import DATA_DOES_NOT_EXIST_MSG
-
-
-WWW_AUTHENTICATE_HEADER = "WWW-Authenticate"
-INVALID_TOKEN_ERROR_CODE = "invalid_token"
+from cornflow.shared.const import (
+    DATA_DOES_NOT_EXIST_MSG,
+    INVALID_TOKEN_ERROR_CODE,
+    WWW_AUTHENTICATE_HEADER,
+)
 
 
 def _quote_auth_param(value) -> str:

@@ -54,7 +54,7 @@ from cornflow.commands.dag import register_deployed_dags_command_test
 from cornflow.commands.permissions import register_dag_permissions_command
 from cornflow.models import UserModel, UserRoleModel
 from cornflow.shared import db
-from cornflow.shared.exceptions import (
+from cornflow.shared.const import (
     INVALID_TOKEN_ERROR_CODE,
     WWW_AUTHENTICATE_HEADER,
 )

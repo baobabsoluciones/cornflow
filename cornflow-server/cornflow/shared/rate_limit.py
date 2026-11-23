@@ -22,6 +22,8 @@ from flask import Response, current_app, request
 from flask_limiter import Limiter
 from flask_limiter.extension import LimitDecorator
 
+from cornflow.shared.const import FAILED_RESPONSE_MIN_STATUS
+
 
 def get_client_ip() -> str:
     """
@@ -57,10 +59,6 @@ limiter = Limiter(key_func=get_client_ip)
 
 # Message returned (as flask-restful "message") when a limit is exceeded
 RATE_LIMIT_MESSAGE = "Too many requests. Please slow down and try again later."
-
-# Lowest HTTP status code that counts as a failed attempt for the limits that
-# only count failures (login, token refresh and logout)
-FAILED_RESPONSE_MIN_STATUS = 400
 
 
 def is_failed_response(response: Response) -> bool:

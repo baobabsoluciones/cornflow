@@ -43,17 +43,13 @@ from cornflow.schemas.user import MFAVerifyRequest
 from cornflow.shared import db
 from cornflow.shared.audit import audit
 from cornflow.shared.authentication import Auth, authenticate
-from cornflow.shared.const import ALL_DEFAULT_ROLES
+from cornflow.shared.const import ALL_DEFAULT_ROLES, MFA_ENROLLMENT_DISABLED_MESSAGE
 from cornflow.shared.exceptions import (
     EndpointNotImplemented,
     InvalidCredentials,
     InvalidUsage,
     NoPermission,
     ObjectDoesNotExist,
-)
-
-MFA_ENROLLMENT_DISABLED_MESSAGE = (
-    "Two-factor authentication enrollment is disabled on this deployment"
 )
 
 

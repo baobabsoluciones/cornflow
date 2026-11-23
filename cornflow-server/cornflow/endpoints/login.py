@@ -23,6 +23,8 @@ from cornflow.shared.audit import audit
 from cornflow.shared.authentication import Auth, LDAPBase
 from cornflow.shared.rate_limit import failed_attempts_limit
 from cornflow.shared.const import (
+    ACCOUNT_LOCKED_ERROR_CODE,
+    ACCOUNT_LOCKED_MESSAGE,
     AUTH_DB,
     AUTH_LDAP,
     AUTH_OID,
@@ -32,12 +34,6 @@ from cornflow.shared.exceptions import (
     ConfigurationError,
     InvalidCredentials,
     InvalidUsage,
-)
-
-ACCOUNT_LOCKED_ERROR_CODE = "account_locked"
-ACCOUNT_LOCKED_MESSAGE = (
-    "The account is locked due to too many failed login attempts. "
-    "Please contact an administrator to unlock it."
 )
 
 

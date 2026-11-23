@@ -300,6 +300,26 @@ PLATFORM_ROLE_INHERITANCE = {
     PLATFORM_ADMIN_ROLE: ADMIN_ROLE,
 }
 
+# Error messages of the role and role permission endpoints for the reserved
+# role range and the platform roles
+_RESERVED_LOW, _RESERVED_HIGH = RESERVED_ROLE_RANGE
+RESERVED_ROLE_ERROR = (
+    f"Role ids {_RESERVED_LOW}-{_RESERVED_HIGH} are reserved for the cornflow "
+    "platform roles: only a platform administrator can manage them"
+)
+RESERVED_ROLE_ID_ERROR = (
+    f"Role ids {_RESERVED_LOW}-{_RESERVED_HIGH} are reserved for the cornflow "
+    "platform roles and a custom role there would stop cornflow from starting: "
+    f"leave the id out or use an id outside {_RESERVED_LOW}-{_RESERVED_HIGH}"
+)
+NO_FREE_ROLE_ID_ERROR = (
+    f"There is no free role id below {_RESERVED_LOW}: create the role with an "
+    f"explicit id outside {_RESERVED_LOW}-{_RESERVED_HIGH}"
+)
+PLATFORM_ROLE_PERMISSION_ERROR = (
+    "Only a platform administrator can manage the permissions of the platform roles"
+)
+
 ACTIONS_MAP = {
     GET_ACTION: "can_get",
     PATCH_ACTION: "can_patch",
@@ -448,6 +468,30 @@ AIRFLOW_NOT_REACHABLE_MSG = "Airflow is not reachable"
 DAG_PAUSED_MSG = "The dag exists but it is paused in airflow"
 AIRFLOW_ERROR_MSG = "Airflow responded with an error:"
 DATA_DOES_NOT_EXIST_MSG = "The data entity does not exist on the database"
+
+# Account lockout (login): error code and message returned when the account
+# is locked due to too many failed login attempts
+ACCOUNT_LOCKED_ERROR_CODE = "account_locked"
+ACCOUNT_LOCKED_MESSAGE = (
+    "The account is locked due to too many failed login attempts. "
+    "Please contact an administrator to unlock it."
+)
+
+# Message returned by the MFA setup endpoints when the enrollment is disabled
+MFA_ENROLLMENT_DISABLED_MESSAGE = (
+    "Two-factor authentication enrollment is disabled on this deployment"
+)
+
+# Settings that only work with the MFA endpoints enabled
+MFA_DEPENDENT_SETTINGS = ("MFA_REQUIRED", "API_KEY_STEPUP_TOTP", "PLATFORM_ROLE_STEPUP_TOTP")
+
+# Header and error code of the 401 responses for an invalid token
+WWW_AUTHENTICATE_HEADER = "WWW-Authenticate"
+INVALID_TOKEN_ERROR_CODE = "invalid_token"
+
+# Lowest HTTP status code that counts as a failed attempt for the rate limits
+# that only count failures (login, token refresh and logout)
+FAILED_RESPONSE_MIN_STATUS = 400
 
 # Name of the Flask Blueprint where the core endpoints are registered
 CORNFLOW_BLUEPRINT_NAME = "cornflow"

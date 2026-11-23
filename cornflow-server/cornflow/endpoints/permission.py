@@ -15,12 +15,8 @@ from cornflow.schemas.permissions import (
 from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.compress import compressed
 from cornflow.shared.admin_access import is_reserved_role_id
-from cornflow.shared.const import PLATFORM_ADMIN_ROLE
+from cornflow.shared.const import PLATFORM_ADMIN_ROLE, PLATFORM_ROLE_PERMISSION_ERROR
 from cornflow.shared.exceptions import NoPermission, ObjectAlreadyExists
-
-PLATFORM_ROLE_PERMISSION_ERROR = (
-    "Only a platform administrator can manage the permissions of the platform roles"
-)
 
 
 def _deny_platform_role_permission(actor, role_id, action):

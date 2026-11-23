@@ -46,6 +46,7 @@ from cornflow.shared.const import (
     AUTH_OID,
     CONDITIONAL_ENDPOINTS,
     LEGACY_ENDPOINT_SUFFIX,
+    MFA_DEPENDENT_SETTINGS,
     SIGNUP_PLATFORM_ADMIN_ONLY,
     SIGNUP_WITH_AUTH,
     SIGNUP_WITH_NO_AUTH,
@@ -69,10 +70,6 @@ from cornflow.shared.secret_keys import (
     MINIMUM_SECRET_KEY_LENGTH,  # noqa: F401 (imported by the tests from here)
     check_secret_keys,
 )
-
-
-# Settings that only work with the MFA endpoints enabled
-MFA_DEPENDENT_SETTINGS = ("MFA_REQUIRED", "API_KEY_STEPUP_TOTP", "PLATFORM_ROLE_STEPUP_TOTP")
 
 
 def _check_security_level(app):

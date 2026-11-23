@@ -15,7 +15,14 @@ from cornflow.schemas.role import (
 )
 from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.admin_access import is_reserved_role_id
-from cornflow.shared.const import AUTH_LDAP, PLATFORM_ADMIN_ROLE, RESERVED_ROLE_RANGE
+from cornflow.shared.const import (
+    AUTH_LDAP,
+    NO_FREE_ROLE_ID_ERROR,
+    PLATFORM_ADMIN_ROLE,
+    RESERVED_ROLE_ERROR,
+    RESERVED_ROLE_ID_ERROR,
+    RESERVED_ROLE_RANGE,
+)
 from cornflow.shared.exceptions import (
     EndpointNotImplemented,
     InvalidUsage,
@@ -25,19 +32,6 @@ from cornflow.shared.exceptions import (
 
 _RESERVED_LOW, _RESERVED_HIGH = RESERVED_ROLE_RANGE
 
-RESERVED_ROLE_ERROR = (
-    f"Role ids {_RESERVED_LOW}-{_RESERVED_HIGH} are reserved for the cornflow "
-    "platform roles: only a platform administrator can manage them"
-)
-RESERVED_ROLE_ID_ERROR = (
-    f"Role ids {_RESERVED_LOW}-{_RESERVED_HIGH} are reserved for the cornflow "
-    "platform roles and a custom role there would stop cornflow from starting: "
-    f"leave the id out or use an id outside {_RESERVED_LOW}-{_RESERVED_HIGH}"
-)
-NO_FREE_ROLE_ID_ERROR = (
-    f"There is no free role id below {_RESERVED_LOW}: create the role with an "
-    f"explicit id outside {_RESERVED_LOW}-{_RESERVED_HIGH}"
-)
 
 
 def _deny_reserved_role(actor, role_id, action):
