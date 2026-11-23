@@ -134,6 +134,32 @@ jobs:
           AIRFLOW_USER: notadmin
           AIRFLOW_PWD: notadmin
           CF_ALARMS_ENDPOINT: 1
+      - name: Run UAT hardening battery (security level 2)
+        run: |
+          coverage run -a --source=./cornflow/ --rcfile=./.coveragerc -m unittest discover -s cornflow/tests/unit -p "test_uat_hardening_*.py"
+          coverage report -m
+        env:
+          FLASK_ENV: testing
+          OPEN_DEPLOYMENT: 1
+          DATABASE_URL: sqlite:///cornflow_test.db
+          LOG_LEVEL: 30
+          AIRFLOW_USER: notadmin
+          AIRFLOW_PWD: notadmin
+          CF_ALARMS_ENDPOINT: 1
+          CORNFLOW_SECURITY_LEVEL: 2
+      - name: Run UAT hardening battery (security level 3)
+        run: |
+          coverage run -a --source=./cornflow/ --rcfile=./.coveragerc -m unittest discover -s cornflow/tests/unit -p "test_uat_hardening_*.py"
+          coverage report -m
+        env:
+          FLASK_ENV: testing
+          OPEN_DEPLOYMENT: 1
+          DATABASE_URL: sqlite:///cornflow_test.db
+          LOG_LEVEL: 30
+          AIRFLOW_USER: notadmin
+          AIRFLOW_PWD: notadmin
+          CF_ALARMS_ENDPOINT: 1
+          CORNFLOW_SECURITY_LEVEL: 3
       - name: Run ldap unit tests
         run: |
           coverage run -a --source=./cornflow/ --rcfile=./.coveragerc -m unittest discover -s cornflow/tests/ldap
