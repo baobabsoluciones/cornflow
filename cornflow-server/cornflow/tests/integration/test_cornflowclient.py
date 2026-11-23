@@ -19,10 +19,32 @@ from cornflow.shared.const import (
     EXEC_STATE_STOPPED,
     EXEC_STATE_RUNNING,
     EXEC_STATE_QUEUED,
+    EXEC_STATE_NOT_RUN,
+    EXEC_STATE_SAVING,
+    EXEC_STATE_UNKNOWN,
     STATUS_HEALTHY,
 )
 from cornflow.tests.const import INSTANCE_PATH, CASE_PATH
 from cornflow.tests.custom_liveServer import CustomTestCaseLive
+
+# States an execution passes through before Airflow finishes it
+UNFINISHED_STATES = (
+    EXEC_STATE_QUEUED,
+    EXEC_STATE_RUNNING,
+    EXEC_STATE_NOT_RUN,
+    EXEC_STATE_SAVING,
+    EXEC_STATE_UNKNOWN,
+)
+
+
+def wait_until_finished(client, execution_id, timeout=120):
+    """Polls the execution until Airflow finishes it, instead of sleeping a fixed time."""
+    deadline = time.monotonic() + timeout
+    status = client.get_status(execution_id)
+    while status["state"] in UNFINISHED_STATES and time.monotonic() < deadline:
+        time.sleep(0.5)
+        status = client.get_status(execution_id)
+    return status
 
 
 def load_file(_file):
@@ -335,8 +357,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
 
     def test_solve_and_wait(self):
         execution = self.create_instance_and_execution()
-        time.sleep(15)
-        status = self.client.get_status(execution["id"])
+        status = wait_until_finished(self.client, execution["id"])
         results = self.client.get_results(execution["id"])
         self.assertEqual(status["state"], EXEC_STATE_CORRECT)
         self.assertEqual(results["state"], EXEC_STATE_CORRECT)
@@ -344,8 +365,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
     def test_interrupt(self):
         execution = self.create_timer_instance_and_execution(5)
         self.client.stop_execution(execution_id=execution["id"])
-        time.sleep(2)
-        status = self.client.get_status(execution["id"])
+        status = wait_until_finished(self.client, execution["id"])
         results = self.client.get_results(execution["id"])
         self.assertEqual(status["state"], EXEC_STATE_STOPPED)
         self.assertEqual(results["state"], EXEC_STATE_STOPPED)
@@ -421,8 +441,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
 
     def test_solve_and_relaunch(self):
         execution = self.create_instance_and_execution()
-        time.sleep(20)
-        status = self.client.get_status(execution["id"])
+        status = wait_until_finished(self.client, execution["id"])
         results = self.client.get_results(execution["id"])
         self.assertEqual(status["state"], EXEC_STATE_CORRECT)
         self.assertEqual(results["state"], EXEC_STATE_CORRECT)
@@ -431,8 +450,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         results = self.client.get_solution(execution["id"])
         self.assertIsNone(results["checks"])
         self.assertEqual(results["config"], config)
-        time.sleep(15)
-        status = self.client.get_status(execution["id"])
+        status = wait_until_finished(self.client, execution["id"])
         self.assertEqual(status["state"], EXEC_STATE_CORRECT)
         results = self.client.get_solution(execution["id"])
         self.assertEqual(results["checks"], dict())
@@ -464,8 +482,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
             status["state"] == EXEC_STATE_RUNNING
             or status["state"] == EXEC_STATE_QUEUED
         )
-        time.sleep(10)
-        status = self.client.get_status(data_check_execution["id"])
+        status = wait_until_finished(self.client, data_check_execution["id"])
         self.assertEqual(status["state"], EXEC_STATE_CORRECT)
         response = self.client.raw.get_api_for_id(
             api="instance", id=instance["id"], post_url="data", encoding="br"
@@ -474,7 +491,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
 
     def test_check_execution(self):
         execution = self.create_instance_and_execution()
-        time.sleep(20)
+        wait_until_finished(self.client, execution["id"])
         data_check_execution = self.client.create_execution_data_check_kpis(
             execution["id"]
         )
@@ -484,8 +501,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
             status["state"] == EXEC_STATE_RUNNING
             or status["state"] == EXEC_STATE_QUEUED
         )
-        time.sleep(10)
-        status = self.client.get_status(data_check_execution["id"])
+        status = wait_until_finished(self.client, data_check_execution["id"])
         self.assertEqual(status["state"], EXEC_STATE_CORRECT)
 
     def test_check_case(self):
@@ -499,8 +515,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
             status["state"] == EXEC_STATE_RUNNING
             or status["state"] == EXEC_STATE_QUEUED
         )
-        time.sleep(10)
-        status = self.client.get_status(data_check_execution["id"])
+        status = wait_until_finished(self.client, data_check_execution["id"])
         self.assertEqual(status["state"], EXEC_STATE_CORRECT)
         response = self.client.raw.get_api_for_id(
             api="case", id=case["id"], post_url="data", encoding="br"
