@@ -34,13 +34,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ['3.10', '3.11', '3.12']
-        os: [ubuntu-latest]
-        # macOS and Windows catch OS differences, not Python-version ones: one version each is enough
-        include:
-          - os: macos-latest
-            python-version: '3.12'
-          - os: windows-latest
-            python-version: '3.12'
+        os: [ubuntu-latest, macos-latest, windows-latest]
 
     steps:
       - uses: actions/checkout@v4
