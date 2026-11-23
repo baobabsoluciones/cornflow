@@ -69,9 +69,9 @@ jobs:
       run:
         working-directory: ./libs/client
     strategy:
+      fail-fast: false
       matrix:
-        # Runs against a real Airflow and cornflow: once, on the newest version, is enough
-        python-version: ['3.12']
+        python-version: ['3.10', '3.11', '3.12']
         os: [ubuntu-latest]
 
     steps:
