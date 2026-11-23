@@ -248,8 +248,10 @@ locally.
   returns ``mfa_required`` when the code is missing; sending ``totp_code``
   (a TOTP code or an unused backup code) returns the session token.
 * Reset: ``DELETE /user/<id>/mfa/`` (the user themselves or an admin, e.g.
-  when a phone is lost). With ``MFA_REQUIRED=1`` the user will enroll again
-  at the next login.
+  when a phone is lost). It revokes every session and the personal API key
+  of the user, including a superseded key still in its rotation grace
+  window, as the account lock does. With ``MFA_REQUIRED=1`` the user will
+  enroll again at the next login.
 
 BI tokens (deprecated)
 *************************
@@ -311,7 +313,8 @@ either credential. It is meant for unattended automation.
   TOTP). Shown only once.
 - **One active key per user.** Generating a new key supersedes the previous
   one; it is also revoked explicitly (``DELETE /user/api-key/`` or the
-  Settings screen), and automatically on account lock and MFA reset. A
+  Settings screen), and automatically on account lock and MFA reset, which also revoke a
+  superseded key still in its rotation grace window. A
   routine password change does NOT revoke it (automation continuity).
   The key itself is never stored: revocation works because the key carries
   the user's api-key version, which is compared against the database on every
@@ -320,8 +323,8 @@ either credential. It is meant for unattended automation.
   keeps working for ``API_KEY_ROTATION_GRACE_MINUTES`` (default 60, at most
   a day at level 3; 0 disables it), so a key wired into running automation can be
   replaced without a gap: **generate first, redeploy after**. Only the
-  immediately superseded key benefits, and an explicit revocation is always
-  immediate.
+  immediately superseded key benefits. An explicit revocation, an account
+  lock and an MFA reset revoke both keys at once, with no grace.
 - **Scope: full or read-only.** A key can be minted read-only (``"scope":
   "read"`` on the request, the *read-only* checkbox in the Settings screen,
   ``create_api_key(read_only=True)`` in the library, or ``--read-only`` in the
@@ -471,10 +474,10 @@ machine-to-machine paths are unaffected.
 * ``X-Frame-Options: DENY`` and a ``frame-ancestors 'none'`` CSP — no framing
   (clickjacking).
 * ``Content-Security-Policy: default-src 'none'; frame-ancestors 'none';
-  base-uri 'none'`` — deny-by-default; the API returns JSON and the docs UI is
-  off at level 3, so nothing needs to load. Override with
-  ``CONTENT_SECURITY_POLICY`` to use the docs UI (on by default at levels 1
-  and 2).
+  base-uri 'none'`` — deny-by-default; the API returns JSON, so nothing
+  needs to load. Override it with ``CONTENT_SECURITY_POLICY``. The
+  interactive API docs get a policy of their own (see below), which
+  ``CONTENT_SECURITY_POLICY`` does not change.
 * ``Referrer-Policy: no-referrer`` — do not leak URLs (which may carry tokens,
   e.g. the password reset link) through the ``Referer`` header.
 * ``Permissions-Policy`` — disables browser features the app does not use.
@@ -508,10 +511,26 @@ defense-in-depth and closes the previously wide-open ``*`` policy.
 
 **Interactive API docs** (Swagger UI at ``/swagger-ui/`` and the OpenAPI
 schema at ``/swagger/``) are **disabled by default at level 3**
-(``CORNFLOW_DOCS_ENABLED=0``), whatever ``FLASK_ENV`` is, and enabled at
-levels 1 and 2, to shrink the attack surface and keep the strict
-CSP. Re-enable with ``CORNFLOW_DOCS_ENABLED=1`` (you will likely also need to
-relax ``CONTENT_SECURITY_POLICY`` so the Swagger UI assets load).
+(``CORNFLOW_DOCS_ENABLED=0``), whatever ``FLASK_ENV`` is, to shrink the
+attack surface, and enabled at levels 1 and 2. With
+``CORNFLOW_DOCS_ENABLED=1``, at any level, the Swagger UI loads and works in
+the browser: its routes (the page, its static files and the schema) carry a
+``Content-Security-Policy`` of their own::
+
+    default-src 'none'; script-src 'self' 'sha256-<hash>'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'
+
+It only lets the page load the scripts, the stylesheet and the icons served
+by cornflow itself, the images embedded in the stylesheet (``data:``) and
+requests to the same origin (the schema and *Try it out*). The inline script
+that starts the page is allowed by its SHA-256 hash, computed on the page as
+served, so it follows the URL under which cornflow is published. Inline
+styles are allowed because the Swagger UI sets them to highlight examples
+and responses; ``'unsafe-eval'`` and other origins are not allowed. The
+Swagger UI is served from the static files bundled with flask-apispec, with
+no external resources. The rest of the API keeps the strict policy above, or
+``CONTENT_SECURITY_POLICY`` if it is set, which does not apply to the
+Swagger UI routes. ``CORNFLOW_DOCS_ENABLED=0`` removes the page, its static
+files and the schema (404).
 
 Security levels
 ******************
@@ -524,9 +543,11 @@ level 3 includes level 2.
 
 * **Level 1** (the default) behaves as cornflow 1.3.9 for sessions,
   passwords, CORS, Swagger, HSTS, BI tokens and user sign-up, so upgrading
-  from 1.3.9 needs no change in deployments or clients. The only visible
-  change is that a token that is not valid answers 401 instead of 400 (see
-  :ref:`Invalid tokens (401 and WWW-Authenticate)`).
+  from 1.3.9 needs no change in deployments or clients. There are two
+  visible changes: a token that is not valid answers 401 instead of 400 (see
+  :ref:`Invalid tokens (401 and WWW-Authenticate)`), and BI tokens are
+  issued with ``cornflow users bi_token -u <username>``, which replaces the
+  command of 1.3.9 that asked for the password of a service user.
 * **Level 2** adds the basic controls: password policy, one-time passwords,
   account lockout after 5 failed logins, a mandatory secret key of at least
   32 bytes, 8-hour sessions and user sign-up restricted to platform
@@ -1111,7 +1132,7 @@ A variable that is set but empty (or only contains spaces) counts as unset.
 When ``FERNET_KEY`` and ``SECRET_KEY`` are both set with different values,
 cornflow uses ``FERNET_KEY``, ignores ``SECRET_KEY`` and logs a warning.
 The key is resolved in the configuration, so the server and the CLI run
-with ``docker exec`` (``cornflow users api_key``, ``bi_token``, ``token``)
+with ``docker exec`` (``cornflow users api_key``, ``bi_token``)
 sign with the same key as long as the variables are set in the container
 environment. No message ever prints the value of a key.
 

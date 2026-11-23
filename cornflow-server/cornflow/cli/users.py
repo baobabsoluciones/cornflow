@@ -19,10 +19,7 @@ from cornflow.shared.secret_keys import (
     cli_api_key_random_key_warning,
     uses_random_secret_key,
 )
-from cornflow.shared.exceptions import (
-    ObjectDoesNotExist,
-    NoPermission,
-)
+from cornflow.shared.exceptions import ObjectDoesNotExist
 
 
 force_password_change = click.option(
@@ -255,35 +252,5 @@ def issue_api_key(username, read_only):
             source="cli",
             scope=scope,
         )
-        click.echo(token)
-        return True
-
-
-@create.command(
-    name="token",
-    help="Creates a BI token for a user. The token expires after "
-    "BI_TOKEN_DURATION_DAYS days, or does not expire when "
-    "BI_TOKEN_DURATION_DAYS is 0 (the default at security levels 1 and 2). "
-    "Security level 3 rejects BI tokens without an expiration date. This token "
-    "can only be used on BI endpoints",
-)
-@click.option(
-    "--idx", "-i", type=int, help="The id of the user to generate the token for"
-)
-@username
-@password
-def create_unexpiring_token(idx, username, password):
-    app = get_app()
-    with app.app_context():
-        user = UserModel.get_one_object(id=idx)
-        asking_user = UserModel.get_one_user_by_username(username)
-
-        if not asking_user.check_hash(password) or not asking_user.is_service_user():
-            raise NoPermission("The asking user has no permissions to generate tokens")
-
-        if not user:
-            raise ObjectDoesNotExist("User does not exist")
-
-        token = BIAuth.generate_token(idx)
         click.echo(token)
         return True

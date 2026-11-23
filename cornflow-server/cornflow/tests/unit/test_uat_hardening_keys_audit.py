@@ -57,6 +57,12 @@ from cornflow.tests.const import (
     USER_ROLE_URL,
     USER_URL,
 )
+from cornflow.tests.swagger_csp_support import (
+    STRICT_CSP,
+    SWAGGER_CSP_WITHOUT_HASH,
+    expected_page_csp,
+    parse_page,
+)
 from cornflow.tests.uat_hardening_support import (
     LEVEL,
     LEVEL_DEFAULTS,
@@ -929,11 +935,26 @@ class TestUatBrowserLevelDefaults(CommonSetup):
         self.assert_level_default_with_any_flask_env("CORS_ORIGINS")
 
     def test_uat_11_6_docs_level_default(self):
-        """11.6 Swagger with the level default: served at levels 1 and 2, 404 at level 3."""
+        """11.6 Swagger with the level default: served with its own CSP at levels 1 and 2, 404 at level 3."""
         self.assertEqual(by_level(1, 1, 0), LEVEL_DEFAULTS["DOCS_ENABLED"])
         expected = by_level(200, 200, 404)
-        self.assertEqual(expected, self.client.get("/swagger-ui/").status_code)
-        self.assertEqual(expected, self.client.get("/swagger/").status_code)
+        page = self.client.get("/swagger-ui/")
+        schema = self.client.get("/swagger/")
+        self.assertEqual(expected, page.status_code)
+        self.assertEqual(expected, schema.status_code)
+        if at_least(3):
+            self.assertEqual(STRICT_CSP, page.headers["Content-Security-Policy"])
+            self.assertEqual(STRICT_CSP, schema.headers["Content-Security-Policy"])
+        else:
+            inline_scripts = parse_page(page.get_data(as_text=True)).inline_scripts
+            self.assertEqual(
+                expected_page_csp(inline_scripts), page.headers["Content-Security-Policy"]
+            )
+            self.assertEqual(
+                SWAGGER_CSP_WITHOUT_HASH, schema.headers["Content-Security-Policy"]
+            )
+        health = self.client.get(HEALTH_URL)
+        self.assertEqual(STRICT_CSP, health.headers["Content-Security-Policy"])
         self.assert_level_default_with_any_flask_env("DOCS_ENABLED")
 
 
@@ -969,18 +990,31 @@ class TestUatDocsOff(CommonSetup):
     config_overrides = {"DOCS_ENABLED": 0}
 
     def test_uat_11_6_docs_disabled_in_production(self):
-        """11.6 GET /swagger-ui/ and /swagger/ in production: 404."""
-        self.assertEqual(404, self.client.get("/swagger-ui/").status_code)
-        self.assertEqual(404, self.client.get("/swagger/").status_code)
+        """11.6 GET /swagger-ui/, /swagger/ and the static files in production: 404."""
+        for url in (
+            "/swagger-ui/",
+            "/swagger/",
+            "/flask-apispec/static/swagger-ui-bundle.js",
+        ):
+            response = self.client.get(url)
+            self.assertEqual(404, response.status_code, url)
+            self.assertEqual(STRICT_CSP, response.headers["Content-Security-Policy"], url)
 
 
 class TestUatDocsOn(CommonSetup):
     config_overrides = {"DOCS_ENABLED": 1}
 
     def test_uat_11_7_docs_enabled(self):
-        """11.7 With CORNFLOW_DOCS_ENABLED=1 the documentation answers again."""
-        self.assertEqual(200, self.client.get("/swagger-ui/").status_code)
-        self.assertEqual(200, self.client.get("/swagger/").status_code)
+        """11.7 With CORNFLOW_DOCS_ENABLED=1 the documentation answers again, with the CSP of Swagger."""
+        page = self.client.get("/swagger-ui/")
+        schema = self.client.get("/swagger/")
+        self.assertEqual(200, page.status_code)
+        self.assertEqual(200, schema.status_code)
+        inline_scripts = parse_page(page.get_data(as_text=True)).inline_scripts
+        self.assertEqual(
+            expected_page_csp(inline_scripts), page.headers["Content-Security-Policy"]
+        )
+        self.assertEqual(SWAGGER_CSP_WITHOUT_HASH, schema.headers["Content-Security-Policy"])
 
 
 class TestUatUi(CommonSetup):

@@ -1,7 +1,7 @@
 """
 Unit tests for the behaviour of the BI token at each security level: issuing
 (with or without an expiration date), rejection of the tokens without "exp"
-at level 3, the CLI commands that issue them and their help texts.
+at level 3, the CLI command that issues them (users bi_token) and its help text.
 """
 
 import os
@@ -16,9 +16,8 @@ from flask import current_app, request
 from cornflow.app import create_app
 from cornflow.cli import cli
 from cornflow.config import app_config
-from cornflow.models import UserModel, UserRoleModel
 from cornflow.shared.authentication.auth import BIAuth
-from cornflow.shared.const import INTERNAL_TOKEN_ISSUER, SERVICE_ROLE
+from cornflow.shared.const import INTERNAL_TOKEN_ISSUER
 from cornflow.shared.exceptions import (
     ConfigurationError,
     InvalidCredentials,
@@ -31,7 +30,6 @@ from cornflow.tests.unit.test_invalid_token_response import (
     CHALLENGE_HEADER,
     MSG_BI_EXPIRED,
     MSG_BI_INVALID,
-    STRONG_PASSWORD,
     TokenSupport,
     auth_header,
 )
@@ -68,15 +66,6 @@ class BITokenLevelCases:
             super().setUp()
             # Read once: creating another app in a test detaches the instance
             self.user_id = self.user.id
-            service = UserModel(
-                data={
-                    "username": "svc_bi",
-                    "email": "svc_bi@test.com",
-                    "password": STRONG_PASSWORD,
-                }
-            )
-            service.save()
-            UserRoleModel({"user_id": service.id, "role_id": SERVICE_ROLE}).save()
 
         # -- helpers -----------------------------------------------------
 
@@ -225,25 +214,6 @@ class BITokenLevelCases:
             self.assert_expiry(self.claims_of(token), self.default_days)
             self.assertEqual("ana", BIAuth.decode_token(token)["sub"])
 
-        def test_cli_create_token(self):
-            result = self.run_cli(
-                [
-                    "users",
-                    "create",
-                    "token",
-                    "-i",
-                    str(self.user.id),
-                    "-u",
-                    "svc_bi",
-                    "-p",
-                    STRONG_PASSWORD,
-                ]
-            )
-            self.assertEqual(0, result.exit_code, result.output)
-            token = last_line(result.output)
-            self.assert_expiry(self.claims_of(token), self.default_days)
-            self.assertEqual("ana", BIAuth.decode_token(token)["sub"])
-
         def test_cli_bi_token_with_operator_duration(self):
             result = self.run_cli(
                 ["users", "bi_token", "-u", "ana"], BI_TOKEN_DURATION_DAYS=30
@@ -323,15 +293,6 @@ class TestBITokenCliHelp(unittest.TestCase):
             "does not expire when BI_TOKEN_DURATION_DAYS is 0",
             "[DEPRECATED]",
             "read-only personal API keys",
-        ):
-            self.assertIn(expected, text)
-        self.assertNotIn("never", text.lower())
-
-    def test_create_token_help(self):
-        text = self.help_text("users", "create", "token")
-        for expected in (
-            "expires after BI_TOKEN_DURATION_DAYS days",
-            "does not expire when BI_TOKEN_DURATION_DAYS is 0",
         ):
             self.assertIn(expected, text)
         self.assertNotIn("never", text.lower())

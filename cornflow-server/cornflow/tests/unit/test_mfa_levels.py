@@ -64,6 +64,7 @@ ROLE_STEPUP_ERROR = (
     "A valid two-factor authentication code is required to grant a platform role"
 )
 RESET_MESSAGE = "The two-factor authentication has been reset"
+API_KEY_REVOKED_ERROR = "The API key has been revoked, please generate a new one"
 JSON_HEADER = {"Content-Type": "application/json"}
 # Level 3 without MFA enrollment: the three dependants must be off too
 LEVEL3_WITHOUT_ENROLLMENT = {
@@ -553,6 +554,43 @@ class _MfaResetCases:
                 self.assertEqual(200, response.status_code, response.json)
                 self.assertFalse(self.reload(ana.id).mfa_enabled)
                 self.assertEqual(401, self.get_user_info(t_ana, ana.id).status_code)
+
+    def test_reset_revokes_api_key_in_rotation_grace(self):
+        for mode in ("self", "admin"):
+            with self.subTest(reset_by=mode):
+                ana = self.create_user(f"ana_{mode}")
+                self.enable_mfa(ana)
+                token = self.session_token(ana)
+                first = self.generate_api_key(token)
+                self.assertEqual(201, first.status_code, first.json)
+                second = self.generate_api_key(token)
+                self.assertEqual(201, second.status_code, second.json)
+                keys = (first.json["api_key"], second.json["api_key"])
+                # Default grace window (60 minutes): both keys are valid
+                for key in keys:
+                    self.assertEqual(200, self.get_user_info(key, ana.id).status_code)
+                before = self.reload(ana.id)
+                version = before.api_key_version
+                self.assertIsNotNone(before.api_key_grace_until)
+
+                actor_token = token
+                if mode == "admin":
+                    actor_token = self.session_token(
+                        self.create_user("cfadmin_r", ADMIN_ROLE)
+                    )
+                response = self.delete_mfa(actor_token, ana.id)
+                self.assertEqual(200, response.status_code, response.json)
+
+                for key in keys:
+                    response = self.get_user_info(key, ana.id)
+                    self.assertEqual(401, response.status_code, response.json)
+                    self.assertIn("WWW-Authenticate", response.headers)
+                    self.assertEqual(API_KEY_REVOKED_ERROR, response.json["error"])
+                after = self.reload(ana.id)
+                self.assertIsNone(after.api_key_previous_version)
+                self.assertIsNone(after.api_key_grace_until)
+                self.assertIsNone(after.api_key_issued_at)
+                self.assertGreater(after.api_key_version, version)
 
     def test_other_user_can_not_reset(self):
         ana = self.create_user("ana")

@@ -63,6 +63,8 @@ from cornflow.tests.uat_hardening_support import (
 )
 
 REFRESH_URL = USER_URL.rsplit("/user/", 1)[0] + "/token/refresh/"
+API_KEY_URL = USER_URL + "api-key/"
+API_KEY_REVOKED_MESSAGE = "The API key has been revoked, please generate a new one"
 MIGRATIONS_DIR = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), "..", "..", "migrations"
 )
@@ -523,13 +525,30 @@ class MfaTests(UatTestCase):
         self.assertTrue(control.json.get("mfa_required"))
         self.assertNotIn("token", control.json)
 
+    def new_api_key(self, token, username):
+        """Generates a personal API key; the TOTP code is only checked when API_KEY_STEPUP_TOTP=1."""
+        response = self.client.post(
+            API_KEY_URL,
+            data=json.dumps({"totp_code": self.totp_now(username)}),
+            headers=auth_header(token),
+        )
+        self.assertEqual(201, response.status_code, response.json)
+        return response.json["api_key"]
+
     def test_uat_2_8_admin_resets_mfa_of_another_user(self):
-        """2.8 An admin resets the MFA of another user: re-enroll, sessions and keys revoked."""
+        """2.8 An admin resets the MFA of another user: re-enroll, sessions and keys (also the one in its rotation grace) revoked."""
         self.make_user("cfadmin", [ADMIN_ROLE])
         admin_token = self.token_of("cfadmin")
         verify = self.enrolled("victim")
         victim_id = UserModel.get_one_user_by_username("victim").id
         old_session = self.login("victim", totp_code=self.totp_now("victim")).json
+        # The victim renews its API key: the superseded one stays valid during
+        # the rotation grace window
+        first_key = self.new_api_key(old_session["token"], "victim")
+        second_key = self.new_api_key(old_session["token"], "victim")
+        for key in (first_key, second_key):
+            response = self.client.get(f"{USER_URL}{victim_id}/", headers=auth_header(key))
+            self.assertEqual(200, response.status_code, response.json)
         key_version = UserModel.get_one_user_by_username("victim").api_key_version or 0
 
         response = self.client.delete(
@@ -541,6 +560,15 @@ class MfaTests(UatTestCase):
         victim = UserModel.get_one_user_by_username("victim")
         self.assertFalse(victim.mfa_enabled)
         self.assertEqual(key_version + 1, victim.api_key_version)
+        self.assertIsNone(victim.api_key_previous_version)
+        self.assertIsNone(victim.api_key_grace_until)
+        self.assertIsNone(victim.api_key_issued_at)
+        # Both keys are revoked, also the one still in its grace window
+        for key in (first_key, second_key):
+            self.assert_invalid_token(
+                self.client.get(f"{USER_URL}{victim_id}/", headers=auth_header(key)),
+                API_KEY_REVOKED_MESSAGE,
+            )
         # The sessions that existed are no longer valid
         stale = self.client.get(
             f"{USER_URL}{victim_id}/", headers=auth_header(old_session["token"])

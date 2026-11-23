@@ -369,10 +369,12 @@ def create_app(env_name="development", dataconn=None):
 
     _register_legacy_routes(app, resources, alarms_resources, auth_type)
 
-    # The interactive API docs (Swagger UI) are registered only when enabled.
-    # They are off by default in production so the deny-by-default CSP holds
-    # and the OpenAPI schema is not exposed. Only the Blueprint routes are
-    # documented; the legacy aliases are not duplicated in the schema.
+    # The interactive API docs (Swagger UI) are registered only when enabled
+    # (DOCS_ENABLED: on by default at security levels 1 and 2, off at level 3).
+    # Their routes get a Content-Security-Policy of their own that lets the
+    # Swagger UI load (see cornflow.shared.security); the rest of the API keeps
+    # the strict one. Only the Blueprint routes are documented; the legacy
+    # aliases are not duplicated in the schema.
     if int(app.config.get("DOCS_ENABLED", 1)):
         docs = FlaskApiSpec(app)
         for res in resources:

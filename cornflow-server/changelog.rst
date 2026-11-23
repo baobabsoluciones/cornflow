@@ -6,13 +6,14 @@ version 1.4.0rc1
     - Security levels
         New variable ``CORNFLOW_SECURITY_LEVEL`` (1, 2 or 3; 1 by default) that sets the default value
         of every security setting. Level 1 behaves as version 1.3.9, so upgrading needs no change in
-        deployments or clients (except the 401 answer to invalid tokens described below); level 2 adds
-        the password policy, one-time passwords, account lockout after 5 failed logins, a mandatory
-        secret key and 8-hour sessions; level 3 adds mandatory two-factor authentication, renewable
-        sessions, password rotation, user sign-up restricted to platform administrators, BI tokens that
-        expire after 90 days, closed CORS, Swagger off and HSTS on, whatever ``FLASK_ENV`` is. An invalid
-        level stops cornflow from starting. The effective level and the variables that change its
-        defaults are logged at startup; the level is not exposed through the API.
+        deployments or clients (except the 401 answer to invalid tokens and the removal of the
+        ``cornflow users create token`` command, both described below); level 2 adds the password
+        policy, one-time passwords, account lockout after 5 failed logins, a mandatory secret key and
+        8-hour sessions; level 3 adds mandatory two-factor authentication, renewable sessions, password
+        rotation, user sign-up restricted to platform administrators, BI tokens that expire after 90
+        days, closed CORS, Swagger off and HSTS on, whatever ``FLASK_ENV`` is. An invalid level stops
+        cornflow from starting. The effective level and the variables that change its defaults are
+        logged at startup; the level is not exposed through the API.
 
     - Settings by level
         Every security setting keeps its own variable, which overrides the level default within the
@@ -60,6 +61,22 @@ version 1.4.0rc1
         ``SECRET_BI_KEY`` in a Secret that is kept across upgrades (or uses an existing one with
         ``cornflow.keys.existingSecret``), no longer sets ``SECRET_KEY``, adds
         ``CORNFLOW_SECURITY_LEVEL`` and requires Helm 3.5 or later.
+
+    - BI token command
+        Breaking change: the ``cornflow users create token`` command has been removed. Use
+        ``cornflow users bi_token -u <username>`` or, better, a read-only personal API key
+        (``cornflow users api_key -u <username> --read-only``).
+
+    - Two-factor reset
+        Resetting the two-factor authentication of a user (``DELETE /user/<id>/mfa/``) also revokes
+        the personal API key superseded by the last rotation that is still in its grace window, as
+        the account lock does.
+
+    - Interactive API docs
+        With ``CORNFLOW_DOCS_ENABLED=1`` (the default at levels 1 and 2) the routes of the Swagger UI
+        (the page, its static files and the OpenAPI schema) get a Content-Security-Policy of their
+        own that lets the interface load and work in the browser, with no external resources. The
+        rest of the API keeps the strict policy, or ``CONTENT_SECURITY_POLICY`` if it is set.
 
 version 1.3.5
 --------------
