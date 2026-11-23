@@ -37,8 +37,8 @@ kubectl create secret generic cornflow-secrets \
 
 ```bash
 kubectl create secret generic cornflow-keys \
-  --from-literal=FERNET_KEY="$(python -c 'import secrets; print(secrets.token_hex(32))')" \
-  --from-literal=SECRET_BI_KEY="$(python -c 'import secrets; print(secrets.token_hex(32))')"
+  --from-literal=FERNET_KEY="$(python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())')" \
+  --from-literal=SECRET_BI_KEY="$(python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())')"
 ```
 
 ```yaml

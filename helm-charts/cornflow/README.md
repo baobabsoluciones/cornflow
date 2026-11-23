@@ -196,8 +196,8 @@ kubectl get secret my-cornflow-cornflow-keys -o yaml > cornflow-keys-backup.yaml
 
 ```bash
 kubectl create secret generic my-cornflow-keys \
-  --from-literal=FERNET_KEY="$(python -c 'import secrets; print(secrets.token_hex(32))')" \
-  --from-literal=SECRET_BI_KEY="$(python -c 'import secrets; print(secrets.token_hex(32))')"
+  --from-literal=FERNET_KEY="$(python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())')" \
+  --from-literal=SECRET_BI_KEY="$(python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())')"
 
 helm install my-cornflow ./helm-charts/cornflow --set cornflow.keys.existingSecret=my-cornflow-keys
 ```

@@ -18,6 +18,7 @@ cornflow.shared.secret_keys is imported lazily (through ``sk``) so that a
 missing module only makes the tests that use it fail.
 """
 
+import base64
 import contextlib
 import copy
 import importlib
@@ -89,6 +90,11 @@ KEY_VARS = (
 )
 # Words that identify the messages about the secret keys
 KEY_MESSAGE_MARKERS = ("secret key", "FERNET_KEY", "SECRET_TOKEN_KEY", "SECRET_BI_KEY")
+# The command that the key messages suggest, and the code that it runs
+FERNET_KEY_CODE = (
+    "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+)
+FERNET_KEY_COMMAND = f'python -c "{FERNET_KEY_CODE}"'
 
 assert KEY_A != KEY_B and len(KEY_A) == len(BI_KEY) == 44
 assert (len(SHORT), len(L31), len(L32), len(BI_23)) == (20, 31, 32, 23)
@@ -639,6 +645,105 @@ class TestCheckSecretKeys(KeyTestCase):
         self.assertIn("ana", sk.cli_api_key_random_key_warning("ana"))
         self.assertIn("FERNET_KEY", sk.cli_api_key_random_key_warning("ana"))
         self.assertIn("CORNFLOW_EPHEMERAL_SECRET_KEY", sk.EPHEMERAL_KEY_SHARED_INFO)
+
+
+class TestGenerateKeyHint(KeyTestCase):
+    """The command that the messages suggest to generate a key."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        # The code of the command, not GENERATE_KEY_HINT: the generated key
+        # tests do not depend on the text of the constant.
+        cls.key, cls.bi = (
+            subprocess.run(
+                [sys.executable, "-I", "-c", FERNET_KEY_CODE],
+                capture_output=True,
+                text=True,
+                timeout=60,
+                check=True,
+            ).stdout.strip()
+            for _ in range(2)
+        )
+
+    def test_hint_is_the_fernet_command(self):
+        self.assertEqual(FERNET_KEY_COMMAND, sk.GENERATE_KEY_HINT)
+        self.assertIn("Fernet.generate_key", sk.GENERATE_KEY_HINT)
+        self.assertNotIn("token_hex", sk.GENERATE_KEY_HINT)
+
+    def test_key_messages_suggest_the_fernet_command(self):
+        messages = {
+            "missing_key_error(2)": sk.missing_key_error(2),
+            "missing_key_error(3)": sk.missing_key_error(3),
+            "short_key_error(2)": sk.short_key_error(2, "FERNET_KEY"),
+            "short_key_error(3)": sk.short_key_error(3, "SECRET_KEY"),
+            "random_key_warning(False)": sk.random_key_warning(False),
+            "random_key_warning(True)": sk.random_key_warning(True),
+            "short_key_warning(FERNET_KEY)": sk.short_key_warning("FERNET_KEY"),
+            "short_key_warning(SECRET_KEY)": sk.short_key_warning("SECRET_KEY"),
+            "short_key_warning(SECRET_TOKEN_KEY)": sk.short_key_warning(
+                "SECRET_TOKEN_KEY"
+            ),
+            "bi_key_short_warning()": sk.bi_key_short_warning(),
+            "bi_key_short_error(2)": sk.bi_key_short_error(2),
+            "bi_key_short_error(3)": sk.bi_key_short_error(3),
+        }
+        for name, message in messages.items():
+            with self.subTest(message=name):
+                self.assertEqual(1, message.count(FERNET_KEY_COMMAND))
+                self.assertNotIn("token_hex", message)
+                self.assertNoKeyValue(message)
+
+    def test_startup_messages_suggest_the_fernet_command(self):
+        exc, _ = start_fails(self, 2, {})
+        self.assertIn(FERNET_KEY_COMMAND, exc.error)
+        self.assertNotIn("token_hex", exc.error)
+        _, handler = start(1, {})
+        lines = key_lines(handler)
+        self.assertTrue(any(FERNET_KEY_COMMAND in line for line in lines), lines)
+        for line in lines:
+            self.assertNotIn("token_hex", line)
+
+    def test_generated_key_is_a_fernet_key_of_32_bytes(self):
+        for key in (self.key, self.bi):
+            with self.subTest(key_length=len(key)):
+                self.assertRegex(key, r"^[A-Za-z0-9_-]{43}=$")
+                self.assertEqual(44, len(key))
+                self.assertEqual(32, len(base64.urlsafe_b64decode(key)))
+                self.assertGreaterEqual(
+                    sk.key_length(key), sk.MINIMUM_SECRET_KEY_LENGTH
+                )
+                fernet = Fernet(key.encode())
+                self.assertEqual(b"cornflow", fernet.decrypt(fernet.encrypt(b"cornflow")))
+        self.assertNotEqual(self.key, self.bi)
+
+    def test_generated_key_is_accepted_at_every_level(self):
+        key, bi = self.key, self.bi
+        for level in LEVELS:
+            with self.subTest(level=level):
+                resolved = sk.resolve_secret_keys(
+                    {"FERNET_KEY": key, "SECRET_BI_KEY": bi}, level
+                )
+                self.assertEqual("FERNET_KEY", resolved.source)
+                self.assertEqual(key, resolved.token_key)
+                self.assertIs(False, resolved.keys_differ)
+                self.assertEqual(
+                    ((), ()),
+                    tuple(
+                        tuple(x)
+                        for x in sk.check_secret_keys(
+                            level=level,
+                            token_key=key,
+                            source="FERNET_KEY",
+                            keys_differ=False,
+                            bi_key=bi,
+                            mfa_enabled=False,
+                        )
+                    ),
+                )
+                app, handler = start(level, {"FERNET_KEY": key, "SECRET_BI_KEY": bi})
+                self.assertEqual([], key_lines(handler))
+                self.assertEqual(key, app.config["SECRET_TOKEN_KEY"])
 
 
 # ---------------------------------------------------------------------------

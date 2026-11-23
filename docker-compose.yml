@@ -89,7 +89,7 @@ x-cornflow-common: &cornflow-common
   #  context: ./cornflow-server
   environment: &cornflow-common-env
     # Development-only keys. Never use them outside local development: set your own
-    # keys of at least 32 bytes, e.g. python -c "import secrets; print(secrets.token_hex(32))".
+    # keys of at least 32 bytes, e.g. python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())".
     # FERNET_KEY signs the sessions and API keys and encrypts the TOTP secrets of MFA:
     # changing it invalidates all of them. It takes precedence over SECRET_KEY.
     FERNET_KEY: "GkaSW-plxVw3k4b07Dk3yPeaUyKhO3R0qj-12LXNkz4="

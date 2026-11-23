@@ -1,82 +1,332 @@
-version 1.4.0rc1
-----------------
+version 1.4.0
+--------------
 - released: pending
-- description: Security levels and secret key handling
+- description: Security hardening with three security levels, plugins and a fixed secret key
 - changelog:
+    - Upgrading from version 1.3.9
+        This version needs three database migrations (``b7a1c9d807e5``, ``c3f2a1b4e5d6`` and
+        ``d4e8b2c6f109``), which ``cornflow service init`` applies at startup: new columns in the
+        ``users`` table and the new tables ``user_password_history``, ``mfa_backup_codes`` and
+        ``session_tokens``. At the default security level (1) cornflow behaves as version 1.3.9 for
+        sessions, passwords, CORS, Swagger, HSTS, BI tokens and user sign-up. The changes that can
+        affect a deployment or a client of version 1.3.9 start with "Breaking change" in the topics
+        below. Set ``FERNET_KEY`` to a fixed value (see "Secret key"), and read "Raising the security
+        level" in the access control documentation before moving to level 2 or 3.
+
     - Security levels
         New variable ``CORNFLOW_SECURITY_LEVEL`` (1, 2 or 3; 1 by default) that sets the default value
-        of every security setting. Level 1 behaves as version 1.3.9, so upgrading needs no change in
-        deployments or clients (except the 401 answer to invalid tokens and the removal of the
-        ``cornflow users create token`` command, both described below); level 2 adds the password
-        policy, one-time passwords, account lockout after 5 failed logins, a mandatory secret key and
+        of every security setting. The levels add up: level 1 behaves as version 1.3.9 for sessions,
+        passwords, CORS, Swagger, HSTS, BI tokens and user sign-up; level 2 adds the password policy,
+        one-time passwords, account lockout after 5 failed logins, user sign-up restricted to platform
+        administrators (``SIGNUP_ACTIVATED=3``), a mandatory secret key of at least 32 bytes and
         8-hour sessions; level 3 adds mandatory two-factor authentication, renewable sessions, password
-        rotation, user sign-up restricted to platform administrators, BI tokens that expire after 90
-        days, closed CORS, Swagger off and HSTS on, whatever ``FLASK_ENV`` is. An invalid level stops
-        cornflow from starting. The effective level and the variables that change its defaults are
-        logged at startup; the level is not exposed through the API.
+        rotation, BI tokens that expire after 90 days, closed CORS, Swagger off and HSTS on, whatever
+        ``FLASK_ENV`` is. From level 2 client administrators no longer manage roles, permissions,
+        actions and API views, and at level 3 they can no longer unlock accounts. An invalid level
+        stops cornflow from starting. The effective level and the variables that change its defaults
+        are logged at startup; the level is not exposed through the API.
 
     - Settings by level
         Every security setting keeps its own variable, which overrides the level default within the
         limits of the level. A value outside the limits is replaced by the limit, with a warning in the
         log; a 0 that turns off a control the level requires (``LOGIN_MAX_ATTEMPTS`` at levels 2 and 3,
-        ``BI_TOKEN_DURATION_DAYS`` at level 3) stops cornflow from starting. ``BI_TOKEN_DURATION_DAYS=0``
-        issues BI tokens without expiration date. ``CORS_ORIGINS``, ``CORNFLOW_DOCS_ENABLED`` and
-        ``HSTS_ENABLED`` no longer depend on ``FLASK_ENV``.
+        ``BI_TOKEN_DURATION_DAYS`` at level 3) stops cornflow from starting. ``CORS_ORIGINS``,
+        ``CORNFLOW_DOCS_ENABLED`` and ``HSTS_ENABLED`` no longer depend on ``FLASK_ENV``, and
+        ``cornflow service init`` no longer sets ``SIGNUP_ACTIVATED``, so the level default applies.
+        ``cornflow service init`` exits with the reason, before running the migrations or creating any
+        user, when the security configuration is not valid.
 
-    - Two-factor enrollment
-        New variable ``MFA_ENABLED`` (0 at levels 1 and 2, 1 at level 3). With ``MFA_ENABLED=0``,
-        ``/mfa/setup/`` and ``/mfa/verify/`` answer 501 and users who already enrolled keep using their
-        second factor. ``MFA_REQUIRED``, ``API_KEY_STEPUP_TOTP`` and ``PLATFORM_ROLE_STEPUP_TOTP`` set to
-        1 need ``MFA_ENABLED=1``, or cornflow does not start.
+    - Password policy, rotation and one-time passwords
+        At levels 2 and 3 a password must have at least 12 characters, uppercase and lowercase letters,
+        a number and a special character, no spaces, no sequence of 6 or more digits and no personal
+        data, and reach a zxcvbn strength score of 3; the last 10 passwords can not be reused, users
+        send ``current_password`` to change their own password and the new one can not be too similar
+        to it (``PWD_MIN_LENGTH``, ``PWD_MIN_ZXCVBN_SCORE``, ``PWD_HISTORY_SIZE`` and
+        ``PWD_MAX_SIMILARITY``). Level 1 keeps the rules of version 1.3.9. From level 2 the passwords
+        set by an administrator (also at sign-up), the temporary password of the recovery and the users
+        flagged by the migration or created with the new ``--force-password-change`` option of
+        ``cornflow users create`` must be changed at the next login: until then the other endpoints
+        answer 403 with ``error_code: password_rotation``. At level 3 (``PWD_ROTATION_ENFORCE=1``) a
+        password older than ``PWD_ROTATION_TIME`` days (120) can only be changed; at levels 1 and 2 it
+        is only reported with ``change_password`` in the login response, as in version 1.3.9.
 
-    - Secret key
-        The secret key comes from ``FERNET_KEY`` and, if it is not set, from ``SECRET_KEY``. An empty
-        variable counts as unset, and a warning is logged when both are set with different values. The
-        key is resolved in the configuration, so the server and the CLI sign with the same one. Levels 2
-        and 3 do not start without a key of at least 32 bytes; at level 1 without a key, cornflow uses a
-        random key generated once per start and shared by all the gunicorn workers, with a warning.
-        ``cornflow service init`` no longer writes ``SECRET_KEY`` (it used to fill it with ``FERNET_KEY``
-        or with a new random key on every start) and no longer sets ``SIGNUP_ACTIVATED``.
+    - Two-factor authentication
+        Internal users can add a second factor based on TOTP (RFC 6238), compatible with any
+        authenticator app: ``POST /mfa/setup/`` returns the secret and the provisioning URI, and
+        ``POST /mfa/verify/`` activates it and returns one-time backup codes. The login then answers
+        ``mfa_required`` until it gets ``totp_code`` (a TOTP code or an unused backup code), and a code
+        can not be used twice. The secrets are stored encrypted with a key derived from the secret key.
+        ``DELETE /user/<id>/mfa/`` (the user or an administrator) removes the second factor and revokes
+        the sessions and the personal API keys of the user, including the key superseded by the last
+        rotation that is still in its grace window. New variable ``MFA_ENABLED`` (0 at levels 1 and 2,
+        1 at level 3): with ``MFA_ENABLED=0``, ``/mfa/setup/`` and ``/mfa/verify/`` answer 501 and users
+        who already enrolled keep using their second factor. With ``MFA_REQUIRED=1`` (level 3) every
+        internal user except service users must enroll at the next login, which returns
+        ``mfa_setup_required`` and a short-lived enrollment token. ``MFA_REQUIRED``,
+        ``API_KEY_STEPUP_TOTP`` and ``PLATFORM_ROLE_STEPUP_TOTP`` set to 1 need ``MFA_ENABLED=1``, or
+        cornflow does not start. Service users and LDAP and OpenID users are exempt.
 
-    - Invalid tokens
-        At every level, an expired token, a token with a wrong signature or format (also from OpenID
-        Connect), a revoked session or API key, the token of a user that no longer exists and an expired
-        or invalid BI token answer 401 with the header ``WWW-Authenticate: Bearer error="invalid_token"``.
-        Several of these cases answered 400 in version 1.3.9. Requests without a token, or with a header
-        that does not follow ``Bearer <token>``, still answer 400.
+    - Account lockout
+        After ``LOGIN_MAX_ATTEMPTS`` consecutive failed logins (wrong password or wrong second-factor
+        code) the account is locked until someone unlocks it: 0 at level 1 (no lockout, as in version
+        1.3.9) and 5 at levels 2 and 3, where it must be between 1 and 10. The lock revokes the sessions
+        and the personal API keys of the user. A locked account gets 403 with
+        ``error_code: account_locked`` only when the password is correct. Platform administrators unlock
+        any account with ``PUT /user/<id>/unlock/`` and, at levels 1 and 2, client administrators unlock
+        the users without a platform role; ``cornflow users unlock -u <username>`` works at every level.
+        Service users are exempt.
 
-    - Rate limits
-        The per-IP limit of login, token refresh and logout only counts failed responses, so successful
-        logins (also those of the Airflow tasks) no longer use it up. Password recovery and reset still
-        count every request.
+    - Sessions
+        Tokens carry a version checked on every request, so a password change (also your own, which
+        requires logging in again), an account lock or a two-factor reset closes all the sessions of
+        the user. With ``REFRESH_TOKEN_ENABLED=1`` (the default at level 3) the login returns a short
+        access token (``ACCESS_TOKEN_DURATION_MINUTES``, 15) and a refresh token that only works on
+        ``POST /token/refresh/``, which rotates it. A session is closed after
+        ``REFRESH_TOKEN_INACTIVITY_MINUTES`` (30) without a refresh and after
+        ``REFRESH_TOKEN_ABSOLUTE_HOURS`` (12) in any case, and cornflow logs a warning at startup when
+        these windows are inconsistent. ``POST /logout/`` closes a session, and the access tokens of a
+        closed session stop working at once. Reusing a refresh token that has already been rotated
+        closes the session and emits the audit event ``session.reuse_detected``. ``cornflow sessions
+        purge`` deletes the expired and revoked sessions. At levels 1 and 2 the login returns a single
+        token of ``TOKEN_DURATION`` hours (24 at level 1, as in version 1.3.9, and 8 at level 2).
+        Service users always get a single token. The login response also returns ``last_login``, the
+        date of the previous login.
 
-    - Default passwords
-        ``cornflow service init`` and the Airflow initialization script go back to the default passwords
-        of version 1.3.9 for the admin and service users. They do not comply with the password policy
-        of levels 2 and 3, where ``CORNFLOW_ADMIN_PWD`` and ``CORNFLOW_SERVICE_PWD`` must be set.
+    - Personal API keys
+        A personal API key is a long-lived credential (``API_KEY_DURATION_DAYS``, 365) that every
+        endpoint accepts instead of a session token, meant for unattended processes. It is generated
+        with ``POST /user/api-key/`` from a full session (with a fresh TOTP code when the user has
+        two-factor authentication and ``API_KEY_STEPUP_TOTP=1``, the default at level 3) or with
+        ``cornflow users api_key -u <username>``, and revoked with ``DELETE /user/api-key/``. Each user
+        has one active key: a new key replaces the previous one, which keeps working for
+        ``API_KEY_ROTATION_GRACE_MINUTES`` (60). A read-only key (``"scope": "read"``, or
+        ``--read-only`` in the CLI) is refused on any request other than GET, HEAD and OPTIONS. A key
+        can not be used to change passwords, two-factor authentication, API keys, users, roles or
+        permissions. The account lock and the two-factor reset revoke the keys; a password change does
+        not. ``cornflow tokens notify-expiry``, meant to run once a day, emails the owner and the
+        platform administrators when a key is about to expire (``TOKEN_EXPIRY_NOTIFICATION_DAYS``,
+        ``30,7,3,2,1``). ``PERSONAL_TOKEN_ENABLED=0`` turns off the endpoint (501). In Airflow,
+        ``connect_to_cornflow`` uses the key in ``CORNFLOW_SERVICE_API_KEY``, when it is set, instead
+        of logging in with the service user.
 
-    - Docker and Helm
-        The docker-compose files set a development-only ``FERNET_KEY`` and ``SECRET_BI_KEY`` and include
-        ``CORNFLOW_SECURITY_LEVEL`` commented out. The Helm chart generates ``FERNET_KEY`` and
-        ``SECRET_BI_KEY`` in a Secret that is kept across upgrades (or uses an existing one with
-        ``cornflow.keys.existingSecret``), no longer sets ``SECRET_KEY``, adds
-        ``CORNFLOW_SECURITY_LEVEL`` and requires Helm 3.5 or later.
+    - BI tokens
+        ``BI_TOKEN_DURATION_DAYS`` sets how long a BI token lasts: 0 at levels 1 and 2, which issues
+        tokens without expiration date as in version 1.3.9, and 90 days at level 3 (between 1 and 365),
+        where a BI token without expiration date answers 401. BI tokens are issued with
+        ``cornflow users bi_token -u <username>``, deprecated together with the BI tokens in favour of
+        the read-only personal API keys, which can be revoked one by one and get expiry warnings, while
+        a BI token can only be invalidated by changing ``SECRET_BI_KEY``.
 
-    - BI token command
         Breaking change: the ``cornflow users create token`` command has been removed. Use
         ``cornflow users bi_token -u <username>`` or, better, a read-only personal API key
         (``cornflow users api_key -u <username> --read-only``).
 
-    - Two-factor reset
-        Resetting the two-factor authentication of a user (``DELETE /user/<id>/mfa/``) also revokes
-        the personal API key superseded by the last rotation that is still in its grace window, as
-        the account lock does.
+    - Platform roles and data isolation
+        New roles for the platform operators: ``platform_viewer`` (901), ``platform_planner`` (902) and
+        ``platform_admin`` (903), with the permissions of their client counterpart. Only a platform
+        administrator grants or revokes platform roles, and granting one through the API asks for a
+        fresh TOTP code when the administrator has two-factor authentication and
+        ``PLATFORM_ROLE_STEPUP_TOTP=1`` (level 3). Create these users with
+        ``cornflow users create platform_viewer``, ``platform_planner`` or ``platform_admin``, or set
+        ``CORNFLOW_PLATFORM_ADMIN_USER``, ``CORNFLOW_PLATFORM_ADMIN_EMAIL`` and
+        ``CORNFLOW_PLATFORM_ADMIN_PWD`` before ``cornflow service init``. At levels 2 and 3 only
+        platform administrators create users through ``/signup/``, manage roles, permissions, actions
+        and API views and revoke the admin role; at level 1 client administrators keep doing it as in
+        version 1.3.9, except on the platform roles. ``POST /roles/`` accepts an optional ``id``. The
+        instances, executions and cases created by platform users are not visible to client users,
+        client administrators included (``PLATFORM_DATA_ISOLATION=0`` turns it off), in the lists and
+        by id; service users are exempt so that Airflow can solve them. An update made by a service
+        user no longer changes the owner of the object.
 
-    - Interactive API docs
-        With ``CORNFLOW_DOCS_ENABLED=1`` (the default at levels 1 and 2) the routes of the Swagger UI
-        (the page, its static files and the OpenAPI schema) get a Content-Security-Policy of their
-        own that lets the interface load and work in the browser, with no external resources. The
-        rest of the API keeps the strict policy, or ``CONTENT_SECURITY_POLICY`` if it is set.
+        Breaking change: the role ids 900 to 999 are reserved for the platform roles. Role registration
+        stops cornflow from starting if a custom role of an external application uses an id in that
+        range, or if a stored role has a platform role id with another name: move those roles to an id
+        between 5 and 899, or from 1000, before upgrading.
+
+    - Password recovery
+        With ``CORNFLOW_UI_URL`` set, the recovery email carries a single-use link to the web client
+        (``<CORNFLOW_UI_URL>/reset-password?token=...``) valid for ``PWD_RESET_TOKEN_DURATION_MINUTES``
+        (30), and the new password is set with ``PUT /user/reset-password/``. Without it the email
+        still carries a temporary password, one-time from level 2.
+
+    - Security audit log
+        Security events are written as one JSON record per line on the ``cornflow.audit`` logger,
+        separate from the application log: logins, account locks and unlocks, password changes, resets
+        and recovery requests, two-factor enrollments and resets, API keys issued, revoked and about to
+        expire, BI tokens issued, users created, roles granted and revoked and session events, from the
+        API and from the CLI. Each record carries the time, the event and the outcome and, when known,
+        the actor, the target and the source IP. ``AUDIT_LOG_ENABLED=0`` turns it off.
+
+    - Rate limits
+        Login, token refresh and logout are limited per client IP (``RATELIMIT_LOGIN``,
+        ``10 per minute``) counting only the failed responses, so successful logins (also those of the
+        Airflow tasks) never use the limit up. Password recovery and reset count every request
+        (``RATELIMIT_RECOVER``, ``5 per hour``). Over the limit the endpoint answers 429. The counters
+        are kept per process by default and cornflow logs a warning at startup: with several gunicorn
+        workers set ``RATELIMIT_STORAGE_URI`` to a shared storage (Redis is supported). Behind a reverse
+        proxy set ``RATELIMIT_TRUST_FORWARDED_FOR=1``, so that the limit counts each client IP and not
+        the proxy. ``RATELIMIT_ENABLED=0`` turns the limits off.
+
+    - Security headers, CORS and interactive API docs
+        Every response carries security headers for browsers (``X-Content-Type-Options``,
+        ``X-Frame-Options``, a deny-by-default ``Content-Security-Policy``, ``Referrer-Policy``,
+        ``Permissions-Policy``, ``Cache-Control: no-store`` and, with ``HSTS_ENABLED=1``,
+        ``Strict-Transport-Security``); the ``Server`` banner is overwritten and ``X-Powered-By`` is
+        removed. cornflow-client, Airflow and the CLI are not affected. ``SECURITY_HEADERS_ENABLED=0``
+        turns them off, and ``CONTENT_SECURITY_POLICY``, ``REFERRER_POLICY``, ``PERMISSIONS_POLICY``,
+        ``SECURITY_NO_STORE`` and the ``HSTS_*`` variables adjust them. ``CORS_ORIGINS`` is now applied:
+        ``*`` (levels 1 and 2) allows any origin, a comma-separated list restricts it and an empty value
+        (level 3) closes it. With ``CORNFLOW_DOCS_ENABLED=1`` (the default at levels 1 and 2) the routes
+        of the Swagger UI (the page, its static files and the OpenAPI schema) get a
+        Content-Security-Policy of their own that lets the interface load and work in the browser, with
+        no external resources; the rest of the API keeps the strict policy, or
+        ``CONTENT_SECURITY_POLICY`` if it is set. ``CORNFLOW_DOCS_ENABLED=0`` (level 3) removes them.
+
+    - Secret key
+        The secret key signs the sessions, the personal API keys and the temporary tokens, and encrypts
+        the two-factor secrets. ``FERNET_KEY`` is the recommended variable; ``SECRET_KEY`` is only an
+        alternative, read when ``FERNET_KEY`` is not set. An empty variable counts as unset. The key is
+        resolved in the configuration, so the server and the CLI sign with the same one. Levels 2 and 3
+        do not start without a key of at least 32 bytes; at level 1 without a key, cornflow uses a
+        random key generated once per start and shared by all the gunicorn workers, with a warning.
+        A ``SECRET_BI_KEY`` shorter than 32 bytes stops levels 2 and 3 from starting and logs a warning
+        at level 1. The documentation and the startup messages suggest generating the key with Fernet:
+        ``python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"``
+        prints 44 characters (32 random bytes) and the key is also valid for Airflow.
+
+        Breaking change: when ``FERNET_KEY`` and ``SECRET_KEY`` are both set with different values,
+        cornflow signs with ``FERNET_KEY`` and logs a warning, so a deployment that was signing with
+        ``SECRET_KEY`` (for example, started with ``flask`` instead of ``cornflow service init``)
+        closes its sessions unless both variables get the same value. ``cornflow service init`` no
+        longer writes ``SECRET_KEY`` (it used to fill it with ``FERNET_KEY`` or with a new random key
+        on every start): external applications that read ``SECRET_KEY`` on their own must have it set
+        in their environment.
+
+    - Invalid tokens
+        Breaking change: at every level, an expired token, a token with a wrong signature or format
+        (also from OpenID Connect), a revoked session or API key, the token of a user that no longer
+        exists and an expired or invalid BI token answer 401 with the header
+        ``WWW-Authenticate: Bearer error="invalid_token"``. Several of these cases answered 400 in
+        version 1.3.9; cornflow-client 1.4 accepts both. Requests without a token, or with a header
+        that does not follow ``Bearer <token>``, still answer 400.
+
+    - Error messages
+        The login and the sign-up no longer return internal exceptions to the client when the token
+        can not be generated, and the decryption error of the stored secrets no longer names the secret
+        key. A wrong password always gets the same generic error: the locked account message is only
+        shown to whoever gives the correct password.
+
+    - Plugins and routes
+        The core endpoints are registered under ``/cornflow/`` (a Flask blueprint) and the routes
+        without prefix are kept as aliases; the security checks and the rate limits apply equally to
+        both, and the OpenAPI schema only documents the ``/cornflow/`` routes. With ``EXTERNAL_APP=0``
+        cornflow loads the plugins published under the ``cornflow.plugins`` entry point group
+        (``CornflowPlugin`` in ``cornflow.shared.plugins``), which mount their routes at the root. On
+        every ``access_init`` cornflow keeps the views mounted by the plugins, calls the
+        ``register_access`` of each plugin by ``priority`` and leaves the permissions on their views as
+        their code declares them (``ROLES_WITH_ACCESS`` and ``get_custom_roles_actions``), deleting the
+        ones added by hand. With ``EXTERNAL_APP=1`` cornflow keeps working as an external application.
+
+        Breaking change: ``APPLICATION_ROOT`` now only applies with ``EXTERNAL_APP=1``, where
+        cornflow is mounted under it; in version 1.3.9 it only applied with ``EXTERNAL_APP=0``. A
+        deployment with ``EXTERNAL_APP=0`` that served cornflow under a path other than ``/`` now
+        serves it under ``/cornflow/`` and at the root.
+
+    - DAGs and executions
+        Two requests that register the same DAG permissions at the same time (for example the DAG that
+        updates the registry and a deployment) no longer fail with 500: the duplicate is discarded.
+        Saving the Airflow log of an execution no longer changes its state: ``PUT /dag/<id>/`` only
+        sets the state when the request carries one or a solution, and cornflow-client sends the error
+        state together with the log.
+
+    - Default passwords
+        ``cornflow service init`` and the Airflow initialization script keep the default passwords of
+        version 1.3.9 for the admin and service users. They do not comply with the password policy of
+        levels 2 and 3, where ``CORNFLOW_ADMIN_PWD`` and ``CORNFLOW_SERVICE_PWD`` must be set.
+
+    - Docker and Helm
+        The docker-compose files set a development-only ``FERNET_KEY`` and ``SECRET_BI_KEY``, include
+        ``CORNFLOW_SECURITY_LEVEL`` commented out and set example passwords for the admin and service
+        users that comply with the password policy; ``docker-compose.yml`` also carries
+        ``RATELIMIT_STORAGE_URI`` commented out. The Helm chart generates ``FERNET_KEY`` and
+        ``SECRET_BI_KEY`` in a Secret that is kept across upgrades (or uses an existing one with
+        ``cornflow.keys.existingSecret``), adds ``CORNFLOW_SECURITY_LEVEL`` and requires Helm 3.5 or
+        later.
+
+        Breaking change: the Helm chart no longer sets ``SECRET_KEY`` and fails to render if
+        ``cornflow.env`` sets ``FERNET_KEY``, ``SECRET_KEY`` or ``SECRET_BI_KEY``: to keep the key in
+        use, store it in a Secret and set ``cornflow.keys.existingSecret``. The example passwords of the
+        admin and service users have changed in the docker-compose files and in ``values.yaml``, and
+        existing users keep their password: a deployment that relied on the old example values must
+        set ``CORNFLOW_SERVICE_PWD`` and the password of the Airflow connection to the one in use.
+
+    - Other changes
+        The CLI connects to ``DATABASE_URL`` first, so the commands run inside the container (for
+        example ``cornflow users bi_token``) reach the same database as the server. A server UAT battery
+        of the security controls (``test_uat_hardening_*.py``) runs at each security level. New
+        dependencies: Flask-Limiter (with Redis support), pyotp and zxcvbn.
+
+version 1.3.9
+--------------
+- released: 2026-10-19
+- description: Airflow 3 support, automatic DAG permissions and security update
+- changelog:
+    - Airflow 3.2.2
+        The Airflow image is upgraded from 2.9.1 to 3.2.2. The webserver is replaced by the
+        api-server and a standalone dag-processor is now required. The Airflow client in
+        cornflow-client detects the API version (v1 or v2) and authenticates with basic auth or
+        JWT accordingly, so it keeps working against Airflow 2 deployments. Internal DAGs are
+        adapted to Airflow 3 (no ORM access from tasks, ``schedule`` instead of
+        ``schedule_interval``). A new ``airflow-k8s`` image and a Helm chart are provided.
+
+    - DAG permissions
+        Permissions are now created when a deployed DAG is registered or updated, without
+        having to run the ``register_dag_permissions`` command. With ``OPEN_DEPLOYMENT=0``,
+        admin users are granted access to every DAG along with service users. Fixed a case
+        where a single new permission was not saved.
+
+    - Security update
+        Upgrade PyJWT to 2.15.1, cryptography to 50.0.2, requests to 2.33.0 and setuptools
+        to 83.0.0.
+
+version 1.3.8
+--------------
+- released: 2026-09-25
+- description: Bug fixes
+- changelog:
+    - Bulk update and soft deleted rows
+        Resending a row that had been soft deleted through a bulk update now reactivates it: its
+        `deleted_at` is cleared and the update is applied, so the record becomes visible again on the
+        reads. Previously the row was updated in place but stayed deleted, while the call answered
+        201. If no row matches on the unique fields but the payload carries the `id` of a soft deleted
+        row, that row is reactivated instead of failing on the primary key. Models without soft delete
+        keep the previous behaviour.
+
+    - Databricks backend configuration
+        When the Databricks backend is selected, the required environment variables
+        (DATABRICKS_HOST, DATABRICKS_CLIENT_SECRET, DATABRICKS_TOKEN_ENDPOINT, DATABRICKS_EP_CLUSTERS,
+        DATABRICKS_CLIENT_ID) are validated on startup, and a clear fatal error lists the missing ones.
+        DATABRICKS_HEALTH_PATH defaults to "default path" when not set.
+
+    - Emails
+        Fixed the email body being attached twice, which made some clients render it twice or flag
+        the message as malformed.
+
+version 1.3.7
+--------------
+- released: 2026-07-10
+- description: Performance improvement
+- changelog:
+    - Improve performance of executions endpoint
+    - Add bug fix for when using click 8.4.0 with celery executor
+
+version 1.3.6
+--------------
+- released: 2026-06-25
+- description: Security update and performance improvement
+- changelog:
+    - Upgrade cryptography to 48.0.1 and PyJWT to 2.13.0
+    - Improve performance of executions endpoint
 
 version 1.3.5
 --------------

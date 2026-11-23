@@ -31,7 +31,12 @@ KEY_SOURCE_CONFIG = "config"  # set by a configuration class (Testing, external 
 CONFIG_KEY_SECRET_KEY_SOURCE = "SECRET_KEY_SOURCE"
 CONFIG_KEY_SECRET_KEYS_DIFFER = "SECRET_KEYS_DIFFER"
 
-GENERATE_KEY_HINT = 'python -c "import secrets; print(secrets.token_hex(32))"'
+# Command suggested by the key messages. It prints a Fernet key: 32 random bytes in
+# 44 URL-safe base64 characters, above the 32-byte minimum and also valid for Airflow.
+GENERATE_KEY_HINT = (
+    'python -c "from cryptography.fernet import Fernet; '
+    'print(Fernet.generate_key().decode())"'
+)
 
 _MIN_BYTES = MINIMUM_SECRET_KEY_LENGTH
 _MIN_BITS = MINIMUM_SECRET_KEY_LENGTH * 8

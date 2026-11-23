@@ -1137,9 +1137,20 @@ sign with the same key as long as the variables are set in the container
 environment. No message ever prints the value of a key.
 
 The key must have at least 32 bytes (256 bits, as required by RFC 7518 for
-HMAC-SHA256). Generate one with::
+HMAC-SHA256). ``FERNET_KEY`` is the recommended variable; ``SECRET_KEY`` is
+only an alternative, read when ``FERNET_KEY`` is not set. Generate the key
+with::
 
-    python -c "import secrets; print(secrets.token_hex(32))"
+    python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+
+The command prints a Fernet key: 44 URL-safe base64 characters that encode
+32 random bytes, so it meets the minimum of 32 bytes. A key generated this
+way is also valid for Airflow, which requires a valid Fernet key
+(``AIRFLOW__CORE__FERNET_KEY``): deployment tools that pass the same
+``FERNET_KEY`` to cornflow and to Airflow can use a single key. The command
+needs the ``cryptography`` package, a dependency of cornflow, so it works
+inside the cornflow image or in any environment where cornflow is
+installed.
 
 * **Level 1**: without a key cornflow starts with a random key and logs a
   warning. ``cornflow service init`` generates it once per start, before
