@@ -251,7 +251,8 @@ version 1.4.0
         ``RATELIMIT_STORAGE_URI`` commented out. The Helm chart generates ``FERNET_KEY`` and
         ``SECRET_BI_KEY`` in a Secret that is kept across upgrades (or uses an existing one with
         ``cornflow.keys.existingSecret``), adds ``CORNFLOW_SECURITY_LEVEL`` and requires Helm 3.5 or
-        later.
+        later. Numeric or boolean values in ``cornflow.env`` (for example ``CORNFLOW_SECURITY_LEVEL: 3``)
+        no longer prevent the chart from rendering.
 
         Breaking change: the Helm chart no longer sets ``SECRET_KEY`` and fails to render if
         ``cornflow.env`` sets ``FERNET_KEY``, ``SECRET_KEY`` or ``SECRET_BI_KEY``: to keep the key in

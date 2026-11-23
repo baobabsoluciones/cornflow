@@ -104,7 +104,7 @@ spec:
           env:
             {{- range $key, $value := .Values.cornflow.env }}
             - name: {{ $key }}
-              value: {{ $value | replace "RELEASE_NAME" $.Release.Name | quote }}
+              value: {{ $value | toString | replace "RELEASE_NAME" $.Release.Name | quote }}
             {{- end }}
             # FERNET_KEY and SECRET_BI_KEY come from the keys Secret (see cornflow.keys)
             - name: FERNET_KEY
