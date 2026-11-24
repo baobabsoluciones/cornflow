@@ -8,6 +8,9 @@ from cornflow_client.raw_cornflow_client import CornFlowApiError
 from cornflow_client.airflow import dag_utilities as du
 from unittest.mock import Mock, patch
 
+# Airflow log folders contain ":" (run_id and ts), which Windows does not allow in folder names
+SKIP_ON_WINDOWS = "Airflow log folders contain ':' in run_id and ts, not allowed on Windows"
+
 
 class DagUtilities(unittest.TestCase):
     @patch("cornflow_client.airflow.dag_utilities.CornFlow")
@@ -125,6 +128,7 @@ class DagUtilities(unittest.TestCase):
             fd.write("task started\n")
         return base, ti
 
+    @unittest.skipIf(os.name == "nt", SKIP_ON_WINDOWS)
     def test_airflow_log_of_a_failed_execution_is_saved_with_the_traceback(self):
         # a custom layout that none of the default layouts matches: only the configured template finds it
         base, ti = self._failed_task(["custom", "rostering", "2026-11-11T20:21:33+00:00", "try-1.log"])
@@ -139,6 +143,7 @@ class DagUtilities(unittest.TestCase):
         self.assertIn("KeyError: (36, 3)", payload["log_text"])
         self.assertEqual(payload["state"], -1)
 
+    @unittest.skipIf(os.name == "nt", SKIP_ON_WINDOWS)
     def test_the_default_layout_is_found_when_the_template_cannot_be_rendered(self):
         base, ti = self._failed_task(
             ["dag_id=rostering", "run_id=manual__2026-11-11T20:21:33+00:00", "task_id=rostering", "attempt=1.log"]
@@ -149,6 +154,7 @@ class DagUtilities(unittest.TestCase):
 
         self.assertIn("task started", client.raw.put_api_for_id.call_args.kwargs["payload"]["log_text"])
 
+    @unittest.skipIf(os.name == "nt", SKIP_ON_WINDOWS)
     def test_the_log_layout_of_old_airflow_versions_is_still_found(self):
         base, ti = self._failed_task(["rostering", "rostering", "2026-11-11T20:21:33+00:00", "1.log"])
         client = Mock()
