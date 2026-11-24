@@ -19,10 +19,45 @@ from cornflow.shared.const import (
     EXEC_STATE_STOPPED,
     EXEC_STATE_RUNNING,
     EXEC_STATE_QUEUED,
+    EXEC_STATE_NOT_RUN,
+    EXEC_STATE_SAVING,
+    EXEC_STATE_UNKNOWN,
     STATUS_HEALTHY,
 )
 from cornflow.tests.const import INSTANCE_PATH, CASE_PATH
 from cornflow.tests.custom_liveServer import CustomTestCaseLive
+
+# States an execution passes through before Airflow finishes it
+UNFINISHED_STATES = (
+    EXEC_STATE_QUEUED,
+    EXEC_STATE_RUNNING,
+    EXEC_STATE_NOT_RUN,
+    EXEC_STATE_SAVING,
+    EXEC_STATE_UNKNOWN,
+)
+
+
+def wait_until_finished(client, execution_id, timeout=120):
+    """Polls the execution until Airflow finishes it, instead of sleeping a fixed time."""
+    deadline = time.monotonic() + timeout
+    status = client.get_status(execution_id)
+    while status["state"] in UNFINISHED_STATES and time.monotonic() < deadline:
+        time.sleep(0.5)
+        status = client.get_status(execution_id)
+    return status
+
+
+def wait_for_checks(get_data, timeout=30):
+    """
+    Polls the data of an instance or case until its checks are written. The
+    data-check execution can report finished before its checks are saved.
+    """
+    deadline = time.monotonic() + timeout
+    data = get_data()
+    while data.get("checks") is None and time.monotonic() < deadline:
+        time.sleep(0.5)
+        data = get_data()
+    return data
 
 
 def load_file(_file):
@@ -37,22 +72,22 @@ class TestCornflowClientBasic(CustomTestCaseLive):
         self.items_to_check = ["name", "description"]
 
     def check_status_evolution(self, execution, end_state=EXEC_STATE_CORRECT):
+        """
+        The execution goes queued -> (running) -> end_state, never backwards.
+        A small solve can start and finish between two polls, so running is
+        not required to be seen; when it is seen, it is between the two.
+        """
         statuses = [execution["state"]]
-        while end_state not in statuses and len(statuses) < 100:
-            time.sleep(1)
-            status = self.client.get_status(execution["id"])
-            statuses.append(status["state"])
+        deadline = time.monotonic() + 100
+        while end_state not in statuses and time.monotonic() < deadline:
+            time.sleep(0.2)
+            statuses.append(self.client.get_status(execution["id"])["state"])
 
-        self.assertIn(EXEC_STATE_QUEUED, statuses)
-        self.assertIn(EXEC_STATE_RUNNING, statuses)
-        self.assertIn(end_state, statuses)
-
-        queued_idx = statuses.index(EXEC_STATE_QUEUED)
-        running_idx = statuses.index(EXEC_STATE_RUNNING)
-        end_state_idx = statuses.index(end_state)
-
-        self.assertLess(queued_idx, running_idx)
-        self.assertLess(running_idx, end_state_idx)
+        self.assertEqual(EXEC_STATE_QUEUED, statuses[0], statuses)
+        self.assertIn(end_state, statuses, statuses)
+        order = [EXEC_STATE_QUEUED, EXEC_STATE_RUNNING, end_state]
+        ranks = [order.index(state) for state in statuses if state in order]
+        self.assertEqual(sorted(ranks), ranks, statuses)
 
     def create_new_instance_file(self, mps_file):
         name = "test_instance1"
@@ -335,8 +370,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
 
     def test_solve_and_wait(self):
         execution = self.create_instance_and_execution()
-        time.sleep(15)
-        status = self.client.get_status(execution["id"])
+        status = wait_until_finished(self.client, execution["id"])
         results = self.client.get_results(execution["id"])
         self.assertEqual(status["state"], EXEC_STATE_CORRECT)
         self.assertEqual(results["state"], EXEC_STATE_CORRECT)
@@ -344,8 +378,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
     def test_interrupt(self):
         execution = self.create_timer_instance_and_execution(5)
         self.client.stop_execution(execution_id=execution["id"])
-        time.sleep(2)
-        status = self.client.get_status(execution["id"])
+        status = wait_until_finished(self.client, execution["id"])
         results = self.client.get_results(execution["id"])
         self.assertEqual(status["state"], EXEC_STATE_STOPPED)
         self.assertEqual(results["state"], EXEC_STATE_STOPPED)
@@ -421,8 +454,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
 
     def test_solve_and_relaunch(self):
         execution = self.create_instance_and_execution()
-        time.sleep(20)
-        status = self.client.get_status(execution["id"])
+        status = wait_until_finished(self.client, execution["id"])
         results = self.client.get_results(execution["id"])
         self.assertEqual(status["state"], EXEC_STATE_CORRECT)
         self.assertEqual(results["state"], EXEC_STATE_CORRECT)
@@ -431,8 +463,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         results = self.client.get_solution(execution["id"])
         self.assertIsNone(results["checks"])
         self.assertEqual(results["config"], config)
-        time.sleep(15)
-        status = self.client.get_status(execution["id"])
+        status = wait_until_finished(self.client, execution["id"])
         self.assertEqual(status["state"], EXEC_STATE_CORRECT)
         results = self.client.get_solution(execution["id"])
         self.assertEqual(results["checks"], dict())
@@ -464,17 +495,18 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
             status["state"] == EXEC_STATE_RUNNING
             or status["state"] == EXEC_STATE_QUEUED
         )
-        time.sleep(10)
-        status = self.client.get_status(data_check_execution["id"])
+        status = wait_until_finished(self.client, data_check_execution["id"])
         self.assertEqual(status["state"], EXEC_STATE_CORRECT)
-        response = self.client.raw.get_api_for_id(
-            api="instance", id=instance["id"], post_url="data", encoding="br"
-        ).json()
+        response = wait_for_checks(
+            lambda: self.client.raw.get_api_for_id(
+                api="instance", id=instance["id"], post_url="data", encoding="br"
+            ).json()
+        )
         self.assertIsNotNone(response["checks"])
 
     def test_check_execution(self):
         execution = self.create_instance_and_execution()
-        time.sleep(20)
+        wait_until_finished(self.client, execution["id"])
         data_check_execution = self.client.create_execution_data_check_kpis(
             execution["id"]
         )
@@ -484,8 +516,7 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
             status["state"] == EXEC_STATE_RUNNING
             or status["state"] == EXEC_STATE_QUEUED
         )
-        time.sleep(10)
-        status = self.client.get_status(data_check_execution["id"])
+        status = wait_until_finished(self.client, data_check_execution["id"])
         self.assertEqual(status["state"], EXEC_STATE_CORRECT)
 
     def test_check_case(self):
@@ -499,10 +530,11 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
             status["state"] == EXEC_STATE_RUNNING
             or status["state"] == EXEC_STATE_QUEUED
         )
-        time.sleep(10)
-        status = self.client.get_status(data_check_execution["id"])
+        status = wait_until_finished(self.client, data_check_execution["id"])
         self.assertEqual(status["state"], EXEC_STATE_CORRECT)
-        response = self.client.raw.get_api_for_id(
-            api="case", id=case["id"], post_url="data", encoding="br"
-        ).json()
+        response = wait_for_checks(
+            lambda: self.client.raw.get_api_for_id(
+                api="case", id=case["id"], post_url="data", encoding="br"
+            ).json()
+        )
         self.assertIsNotNone(response["checks"])
