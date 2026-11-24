@@ -8,6 +8,12 @@ version 1.4.0
         states (``state``), the solution status (``sol_code``), the solver status (``status_code``) and the execution
         files status it returns a list of ``{code, name, message}``. It is built from the constants of the server and
         of ``cornflow_client`` and can be read by any authenticated user, whatever their role.
+    - Pagination headers
+        ``GET /instance/``, ``GET /case/`` and ``GET /execution/`` return at most ``limit`` rows (10 by default).
+        Their responses now carry ``X-Total-Count`` (rows matching the same filters and visibility, ignoring
+        ``offset`` and ``limit``), ``X-Offset``, ``X-Limit`` and a ``Link`` header (``rel="next"`` / ``rel="prev"``),
+        also exposed through CORS. The body is unchanged (a JSON list), so existing clients keep working, but
+        clients that need every row should page instead of assuming the first page is the whole list.
 
 version 1.3.5
 --------------

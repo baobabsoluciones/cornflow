@@ -181,27 +181,23 @@ class ExecutionModel(BaseDataModel):
         return super().get_one_object(user=user, idx=idx, options=options, **kwargs)
 
     @classmethod
-    def get_all_objects(
+    def get_all_objects_query(
         cls,
         user,
         schema=None,
         creation_date_gte=None,
         creation_date_lte=None,
         checks_and_kpis=False,
-        offset=0,
-        limit=10,
     ):
         """
-        Query to get all objects from a user
+        Query with every filter of the list, before ordering and pagination. Both
+        the list and its total count are built from it so they can not drift apart.
         :param UserModel user: User object.
         :param string schema: data_schema to filter (dag)
         :param string creation_date_gte: created_at needs to be larger or equal to this
         :param string creation_date_lte: created_at needs to be smaller or equal to this
-        :param int offset: query offset for pagination
         :param bool checks_and_kpis: include checks and kpis executions
-        :param int limit: query size limit
-        :return: The objects
-        :rtype: list(:class:`BaseDataModel`)
+        :return: the filtered query
         """
         query = cls.query.options(defer(cls.data), defer(cls.checks)).filter(cls.deleted_at == None)
         # Shared with the base model so the list and the detail view can not
@@ -221,8 +217,37 @@ class ExecutionModel(BaseDataModel):
                     cls.checks_and_kpis_only.is_(None),
                 )
             )
+        # Executions that only run the data checks are not listed. Filtering here,
+        # not after paging, keeps pages full and the total equal to what is listed
+        checks_only = cls.config["checks_only"].as_boolean()
+        query = query.filter(or_(checks_only.is_(None), checks_only == false()))
 
+        return query
+
+    @classmethod
+    def get_all_objects(cls, user, offset=0, limit=10, **kwargs):
+        """
+        Query to get all objects from a user
+
+        :param int offset: query offset for pagination
+        :param int limit: query size limit
+        :param kwargs: the filters of :meth:`get_all_objects_query`
+        :return: The objects
+        :rtype: list(:class:`ExecutionModel`)
+        """
+        query = cls.get_all_objects_query(user, **kwargs)
         return query.order_by(desc(cls.created_at)).offset(offset).limit(limit).all()
+
+    @classmethod
+    def count_all_objects(cls, user, offset=None, limit=None, **kwargs):
+        """
+        Number of executions that match the filters of :meth:`get_all_objects`,
+        ignoring offset and limit.
+
+        :return: the total number of matching executions
+        :rtype: int
+        """
+        return cls.get_all_objects_query(user, **kwargs).order_by(None).count()
 
     def __repr__(self):
         """
