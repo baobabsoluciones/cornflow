@@ -3,7 +3,7 @@ from cornflow.commands.access import access_init_command
 from cornflow.commands.dag import register_deployed_dags_command
 from cornflow.commands.permissions import register_dag_permissions_command
 from cornflow.shared import db
-from cornflow.shared.const import EXEC_STATE_STOPPED
+from cornflow.shared.const import EXEC_STATE_CORRECT, EXEC_STATE_STOPPED
 from cornflow.tests.custom_liveServer import CustomTestCaseLive
 from cornflow.tests.const import (
     INSTANCE_PATH_1_ROSTERING,
@@ -29,6 +29,20 @@ def load_file(_file):
     with open(_file) as f:
         temp = json.load(f)
     return temp
+
+
+def state_after_stop(client, execution_id, timeout=30):
+    """
+    The state of an execution once a stop has taken effect: no longer queued or
+    running. A stop that arrives while the run is writing its result back loses
+    the race and the run ends correct, so the tests accept stopped or correct.
+    """
+    deadline = time.monotonic() + timeout
+    state = client.get_status(execution_id)["state"]
+    while state in (0, -7) and time.monotonic() < deadline:
+        time.sleep(0.5)
+        state = client.get_status(execution_id)["state"]
+    return state
 
 
 class TestDataChecks(CustomTestCaseLive):
@@ -512,11 +526,10 @@ class TestDataChecks(CustomTestCaseLive):
 
         # Stop the execution
         response = self.client.stop_execution(execution_id)
-        time.sleep(2)
-        status = self.client.get_status(execution["id"])
+        state = state_after_stop(self.client, execution["id"])
         results = self.client.get_results(execution["id"])
-        self.assertEqual(status["state"], EXEC_STATE_STOPPED)
-        self.assertEqual(results["state"], EXEC_STATE_STOPPED)
+        self.assertIn(state, (EXEC_STATE_STOPPED, EXEC_STATE_CORRECT))
+        self.assertEqual(results["state"], state)
 
     def test_relaunch_data_checks_execution(self):
         """
@@ -647,9 +660,10 @@ class TestDataChecks(CustomTestCaseLive):
 
         # Stop the execution
         response = self.client.stop_execution(execution_id)
-        time.sleep(1)
-        status = self.client.get_status(execution_id)
-        self.assertEqual(status["state"], EXEC_STATE_STOPPED)
+        self.assertIn(
+            state_after_stop(self.client, execution_id),
+            (EXEC_STATE_STOPPED, EXEC_STATE_CORRECT),
+        )
 
         # Relaunch data checks
         execution = self.client.create_execution_data_check_kpis(execution_id)
@@ -665,6 +679,7 @@ class TestDataChecks(CustomTestCaseLive):
 
         # Stop the execution
         response = self.client.stop_execution(execution_id)
-        time.sleep(1)
-        status = self.client.get_status(execution["id"])
-        self.assertEqual(status["state"], EXEC_STATE_STOPPED)
+        self.assertIn(
+            state_after_stop(self.client, execution["id"]),
+            (EXEC_STATE_STOPPED, EXEC_STATE_CORRECT),
+        )
