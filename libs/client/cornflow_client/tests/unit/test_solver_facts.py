@@ -87,6 +87,20 @@ class TestSolverFacts(TestCase):
         self.assertEqual(log["gap"], 0.0)
         self.assertEqual(log["nodes"], 3)
 
+    def test_gap_with_a_zero_objective(self):
+        class Proven(BaseSolver):
+            reported = dict(objective=0, best_bound=0)
+
+        class Open(BaseSolver):
+            reported = dict(objective=0, best_bound=5.0)
+
+        # objective and bound both 0: proven optimal, no gap
+        self.assertEqual(solve_log(Proven)["gap"], 0.0)
+        # a relative gap over a zero objective is undefined: left out, the facts stay
+        log = solve_log(Open)
+        self.assertNotIn("gap", log)
+        self.assertEqual(log["best_bound"], 5.0)
+
     def test_reported_gap_is_kept(self):
         class Solver(BaseSolver):
             reported = dict(objective=100.0, best_bound=90.0, gap=0.25)
