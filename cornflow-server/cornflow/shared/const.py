@@ -2,6 +2,11 @@
 In this file we import the values for different constants on cornflow server
 """
 
+from cornflow_client.constants import (
+    SOLUTION_STATUS_FEASIBLE,
+    SOLUTION_STATUS_INFEASIBLE,
+)
+
 # CORNFLOW BACKEND
 AIRFLOW_BACKEND = 1
 DATABRICKS_BACKEND = 2
@@ -354,6 +359,13 @@ EXECUTION_FILES_STATUS_MESSAGE_DICT = {
     EXECUTION_FILES_STATUS_DELETED: "The requested files have been deleted. Please wait while they are generated again.",
     EXECUTION_FILES_STATUS_NOT_UP_TO_DATE: "The requested files are not up-to-date. Please wait while they are generated again.",
     EXECUTION_FILES_STATUS_OK: "The files were generated successfully.",
+}
+
+# is there a solution? (the "sol_code" of the execution log).
+# The codes come from cornflow_client.constants (SOLUTION_STATUS_*).
+SOLUTION_STATUS_MESSAGE_DICT = {
+    SOLUTION_STATUS_INFEASIBLE: "No solution was found.",
+    SOLUTION_STATUS_FEASIBLE: "A feasible solution was found.",
 }
 
 # Costants for messages that are given back on exceptions
