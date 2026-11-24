@@ -59,22 +59,22 @@ class TestCornflowClientBasic(CustomTestCaseLive):
         self.items_to_check = ["name", "description"]
 
     def check_status_evolution(self, execution, end_state=EXEC_STATE_CORRECT):
+        """
+        The execution goes queued -> (running) -> end_state, never backwards.
+        A small solve can start and finish between two polls, so running is
+        not required to be seen; when it is seen, it is between the two.
+        """
         statuses = [execution["state"]]
-        while end_state not in statuses and len(statuses) < 100:
-            time.sleep(1)
-            status = self.client.get_status(execution["id"])
-            statuses.append(status["state"])
+        deadline = time.monotonic() + 100
+        while end_state not in statuses and time.monotonic() < deadline:
+            time.sleep(0.2)
+            statuses.append(self.client.get_status(execution["id"])["state"])
 
-        self.assertIn(EXEC_STATE_QUEUED, statuses)
-        self.assertIn(EXEC_STATE_RUNNING, statuses)
-        self.assertIn(end_state, statuses)
-
-        queued_idx = statuses.index(EXEC_STATE_QUEUED)
-        running_idx = statuses.index(EXEC_STATE_RUNNING)
-        end_state_idx = statuses.index(end_state)
-
-        self.assertLess(queued_idx, running_idx)
-        self.assertLess(running_idx, end_state_idx)
+        self.assertEqual(EXEC_STATE_QUEUED, statuses[0], statuses)
+        self.assertIn(end_state, statuses, statuses)
+        order = [EXEC_STATE_QUEUED, EXEC_STATE_RUNNING, end_state]
+        ranks = [order.index(state) for state in statuses if state in order]
+        self.assertEqual(sorted(ranks), ranks, statuses)
 
     def create_new_instance_file(self, mps_file):
         name = "test_instance1"
