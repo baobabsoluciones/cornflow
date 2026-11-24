@@ -86,7 +86,24 @@ jobs:
         run: |
           python -m pytest -n auto -q -p no:cacheprovider \
             --cov=cornflow --cov-config=.coveragerc --cov-report= \
+            --deselect cornflow/tests/unit/test_log_in.py::TestLogIn::test_log_in_timing_no_user_enumeration \
             cornflow/tests/unit
+          coverage report -m
+        env:
+          FLASK_ENV: testing
+          OPEN_DEPLOYMENT: 1
+          DATABASE_URL: sqlite:////dev/shm/cornflow_test.db
+          LOG_LEVEL: 30
+          AIRFLOW_USER: notadmin
+          AIRFLOW_PWD: notadmin
+          CF_ALARMS_ENDPOINT: 1
+      - name: Run timing-sensitive tests
+        # Timing tests run on their own, in series: in parallel the load from the other
+        # workers distorts the measurements and makes them fail.
+        run: |
+          python -m pytest -q -p no:cacheprovider --cov-append \
+            --cov=cornflow --cov-config=.coveragerc --cov-report= \
+            cornflow/tests/unit/test_log_in.py::TestLogIn::test_log_in_timing_no_user_enumeration
           coverage report -m
         env:
           FLASK_ENV: testing
