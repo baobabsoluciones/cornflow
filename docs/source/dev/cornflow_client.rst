@@ -104,6 +104,11 @@ Constant                                                       Value
 ============================================================  ==========
 
 
+The meaning of these codes (and of the execution states and the execution files status of the server) can be
+obtained from a running server with ``GET /constants/``: for each of ``execution_states``, ``solution_status``
+(``sol_code``), ``solver_status`` (``status_code``) and ``execution_files_status`` it returns a list of
+``{code, name, message}``. Any authenticated user can read it.
+
 .. automodule:: cornflow_client.constants
    :members:
    :undoc-members:

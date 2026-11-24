@@ -1,3 +1,14 @@
+version 1.4.0
+--------------
+- released: unreleased
+- description: Explanation of the status codes
+- changelog:
+    - Constants endpoint
+        New read-only endpoint ``GET /constants/`` that explains the codes found in the responses: for the execution
+        states (``state``), the solution status (``sol_code``), the solver status (``status_code``) and the execution
+        files status it returns a list of ``{code, name, message}``. It is built from the constants of the server and
+        of ``cornflow_client`` and can be read by any authenticated user, whatever their role.
+
 version 1.3.5
 --------------
 - released: 2026-06-03
