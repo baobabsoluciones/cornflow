@@ -1,3 +1,14 @@
+version 1.4.0 (unreleased)
+--------------------------
+- description: Solver facts in the execution log
+- changelog:
+    - Solver facts in the execution log
+        Experiments can report the objective, best bound, relative gap, node count and iteration count
+        of the solve. They are written to the execution's ``log_json`` as ``objective``, ``best_bound``,
+        ``gap``, ``nodes`` and ``iterations``, so the UI, the API and other tools no longer have to parse the
+        raw solver log. All of them are optional: experiments that report nothing produce the same log as
+        before. See "Solver facts" in the deploy-a-solver guide.
+
 version 1.3.5
 --------------
 - released: 2026-06-03

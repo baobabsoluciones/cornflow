@@ -3,6 +3,7 @@ Base code for the application core.
 """
 
 # Partial imports
+import math
 from abc import ABC, abstractmethod
 from timeit import default_timer as timer
 from typing import Type, Dict, List, Tuple, Union
@@ -22,6 +23,8 @@ from cornflow_client.constants import (
     BadSolution,
     BadInstance,
     EXECUTION_FILES_STATUS_NOT_GENERATED,
+    SOLVER_FACTS_KEYS,
+    SOLVER_FACTS_INT_KEYS,
 )
 
 from .experiment import ExperimentCore
@@ -268,6 +271,38 @@ class ApplicationCore(ABC):
             "sol_code": SOLUTION_STATUS_INFEASIBLE,  # Default to infeasible
         }
 
+    @staticmethod
+    def _clean_solver_facts(output, algo):
+        """
+        Collects the optional solver facts (see SOLVER_FACTS_KEYS) that the
+        experiment reported, either in the dict returned by solve() or in a
+        `solver_facts` dict attribute. Values that are not finite numbers are dropped.
+        Returns a dict with only the valid facts, ready to be merged in log_json.
+        """
+        reported = {}
+        attr = getattr(algo, "solver_facts", None)
+        if isinstance(attr, dict):
+            reported.update(attr)
+        reported.update({k: v for k, v in output.items() if k in SOLVER_FACTS_KEYS})
+
+        facts = {}
+        for key in SOLVER_FACTS_KEYS:
+            value = reported.get(key)
+            if isinstance(value, bool) or not isinstance(value, (int, float)):
+                continue
+            if not math.isfinite(value):
+                continue
+            facts[key] = int(value) if key in SOLVER_FACTS_INT_KEYS else float(value)
+
+        # relative gap, as the solvers report it: |objective - bound| / |objective|
+        if "gap" not in facts and "objective" in facts and "best_bound" in facts:
+            objective, bound = facts["objective"], facts["best_bound"]
+            if objective != 0:
+                facts["gap"] = abs(objective - bound) / abs(objective)
+            elif bound == 0:
+                facts["gap"] = 0.0
+        return facts
+
     def _determine_final_solution_code(self, algo, status_sol):
         """Determines the final solution status code."""
         if status_sol is not None:
@@ -330,6 +365,10 @@ class ApplicationCore(ABC):
 
         # 1. Build initial log dictionary
         log_json = self._build_base_log_json(output, solver_name, elapsed_time)
+        # Solver facts are optional: invalid ones are removed, valid ones normalised
+        for key in SOLVER_FACTS_KEYS:
+            log_json.pop(key, None)
+        log_json.update(self._clean_solver_facts(output, algo))
 
         # 2. Determine final solution status code and update log
         status_sol = output.get("status_sol")
