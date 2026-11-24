@@ -24,3 +24,6 @@ sphinxcontrib-serializinghtml
 sphinxcontrib-redoc
 sphinx_design
 shibuya
+pytest
+pytest-cov
+pytest-xdist
