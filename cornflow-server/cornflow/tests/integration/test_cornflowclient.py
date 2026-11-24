@@ -47,6 +47,19 @@ def wait_until_finished(client, execution_id, timeout=120):
     return status
 
 
+def wait_for_checks(get_data, timeout=30):
+    """
+    Polls the data of an instance or case until its checks are written. The
+    data-check execution can report finished before its checks are saved.
+    """
+    deadline = time.monotonic() + timeout
+    data = get_data()
+    while data.get("checks") is None and time.monotonic() < deadline:
+        time.sleep(0.5)
+        data = get_data()
+    return data
+
+
 def load_file(_file):
     with open(_file) as f:
         temp = json.load(f)
@@ -484,9 +497,11 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         )
         status = wait_until_finished(self.client, data_check_execution["id"])
         self.assertEqual(status["state"], EXEC_STATE_CORRECT)
-        response = self.client.raw.get_api_for_id(
-            api="instance", id=instance["id"], post_url="data", encoding="br"
-        ).json()
+        response = wait_for_checks(
+            lambda: self.client.raw.get_api_for_id(
+                api="instance", id=instance["id"], post_url="data", encoding="br"
+            ).json()
+        )
         self.assertIsNotNone(response["checks"])
 
     def test_check_execution(self):
@@ -517,7 +532,9 @@ class TestCornflowClientAdmin(TestCornflowClientBasic):
         )
         status = wait_until_finished(self.client, data_check_execution["id"])
         self.assertEqual(status["state"], EXEC_STATE_CORRECT)
-        response = self.client.raw.get_api_for_id(
-            api="case", id=case["id"], post_url="data", encoding="br"
-        ).json()
+        response = wait_for_checks(
+            lambda: self.client.raw.get_api_for_id(
+                api="case", id=case["id"], post_url="data", encoding="br"
+            ).json()
+        )
         self.assertIsNotNone(response["checks"])
