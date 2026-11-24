@@ -72,5 +72,7 @@ class LogSchema(BasicLogSchema):
     first_relaxed = fields.Float(**log_options)
     first_solution = fields.Nested(FirstSolution, **log_options)
     nodes = fields.Int(**log_options)
+    objective = fields.Float(**log_options)
+    iterations = fields.Int(**log_options)
     progress = fields.Nested(ProgressSchema, required=False)
     cut_info = fields.Raw(**log_options)

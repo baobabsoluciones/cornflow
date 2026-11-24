@@ -198,6 +198,47 @@ class TestDagDetailEndpoint(TestExecutionsDetailEndpointMock):
 
         self.assertNotIn("some_other_key", data["log"].keys())
 
+    def test_put_dag_with_solver_facts_in_log(self):
+        """
+        The solver facts (objective, best bound, gap, nodes, iterations) sent by the
+        DAG in log_json are stored and returned by the log endpoint.
+        """
+        idx = self.create_new_row(EXECUTION_URL_NORUN, self.model, self.payload)
+        with open(CASE_PATH) as f:
+            payload = json.load(f)
+
+        log_json = {
+            "time": 10.3,
+            "solver": "dummy",
+            "status": "Optimal",
+            "status_code": 1,
+            "sol_code": 1,
+            "objective": 100.0,
+            "best_bound": 90.0,
+            "gap": 0.1,
+            "nodes": 1200,
+            "iterations": 5000,
+        }
+        data = dict(data=payload["data"], state=EXEC_STATE_CORRECT, log_json=log_json)
+        token = self.create_service_user()
+        self.update_row(
+            url=f"{DAG_URL}{idx}/",
+            payload_to_check={**self.payload, **data},
+            change=data,
+            token=token,
+            check_payload=False,
+        )
+
+        data = self.get_one_row(
+            url=f"{EXECUTION_URL}{idx}/log/",
+            token=token,
+            check_payload=False,
+            payload=self.payload,
+            expected_status=200,
+        )
+        for key, value in log_json.items():
+            self.assertEqual(data["log"][key], value)
+
     def _service_token(self):
         if not hasattr(self, "_cached_service_token"):
             self._cached_service_token = self.create_service_user()

@@ -147,6 +147,29 @@ Each solver is a subclass of the :ref:`Experiment class` and should define one a
 
 The output of the ``solve`` method should be a dictionary contains the state of the resolution. The status mapping can be found in ``cornflow_client.constants``. The ``status_sol`` item should indicate whether the execution has found a solution or not, while the ``status`` item should return the state of the resolution (optimal, stopped because of time limit, unfeasible...).
 
+Solver facts
+***************
+
+The dictionary returned by ``solve`` can also carry the facts of the resolution, so they are stored in the execution's log (``log_json``) and anyone can read them through ``GET /execution/<id>/log/`` without parsing the raw solver log. All of them are optional numbers:
+
+* ``objective``: value of the best solution found.
+* ``best_bound``: best bound proved by the solver.
+* ``gap``: relative MIP gap, ``|objective - best_bound| / |objective|``. If it is not given but ``objective`` and ``best_bound`` are, it is computed.
+* ``nodes``: number of nodes explored (integer).
+* ``iterations``: number of solver iterations (integer).
+
+.. code-block:: python
+
+    return dict(
+        status=STATUS_OPTIMAL,
+        status_sol=SOLUTION_STATUS_FEASIBLE,
+        objective=100.0,
+        best_bound=90.0,
+        nodes=1200,
+    )
+
+The same dictionary can instead be stored in ``self.solver_facts`` during ``solve``; values in the returned dictionary win. Values that are not finite numbers are ignored. Experiments that report nothing keep producing the same log as before.
+
 More than one solution method can be defined. This is why they are given in a dictionary to the :ref:`Application class`. We use them as a catalogue when deciding to solve a problem.
 
 Test cases

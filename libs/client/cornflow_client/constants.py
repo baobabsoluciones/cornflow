@@ -260,6 +260,11 @@ DATABRICKS_TO_STATE_MAP = dict(
 )
 
 
+# Optional solver facts an experiment can report; they are written to the execution's log_json
+SOLVER_FACTS_KEYS = ("objective", "best_bound", "gap", "nodes", "iterations")
+SOLVER_FACTS_INT_KEYS = ("nodes", "iterations")
+
+
 class OrchError(Exception):
     status_code = 400
 
