@@ -957,7 +957,6 @@ class TestUatRegression(CommonSetup):
         )
         self.assertEqual(200, response.status_code, response.json)
 
-    @pending_fix("42b50338")
     def test_uat_12_1_instance_execution_solution_flow(self):
         """12.1 Create an instance, launch an execution and fetch the solution."""
         self.make_user("service_user", [SERVICE_ROLE])

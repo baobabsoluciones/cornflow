@@ -586,7 +586,6 @@ class TestUatPlatformRoles(SessionsTestCase):
         self.assertNotIn(pexecution, self.ids(EXECUTION_URL, token))
         self.assertIn(cexecution, self.ids(EXECUTION_URL, token))
 
-    @pending_fix("e86f9a3f")
     def test_uat_7_12_client_admin_does_not_see_platform_data(self):
         """7.12 The same instance, listed by a client admin: it does not
         appear (although the admin sees everything else of the client)."""

@@ -35,6 +35,12 @@ def _hide_platform_objects(query, cls, user):
         return query
     if not int(current_app.config.get("PLATFORM_DATA_ISOLATION", 1)):
         return query
+    # Service accounts act on behalf of every user: airflow must be able to
+    # read a platform user's instance to solve it (found in UAT 12.1, where
+    # the executions of a platform user never left the queue because the
+    # service account could not see their data and every task got a 404)
+    if user.is_service_user():
+        return query
     # Imported here to avoid a circular import at module load
     from cornflow.models.user_role import UserRoleModel
 
@@ -52,6 +58,34 @@ def _hide_platform_objects(query, cls, user):
             ~cls.user_id.in_(platform_user_ids),
         )
     )
+
+
+def apply_visibility(query, cls, user):
+    """
+    Applies the visibility rules of a data object to a query: the per-user
+    restriction (USER_ACCESS_ALL_OBJECTS) and the platform/client isolation.
+
+    Every listing or lookup of data objects must go through here. Some models
+    re-implement their own listing query for performance (deferred columns,
+    extra filters), so keeping the rules in a single function is what stops
+    the paths from drifting apart: that drift is exactly how the executions of
+    a platform user stayed visible to a client admin in the list while the
+    detail view already answered 404.
+
+    :param query: the query being built
+    :param cls: the model class being queried
+    :param user: the user performing the query (None for internal calls)
+    :return: the query with the visibility rules applied
+    """
+    user_access = int(current_app.config["USER_ACCESS_ALL_OBJECTS"])
+    if (
+        user is not None
+        and not user.is_admin()
+        and not user.is_service_user()
+        and user_access == USER_ACCESS_ALL_OBJECTS_NO
+    ):
+        query = query.filter(cls.user_id == user.id)
+    return _hide_platform_objects(query, cls, user)
 
 
 class BaseDataModel(TraceAttributesModel):
@@ -122,17 +156,7 @@ class BaseDataModel(TraceAttributesModel):
         query = cls.query.filter(cls.deleted_at == None)
         if options:
             query = query.options(*options)
-        user_access = int(current_app.config["USER_ACCESS_ALL_OBJECTS"])
-        if (
-            user is not None
-            and not user.is_admin()
-            and not user.is_service_user()
-            and user_access == 0
-        ):
-            query = query.filter(cls.user_id == user.id)
-
-        # Client users never see the objects of internal (platform) users
-        query = _hide_platform_objects(query, cls, user)
+        query = apply_visibility(query, cls, user)
 
         if schema:
             query = query.filter(cls.schema == schema)
@@ -169,8 +193,5 @@ class BaseDataModel(TraceAttributesModel):
         if options:
             query = query.options(*options)
         query = query.filter_by(id=idx, deleted_at=None)
-        if not user.is_admin() and not user.is_service_user() and user_access == USER_ACCESS_ALL_OBJECTS_NO:
-            query = query.filter_by(user_id=user.id)
-        # Client users never see the objects of internal (platform) users
-        query = _hide_platform_objects(query, cls, user)
+        query = apply_visibility(query, cls, user)
         return query.first()
