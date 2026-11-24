@@ -124,6 +124,26 @@ class TestListTotalCount(CustomTestCase):
         self.assertEqual(ROWS - 1, total(self.get(EXECUTION_URL)))
         self.assertEqual(ROWS, total(self.get(EXECUTION_URL, checks_and_kpis=1)))
 
+    def test_checks_only_executions_are_neither_listed_nor_counted(self):
+        executions = ExecutionModel.query.order_by(ExecutionModel.id).all()
+        for index, execution in enumerate(executions[:4]):
+            execution.config = {**execution.config, "checks_only": index != 3}
+        db.session.commit()
+        listed = ROWS - 3
+        limit = 4
+        seen, offset = [], 0
+        while True:
+            response = self.get(EXECUTION_URL, limit=limit, offset=offset)
+            page = response.json
+            self.assertEqual(listed, total(response))
+            seen += [row["id"] for row in page]
+            offset += limit
+            if offset >= total(response):
+                break
+            self.assertEqual(limit, len(page))
+        self.assertEqual(listed, len(seen))
+        self.assertEqual(listed, len(set(seen)))
+
     def test_cases_total(self):
         for _ in range(ROWS):
             self.create_new_row(CASE_URL, CaseModel, self.case_payload)

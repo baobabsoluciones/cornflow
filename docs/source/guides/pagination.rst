@@ -40,6 +40,3 @@ visible row, and client users do not count the rows of platform users. The heade
         offset += limit
         if offset >= int(response.headers["X-Total-Count"]):
             break
-
-``GET /execution/`` hides the executions that only run data checks after the page is selected, so a page can have
-fewer rows than ``limit`` before the last one. Stop on ``X-Total-Count``, not on a short page.

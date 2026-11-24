@@ -159,12 +159,6 @@ class ExecutionEndpoint(OrchestratorMixin):
         )
         current_app.logger.info(f"User {self.get_user()} gets list of executions")
 
-        executions = [
-            execution
-            for execution in executions
-            if not execution.config.get("checks_only", False)
-        ]
-
         running_executions = [
             execution
             for execution in executions

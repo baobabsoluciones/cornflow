@@ -222,6 +222,10 @@ class ExecutionModel(BaseDataModel):
                     cls.checks_and_kpis_only.is_(None),
                 )
             )
+        # Executions that only run the data checks are not listed. Filtering here,
+        # not after paging, keeps pages full and the total equal to what is listed
+        checks_only = cls.config["checks_only"].as_boolean()
+        query = query.filter(or_(checks_only.is_(None), checks_only == false()))
 
         return query
 
