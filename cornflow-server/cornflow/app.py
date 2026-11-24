@@ -52,6 +52,7 @@ from cornflow.shared.const import (
 from cornflow.shared.exceptions import initialize_errorhandlers, ConfigurationError
 from cornflow.shared.log_config import log_config
 from cornflow.shared.plugins import load_plugins
+from cornflow.endpoints.meta_resource import PAGINATION_HEADERS
 from cornflow.shared.security import init_security_headers, resolve_cors_origins
 
 
@@ -163,7 +164,12 @@ def create_app(env_name="development", dataconn=None):
     # Cross-origin access is driven by CORS_ORIGINS: "*" allows any origin
     # (development default), an explicit list restricts it and an empty value
     # (production default) is default-closed.
-    CORS(app, origins=resolve_cors_origins(app.config.get("CORS_ORIGINS", "*")))
+    # The pagination headers are exposed so browsers can read them.
+    CORS(
+        app,
+        origins=resolve_cors_origins(app.config.get("CORS_ORIGINS", "*")),
+        expose_headers=PAGINATION_HEADERS,
+    )
     bcrypt.init_app(app)
     db.init_app(app)
     Migrate(app=app, db=db)

@@ -154,7 +154,7 @@ class ExecutionEndpoint(OrchestratorMixin):
         :rtype: Tuple(dict, integer)
         """
         checks_and_kpis = kwargs.pop("checks_and_kpis", False)
-        executions = self.get_list(
+        executions, headers = self.get_list_page(
             user=self.get_user(), checks_and_kpis=checks_and_kpis, **kwargs
         )
         current_app.logger.info(f"User {self.get_user()} gets list of executions")
@@ -206,7 +206,7 @@ class ExecutionEndpoint(OrchestratorMixin):
                 state = self.orch_to_state_map.get(data["state"], EXEC_STATE_UNKNOWN)
             execution.update_state(state)
 
-        return executions
+        return executions, 200, headers
 
     @doc(description="Create an execution", tags=["Executions"])
     @authenticate(auth_class=Auth())

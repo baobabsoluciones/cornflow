@@ -7,6 +7,7 @@ from flask_restful import Resource
 from flask import g, request, current_app
 from flask_apispec.views import MethodResource
 from functools import wraps
+from urllib.parse import urlencode
 from pytups import SuperDict
 
 # Import from internal modules
@@ -16,6 +17,45 @@ from cornflow.shared.const import (
     USER_ACCESS_ALL_OBJECTS_YES,
 )
 from cornflow.shared.exceptions import InvalidUsage, ObjectDoesNotExist, NoPermission
+
+
+DEFAULT_PAGE_SIZE = 10
+PAGINATION_HEADERS = ["X-Total-Count", "X-Offset", "X-Limit", "Link"]
+
+
+def pagination_headers(total, offset=0, limit=DEFAULT_PAGE_SIZE):
+    """
+    Headers that tell a client how many rows a paginated list has and where the
+    neighbour pages are, so it does not mistake one page for the whole list.
+
+    :param int total: rows matching the filters of the list, ignoring offset and limit
+    :param int offset: the offset of the page that was returned
+    :param int limit: the page size
+    :return: the headers: X-Total-Count, X-Offset, X-Limit and, when there are
+      neighbour pages, Link (rel="next" / rel="prev")
+    :rtype: dict
+    """
+    offset = offset or 0
+    limit = limit if limit is not None else DEFAULT_PAGE_SIZE
+    headers = {
+        "X-Total-Count": str(total),
+        "X-Offset": str(offset),
+        "X-Limit": str(limit),
+    }
+
+    def page_link(page_offset, rel):
+        args = request.args.to_dict()
+        args.update(offset=page_offset, limit=limit)
+        return f'<{request.path}?{urlencode(args)}>; rel="{rel}"'
+
+    links = []
+    if limit > 0 and offset + limit < total:
+        links.append(page_link(offset + limit, "next"))
+    if limit > 0 and offset > 0:
+        links.append(page_link(max(offset - limit, 0), "prev"))
+    if links:
+        headers["Link"] = ", ".join(links)
+    return headers
 
 
 class BaseMetaResource(Resource, MethodResource):
@@ -47,6 +87,20 @@ class BaseMetaResource(Resource, MethodResource):
         :return: the list of objects
         """
         return self.data_model.get_all_objects(**kwargs)
+
+    def get_list_page(self, **kwargs):
+        """
+        Method to GET one page of objects together with the pagination headers
+
+        :param kwargs: the keyword arguments to filter (offset and limit included).
+        :return: the page of objects and the pagination headers
+        :rtype: Tuple(list, dict)
+        """
+        items = self.get_list(**kwargs)
+        total = self.data_model.count_all_objects(**kwargs)
+        return items, pagination_headers(
+            total, kwargs.get("offset", 0), kwargs.get("limit", DEFAULT_PAGE_SIZE)
+        )
 
     def get_detail(self, **kwargs):
         """

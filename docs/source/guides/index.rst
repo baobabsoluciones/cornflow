@@ -13,4 +13,5 @@ Contents:
     Test your solution method <testing_app>
     Use your solution method <use_solver>
     Debug your solution method <debug_with_airflow>
+    Page through the list endpoints <pagination>
 

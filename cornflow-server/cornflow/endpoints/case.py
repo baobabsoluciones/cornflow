@@ -59,9 +59,9 @@ class CaseEndpoint(BaseMetaResource):
         :rtype: Tuple(dict, integer)
         """
 
-        response = self.get_list(user=self.get_user(), **kwargs)
+        response, headers = self.get_list_page(user=self.get_user(), **kwargs)
         current_app.logger.info(f"User {self.get_user()} gets all cases")
-        return response
+        return response, 200, headers
 
     @doc(description="Create a new case from raw data", tags=["Cases"])
     @authenticate(auth_class=Auth())
