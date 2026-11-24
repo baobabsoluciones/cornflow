@@ -88,7 +88,7 @@ class BaseDataModel(TraceAttributesModel):
         super().__init__()
 
     @classmethod
-    def get_all_objects(
+    def get_all_objects_query(
         cls,
         schema=None,
         creation_date_gte=None,
@@ -97,13 +97,13 @@ class BaseDataModel(TraceAttributesModel):
         deletion_date_lte=None,
         update_date_gte=None,
         update_date_lte=None,
-        offset=0,
-        limit=10,
         user=None,
         options=None,
     ):
         """
-        Query to get all objects from a user
+        Query with every filter of the list (visibility, platform isolation,
+        deleted_at, schema and dates), before ordering and pagination. Both the
+        list and its total count are built from it so they can not drift apart.
 
         :param UserModel user: User object.
         :param string schema: data_schema to filter (dag)
@@ -113,11 +113,8 @@ class BaseDataModel(TraceAttributesModel):
         :param string deletion_date_lte: deletion_at needs to be smaller or equal to this
         :param string update_date_gte: update_at needs to be larger or equal to this
         :param string update_date_lte: update_at needs to be smaller or equal to this
-        :param int offset: query offset for pagination
-        :param int limit: query size limit
         :param list options: extra SQLAlchemy loader options (e.g. defer()) to apply to the query
-        :return: The objects
-        :rtype: list(:class:`BaseDataModel`)
+        :return: the filtered query
         """
         query = cls.query.filter(cls.deleted_at == None)
         if options:
@@ -149,7 +146,34 @@ class BaseDataModel(TraceAttributesModel):
         if update_date_lte:
             query = query.filter(cls.update_at <= update_date_lte)
 
+        return query
+
+    @classmethod
+    def get_all_objects(cls, offset=0, limit=10, **kwargs):
+        """
+        Query to get all objects from a user
+
+        :param int offset: query offset for pagination
+        :param int limit: query size limit
+        :param kwargs: the filters of :meth:`get_all_objects_query`
+        :return: The objects
+        :rtype: list(:class:`BaseDataModel`)
+        """
+        query = cls.get_all_objects_query(**kwargs)
         return query.order_by(desc(cls.created_at)).offset(offset).limit(limit).all()
+
+    @classmethod
+    def count_all_objects(cls, offset=None, limit=None, **kwargs):
+        """
+        Number of objects that match the filters of :meth:`get_all_objects`,
+        ignoring offset and limit.
+
+        :param kwargs: the same filters as :meth:`get_all_objects`
+        :return: the total number of matching objects
+        :rtype: int
+        """
+        kwargs.pop("options", None)
+        return cls.get_all_objects_query(**kwargs).order_by(None).count()
 
     @classmethod
     def get_one_object(cls, user=None, idx=None, options=None, **kwargs):

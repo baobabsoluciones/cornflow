@@ -61,7 +61,8 @@ class InstanceEndpoint(BaseMetaResource):
         :rtype: Tuple(dict, integer)
         """
         current_app.logger.info(f"User {self.get_user()} gets all the instances")
-        return self.get_list(user=self.get_user(), **kwargs)
+        items, headers = self.get_list_page(user=self.get_user(), **kwargs)
+        return items, 200, headers
 
     @doc(description="Create an instance", tags=["Instances"])
     @authenticate(auth_class=Auth())
