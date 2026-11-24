@@ -9,6 +9,7 @@ specification, not from the code under test.
 """
 
 import contextlib
+import importlib
 import logging
 import os
 import unittest
@@ -467,16 +468,21 @@ class TestServiceInitSecurity(TestCase):
         }
         env.update(extra_env or {})
         uri = app_config[name].SQLALCHEMY_DATABASE_URI
+        # import_module: the attribute cornflow.cli.service is the click group
+        service_module = importlib.import_module("cornflow.cli.service")
         with mock.patch.dict(os.environ, env):
             if "SIGNUP_ACTIVATED" not in (extra_env or {}):
                 os.environ.pop("SIGNUP_ACTIVATED", None)
-            with mock.patch("cornflow.cli.service.os.chdir"), mock.patch(
-                "cornflow.cli.service.get_db_conn", return_value=uri
-            ), mock.patch("cornflow.cli.service._sync_with_airflow"), mock.patch(
-                "cornflow.cli.service._initialize_database",
+            with mock.patch.object(service_module.os, "chdir"), mock.patch.object(
+                service_module, "get_db_conn", return_value=uri
+            ), mock.patch.object(
+                service_module, "_sync_with_airflow"
+            ), mock.patch.object(
+                service_module,
+                "_initialize_database",
                 side_effect=_fake_initialize_database,
-            ), mock.patch(
-                "cornflow.cli.service.os.system"
+            ), mock.patch.object(
+                service_module.os, "system"
             ) as system:
                 result = CliRunner().invoke(cli, ["service", "init"])
                 snapshot = dict(os.environ)
@@ -547,10 +553,12 @@ class TestServiceInitEnvironment(unittest.TestCase):
     def setup_environment(self, extra=None):
         from cornflow.cli.service import _setup_environment_variables
 
+        service_module = importlib.import_module("cornflow.cli.service")
+
         with mock.patch.dict(os.environ, {**self.BASE, **(extra or {})}, clear=True):
             before = dict(os.environ)
-            with mock.patch(
-                "cornflow.cli.service.get_db_conn", return_value="sqlite://"
+            with mock.patch.object(
+                service_module, "get_db_conn", return_value="sqlite://"
             ):
                 config = _setup_environment_variables()
             after = dict(os.environ)

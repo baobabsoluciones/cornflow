@@ -1239,18 +1239,23 @@ class TestServiceInitSecretKey(TestCase):
                 gunicorn_env.append(dict(os.environ))
             return 0
 
+        # import_module: the attribute cornflow.cli.service is the click group
+        service_module = importlib.import_module("cornflow.cli.service")
         with mock.patch.dict(os.environ, env):
             for variable in KEY_VARS:
                 if variable not in key_environ:
                     os.environ.pop(variable, None)
             os.environ.pop("SIGNUP_ACTIVATED", None)
-            with mock.patch("cornflow.cli.service.os.chdir"), mock.patch(
-                "cornflow.cli.service.get_db_conn", return_value=uri
-            ), mock.patch("cornflow.cli.service._sync_with_airflow"), mock.patch(
-                "cornflow.cli.service._initialize_database",
+            with mock.patch.object(service_module.os, "chdir"), mock.patch.object(
+                service_module, "get_db_conn", return_value=uri
+            ), mock.patch.object(
+                service_module, "_sync_with_airflow"
+            ), mock.patch.object(
+                service_module,
+                "_initialize_database",
                 side_effect=_fake_initialize_database,
-            ), mock.patch(
-                "cornflow.cli.service.os.system", side_effect=fake_system
+            ), mock.patch.object(
+                service_module.os, "system", side_effect=fake_system
             ) as system:
                 with capture_log(SERVICE_LOGGER, logging.INFO) as handler:
                     result = CliRunner().invoke(cli, ["service", "init"])
@@ -1374,12 +1379,14 @@ class TestServiceInitSecretKey(TestCase):
     def test_setup_environment_does_not_touch_keys(self):
         from cornflow.cli.service import _setup_environment_variables
 
+        service_module = importlib.import_module("cornflow.cli.service")
+
         base = {"PATH": os.environ.get("PATH", ""), "CORNFLOW_BACKEND": "1"}
         for extra in ({}, {"SECRET_KEY": KEY_B}):
             with self.subTest(extra=sorted(extra)):
                 with mock.patch.dict(os.environ, {**base, **extra}, clear=True):
-                    with mock.patch(
-                        "cornflow.cli.service.get_db_conn", return_value="sqlite://"
+                    with mock.patch.object(
+                        service_module, "get_db_conn", return_value="sqlite://"
                     ):
                         _setup_environment_variables()
                     after = dict(os.environ)
