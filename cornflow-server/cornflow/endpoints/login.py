@@ -18,7 +18,7 @@ from cornflow.models import (
     UserRoleModel,
 )
 from cornflow.schemas.user import LoginEndpointRequest, LoginOpenAuthRequest
-from cornflow.shared import db
+from cornflow.shared import bcrypt, db
 from cornflow.shared.audit import audit
 from cornflow.shared.authentication import Auth, LDAPBase
 from cornflow.shared.rate_limit import failed_attempts_limit
@@ -246,6 +246,12 @@ class LoginBaseEndpoint(BaseMetaResource):
                 actor=username,
                 reason="unknown_user",
             )
+            # Spend a time comparable to a real password check so that a
+            # non-existent username cannot be told apart from a wrong
+            # password through response timing (user enumeration). The work
+            # factor is the configured BCRYPT_LOG_ROUNDS, the same one used to
+            # hash the stored passwords.
+            bcrypt.generate_password_hash(password or "")
             raise InvalidCredentials()
 
         # The password is always checked first and, on failure, the same
