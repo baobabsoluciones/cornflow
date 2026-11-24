@@ -80,6 +80,7 @@ ALARMS_URL = PREFIX + "/alarms/"
 MAIN_ALARMS_URL = PREFIX + "/main-alarms/"
 
 LICENSES_URL = PREFIX + "/licences/"
+CONSTANTS_URL = PREFIX + "/constants/"
 
 PUBLIC_DAGS = [
     "solve_model_dag",

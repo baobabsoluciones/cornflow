@@ -19,6 +19,7 @@ from .case import (
     CaseToInstance,
     CaseCompare,
 )
+from .constants import ConstantsEndpoint
 from .dag import (
     DAGDetailEndpoint,
     DAGEndpointManual,
@@ -256,6 +257,7 @@ resources = [
         urls="/user/reset-password/",
         endpoint="reset-password",
     ),
+    dict(resource=ConstantsEndpoint, urls="/constants/", endpoint="constants"),
     dict(
         resource=LicensesEndpoint,
         urls="/licences/",
