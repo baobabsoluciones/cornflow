@@ -18,7 +18,7 @@ from cornflow.app import create_app
 from cornflow.commands.access import access_init_command
 from cornflow.commands.dag import register_deployed_dags_command_test
 from cornflow.models import UserModel
-from cornflow.shared import db
+from cornflow.shared import bcrypt, db
 from cornflow.shared.const import SERVICE_ROLE, INTERNAL_TOKEN_ISSUER, AUTH_OID
 from cornflow.tests.const import LOGIN_URL
 from cornflow.tests.custom_test_case import CustomTestCase, LoginTestCases
@@ -54,6 +54,18 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
         similar to one with a wrong password for an existing user, so that
         valid usernames can not be enumerated through response timing.
         """
+        # The test configuration uses a very low bcrypt work factor, which
+        # makes the hash cost negligible next to the rest of the request. Use
+        # a realistic one, and rehash the stored password with it, so that the
+        # comparison is the one that happens in a real deployment.
+        patcher = mock.patch.object(bcrypt, "_log_rounds", 10)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        user = UserModel.query.filter_by(username="testname").first()
+        user.password = bcrypt.generate_password_hash(self.data["password"]).decode("utf8")
+        user.save()
+        db.session.commit()
+
         existing_user_payload = {
             "username": "testname",
             "password": "Wrongpassword1!",
