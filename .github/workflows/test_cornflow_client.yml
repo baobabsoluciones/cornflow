@@ -181,6 +181,9 @@ jobs:
           # the repeated logins these tests perform.
           MFA_REQUIRED: 0
           RATELIMIT_ENABLED: 0
+          # The client integration tests exercise refresh and logout, and at the
+          # default security level (1) refresh tokens are disabled.
+          REFRESH_TOKEN_ENABLED: 1
       - name: Run unit tests
         run: |
           coverage run --source=./cornflow_client/ --rcfile=./.coveragerc -m unittest discover -s cornflow_client/tests/unit
