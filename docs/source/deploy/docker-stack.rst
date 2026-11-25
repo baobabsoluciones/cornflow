@@ -35,9 +35,16 @@ Main cornflow environment variables::
     AIRFLOW_URL - airflow url service
     CORNFLOW_URL - cornflow url service 
     CORNFLOW_DB_CONN - postgresql connection for cornflow database
-    SECRET_KEY - encrypted key like fernet for keep data safe
-    FLASK_APP - python3 cornflow app (cornflow.app) 
+    FERNET_KEY - secret key that signs sessions and API keys and encrypts the MFA secrets, at least 32 bytes (SECRET_KEY is read when it is not set)
+    SECRET_BI_KEY - secret key that signs the BI tokens, at least 32 bytes
+    CORNFLOW_SECURITY_LEVEL - security level: 1 (default), 2 or 3
+    FLASK_APP - python3 cornflow app (cornflow.app)
     FLASK_ENV - cornflow deployment environment
+
+The ``docker-compose`` files of the repository set a fixed ``FERNET_KEY``
+and ``SECRET_BI_KEY`` for development only: set your own values in any
+other deployment. See :ref:`Secret key (FERNET_KEY)` and
+:ref:`Security levels`.
 
 Entrypoint
 *************
@@ -45,7 +52,7 @@ Entrypoint
 If you are using the default entrypoint of the production image, it will execute the ``init_cornflow_service.py`` script which uses and initializes environment variables to work with postgresql and airflow defined in ``docker-compose.yml``.
 The image entrypoint works as follows:
 
-#. A new fernet secret key will be generated.
+#. The security level and the secret key are checked. cornflow uses ``FERNET_KEY`` (or ``SECRET_KEY``); at level 1 without them it generates a random key for this start, shared by all the workers (every restart invalidates sessions and API keys), and at levels 2 and 3 it does not start.
 #. Check cornflow postgresql database connection.
 #. The migrations and upgrade of the database is executed on every deployment.
 #. For the very first time it will create the cornflow superuser.

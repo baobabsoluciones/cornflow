@@ -14,7 +14,7 @@ Cornflow is a platform that allows you to create, execute, and manage optimizati
 ## Prerequisites
 
 - Kubernetes 1.19+
-- Helm 3.0+
+- Helm 3.5+
 - A configured Kubernetes cluster
 - An Ingress controller (optional, for external access)
 
@@ -111,7 +111,7 @@ helm install my-project ./helm-charts/cornflow
 cat > my-overrides.yaml << EOF
 cornflow:
   env:
-    SECRET_KEY: "my-very-secure-secret-key"
+    # FERNET_KEY and SECRET_BI_KEY are not set here: see "Secret keys" below
     CORNFLOW_ADMIN_PWD: "my-admin-password"
     CORNFLOW_SERVICE_PWD: "my-service-password"
 
@@ -172,6 +172,91 @@ helm install my-project ./helm-charts/cornflow \
 | `postgresql.enabled` | Enable PostgreSQL for Cornflow | `true` |
 | `airflow.enabled` | Enable Airflow deployment | `false` |
 | `ingress.enabled` | Enable Ingress for Cornflow | `false` |
+| `cornflow.keys.existingSecret` | Existing Secret with `FERNET_KEY` and `SECRET_BI_KEY`; empty to let the chart create `<release>-cornflow-keys` (see [Secret keys](#secret-keys)) | `""` |
+| `cornflow.env.CORNFLOW_SECURITY_LEVEL` | Security level of cornflow: 1, 2 or 3 (see [Security level](#security-level)) | `"1"` |
+
+### Secret keys
+
+Cornflow uses two keys. The chart passes them to the pod from a Kubernetes Secret, never from `cornflow.env`:
+
+| Key | Use | Generated value |
+|-----|-----|-----------------|
+| `FERNET_KEY` | Signs the sessions, the API keys (also the one of the service user) and the temporary tokens, and encrypts the TOTP secrets of two-factor authentication (MFA) | 32 random bytes in Fernet format (44 characters) |
+| `SECRET_BI_KEY` | Signs the BI tokens | 64 random alphanumeric characters |
+
+**Generated Secret (default).** On `helm install` the chart creates the Secret `<release>-cornflow-keys` (for example `my-cornflow-cornflow-keys`) with random keys. On every `helm upgrade` it reads that Secret from the cluster and reuses its keys, so restarts, upgrades and new replicas keep sessions, API keys and MFA working. The Secret has the annotation `helm.sh/resource-policy: keep`: `helm uninstall` does not delete it (see [Uninstallation](#uninstallation)), and a new install with the same release name in the same namespace reuses it.
+
+**Changing the keys.** A new `FERNET_KEY` invalidates every session and API key, and users with MFA cannot log in until an administrator resets their MFA (`DELETE /user/<id>/mfa/`). A new `SECRET_BI_KEY` invalidates the BI tokens. Back up the Secret together with the database, and store the copy as safely as the database backups:
+
+```bash
+kubectl get secret my-cornflow-cornflow-keys -o yaml > cornflow-keys-backup.yaml
+```
+
+**Using an existing Secret.** Create a Secret in the release namespace with the keys `FERNET_KEY` and `SECRET_BI_KEY` (32 bytes or more each) and set `cornflow.keys.existingSecret`. The chart then does not create any Secret. Both keys are required: if one is missing, the pod does not start (`CreateContainerConfigError`).
+
+```bash
+kubectl create secret generic my-cornflow-keys \
+  --from-literal=FERNET_KEY="$(python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())')" \
+  --from-literal=SECRET_BI_KEY="$(python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())')"
+
+helm install my-cornflow ./helm-charts/cornflow --set cornflow.keys.existingSecret=my-cornflow-keys
+```
+
+```yaml
+cornflow:
+  keys:
+    existingSecret: my-cornflow-keys
+```
+
+Use an existing Secret when:
+
+- You render the chart without access to the cluster: `helm template`, `helm install --dry-run` or GitOps tools that render with `helm template` (for example Argo CD). Without the cluster the chart cannot read the generated Secret and creates new keys on every render, so every sync would close all sessions and break API keys and MFA.
+- You manage the keys yourself (External Secrets Operator, Sealed Secrets, HashiCorp Vault...).
+- Your values already set `FERNET_KEY`, `SECRET_KEY` or `SECRET_BI_KEY` in `cornflow.env` (see below).
+
+**Keys in `cornflow.env` are rejected.** If `cornflow.env` sets `FERNET_KEY`, `SECRET_KEY` or `SECRET_BI_KEY`, the chart fails to render (`cornflow.env.FERNET_KEY is not allowed. ...`), so the pod never gets two definitions of the same variable. `SECRET_KEY` is not needed: cornflow signs with `FERNET_KEY` and only falls back to `SECRET_KEY` when `FERNET_KEY` is not set.
+
+**Upgrading from a previous version of the chart.**
+
+- With the default values, the upgrade creates the Secret with new keys. With cornflow 1.3.x the default `SECRET_KEY` of the chart was never used (the session key was random on every start), so no session or API key that survived a restart is lost. BI tokens signed with the previous default `SECRET_BI_KEY` stop working: issue them again.
+- If your values set `FERNET_KEY`, `SECRET_KEY` or `SECRET_BI_KEY`, the upgrade fails to render until you move them to an existing Secret. Put in its `FERNET_KEY` the key cornflow was signing with (cornflow 1.3.x: your `FERNET_KEY`; cornflow 1.4.0rc1: your `SECRET_KEY`, or your `FERNET_KEY` if you had no `SECRET_KEY`) and in `SECRET_BI_KEY` your `SECRET_BI_KEY`. Then set `cornflow.keys.existingSecret` and remove the three variables from `cornflow.env` (in a values file, set them to `null`). At security levels 2 and 3 both keys must be 32 bytes or more.
+
+**`helm template` and dry runs.** Every `helm template` (or client-side `--dry-run`) shows different keys: this is expected, as there is no cluster to read the Secret from. `helm upgrade --dry-run=server` (Helm 3.13+) reads the cluster and shows the keys in use.
+
+### Security level
+
+`CORNFLOW_SECURITY_LEVEL` (in `cornflow.env`) sets the default values of the security settings of cornflow. Each setting can still be changed with its own variable.
+
+- `1` (default): same behaviour as cornflow 1.3.9.
+- `2`: password policy, single-use password on user creation, account lockout after 5 failed logins, 8-hour sessions and a mandatory secret key of 32 bytes or more (the keys generated by the chart meet it).
+- `3`: level 2 plus mandatory MFA, sessions with token refresh, password rotation, BI tokens that expire, and production CORS, Swagger and HSTS settings.
+
+The settings of each level are listed in the cornflow documentation: [`docs/source/deploy/access.rst`](../../docs/source/deploy/access.rst).
+
+**Variables in `values.yaml` override the level.** The chart sets `SIGNUP_ACTIVATED: "1"`, `CORS_ORIGINS: "*"`, `TOKEN_DURATION: "24"` and `PWD_ROTATION_TIME: "120"`. While they are set, the level does not change those settings (at level 3, CORS would stay open and anyone could sign up). At levels 2 and 3 remove them, or give them the value you want (for example the origin of your UI in `CORS_ORIGINS`). In a values file, set them to `null`:
+
+```yaml
+cornflow:
+  env:
+    CORNFLOW_SECURITY_LEVEL: "3"
+    SIGNUP_ACTIVATED: null
+    CORS_ORIGINS: "https://cornflow.mydomain.com"
+    TOKEN_DURATION: null
+    PWD_ROTATION_TIME: null
+```
+
+On the command line use `--set-string` for numbers (every value of `cornflow.env` must be a string) and `null` to remove a variable:
+
+```bash
+helm upgrade my-cornflow ./helm-charts/cornflow \
+  --set-string cornflow.env.CORNFLOW_SECURITY_LEVEL=2 \
+  --set cornflow.env.SIGNUP_ACTIVATED=null \
+  --set cornflow.env.CORS_ORIGINS=null \
+  --set cornflow.env.TOKEN_DURATION=null \
+  --set cornflow.env.PWD_ROTATION_TIME=null
+```
+
+Before raising the level, change the example passwords `CORNFLOW_ADMIN_PWD` and `CORNFLOW_SERVICE_PWD`: they meet the password policy, but they are published in this chart.
 
 ### Database Configuration
 
@@ -335,19 +420,20 @@ persistence:
 |----------|-------------|---------------|
 | `DATABASE_URL` | Database connection string | `postgresql://cornflow:cornflow@cornflow-postgresql:5432/cornflow` |
 | `SERVICE_NAME` | Application service name | `Cornflow` |
-| `SECRET_KEY` | Application secret key | `your-secret-key-here` |
-| `SECRET_BI_KEY` | BI secret key | `your-bi-secret-key-here` |
+| `CORNFLOW_SECURITY_LEVEL` | Security level: 1, 2 or 3 (see [Security level](#security-level)) | `1` |
+| `FERNET_KEY` | Signs sessions and API keys and encrypts the MFA secrets. Set in the keys Secret, not in `cornflow.env` (see [Secret keys](#secret-keys)) | generated on install |
+| `SECRET_BI_KEY` | Signs the BI tokens. Set in the keys Secret, not in `cornflow.env` (see [Secret keys](#secret-keys)) | generated on install |
 | `AUTH_TYPE` | Authentication type (1=DB, 2=OID) | `1` |
 | `DEFAULT_ROLE` | Default user role | `2` (Planner) |
-| `CORS_ORIGINS` | CORS allowed origins | `*` |
+| `CORS_ORIGINS` | CORS allowed origins (overrides the security level) | `*` |
 | `LOG_LEVEL` | Log level (10=DEBUG, 20=INFO, 30=WARNING, 40=ERROR) | `20` |
-| `SIGNUP_ACTIVATED` | Enable user signup | `1` |
+| `SIGNUP_ACTIVATED` | Enable user signup (overrides the security level) | `1` |
 | `CORNFLOW_SERVICE_USER` | Service user name | `service_user` |
 | `SERVICE_USER_ALLOW_PASSWORD_LOGIN` | Allow service user password login | `1` |
 | `OPEN_DEPLOYMENT` | Open deployment mode | `1` |
 | `USER_ACCESS_ALL_OBJECTS` | Planner access to other users' objects | `0` |
-| `TOKEN_DURATION` | Token duration in hours | `24` |
-| `PWD_ROTATION_TIME` | Password rotation time in days | `120` |
+| `TOKEN_DURATION` | Token duration in hours (overrides the security level) | `24` |
+| `PWD_ROTATION_TIME` | Password rotation time in days (overrides the security level) | `120` |
 | `RATELIMIT_STORAGE_URI` | Shared storage of the rate-limit counters (e.g. `redis://<host>:6379/0`); `memory://` counts per gunicorn worker | `memory://` |
 
 ### Authentication Variables
@@ -582,6 +668,12 @@ helm uninstall my-cornflow
 
 # Delete PVCs (optional)
 kubectl delete pvc -l app.kubernetes.io/instance=my-cornflow
+```
+
+`helm uninstall` keeps the keys Secret (`helm.sh/resource-policy: keep`), so a new install with the same release name reuses the keys and the data of an existing database stays readable. Delete it only if you no longer need the keys:
+
+```bash
+kubectl delete secret my-cornflow-cornflow-keys
 ```
 
 ## Release Process

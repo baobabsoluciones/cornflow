@@ -46,6 +46,8 @@ from cornflow.shared.const import (
     AUTH_OID,
     CONDITIONAL_ENDPOINTS,
     LEGACY_ENDPOINT_SUFFIX,
+    MFA_DEPENDENT_SETTINGS,
+    SIGNUP_PLATFORM_ADMIN_ONLY,
     SIGNUP_WITH_AUTH,
     SIGNUP_WITH_NO_AUTH,
 )
@@ -53,38 +55,161 @@ from cornflow.shared.exceptions import initialize_errorhandlers, ConfigurationEr
 from cornflow.shared.log_config import log_config
 from cornflow.shared.plugins import load_plugins
 from cornflow.shared.security import init_security_headers, resolve_cors_origins
+from cornflow.shared.security_levels import (
+    CONFIG_KEY_ADJUSTED,
+    CONFIG_KEY_CHANGED,
+    CONFIG_KEY_ERRORS,
+    CONFIG_KEY_LEVEL,
+    CONFIG_KEY_LEVEL_ERROR,
+    DEFAULT_SECURITY_LEVEL,
+)
+from cornflow.shared.secret_keys import (
+    CONFIG_KEY_SECRET_KEY_SOURCE,
+    CONFIG_KEY_SECRET_KEYS_DIFFER,
+    KEY_SOURCE_CONFIG,
+    MINIMUM_SECRET_KEY_LENGTH,  # noqa: F401 (imported by the tests from here)
+    check_secret_keys,
+)
 
 
-# Minimum length in bytes of the JWT signing keys. HMAC-SHA256 requires keys
-# of at least 256 bits (RFC 7518, section 3.2) and CCN-STIC-807 requires
-# equivalent strength for the employed cryptography.
-MINIMUM_SECRET_KEY_LENGTH = 32
+def _check_security_level(app):
+    """
+    Refuses to start with an invalid CORNFLOW_SECURITY_LEVEL. config.py
+    records the error instead of raising, so the import never fails.
+    """
+    message = app.config.get(CONFIG_KEY_LEVEL_ERROR)
+    if message:
+        raise ConfigurationError(error=message, log_txt=message)
+
+
+def _check_disabling_zeros(app):
+    """
+    Refuses to start when a security setting is set to a value <= 0 that turns
+    a control off and the security level does not allow it (LOGIN_MAX_ATTEMPTS
+    at levels 2 and 3, BI_TOKEN_DURATION_DAYS at level 3).
+    """
+    errors = tuple(app.config.get(CONFIG_KEY_ERRORS) or ())
+    if errors:
+        message = "; ".join(errors)
+        raise ConfigurationError(error=message, log_txt=message)
+
+
+def _check_mfa_coherence(app):
+    """
+    Refuses to start when a setting that needs the MFA endpoints is on while
+    MFA_ENABLED is off. MFA_ENABLED is never forced to 1.
+    """
+    mfa_enabled = int(app.config.get("MFA_ENABLED", 0))
+    if mfa_enabled == 1:
+        return
+    enabled = [
+        name for name in MFA_DEPENDENT_SETTINGS if int(app.config.get(name, 0)) == 1
+    ]
+    if not enabled:
+        return
+    names = ", ".join(enabled)
+    assignments = ", ".join(f"{name}=1" for name in enabled)
+    verb = "needs" if len(enabled) == 1 else "need"
+    message = (
+        f"{assignments} {verb} MFA_ENABLED=1, but MFA_ENABLED is {mfa_enabled}: "
+        f"set MFA_ENABLED=1, or set {names} to 0"
+    )
+    raise ConfigurationError(error=message, log_txt=message)
+
+
+def _log_security_level(app):
+    """
+    Logs the effective security level, the variables that change a level
+    default (INFO) and the ones clamped to a limit or not parseable (WARNING).
+    Key values are never logged: the sensitive settings hide their value.
+    """
+    level = app.config.get(CONFIG_KEY_LEVEL)
+    app.logger.info(f"Security level: {level}")
+    for change in app.config.get(CONFIG_KEY_CHANGED) or ():
+        app.logger.info(
+            f"Security level {level}, changed setting: {change.as_log_text()}"
+        )
+    for adjustment in app.config.get(CONFIG_KEY_ADJUSTED) or ():
+        app.logger.warning(
+            f"Security level {level}, adjusted setting: {adjustment.as_log_text()}"
+        )
+
+
+def _run_startup_checks(app):
+    """
+    Startup checks of the security configuration, in this order: security
+    level, disabling zeros the level does not allow, secret keys, MFA_ENABLED
+    coherence, security level log and session windows. The checks raise
+    ConfigurationError when cornflow must not start; the last two only log.
+    """
+    _check_security_level(app)
+    _check_disabling_zeros(app)
+    _check_secret_keys(app)
+    _check_mfa_coherence(app)
+    _log_security_level(app)
+    _check_session_windows(app)
 
 
 def _check_secret_keys(app):
     """
-    Refuses to start the application when a JWT signing key is configured
-    with less than MINIMUM_SECRET_KEY_LENGTH bytes, so weak keys can not be
-    used to sign session tokens.
+    Step 3 of the startup checks: the effective secret key (FERNET_KEY, else
+    SECRET_KEY, else random at level 1) and SECRET_BI_KEY, per security level.
+    Logs the warnings and raises ConfigurationError with every error joined
+    with "; ". Key values are never logged.
+    """
+    warnings, errors = check_secret_keys(
+        level=app.config.get(CONFIG_KEY_LEVEL, DEFAULT_SECURITY_LEVEL),
+        token_key=app.config.get("SECRET_TOKEN_KEY"),
+        source=app.config.get(CONFIG_KEY_SECRET_KEY_SOURCE, KEY_SOURCE_CONFIG),
+        keys_differ=bool(app.config.get(CONFIG_KEY_SECRET_KEYS_DIFFER, False)),
+        bi_key=app.config.get("SECRET_BI_KEY"),
+        mfa_enabled=int(app.config.get("MFA_ENABLED", 0)) == 1,
+    )
+    for message in warnings:
+        app.logger.warning(message)
+    if errors:
+        message = "; ".join(errors)
+        raise ConfigurationError(error=message, log_txt=message)
+
+
+def _check_session_windows(app):
+    """
+    Warns when the session windows are configured in a way that would log out
+    users who are actively working.
+
+    Activity is only recorded when the client exchanges the refresh token, and
+    a client only does that once its access token has expired. So an
+    inactivity window that is not longer than the access-token lifetime closes
+    the session of an active user: by the time the client refreshes, the
+    window has already elapsed. The same applies to an absolute cap shorter
+    than the inactivity window, which would make the window unreachable.
+
+    These are misconfigurations rather than security weaknesses (they are
+    stricter, not laxer), so they are reported and not clamped.
 
     :param app: the Flask application being created
     """
-    for key_name in ("SECRET_TOKEN_KEY", "SECRET_BI_KEY"):
-        value = app.config.get(key_name)
-        if value is None:
-            # Token generation will fail at runtime with a clear error;
-            # deployments must provide the keys through the environment
-            app.logger.warning(
-                f"{key_name} is not configured: authentication tokens can "
-                f"not be issued until it is set"
-            )
-            continue
-        if len(str(value).encode("utf8")) < MINIMUM_SECRET_KEY_LENGTH:
-            raise ConfigurationError(
-                f"{key_name} must be at least {MINIMUM_SECRET_KEY_LENGTH} "
-                f"bytes long (256 bits). Generate one with: "
-                f'python -c "import secrets; print(secrets.token_hex(32))"'
-            )
+    if int(app.config.get("REFRESH_TOKEN_ENABLED", 1)) != 1:
+        return
+    access = int(app.config.get("ACCESS_TOKEN_DURATION_MINUTES", 15))
+    inactivity = int(app.config.get("REFRESH_TOKEN_INACTIVITY_MINUTES", 30))
+    absolute_minutes = int(app.config.get("REFRESH_TOKEN_ABSOLUTE_HOURS", 12)) * 60
+    if inactivity <= access:
+        app.logger.warning(
+            f"REFRESH_TOKEN_INACTIVITY_MINUTES ({inactivity}) is not greater "
+            f"than ACCESS_TOKEN_DURATION_MINUTES ({access}): users who are "
+            f"actively working will be logged out, because a client only "
+            f"refreshes its session once the access token has expired. Set "
+            f"the inactivity window above the access-token lifetime "
+            f"(defaults: 15 and 30)."
+        )
+    if absolute_minutes <= inactivity:
+        app.logger.warning(
+            f"REFRESH_TOKEN_ABSOLUTE_HOURS ({absolute_minutes // 60}h) is not "
+            f"longer than REFRESH_TOKEN_INACTIVITY_MINUTES ({inactivity} min): "
+            f"every session will end at the absolute cap and the inactivity "
+            f"window will never apply."
+        )
 
 
 def _check_rate_limit_storage(app):
@@ -128,7 +253,11 @@ def _register_legacy_routes(app, resources, alarms_resources, auth_type):
             api_legacy.add_resource(res["resource"], res["urls"], endpoint=res["endpoint"] + suffix)
     if auth_type == AUTH_DB:
         signup_activated = int(app.config["SIGNUP_ACTIVATED"])
-        if signup_activated in [SIGNUP_WITH_AUTH, SIGNUP_WITH_NO_AUTH]:
+        if signup_activated in [
+            SIGNUP_WITH_AUTH,
+            SIGNUP_WITH_NO_AUTH,
+            SIGNUP_PLATFORM_ADMIN_ONLY,
+        ]:
             api_legacy.add_resource(SignUpEndpoint, CONDITIONAL_ENDPOINTS["signup"], endpoint="signup" + suffix)
         api_legacy.add_resource(LoginEndpoint, CONDITIONAL_ENDPOINTS["login"], endpoint="login" + suffix)
     elif auth_type == AUTH_LDAP:
@@ -156,7 +285,7 @@ def create_app(env_name="development", dataconn=None):
     app.logger.setLevel(app_config[env_name].LOG_LEVEL)
 
     app.config.from_object(app_config[env_name])
-    _check_secret_keys(app)
+    _run_startup_checks(app)
     # initialization for init_cornflow_service.py
     if dataconn is not None:
         app.config["SQLALCHEMY_DATABASE_URI"] = dataconn
@@ -202,7 +331,11 @@ def create_app(env_name="development", dataconn=None):
 
     if auth_type == AUTH_DB:
         signup_activated = int(app.config["SIGNUP_ACTIVATED"])
-        if signup_activated in [SIGNUP_WITH_AUTH, SIGNUP_WITH_NO_AUTH]:
+        if signup_activated in [
+            SIGNUP_WITH_AUTH,
+            SIGNUP_WITH_NO_AUTH,
+            SIGNUP_PLATFORM_ADMIN_ONLY,
+        ]:
             api.add_resource(
                 SignUpEndpoint, CONDITIONAL_ENDPOINTS["signup"], endpoint="signup"
             )
@@ -233,10 +366,12 @@ def create_app(env_name="development", dataconn=None):
 
     _register_legacy_routes(app, resources, alarms_resources, auth_type)
 
-    # The interactive API docs (Swagger UI) are registered only when enabled.
-    # They are off by default in production so the deny-by-default CSP holds
-    # and the OpenAPI schema is not exposed. Only the Blueprint routes are
-    # documented; the legacy aliases are not duplicated in the schema.
+    # The interactive API docs (Swagger UI) are registered only when enabled
+    # (DOCS_ENABLED: on by default at security levels 1 and 2, off at level 3).
+    # Their routes get a Content-Security-Policy of their own that lets the
+    # Swagger UI load (see cornflow.shared.security); the rest of the API keeps
+    # the strict one. Only the Blueprint routes are documented; the legacy
+    # aliases are not duplicated in the schema.
     if int(app.config.get("DOCS_ENABLED", 1)):
         docs = FlaskApiSpec(app)
         for res in resources:

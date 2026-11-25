@@ -4,7 +4,7 @@ This file contains the auth class that can be used for authentication on the req
 
 from datetime import datetime, timedelta, timezone
 from functools import wraps
-from typing import Tuple
+from typing import Optional, Tuple
 
 # Imports from external libraries
 import jwt
@@ -28,10 +28,13 @@ from cornflow.shared.const import (
     API_KEY_SCOPE_FULL,
     API_KEY_SCOPE_READ,
     AUTH_OID,
+    BI_TOKEN_EXPIRY_REQUIRED_MIN_SECURITY_LEVEL,
     READ_ONLY_HTTP_METHODS,
     PERMISSION_METHOD_MAP,
     INTERNAL_TOKEN_ISSUER,
     OID_PROVIDER_AZURE,
+    PWD_CHANGE_REASON_EXPIRED,
+    PWD_CHANGE_REASON_FLAGGED,
     PWD_ROTATION_ALLOWED_ENDPOINTS,
     TOKEN_PURPOSE_ALLOWED_ENDPOINTS,
     TOKEN_PURPOSE_MFA_SETUP,
@@ -41,10 +44,16 @@ from cornflow.shared.const import (
     TOKEN_TYPE_REFRESH,
 )
 from cornflow.shared.audit import audit
+from cornflow.shared.security_levels import CONFIG_KEY_LEVEL, DEFAULT_SECURITY_LEVEL
+from cornflow.shared.validators import (
+    password_change_flag_enforced,
+    password_rotation_enforced,
+)
 from cornflow.shared.exceptions import (
     CommunicationError,
     InvalidCredentials,
     InvalidData,
+    InvalidToken,
     InvalidUsage,
     NoPermission,
 )
@@ -68,9 +77,8 @@ class Auth:
         if token_type == TOKEN_TYPE_REFRESH:
             # A refresh token is only valid at the refresh endpoint; it must
             # never grant access to a normal endpoint.
-            raise InvalidCredentials(
+            raise InvalidToken(
                 "A refresh token can not be used to access this endpoint",
-                status_code=401,
                 log_txt=f"Error while user {user.id} tries to authenticate with "
                 f"a refresh token on endpoint {logical_endpoint_name(request.endpoint)}.",
             )
@@ -115,9 +123,8 @@ class Auth:
                 f"inside the rotation grace window"
             )
             return
-        raise InvalidCredentials(
+        raise InvalidToken(
             "The API key has been revoked, please generate a new one",
-            status_code=401,
             log_txt=f"Error while user {user.id} authenticates with an API "
             f"key. The key version is stale (revoked).",
         )
@@ -190,21 +197,57 @@ class Auth:
         )
 
     @staticmethod
+    def password_change_flag_applies(user) -> bool:
+        """
+        Tells whether the user's pwd_change_required flag is in force: the flag
+        is only enforced from security level 2. At level 1 it is ignored but
+        kept in the database.
+
+        :param user: the user object
+        :return: True if the user is flagged and the flag applies
+        :rtype: bool
+        """
+        return bool(user.pwd_change_required) and password_change_flag_enforced()
+
+    @staticmethod
+    def password_change_blocking_reason(user) -> Optional[str]:
+        """
+        Gives the reason why the user can only change their password, or None if
+        the user has full access:
+
+        - PWD_CHANGE_REASON_FLAGGED: the password is flagged for a forced change
+          and the security level enforces the flag (levels 2 and 3), whatever
+          PWD_ROTATION_ENFORCE is;
+        - PWD_CHANGE_REASON_EXPIRED: the password is older than PWD_ROTATION_TIME
+          days and PWD_ROTATION_ENFORCE=1.
+
+        Exemptions (service user, external provider) are checked by the caller.
+
+        :param user: the user object
+        :rtype: str or None
+        """
+        if Auth.password_change_flag_applies(user):
+            return PWD_CHANGE_REASON_FLAGGED
+        if password_rotation_enforced() and Auth.password_rotation_expired(user):
+            return PWD_CHANGE_REASON_EXPIRED
+        return None
+
+    @staticmethod
     def _check_password_rotation(user):
         """
-        When password rotation is enforced, users whose password has expired
-        or is flagged for a forced change can only access the endpoints
-        needed to review their profile and set a new password.
+        Users that must change their password can only access the endpoints
+        needed to review their profile and set a new password. That is the case
+        when the password is flagged for a forced change (from security level 2,
+        even without rotation) or has expired while rotation is enforced
+        (PWD_ROTATION_ENFORCE=1). The service user and users from an external
+        provider are exempt.
 
         :param user: the user object
         """
-        if int(current_app.config.get("PWD_ROTATION_ENFORCE", 1)) != 1:
-            return
         if user.comes_from_external_provider():
             return
-        if not (
-            user.pwd_change_required or Auth.password_rotation_expired(user)
-        ):
+        reason = Auth.password_change_blocking_reason(user)
+        if reason is None:
             return
         if user.is_service_user():
             return
@@ -216,14 +259,17 @@ class Auth:
             target_user_id = (request.view_args or {}).get("user_id")
             if target_user_id == user.id:
                 return
+        if reason == PWD_CHANGE_REASON_FLAGGED:
+            cause = "The user's password is flagged for a forced change."
+        else:
+            cause = "The user's password has expired and rotation is enforced."
         raise NoPermission(
             error="Your password has expired or must be renewed. "
             "Please change your password before continuing.",
             status_code=403,
             payload={"error_code": "password_rotation"},
             log_txt=f"Error while user {user.id} tries to access endpoint "
-            f"{endpoint}. The user's password has expired and rotation "
-            f"is enforced.",
+            f"{endpoint}. {cause}",
         )
 
     @staticmethod
@@ -342,13 +388,19 @@ class Auth:
         )
 
     @staticmethod
-    def generate_access_token(user_id: int = None) -> str:
+    def generate_access_token(user_id: int = None, session=None) -> str:
         """
         Generates a short-lived access token (ACCESS_TOKEN_DURATION_MINUTES)
         carrying the token-version claim. It is the credential sent on every
         request; the client renews it via the refresh endpoint.
 
+        When it belongs to a stored session the token also carries its id
+        ("sid"), so revoking that session (logout, refresh-token reuse
+        detection) invalidates the access tokens already in circulation
+        instead of letting them live until their own expiry.
+
         :param int user_id: user id to generate the token for
+        :param session: the :class:`SessionModel` the token belongs to, if any
         :return: the generated access token
         :rtype: str
         """
@@ -374,6 +426,8 @@ class Auth:
             "tv": user.token_version or 0,
             "type": TOKEN_TYPE_ACCESS,
         }
+        if session is not None:
+            payload["sid"] = session.session_id
         return jwt.encode(
             payload, current_app.config["SECRET_TOKEN_KEY"], algorithm="HS256"
         )
@@ -433,7 +487,7 @@ class Auth:
             return {"token": Auth.generate_token(user.id)}
         session = SessionModel.create_for_user(user)
         return {
-            "token": Auth.generate_access_token(user.id),
+            "token": Auth.generate_access_token(user.id, session=session),
             "refresh_token": Auth.generate_refresh_token(user.id, session),
         }
 
@@ -458,32 +512,28 @@ class Auth:
             )
         payload = Auth.decode_token(refresh_token)
         if not isinstance(payload, dict) or payload.get("type") != TOKEN_TYPE_REFRESH:
-            raise InvalidCredentials(
+            raise InvalidToken(
                 "Invalid refresh token",
-                status_code=401,
                 log_txt="Error while refreshing a session. The token is not a "
                 "refresh token.",
             )
         user = UserModel.get_one_object(username=payload.get("sub"))
         if user is None:
-            raise InvalidCredentials(
+            raise InvalidToken(
                 "Invalid refresh token",
-                status_code=401,
                 log_txt="Error while refreshing a session. The user does not "
                 "exist.",
             )
         if int(payload.get("tv", 0)) != int(user.token_version or 0):
-            raise InvalidCredentials(
+            raise InvalidToken(
                 "The session has been revoked, please log in again",
-                status_code=401,
                 log_txt=f"Error while user {user.id} refreshes a session. The "
                 f"token version is stale (revoked).",
             )
         session = SessionModel.get_active(payload.get("sid"))
         if session is None:
-            raise InvalidCredentials(
+            raise InvalidToken(
                 "The session is no longer valid, please log in again",
-                status_code=401,
                 log_txt=f"Error while user {user.id} refreshes a session. The "
                 f"session does not exist or is revoked.",
             )
@@ -498,23 +548,27 @@ class Auth:
                 actor=user.username,
                 session_id=session.session_id,
             )
-            raise InvalidCredentials(
+            raise InvalidToken(
                 "The session has been revoked, please log in again",
-                status_code=401,
                 log_txt=f"Error while user {user.id} refreshes a session. A "
                 f"superseded refresh token was reused; session revoked.",
             )
         if session.is_expired() or session.is_inactive():
             session.revoke()
-            raise InvalidCredentials(
+            raise InvalidToken(
                 "The session has expired, please log in again",
-                status_code=401,
                 log_txt=f"Error while user {user.id} refreshes a session. The "
                 f"session expired (inactivity or absolute cap).",
             )
         session.rotate()
+        audit(
+            "session.refreshed",
+            actor_id=user.id,
+            actor=user.username,
+            session_id=session.session_id,
+        )
         return {
-            "token": Auth.generate_access_token(user.id),
+            "token": Auth.generate_access_token(user.id, session=session),
             "refresh_token": Auth.generate_refresh_token(user.id, session),
             "id": user.id,
         }
@@ -525,19 +579,29 @@ class Auth:
         Revokes the session behind a refresh token (logout). Idempotent: an
         invalid, expired or already-revoked token is a no-op.
 
+        Returns the owner of the closed session so the caller can attribute the
+        event: a logout is not authenticated (the client only sends the refresh
+        token), so without this the audit record would say when and from where
+        but never who.
+
         :param str refresh_token: the refresh token whose session to revoke
+        :return: the user whose session was closed, or None when there was
+          nothing to close
+        :rtype: :class:`UserModel` or None
         """
         if not refresh_token:
-            return
+            return None
         try:
             payload = Auth.decode_token(refresh_token)
         except InvalidCredentials:
-            return
+            return None
         if not isinstance(payload, dict) or payload.get("type") != TOKEN_TYPE_REFRESH:
-            return
+            return None
         session = SessionModel.get_active(payload.get("sid"))
-        if session is not None:
-            session.revoke()
+        if session is None:
+            return None
+        session.revoke()
+        return UserModel.get_one_user(session.user_id)
 
     @staticmethod
     def generate_api_key(user_id: int = None, scope: str = None) -> str:
@@ -591,7 +655,7 @@ class Auth:
         :return: dictionary containing the username from the token's sub claim
         :rtype: dict
         """
-        if token is None:
+        if not token:
             raise InvalidCredentials(
                 "Must provide a token in Authorization header",
                 log_txt="Error while trying to decode token. Token is missing.",
@@ -611,10 +675,13 @@ class Auth:
 
         except jwt.ExpiredSignatureError:
             # Handle expiration specifically, could apply to either token type if caught here first
-            raise InvalidCredentials(
+            raise InvalidToken(
                 "The token has expired, please login again",
                 log_txt="Error while trying to decode token. The token has expired.",
-                status_code=400,
+                # 401 and not 400: an expired credential is an authentication
+                # failure, and it is the status every client (the web app, the
+                # cornflow-client library) uses to decide to renew the session
+                # instead of surfacing the error.
             )
         except (
             jwt.InvalidSignatureError,
@@ -632,10 +699,9 @@ class Auth:
                     )
                 except jwt.ExpiredSignatureError:
                     # OIDC token expired
-                    raise InvalidCredentials(
+                    raise InvalidToken(
                         "The token has expired, please login again",
                         log_txt="Error while trying to decode OIDC token. The token has expired.",
-                        status_code=400,
                     )
                 except (
                     jwt.InvalidTokenError,
@@ -649,10 +715,9 @@ class Auth:
                         f"OIDC verification failed ({type(e_oidc).__name__}: {str(e_oidc)})."
                     )
                     current_app.logger.warning(log_message)
-                    raise InvalidCredentials(
+                    raise InvalidToken(
                         "Invalid token format, signature, or configuration",
                         log_txt=log_message,
-                        status_code=400,
                     )
             else:
                 # Internal verification failed, and OIDC is not configured
@@ -661,10 +726,9 @@ class Auth:
                     f"OIDC is not configured."
                 )
                 current_app.logger.warning(log_message)
-                raise InvalidCredentials(
+                raise InvalidToken(
                     "Invalid token format or signature",
                     log_txt=log_message,
-                    status_code=400,
                 )
         except Exception as e:
             # Catch any other unexpected errors during the process
@@ -745,19 +809,63 @@ class Auth:
         token = self.get_token_from_header(headers)
         data = self.decode_token(token)
 
-        user = self.user_model.get_one_object(username=data["sub"])
+        user = self.user_model.get_one_object(username=data.get("sub"))
 
         if user is None:
             err = "User not found. Please ensure you are using valid credentials"
-            raise InvalidCredentials(
+            raise InvalidToken(
                 err,
                 log_txt="Error while trying to get user from header. User does not exist.",
-                status_code=400,
             )
 
         self._check_token_version(user, data)
+        self._check_session_state(user, data)
 
         return user, data
+
+    @staticmethod
+    def _check_session_state(user, payload):
+        """
+        Rejects an access token whose backing session is gone, revoked or past
+        its absolute lifetime.
+
+        Access tokens are short-lived but stateless, so without this check a
+        revoked session would keep granting access until the token expired on
+        its own (up to ACCESS_TOKEN_DURATION_MINUTES): logging out, or
+        detecting the reuse of a refresh token, would stop the renewal but not
+        the access already in circulation.
+
+        Only the absolute cap is enforced here, never the inactivity window:
+        activity is recorded when the client refreshes, which an active client
+        does at least once per access-token lifetime (the window is always
+        longer than that lifetime). Checking inactivity here would log out a
+        user who is actively making requests.
+
+        Tokens issued before sessions were bound (no "sid" claim) are left to
+        the token-version check alone, so upgrading a deployment does not log
+        everybody out.
+
+        :param user: the user the token belongs to
+        :param dict payload: the decoded token payload
+        """
+        if not isinstance(payload, dict):
+            return
+        session_id = payload.get("sid")
+        if not session_id:
+            return
+        session = SessionModel.get_active(session_id)
+        if session is None:
+            raise InvalidToken(
+                "The session has been closed, please log in again",
+                log_txt=f"Error while user {user.id} authenticates. The session "
+                f"backing the access token is revoked or no longer exists.",
+            )
+        if session.is_expired():
+            raise InvalidToken(
+                "The session has expired, please log in again",
+                log_txt=f"Error while user {user.id} authenticates. The session "
+                f"backing the access token reached its absolute lifetime.",
+            )
 
     def _check_token_version(self, user, payload):
         """
@@ -779,9 +887,8 @@ class Auth:
             # External (OIDC) tokens are managed by the identity provider
             return
         if int(payload.get("tv", 0)) != int(user.token_version or 0):
-            raise InvalidCredentials(
+            raise InvalidToken(
                 "The session has been revoked, please log in again",
-                status_code=401,
                 log_txt=f"Error while user {user.id} tries to authenticate. "
                 f"The token version is stale (revoked session).",
             )
@@ -806,11 +913,10 @@ class Auth:
                 status_code=403,
             )
         if isinstance(data, dict) and data.get("type") == TOKEN_TYPE_REFRESH:
-            raise InvalidCredentials(
+            raise InvalidToken(
                 "A refresh token can not be used to access this endpoint",
                 log_txt="Error while trying to get user from header. "
                 "The token is a refresh token.",
-                status_code=401,
             )
         return user
 
@@ -839,7 +945,7 @@ class Auth:
             jwks_url = f"{provider_url.rstrip('/')}/.well-known/jwks.json"
 
         try:
-            response = requests.get(jwks_url)
+            response = requests.get(jwks_url, timeout=10)
             response.raise_for_status()
 
             # Convert JWK to RSA public keys using PyJWT's built-in method
@@ -986,6 +1092,12 @@ class BIAuth(Auth):
        Migrate those endpoints to ``Auth`` and hand out read-only API keys
        (``cornflow users api_key -u <user> --read-only``); this class will be
        removed in a future release.
+
+    Expiry depends on the security level: BI tokens expire after
+    BI_TOKEN_DURATION_DAYS days, or carry no expiration date when it is 0 (the
+    default at levels 1 and 2). Level 3 (1 to 365 days, 90 by default) also
+    rejects the tokens without an expiration date, so the BI integrations have
+    to regenerate them.
     """
 
     CHECK_TOKEN_VERSION = False
@@ -994,38 +1106,71 @@ class BIAuth(Auth):
         super().__init__(user_model)
 
     @staticmethod
+    def expiry_required() -> bool:
+        """
+        Tells whether BI tokens must carry an expiration date ("exp" claim):
+        only from security level 3. A configuration without SECURITY_LEVEL is
+        treated as the default level, as app.py does.
+
+        :return: True if a BI token without "exp" must be rejected
+        :rtype: bool
+        """
+        level = current_app.config.get(CONFIG_KEY_LEVEL, DEFAULT_SECURITY_LEVEL)
+        return int(level) >= BI_TOKEN_EXPIRY_REQUIRED_MIN_SECURITY_LEVEL
+
+    @staticmethod
     def decode_token(token: str = None) -> dict:
         """
-        Decodes a given JSON Web token and extracts the username from the sub claim.
+        Decodes a BI token and returns its payload (the username is in the sub
+        claim). A token that carries "exp" is rejected once expired; from
+        security level 3 a token without "exp" is rejected too.
 
         :param str token: the given JSON Web Token
-        :return: dictionary containing the username from the token's sub claim
+        :return: the decoded payload
         :rtype: dict
         """
+        if not token:
+            raise InvalidCredentials(
+                "Must provide a token in Authorization header",
+                log_txt="Error while trying to decode a BI token. Token is missing.",
+                status_code=400,
+            )
+        options = {"require": ["exp"]} if BIAuth.expiry_required() else None
         try:
             return jwt.decode(
-                token, current_app.config["SECRET_BI_KEY"], algorithms="HS256"
+                token,
+                current_app.config["SECRET_BI_KEY"],
+                algorithms="HS256",
+                options=options,
             )
 
         except jwt.ExpiredSignatureError:
-            raise InvalidCredentials(
+            raise InvalidToken(
                 "The BI token has expired, please generate a new one",
                 log_txt="Error while trying to decode a BI token. The token has expired.",
-                status_code=400,
+            )
+        except jwt.MissingRequiredClaimError:
+            raise InvalidToken(
+                "The BI token has no expiration date and is no longer accepted, "
+                "please regenerate the BI token",
+                log_txt="Error while trying to decode a BI token. The token has no "
+                "expiration date (exp claim), which security level 3 requires.",
             )
         except jwt.InvalidTokenError:
-            raise InvalidCredentials(
+            raise InvalidToken(
                 "Invalid token, please try again with a new token",
                 log_txt="Error while trying to decode token. The token is invalid.",
-                status_code=400,
             )
 
     @staticmethod
     def generate_token(user_id: int = None) -> str:
         """
         Generates a BI token given a user_id. The token contains the username
-        in the sub claim and expires after BI_TOKEN_DURATION_DAYS days (it can
-        be regenerated with `cornflow users bi_token`).
+        in the sub claim and expires after BI_TOKEN_DURATION_DAYS days; with 0
+        (the default at security levels 1 and 2) it carries no expiration date.
+        Security level 3 does not start with 0, so it never issues tokens
+        without an expiration date. A token can be regenerated with
+        `cornflow users bi_token`.
 
         :param int user_id: user id to generate the token for
         :return: the generated token
@@ -1044,13 +1189,15 @@ class BIAuth(Auth):
                 err, log_txt="Error while trying to generate token. " + err
             )
 
+        now = datetime.now(timezone.utc)
         payload = {
-            "exp": datetime.now(timezone.utc)
-            + timedelta(days=int(current_app.config["BI_TOKEN_DURATION_DAYS"])),
-            "iat": datetime.now(timezone.utc),
+            "iat": now,
             "sub": user.username,
             "iss": INTERNAL_TOKEN_ISSUER,
         }
+        duration_days = int(current_app.config["BI_TOKEN_DURATION_DAYS"])
+        if duration_days > 0:
+            payload["exp"] = now + timedelta(days=duration_days)
 
         return jwt.encode(
             payload, current_app.config["SECRET_BI_KEY"], algorithm="HS256"

@@ -9,7 +9,11 @@ from flask import current_app
 from cornflow.models import UserModel
 from cornflow.shared import db
 from cornflow.shared.authentication.auth import BIAuth, Auth
-from cornflow.shared.exceptions import InvalidUsage
+from cornflow.shared.exceptions import (
+    InvalidCredentials,
+    InvalidToken,
+    InvalidUsage,
+)
 from cornflow.tests.const import LOGIN_URL
 from cornflow.tests.custom_test_case import CheckTokenTestCase, CustomTestCase
 
@@ -129,3 +133,12 @@ class TestUnexpiringToken(CustomTestCase):
 
         auth = Auth()
         self.assertRaises(InvalidUsage, auth.decode_token, None)
+
+    def test_empty_bi_token_is_400_without_challenge(self):
+        # there is no token to assess: 400 and no challenge, not InvalidToken
+        for token in ("", None):
+            with self.assertRaises(InvalidCredentials) as ctx:
+                BIAuth.decode_token(token)
+            self.assertNotIsInstance(ctx.exception, InvalidToken)
+            self.assertEqual(400, ctx.exception.status_code)
+            self.assertNotIn("WWW-Authenticate", ctx.exception.headers)

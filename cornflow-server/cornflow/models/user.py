@@ -21,12 +21,18 @@ from cornflow.shared import (
     db,
 )
 from cornflow.shared.audit import audit
-from cornflow.shared.const import API_KEY_SCOPE_FULL, PASSWORD_SPECIAL_CHARACTERS
+from cornflow.shared.const import (
+    API_KEY_SCOPE_FULL,
+    DEFAULT_LOGIN_MAX_ATTEMPTS,
+    DEFAULT_PWD_HISTORY_SIZE,
+    PASSWORD_SPECIAL_CHARACTERS,
+)
 from cornflow.shared.encryption import decrypt_value, encrypt_value
 from cornflow.shared.exceptions import InvalidCredentials
 from cornflow.shared.validators import (
     check_password_pattern,
     check_email_pattern,
+    password_policy_enforced,
 )
 
 
@@ -184,6 +190,17 @@ class UserModel(TraceAttributesModel):
             for key in ("username", "first_name", "last_name", "email")
         }
 
+    @staticmethod
+    def _password_history_size() -> int:
+        """
+        Number of previous passwords kept. Never negative, as level 1 has no
+        limits on PWD_HISTORY_SIZE.
+        """
+        return max(
+            int(current_app.config.get("PWD_HISTORY_SIZE", DEFAULT_PWD_HISTORY_SIZE)),
+            0,
+        )
+
     def check_password_reuse(self, new_password: str) -> bool:
         """
         Checks if the given password matches the current password or any of
@@ -193,7 +210,7 @@ class UserModel(TraceAttributesModel):
         :return: True if the password was already used
         :rtype: bool
         """
-        history_size = int(current_app.config.get("PWD_HISTORY_SIZE", 10))
+        history_size = self._password_history_size()
         hashes = []
         if self.password:
             hashes.append(self.password)
@@ -223,23 +240,24 @@ class UserModel(TraceAttributesModel):
                     msg,
                     log_txt=f"Error while trying to update user {self.id}. " + msg,
                 )
-            if self.check_password_reuse(new_password):
+            if password_policy_enforced() and self.check_password_reuse(new_password):
                 err = (
                     "The new password can not be one of the last "
-                    f"{current_app.config.get('PWD_HISTORY_SIZE', 10)} "
+                    f"{self._password_history_size()} "
                     "passwords used."
                 )
                 raise InvalidCredentials(
                     err,
                     log_txt=f"Error while trying to update user {self.id}. " + err,
                 )
-            # The replaced hash is kept so the old password can not be reused
+            # The replaced hash is stored at every security level, even if the
+            # reuse check only runs from level 2
             if self.password and self.id is not None:
                 UserPasswordHistoryModel(
                     {"user_id": self.id, "password_hash": self.password}
                 ).save()
                 UserPasswordHistoryModel.trim_history(
-                    self.id, int(current_app.config.get("PWD_HISTORY_SIZE", 10))
+                    self.id, self._password_history_size()
                 )
             new_password = self.__generate_hash(new_password)
             data["password"] = new_password
@@ -284,45 +302,80 @@ class UserModel(TraceAttributesModel):
     def is_login_locked(self) -> bool:
         """
         Returns True while the account is locked because of too many
-        consecutive failed login attempts. Locked accounts can only be
-        unlocked by a platform administrator.
+        consecutive failed login attempts. The lock does not expire: the
+        account stays locked until it is unlocked through the API or the
+        break-glass CLI command, also when the lockout is later disabled
+        (LOGIN_MAX_ATTEMPTS=0).
 
         :rtype: bool
         """
         return bool(self.locked)
 
+    @staticmethod
+    def login_max_attempts() -> int:
+        """
+        Consecutive failed logins (wrong password or wrong second-factor code)
+        that lock an account, as configured with LOGIN_MAX_ATTEMPTS. A value of
+        0 or lower means there is no lockout and failures are not counted (the
+        default at security level 1, where the setting has no limits).
+        """
+        return int(
+            current_app.config.get("LOGIN_MAX_ATTEMPTS", DEFAULT_LOGIN_MAX_ATTEMPTS)
+        )
+
+    @staticmethod
+    def login_lockout_enabled() -> bool:
+        """
+        Returns True when failed logins lock accounts (LOGIN_MAX_ATTEMPTS
+        above 0).
+        """
+        return UserModel.login_max_attempts() > 0
+
+    def _lock_after_failed_logins(self, max_attempts: int):
+        """
+        Locks the account after max_attempts consecutive failed logins. Locking
+        revokes every outstanding session (token version and refresh-token
+        sessions) and the personal API key, with no rotation grace, at every
+        security level. The lock does not expire. Added to the session but not
+        committed (the calling flow commits).
+        """
+        self.locked = True
+        self.revoke_all_sessions()
+        self._clear_api_key_state()
+        current_app.logger.warning(
+            f"User {self.username} locked after {max_attempts} failed login "
+            f"attempts. An administrator must unlock the account."
+        )
+        audit(
+            "account.locked",
+            outcome="locked",
+            target_id=self.id,
+            target=self.username,
+            attempts=self.failed_login_attempts,
+        )
+
     def register_failed_login(self):
         """
-        Registers a failed login attempt (wrong password or wrong TOTP code)
-        and locks the account once LOGIN_MAX_ATTEMPTS consecutive failures
-        are reached. The account stays locked until a platform administrator
-        unlocks it. Service users are exempt from the lockout so the
-        machine-to-machine communication can not be denial-of-serviced.
+        Registers a failed login attempt (wrong password or wrong TOTP code).
+        With LOGIN_MAX_ATTEMPTS above 0, the account is locked once that many
+        consecutive failures are reached and stays locked until it is unlocked
+        (there is no automatic unlock). With LOGIN_MAX_ATTEMPTS at 0 or lower
+        (the default at security level 1) failures are neither counted nor
+        lock the account; accounts that were already locked stay locked.
+        Service users are exempt from the lockout so the machine-to-machine
+        communication can not be denial-of-serviced.
         """
         if self.is_service_user():
             current_app.logger.warning(
                 f"Failed login attempt for service user {self.username}"
             )
             return
-        max_attempts = int(current_app.config.get("LOGIN_MAX_ATTEMPTS", 5))
+        max_attempts = self.login_max_attempts()
+        if max_attempts <= 0:
+            return
         self.failed_login_attempts = (self.failed_login_attempts or 0) + 1
-        if self.failed_login_attempts >= max_attempts:
-            self.locked = True
-            # Locking revokes every outstanding session and personal API key
-            self.revoke_all_sessions()
-            self.api_key_version = (self.api_key_version or 0) + 1
-            current_app.logger.warning(
-                f"User {self.username} locked after {max_attempts} failed "
-                f"login attempts. A platform administrator must unlock the "
-                f"account."
-            )
-            audit(
-                "account.locked",
-                outcome="locked",
-                target_id=self.id,
-                target=self.username,
-                attempts=self.failed_login_attempts,
-            )
+        if not self.locked and self.failed_login_attempts >= max_attempts:
+            self._lock_after_failed_logins(max_attempts)
         db.session.add(self)
         db.session.commit()
 
@@ -337,8 +390,10 @@ class UserModel(TraceAttributesModel):
 
     def unlock_account(self):
         """
-        Unlocks the account and clears the failed login counter. Only
-        platform administrators (or the break-glass CLI command) call this.
+        Unlocks the account and clears the failed login counter. Called by the
+        unlock endpoint (platform administrators, and at security levels 1 and 2
+        also the client admin for users without platform roles) and by the
+        break-glass CLI command.
         """
         self.locked = False
         self.failed_login_attempts = 0
@@ -392,11 +447,11 @@ class UserModel(TraceAttributesModel):
         db.session.add(self)
         db.session.commit()
 
-    def revoke_api_keys(self):
+    def _clear_api_key_state(self):
         """
-        Invalidates the user's personal API key without issuing a new one
-        (explicit disable, and on account lock / MFA reset). The rotation
-        grace does not apply here: an explicit revocation is immediate.
+        Invalidates the user's personal API key, including the key superseded by
+        the last rotation that may still be inside its grace window. Added to
+        the session but not committed (the calling flow commits).
         """
         self.api_key_version = (self.api_key_version or 0) + 1
         self.api_key_issued_at = None
@@ -405,6 +460,14 @@ class UserModel(TraceAttributesModel):
         self.api_key_previous_version = None
         self.api_key_grace_until = None
         db.session.add(self)
+
+    def revoke_api_keys(self):
+        """
+        Invalidates the user's personal API key without issuing a new one
+        (explicit disable, and on account lock / MFA reset). The rotation
+        grace does not apply here: an explicit revocation is immediate.
+        """
+        self._clear_api_key_state()
         db.session.commit()
 
     def api_key_expires_at(self):
@@ -599,7 +662,9 @@ class UserModel(TraceAttributesModel):
             chars = upper_letters + lower_letters + numbers + symbols
             _secure_random.shuffle(chars)
             pwd = "".join(chars)
-            check, _ = check_password_pattern(pwd)
+            # Random passwords always follow the full policy, whatever the
+            # security level
+            check, _ = check_password_pattern(pwd, strict=True)
             if check:
                 return pwd
 

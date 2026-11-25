@@ -7,6 +7,40 @@ from urllib.parse import urljoin
 
 import requests
 
+# Raised when the server refuses to renew an interactive session (the refresh
+# token answers 401): the session was closed and only a new login helps.
+SESSION_CLOSED_MESSAGE = (
+    "The session has been closed (inactivity or maximum session length). "
+    "Log in again; for unattended processes use a personal API key "
+    "(set_api_key, or CORNFLOW_SERVICE_API_KEY in Airflow)."
+)
+
+
+def _is_expired_token(response) -> bool:
+    """
+    Whether a response says the access token has expired and the call is worth
+    retrying after renewing the session.
+
+    A current server answers 401. Older ones answered 400 with the expiry
+    message, so that is accepted too: otherwise a script talking to a server
+    that has not been updated would fail instead of renewing.
+
+    :param response: the requests response to inspect
+    :rtype: bool
+    """
+    status = getattr(response, "status_code", None)
+    if status == 401:
+        return True
+    if status != 400:
+        return False
+    try:
+        body = response.json()
+    except Exception:
+        return False
+    if not isinstance(body, dict):
+        return False
+    return "expired" in str(body.get("error", "")).lower()
+
 
 class RawCornFlow(object):
     """
@@ -27,17 +61,20 @@ class RawCornFlow(object):
             if not self.token:
                 raise CornFlowApiError("Need to login first!")
             response = func(self, *args, **kwargs)
-            # Interactive sessions use a short-lived access token: on a 401
-            # renew it once with the stored refresh token and retry the call
-            # transparently, so long-running scripts keep working. API-key
-            # sessions have no refresh token and are returned as-is.
-            if (
-                getattr(response, "status_code", None) == 401
-                and self.refresh_token
-            ):
+            # Interactive sessions use a short-lived access token: when it has
+            # expired, renew it once with the stored refresh token and retry
+            # the call transparently, so long-running scripts keep working.
+            # API-key sessions have no refresh token and are returned as-is.
+            if self.refresh_token and _is_expired_token(response):
                 refresh_response = self.refresh()
                 if refresh_response.status_code == 200:
                     response = func(self, *args, **kwargs)
+                elif refresh_response.status_code == 401:
+                    # The server refused the refresh token: the session was
+                    # closed (inactivity, maximum length or revocation), so
+                    # retrying cannot help. Any other failure (429, 5xx...)
+                    # keeps returning the original response.
+                    raise CornFlowApiError(SESSION_CLOSED_MESSAGE)
             return response
 
         return wrapper

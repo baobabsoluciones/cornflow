@@ -13,15 +13,47 @@ INTERNAL_TOKEN_ISSUER = "cornflow"
 # ---------------------------------------------------------------------------
 # Password policy (CCN-STIC-807)
 # ---------------------------------------------------------------------------
-# These are the single source of truth for the policy defaults. config.py
-# reads the environment using them as fallbacks (and clamps them to their
-# security floor/ceiling); validators.py uses them when there is no
-# application context (e.g. some CLI usages).
+# Password policy values of security levels 2 and 3. The per-level defaults
+# and limits live in the inventory of cornflow/shared/security_levels.py,
+# which uses these constants; validators.py falls back to them when there is
+# no application context (e.g. some CLI usages).
 DEFAULT_PWD_MIN_LENGTH = 12
 DEFAULT_PWD_MIN_ZXCVBN_SCORE = 3
 DEFAULT_PWD_HISTORY_SIZE = 10
 DEFAULT_PWD_MAX_SIMILARITY = 0.8
 DEFAULT_PWD_ROTATION_TIME = 120
+
+# Security level from which the full password policy applies (levels 2 and
+# 3): no whitespace, no personal data, no digit runs, zxcvbn score, history
+# reuse, similarity with the last password and current_password on a self
+# change. Level 1 keeps the 1.3.9 rules.
+PWD_POLICY_MIN_SECURITY_LEVEL = 2
+
+# Consecutive failed logins that lock an account when the configuration does
+# not define LOGIN_MAX_ATTEMPTS (only configurations that do not inherit from
+# cornflow.config). The security levels set it: 0 (no lockout) at level 1 and
+# 5 at levels 2 and 3.
+DEFAULT_LOGIN_MAX_ATTEMPTS = 5
+
+# Minimum password length of the 1.3.9 rules (level 1 fallback).
+LEGACY_PWD_MIN_LENGTH = 5
+
+# Security level from which the forced password change applies (levels 2
+# and 3): passwords set by an admin (signup or edit) and temporary recovery
+# passwords are single-use, and a password flagged with pwd_change_required
+# (by those flows, by the CLI or by migration b7a1c9d807e5) can only be
+# changed. Level 1 neither flags nor enforces (1.3.9 behaviour); the flags
+# stay in the database and apply again if the level is raised.
+PWD_CHANGE_FLAG_MIN_SECURITY_LEVEL = 2
+
+# Security level from which BI tokens without an expiration date ("exp"
+# claim) are rejected (level 3). Levels 1 and 2 accept them, as in 1.3.9; a
+# token that carries "exp" is always checked against it.
+BI_TOKEN_EXPIRY_REQUIRED_MIN_SECURITY_LEVEL = 3
+
+# Why a user must change their password before using the API (log only)
+PWD_CHANGE_REASON_FLAGGED = "flagged"
+PWD_CHANGE_REASON_EXPIRED = "expired"
 
 # Personal data (username, names, email local part) shorter than this is not
 # searched for inside the password, to avoid false positives with very short
@@ -100,10 +132,12 @@ API_KEY_FORBIDDEN_ENDPOINTS = {
     "user-roles-detail": ["DELETE"],
 }
 
-# Endpoints (name -> allowed methods) that stay reachable when the user's
-# password has expired and password rotation is enforced: the user can check
-# their token, review their own profile (and roles, needed by the web client
-# to render the settings screen) and change their password.
+# Endpoints (name -> allowed methods) that stay reachable when the user must
+# change their password: the password is flagged for a forced change (from
+# security level 2) or has expired while rotation is enforced
+# (PWD_ROTATION_ENFORCE=1). The user can check their token, review their own
+# profile (and roles, needed by the web client to render the settings
+# screen) and change their password.
 PWD_ROTATION_ALLOWED_ENDPOINTS = {
     "user-detail": ["GET", "PUT"],
     "token": ["GET"],
@@ -156,9 +190,13 @@ AIRFLOW_TO_STATE_MAP = dict(
 # NO_SIGNUP: no signup endpoint
 # SIGNUP_WITH_NO_AUTH: signup endpoint with no auth
 # SIGNUP_WITH_AUTH: signup endpoint with auth
+# SIGNUP_PLATFORM_ADMIN_ONLY: signup endpoint with auth, restricted to
+# platform administrators (a compromised client admin can not quietly
+# provision new accounts)
 NO_SIGNUP = 0
 SIGNUP_WITH_NO_AUTH = 1
 SIGNUP_WITH_AUTH = 2
+SIGNUP_PLATFORM_ADMIN_ONLY = 3
 
 DATABRICKS_TO_STATE_MAP = dict(
     BLOCKED=EXEC_STATE_QUEUED,
@@ -222,8 +260,10 @@ SERVICE_ROLE = 4
 PLATFORM_ROLE_OFFSET = 900
 RESERVED_ROLE_RANGE = (900, 999)
 
-# Platform administrators operate the platform itself: they are the only
-# ones that can unlock accounts locked after too many failed login attempts
+# Platform administrators operate the platform itself. At every security level
+# they are the only ones that can manage the reserved role range, the
+# permissions of the platform roles, grant or revoke platform roles and unlock
+# platform users
 PLATFORM_ADMIN_ROLE = ADMIN_ROLE + PLATFORM_ROLE_OFFSET  # 903
 # Platform counterparts of the client viewer/planner roles: same permissions
 # as their client equivalent, used to tell internal (platform operator) users
@@ -259,6 +299,26 @@ PLATFORM_ROLE_INHERITANCE = {
     PLATFORM_PLANNER_ROLE: PLANNER_ROLE,
     PLATFORM_ADMIN_ROLE: ADMIN_ROLE,
 }
+
+# Error messages of the role and role permission endpoints for the reserved
+# role range and the platform roles
+_RESERVED_LOW, _RESERVED_HIGH = RESERVED_ROLE_RANGE
+RESERVED_ROLE_ERROR = (
+    f"Role ids {_RESERVED_LOW}-{_RESERVED_HIGH} are reserved for the cornflow "
+    "platform roles: only a platform administrator can manage them"
+)
+RESERVED_ROLE_ID_ERROR = (
+    f"Role ids {_RESERVED_LOW}-{_RESERVED_HIGH} are reserved for the cornflow "
+    "platform roles and a custom role there would stop cornflow from starting: "
+    f"leave the id out or use an id outside {_RESERVED_LOW}-{_RESERVED_HIGH}"
+)
+NO_FREE_ROLE_ID_ERROR = (
+    f"There is no free role id below {_RESERVED_LOW}: create the role with an "
+    f"explicit id outside {_RESERVED_LOW}-{_RESERVED_HIGH}"
+)
+PLATFORM_ROLE_PERMISSION_ERROR = (
+    "Only a platform administrator can manage the permissions of the platform roles"
+)
 
 ACTIONS_MAP = {
     GET_ACTION: "can_get",
@@ -341,6 +401,53 @@ EXTRA_PERMISSION_ASSIGNATION = [
     (VIEWER_ROLE, DELETE_ACTION, "user-api-key"),
 ]
 
+# Administration rights that depend on the security level (CORNFLOW_SECURITY_LEVEL).
+# They are registered with the base permissions (access_init, which service init
+# runs on every start and which deletes the permissions that are no longer in
+# the code), so changing the level adds or removes them on the next start. At
+# run time the permission table rules, as for any other permission.
+
+# Views of the access model: roles, permissions, actions and API views
+ACCESS_MANAGEMENT_ENDPOINTS = (
+    "roles",
+    "roles-detail",
+    "permissions",
+    "permission-detail",
+    "actions",
+    "api-view",
+)
+
+# The actions the client admin has on its own views (all the default ones)
+ADMIN_BASE_ACTIONS = tuple(
+    action for role, action in BASE_PERMISSION_ASSIGNATION if role == ADMIN_ROLE
+)
+
+# Level 1 keeps the 1.3.9 rights of the client admin: managing roles,
+# permissions, actions and views. Levels 1 and 2 also let the client admin
+# unlock accounts (only of users without platform roles, checked in the
+# endpoint). Level 3 leaves all of it to the platform administrator.
+_ADMIN_ACCESS_MANAGEMENT_PERMISSIONS = [
+    (ADMIN_ROLE, action, endpoint)
+    for endpoint in ACCESS_MANAGEMENT_ENDPOINTS
+    for action in ADMIN_BASE_ACTIONS
+]
+_ADMIN_UNLOCK_PERMISSIONS = [(ADMIN_ROLE, PUT_ACTION, "user-unlock")]
+
+LEVEL_PERMISSION_ASSIGNATION = {
+    1: _ADMIN_ACCESS_MANAGEMENT_PERMISSIONS + _ADMIN_UNLOCK_PERMISSIONS,
+    2: list(_ADMIN_UNLOCK_PERMISSIONS),
+    3: [],
+}
+
+# Highest security level at which a client admin can revoke the admin role
+# from a user (1.3.9 behaviour). From level 2 only a platform administrator can.
+CLIENT_ADMIN_REVOKE_ADMIN_MAX_LEVEL = 1
+
+# Security level used when the application has none (e.g. an external
+# application whose configuration does not inherit from cornflow.config): the
+# strictest one, which is the behaviour before the security levels existed.
+STRICTEST_SECURITY_LEVEL = 3
+
 # are there execution files?
 EXECUTION_FILES_STATUS_NOT_GENERATED = 0
 EXECUTION_FILES_STATUS_ERROR = -1
@@ -361,6 +468,30 @@ AIRFLOW_NOT_REACHABLE_MSG = "Airflow is not reachable"
 DAG_PAUSED_MSG = "The dag exists but it is paused in airflow"
 AIRFLOW_ERROR_MSG = "Airflow responded with an error:"
 DATA_DOES_NOT_EXIST_MSG = "The data entity does not exist on the database"
+
+# Account lockout (login): error code and message returned when the account
+# is locked due to too many failed login attempts
+ACCOUNT_LOCKED_ERROR_CODE = "account_locked"
+ACCOUNT_LOCKED_MESSAGE = (
+    "The account is locked due to too many failed login attempts. "
+    "Please contact an administrator to unlock it."
+)
+
+# Message returned by the MFA setup endpoints when the enrollment is disabled
+MFA_ENROLLMENT_DISABLED_MESSAGE = (
+    "Two-factor authentication enrollment is disabled on this deployment"
+)
+
+# Settings that only work with the MFA endpoints enabled
+MFA_DEPENDENT_SETTINGS = ("MFA_REQUIRED", "API_KEY_STEPUP_TOTP", "PLATFORM_ROLE_STEPUP_TOTP")
+
+# Header and error code of the 401 responses for an invalid token
+WWW_AUTHENTICATE_HEADER = "WWW-Authenticate"
+INVALID_TOKEN_ERROR_CODE = "invalid_token"
+
+# Lowest HTTP status code that counts as a failed attempt for the rate limits
+# that only count failures (login, token refresh and logout)
+FAILED_RESPONSE_MIN_STATUS = 400
 
 # Name of the Flask Blueprint where the core endpoints are registered
 CORNFLOW_BLUEPRINT_NAME = "cornflow"

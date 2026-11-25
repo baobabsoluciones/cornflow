@@ -2,7 +2,8 @@ name: cornflow-server tests
 
 on:
   pull_request:
-    types: [opened, edited, synchronize, reopened]
+    # `edited` is left out on purpose: it fires when the PR title or description changes
+    types: [opened, synchronize, reopened]
     paths:
       - 'cornflow-server/**'
       - '.github/workflows/test_cornflow_server.yml'
@@ -17,18 +18,24 @@ on:
       - '!cornflow-server/docs/**'
       - '!cornflow-server/README.rst'
 
+# A new push to the same PR cancels the run still going for the previous one
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  testing:
-    name: Run all test suites on cornflow-server
-    runs-on: ${{ matrix.os }}
+  # Unit, ldap and postgres suites: they do not need Airflow, so they run on every Python
+  # version without waiting for it to install.
+  unit:
+    name: Unit tests on cornflow-server
+    runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./cornflow-server
     strategy:
-      max-parallel: 21
+      fail-fast: false
       matrix:
         python-version: ['3.10', '3.11', '3.12']
-        os: [ubuntu-latest]
 
     services:
       postgres:
@@ -48,9 +55,164 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: 'cornflow-server/requirements*.txt'
+      - name: Copy DAG files
+        run: |
+          cd ..
+          cp -r cornflow-dags/DAG/* cornflow-server/airflow_config/dags/
+          cp cornflow-dags/requirements.txt cornflow-server/airflow_config/
+      - name: Start LDAP
+        run: |
+          docker run --volume $GITHUB_WORKSPACE/cornflow-server/airflow_config:/etc/ldap.dist/prepopulate \
+          -e SLAPD_DOMAIN=example.org \
+          -e SLAPD_PASSWORD=admin \
+          -d -p 389:389 dinkel/openldap
+      - name: Install dependencies
+        run: |
+          CLIENT_BRANCH="${{ github.head_ref || github.ref_name }}"
+          uv pip install --system -r requirements-dev.txt
+          uv pip install --system --reinstall-package cornflow-client \
+            "cornflow-client @ git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
+      - name: Run unit tests
+        # In parallel, one SQLite file per worker (see conftest.py), kept in RAM under /dev/shm:
+        # every test creates and drops all the tables, which is slow on disk.
+        run: |
+          python -m pytest -n auto -q -p no:cacheprovider \
+            --cov=cornflow --cov-config=.coveragerc --cov-report= \
+            --deselect cornflow/tests/unit/test_log_in.py::TestLogIn::test_log_in_timing_no_user_enumeration \
+            cornflow/tests/unit
+          coverage report -m
+        env:
+          FLASK_ENV: testing
+          OPEN_DEPLOYMENT: 1
+          DATABASE_URL: sqlite:////dev/shm/cornflow_test.db
+          LOG_LEVEL: 30
+          AIRFLOW_USER: notadmin
+          AIRFLOW_PWD: notadmin
+          CF_ALARMS_ENDPOINT: 1
+      - name: Run timing-sensitive tests
+        # Timing tests run on their own, in series: in parallel the load from the other
+        # workers distorts the measurements and makes them fail.
+        run: |
+          python -m pytest -q -p no:cacheprovider --cov-append \
+            --cov=cornflow --cov-config=.coveragerc --cov-report= \
+            cornflow/tests/unit/test_log_in.py::TestLogIn::test_log_in_timing_no_user_enumeration
+          coverage report -m
+        env:
+          FLASK_ENV: testing
+          OPEN_DEPLOYMENT: 1
+          DATABASE_URL: sqlite:////dev/shm/cornflow_test.db
+          LOG_LEVEL: 30
+          AIRFLOW_USER: notadmin
+          AIRFLOW_PWD: notadmin
+          CF_ALARMS_ENDPOINT: 1
+      - name: Run UAT hardening battery (security level 2)
+        run: |
+          python -m pytest -n auto -q -p no:cacheprovider --cov-append \
+            --cov=cornflow --cov-config=.coveragerc --cov-report= \
+            cornflow/tests/unit/test_uat_hardening_*.py
+          coverage report -m
+        env:
+          FLASK_ENV: testing
+          OPEN_DEPLOYMENT: 1
+          DATABASE_URL: sqlite:////dev/shm/cornflow_test.db
+          LOG_LEVEL: 30
+          AIRFLOW_USER: notadmin
+          AIRFLOW_PWD: notadmin
+          CF_ALARMS_ENDPOINT: 1
+          CORNFLOW_SECURITY_LEVEL: 2
+      - name: Run UAT hardening battery (security level 3)
+        run: |
+          python -m pytest -n auto -q -p no:cacheprovider --cov-append \
+            --cov=cornflow --cov-config=.coveragerc --cov-report= \
+            cornflow/tests/unit/test_uat_hardening_*.py
+          coverage report -m
+        env:
+          FLASK_ENV: testing
+          OPEN_DEPLOYMENT: 1
+          DATABASE_URL: sqlite:////dev/shm/cornflow_test.db
+          LOG_LEVEL: 30
+          AIRFLOW_USER: notadmin
+          AIRFLOW_PWD: notadmin
+          CF_ALARMS_ENDPOINT: 1
+          CORNFLOW_SECURITY_LEVEL: 3
+      - name: Run ldap unit tests
+        run: |
+          coverage run -a --source=./cornflow/ --rcfile=./.coveragerc -m unittest discover -s cornflow/tests/ldap
+          coverage report -m
+        env:
+          FLASK_ENV: testing
+          DATABASE_URL: sqlite:////dev/shm/cornflow_test.db
+          AUTH_TYPE: 2
+          OPEN_DEPLOYMENT: 1
+          LDAP_HOST: ldap://localhost:389
+          LDAP_BIND_PASSWORD: admin
+          LDAP_GROUP_BASE: dc=example,dc=org
+          LDAP_GROUP_OBJECT_CLASS: groupOfNames
+          LDAP_PROTOCOL_VERSION: 3
+          LDAP_BIND_DN: cn=admin,dc=example,dc=org
+          LDAP_USE_TLS: False
+          LDAP_USERNAME_ATTRIBUTE: cn
+          LDAP_USER_BASE: ou=users,dc=example,dc=org
+          LDAP_SERVICE_BASE: ou=service,dc=example,dc=org
+          LDAP_EMAIL_ATTRIBUTE: mail
+          LDAP_USER_OBJECT_CLASS: inetOrgPerson
+          LDAP_GROUP_ATTRIBUTE: cn
+          LDAP_GROUP_TO_ROLE_SERVICE: services
+          LDAP_GROUP_TO_ROLE_ADMIN: administrators
+          LDAP_GROUP_TO_ROLE_VIEWER: viewers
+          LDAP_GROUP_TO_ROLE_PLANNER: planners
+          LOG_LEVEL: 30
+          CORNFLOW_SERVICE_USER: cornflow
+      - name: Run postgres unit tests
+        run: |
+          coverage run -a --source=./cornflow/ --rcfile=./.coveragerc -m unittest cornflow/tests/unit/test_commands.py
+          coverage report -m
+          coverage xml
+        env:
+          FLASK_ENV: testing
+          OPEN_DEPLOYMENT: 1
+          DATABASE_URL: postgresql://postgres:postgresadmin@127.0.0.1:5432/cornflow-test
+          LOG_LEVEL: 30
+          CF_ALARMS_ENDPOINT: 1
+      - name: Upload coverage to codecov
+        uses: codecov/codecov-action@v3
+        with:
+          flags: server-tests
+          token: ${{secrets.CODECOV_TOKEN}}
+
+  # Integration suite against a real Airflow, in parallel with the unit job.
+  integration:
+    name: Integration tests on cornflow-server
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./cornflow-server
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.10', '3.11', '3.12']
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: |
+            cornflow-server/requirements*.txt
+            cornflow-dags/requirements.txt
       - name: Copy DAG files
         run: |
           cd ..
@@ -58,18 +220,13 @@ jobs:
           cp cornflow-dags/requirements.txt cornflow-server/airflow_config/
       - name: Install dependencies
         run: |
-          docker run --volume $GITHUB_WORKSPACE/cornflow-server/airflow_config:/etc/ldap.dist/prepopulate \
-          -e SLAPD_DOMAIN=example.org \
-          -e SLAPD_PASSWORD=admin \
-          -d -p 389:389 dinkel/openldap
           CLIENT_BRANCH="${{ github.head_ref || github.ref_name }}"
-          python -m pip install --upgrade pip
-          python -m pip install -U -r requirements-dev.txt
-          python -m pip uninstall cornflow-client -y
-          python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
+          uv pip install --system -r requirements-dev.txt
+          uv pip install --system --reinstall-package cornflow-client \
+            "cornflow-client @ git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
       - name: Install airflow
         run: |
-          python -m venv afvenv
+          uv venv afvenv --python "$(python -c 'import sys; print(sys.executable)')"
           source afvenv/bin/activate
           AIRFLOW_VERSION=3.2.2
           PYTHON_VERSION="$(python3 --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
@@ -77,10 +234,10 @@ jobs:
           CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
           # The fab extra provides FabAuthManager and the `airflow users create` CLI,
           # which moved out of Airflow core in Airflow 3.
-          python -m pip install "apache-airflow[fab]==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
-          python -m pip install -U -r airflow_config/requirements.txt
-          python -m pip uninstall cornflow-client -y
-          python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
+          uv pip install "apache-airflow[fab]==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
+          uv pip install -r airflow_config/requirements.txt
+          uv pip install --reinstall-package cornflow-client \
+            "cornflow-client @ git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
           # Airflow 3 replaced `db init` with the idempotent `db migrate`
           airflow db migrate
           airflow users create \
@@ -122,59 +279,9 @@ jobs:
           AIRFLOW__API__SECRET_KEY: e9adafa751fd35adfc1fdd3285019be15eea0758f76e38e1e37a1154fb36
           AIRFLOW__CORE__LOAD_EXAMPLES: 0
           AIRFLOW_CONN_CF_URI: http://airflow:Xq7-mBv.Ld9Rn2@localhost:5050
-      - name: Run unit tests
-        run: |
-          coverage run --source=./cornflow/ --rcfile=./.coveragerc -m unittest discover -s cornflow/tests/unit
-          coverage report -m
-        env:
-          FLASK_ENV: testing
-          OPEN_DEPLOYMENT: 1
-          DATABASE_URL: sqlite:///cornflow_test.db
-          LOG_LEVEL: 30
-          AIRFLOW_USER: notadmin
-          AIRFLOW_PWD: notadmin
-          CF_ALARMS_ENDPOINT: 1
-      - name: Run ldap unit tests
-        run: |
-          coverage run -a --source=./cornflow/ --rcfile=./.coveragerc -m unittest discover -s cornflow/tests/ldap
-          coverage report -m
-        env:
-          FLASK_ENV: testing
-          DATABASE_URL: sqlite:///cornflow_test.db
-          AUTH_TYPE: 2
-          OPEN_DEPLOYMENT: 1
-          LDAP_HOST: ldap://localhost:389
-          LDAP_BIND_PASSWORD: admin
-          LDAP_GROUP_BASE: dc=example,dc=org
-          LDAP_GROUP_OBJECT_CLASS: groupOfNames
-          LDAP_PROTOCOL_VERSION: 3
-          LDAP_BIND_DN: cn=admin,dc=example,dc=org
-          LDAP_USE_TLS: False
-          LDAP_USERNAME_ATTRIBUTE: cn
-          LDAP_USER_BASE: ou=users,dc=example,dc=org
-          LDAP_SERVICE_BASE: ou=service,dc=example,dc=org
-          LDAP_EMAIL_ATTRIBUTE: mail
-          LDAP_USER_OBJECT_CLASS: inetOrgPerson
-          LDAP_GROUP_ATTRIBUTE: cn
-          LDAP_GROUP_TO_ROLE_SERVICE: services
-          LDAP_GROUP_TO_ROLE_ADMIN: administrators
-          LDAP_GROUP_TO_ROLE_VIEWER: viewers
-          LDAP_GROUP_TO_ROLE_PLANNER: planners
-          LOG_LEVEL: 30
-          CORNFLOW_SERVICE_USER: cornflow
-      - name: Run postgres unit tests
-        run: |
-          coverage run -a --source=./cornflow/ --rcfile=./.coveragerc -m unittest cornflow/tests/unit/test_commands.py
-          coverage report -m
-        env:
-          FLASK_ENV: testing
-          OPEN_DEPLOYMENT: 1
-          DATABASE_URL: postgresql://postgres:postgresadmin@127.0.0.1:5432/cornflow-test
-          LOG_LEVEL: 30
-          CF_ALARMS_ENDPOINT: 1
       - name: Run integration tests
         run: |
-          coverage run -a --source=./cornflow/ --rcfile=./.coveragerc -m unittest discover -s cornflow/tests/integration
+          coverage run --source=./cornflow/ --rcfile=./.coveragerc -m unittest discover -s cornflow/tests/integration
           coverage report -m
           coverage xml
         env:

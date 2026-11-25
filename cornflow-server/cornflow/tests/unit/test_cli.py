@@ -32,7 +32,6 @@ from cornflow.models import (
 )
 from cornflow.models import UserModel
 from cornflow.shared import db
-from cornflow.shared.exceptions import NoPermission, ObjectDoesNotExist
 from cornflow.endpoints import alarms_resources, get_resources
 
 
@@ -494,11 +493,9 @@ class CLITests(TestCase):
         self.assertEqual(user.roles, {1: "viewer"})
         self.assertFalse(user.is_service_user())
 
-    def test_generate_token(self):
+    def test_viewer_user_command_not_marked_by_default(self):
         runner = CliRunner()
-
         self.test_roles_init_command()
-
         result = runner.invoke(
             cli,
             [
@@ -506,100 +503,52 @@ class CLITests(TestCase):
                 "create",
                 "viewer",
                 "-u",
-                "viewer_user",
+                "plainuser",
                 "-p",
                 "Kx9#tR2m!Qw7Zp",
                 "-e",
-                "viewer@test.org",
+                "plainuser@test.org",
             ],
         )
-
         self.assertEqual(result.exit_code, 0)
+        user = UserModel.get_one_user_by_email("plainuser@test.org")
+        self.assertFalse(user.pwd_change_required)
 
-        user_id = UserModel.get_one_user_by_username("viewer_user").id
-
+    def test_viewer_user_command_force_password_change(self):
+        runner = CliRunner()
+        self.test_roles_init_command()
         result = runner.invoke(
             cli,
             [
                 "users",
                 "create",
-                "service",
+                "viewer",
                 "-u",
-                "test",
+                "provisioned",
                 "-p",
                 "Kx9#tR2m!Qw7Zp",
                 "-e",
-                "test@test.org",
+                "provisioned@test.org",
+                "--force-password-change",
             ],
         )
-
         self.assertEqual(result.exit_code, 0)
+        user = UserModel.get_one_user_by_email("provisioned@test.org")
+        self.assertTrue(user.pwd_change_required)
 
-        result = runner.invoke(
-            cli,
-            [
-                "users",
-                "create",
-                "token",
-                "-i",
-                user_id,
-                "-u",
-                "test",
-                "-p",
-                "Kx9#tR2m!Qw7Zp",
-            ],
-        )
+    def test_service_user_command_has_no_force_flag(self):
+        # Service users are exempt from rotation: the flag must not exist
+        runner = CliRunner()
+        result = runner.invoke(cli, ["users", "create", "service", "--help"])
+        self.assertEqual(result.exit_code, 0)
+        self.assertNotIn("--force-password-change", result.output)
 
-        self.assertIn("ey", result.output)
-
-        result = runner.invoke(
-            cli,
-            [
-                "users",
-                "create",
-                "token",
-                "-i",
-                user_id,
-                "-u",
-                "test",
-                "-p",
-                "Otherpassword",
-            ],
-        )
-
-        self.assertEqual(result.exit_code, 1)
-        self.assertIsInstance(result.exception, NoPermission)
-
-        result = runner.invoke(
-            cli,
-            [
-                "users",
-                "create",
-                "token",
-                "-i",
-                user_id,
-                "-u",
-                "viewer_user",
-                "-p",
-                "Kx9#tR2m!Qw7Zp",
-            ],
-        )
-
-        self.assertIsInstance(result.exception, NoPermission)
-
-        result = runner.invoke(
-            cli,
-            [
-                "users",
-                "create",
-                "token",
-                "-i",
-                100,
-                "-u",
-                "test",
-                "-p",
-                "Kx9#tR2m!Qw7Zp",
-            ],
-        )
-
-        self.assertIsInstance(result.exception, ObjectDoesNotExist)
+    def test_create_token_command_was_removed(self):
+        """The BI token command of the create group no longer exists: users bi_token replaces it."""
+        runner = CliRunner()
+        result = runner.invoke(cli, ["users", "create", "token", "-i", "1", "-u", "x", "-p", "y"])
+        self.assertEqual(2, result.exit_code, result.output)
+        self.assertIn("No such command 'token'", result.output)
+        result = runner.invoke(cli, ["users", "create", "--help"])
+        self.assertEqual(0, result.exit_code, result.output)
+        self.assertNotRegex(result.output, r"(?m)^\s+token\b")

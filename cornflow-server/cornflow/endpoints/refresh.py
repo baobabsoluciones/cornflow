@@ -19,19 +19,17 @@ from flask_apispec import doc
 from cornflow.endpoints.meta_resource import BaseMetaResource
 from cornflow.shared.audit import audit
 from cornflow.shared.authentication import Auth
-from cornflow.shared.rate_limit import (
-    limiter,
-    login_rate_limit,
-    RATE_LIMIT_MESSAGE,
-)
+from cornflow.shared.rate_limit import failed_attempts_limit
 
 
 class RefreshTokenEndpoint(BaseMetaResource):
     """Endpoint to renew a session by exchanging the refresh token."""
 
-    # Same per-IP limit as the login endpoint: both are unauthenticated
-    # endpoints that take a credential in the body
-    decorators = [limiter.shared_limit(login_rate_limit, scope="token-refresh", error_message=RATE_LIMIT_MESSAGE)]
+    # Same per-IP limit value as the login endpoint (RATELIMIT_LOGIN), with
+    # its own counter: both are unauthenticated endpoints that take a
+    # credential in the body. Only failed responses (invalid, expired or
+    # revoked refresh tokens) consume it
+    decorators = [failed_attempts_limit("token-refresh")]
 
     def __init__(self):
         super().__init__()
@@ -48,15 +46,21 @@ class RefreshTokenEndpoint(BaseMetaResource):
         :rtype: Tuple(dict, integer)
         """
         body = request.get_json(silent=True) or {}
+        # The session.refreshed audit event is emitted by the auth layer, which
+        # is where the user behind the token is resolved
         result = self.auth_class.consume_refresh_token(body.get("refresh_token"))
-        audit("session.refreshed", actor_id=result.get("id"))
         return result, 200
 
 
 class LogoutEndpoint(BaseMetaResource):
     """Endpoint to revoke the session behind a refresh token."""
 
-    decorators = [limiter.shared_limit(login_rate_limit, scope="logout", error_message=RATE_LIMIT_MESSAGE)]
+    # Same per-IP limit as the login endpoint, counting only failed
+    # responses. The logout is idempotent and answers 200 even when the
+    # refresh token is not valid, so in practice it never consumes the limit.
+    # This is accepted: refresh tokens are signed and can not be guessed, so
+    # a failed logout reveals nothing
+    decorators = [failed_attempts_limit("logout")]
 
     def __init__(self):
         super().__init__()
@@ -72,6 +76,12 @@ class LogoutEndpoint(BaseMetaResource):
         :rtype: Tuple(dict, integer)
         """
         body = request.get_json(silent=True) or {}
-        self.auth_class.revoke_session(body.get("refresh_token"))
-        audit("session.logout")
+        user = self.auth_class.revoke_session(body.get("refresh_token"))
+        # A logout carries no session credential, so the actor is taken from
+        # the session that was closed (None when there was nothing to close)
+        audit(
+            "session.logout",
+            actor_id=getattr(user, "id", None),
+            actor=getattr(user, "username", None),
+        )
         return {"message": "The session has been closed"}, 200

@@ -18,15 +18,13 @@ from cornflow.models import (
     UserRoleModel,
 )
 from cornflow.schemas.user import LoginEndpointRequest, LoginOpenAuthRequest
-from cornflow.shared import db
+from cornflow.shared import bcrypt, db
 from cornflow.shared.audit import audit
 from cornflow.shared.authentication import Auth, LDAPBase
-from cornflow.shared.rate_limit import (
-    limiter,
-    login_rate_limit,
-    RATE_LIMIT_MESSAGE,
-)
+from cornflow.shared.rate_limit import failed_attempts_limit
 from cornflow.shared.const import (
+    ACCOUNT_LOCKED_ERROR_CODE,
+    ACCOUNT_LOCKED_MESSAGE,
     AUTH_DB,
     AUTH_LDAP,
     AUTH_OID,
@@ -197,6 +195,7 @@ class LoginBaseEndpoint(BaseMetaResource):
                     )
             if not valid:
                 # Wrong second-factor codes also count towards the lockout
+                # (when LOGIN_MAX_ATTEMPTS is above 0)
                 user.register_failed_login()
                 audit(
                     "login.failure",
@@ -247,6 +246,12 @@ class LoginBaseEndpoint(BaseMetaResource):
                 actor=username,
                 reason="unknown_user",
             )
+            # Spend a time comparable to a real password check so that a
+            # non-existent username cannot be told apart from a wrong
+            # password through response timing (user enumeration). The work
+            # factor is the configured BCRYPT_LOG_ROUNDS, the same one used to
+            # hash the stored passwords.
+            bcrypt.generate_password_hash(password or "")
             raise InvalidCredentials()
 
         # The password is always checked first and, on failure, the same
@@ -289,10 +294,9 @@ class LoginBaseEndpoint(BaseMetaResource):
         :param user: the locked user
         """
         raise InvalidCredentials(
-            "The account is locked due to too many failed login attempts. "
-            "Please contact a platform administrator to unlock it.",
+            ACCOUNT_LOCKED_MESSAGE,
             status_code=403,
-            payload={"error_code": "account_locked"},
+            payload={"error_code": ACCOUNT_LOCKED_ERROR_CODE},
             log_txt=f"Error while user {user.id} tries to log in. "
             f"The account is locked.",
         )
@@ -415,15 +419,17 @@ class LoginBaseEndpoint(BaseMetaResource):
 def check_last_password_change(user):
     """
     Check if the user needs to change their password, either because the
-    password rotation time has passed or because the password was flagged
-    for a forced change (first login after the policy hardening, a password
-    reset by an admin or a recovery with a temporary password).
+    password rotation time (PWD_ROTATION_TIME) has passed, at every security
+    level, or because the password is flagged for a forced change and the
+    level enforces the flag (levels 2 and 3: a password set by an admin, a
+    temporary recovery password, the CLI or the policy hardening migration).
+    Level 1 only reports the password age, as in 1.3.9.
 
     :param user: The user object to check
     :return: True if password needs to be changed, False otherwise
     :rtype: bool
     """
-    if user.pwd_change_required:
+    if Auth.password_change_flag_applies(user):
         return True
     return Auth.password_rotation_expired(user)
 
@@ -441,8 +447,10 @@ class LoginEndpoint(LoginBaseEndpoint):
 
     # Per-IP rate limit applied around the whole endpoint (flask-restful
     # discovers class-level decorators; a per-method decorator would not be
-    # enforced through its dispatch)
-    decorators = [limiter.shared_limit(login_rate_limit, scope="login", error_message=RATE_LIMIT_MESSAGE)]
+    # enforced through its dispatch). Only failed responses consume it, so
+    # successful logins (and the intermediate step that asks for the second
+    # factor) never use it up
+    decorators = [failed_attempts_limit("login")]
 
     @doc(description="Log in", tags=["Users"])
     @use_kwargs(LoginEndpointRequest, location="json")
@@ -461,7 +469,7 @@ class LoginEndpoint(LoginBaseEndpoint):
 class LoginOpenAuthEndpoint(LoginBaseEndpoint):
     """ """
 
-    decorators = [limiter.shared_limit(login_rate_limit, scope="login", error_message=RATE_LIMIT_MESSAGE)]
+    decorators = [failed_attempts_limit("login")]
 
     def __init__(self):
         super().__init__()

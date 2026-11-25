@@ -1,10 +1,15 @@
 import os
+import sys
 import tempfile
 import unittest
+from datetime import datetime, timezone
 from cornflow_client.constants import EXECUTION_FILES_STATUS_ERROR
 from cornflow_client.raw_cornflow_client import CornFlowApiError
 from cornflow_client.airflow import dag_utilities as du
 from unittest.mock import Mock, patch
+
+# Airflow log folders contain ":" (run_id and ts), which Windows does not allow in folder names
+SKIP_ON_WINDOWS = "Airflow log folders contain ':' in run_id and ts, not allowed on Windows"
 
 
 class DagUtilities(unittest.TestCase):
@@ -112,6 +117,101 @@ class DagUtilities(unittest.TestCase):
 
         self.assertEqual(2, client.write_execution_files.call_count)
 
+    def _failed_task(self, layout):
+        """A temp log folder with one task log written in ``layout``; returns (folder, ti)."""
+        base = tempfile.mkdtemp()
+        ti = Mock(dag_id="rostering", task_id="rostering", run_id="manual__2026-11-11T20:21:33+00:00", try_number=1)
+        ti.execution_date = None
+        path = os.path.join(base, *layout)
+        os.makedirs(os.path.dirname(path))
+        with open(path, "w") as fd:
+            fd.write("task started\n")
+        return base, ti
+
+    @unittest.skipIf(os.name == "nt", SKIP_ON_WINDOWS)
+    def test_airflow_log_of_a_failed_execution_is_saved_with_the_traceback(self):
+        # a custom layout that none of the default layouts matches: only the configured template finds it
+        base, ti = self._failed_task(["custom", "rostering", "2026-11-11T20:21:33+00:00", "try-1.log"])
+        ti.execution_date = datetime(2026, 11, 11, 20, 21, 33, tzinfo=timezone.utc)
+        template = "custom/{{ ti.dag_id }}/{{ ts }}/try-{{ try_number }}.log"
+        client = Mock()
+
+        du.try_to_save_airflow_log(client, "exec1", ti, base, "KeyError: (36, 3)", template, state=-1)
+
+        payload = client.raw.put_api_for_id.call_args.kwargs["payload"]
+        self.assertIn("task started", payload["log_text"])
+        self.assertIn("KeyError: (36, 3)", payload["log_text"])
+        self.assertEqual(payload["state"], -1)
+
+    @unittest.skipIf(os.name == "nt", SKIP_ON_WINDOWS)
+    def test_the_default_layout_is_found_when_the_template_cannot_be_rendered(self):
+        base, ti = self._failed_task(
+            ["dag_id=rostering", "run_id=manual__2026-11-11T20:21:33+00:00", "task_id=rostering", "attempt=1.log"]
+        )
+        client = Mock()
+
+        du.try_to_save_airflow_log(client, "exec1", ti, base, "boom", "{{ not valid jinja")
+
+        self.assertIn("task started", client.raw.put_api_for_id.call_args.kwargs["payload"]["log_text"])
+
+    @unittest.skipIf(os.name == "nt", SKIP_ON_WINDOWS)
+    def test_the_log_layout_of_old_airflow_versions_is_still_found(self):
+        base, ti = self._failed_task(["rostering", "rostering", "2026-11-11T20:21:33+00:00", "1.log"])
+        client = Mock()
+
+        du.try_to_save_airflow_log(client, "exec1", ti, base, "boom")
+
+        self.assertIn("task started", client.raw.put_api_for_id.call_args.kwargs["payload"]["log_text"])
+
+    def test_without_a_log_file_the_traceback_is_still_saved(self):
+        ti = Mock(dag_id="d", task_id="t", run_id="r", try_number=1)
+        ti.execution_date = None
+        client = Mock()
+
+        du.try_to_save_airflow_log(client, "exec1", ti, tempfile.mkdtemp(), "boom")
+
+        self.assertEqual(client.raw.put_api_for_id.call_args.kwargs["payload"]["log_text"].strip(), "boom")
+
+    def test_nothing_is_saved_without_a_log_file_nor_a_traceback(self):
+        ti = Mock(dag_id="d", task_id="t", run_id="r", try_number=1)
+        ti.execution_date = None
+        client = Mock()
+
+        du.try_to_save_airflow_log(client, "exec1", ti, tempfile.mkdtemp())
+
+        client.raw.put_api_for_id.assert_not_called()
+
+    def test_a_cornflow_error_while_saving_the_log_does_not_raise(self):
+        ti = Mock(dag_id="d", task_id="t", run_id="r", try_number=1)
+        ti.execution_date = None
+        client = Mock()
+        client.raw.put_api_for_id.side_effect = CornFlowApiError("cornflow is down")
+
+        du.try_to_save_airflow_log(client, "exec1", ti, tempfile.mkdtemp(), "boom", state=-1)
+
+        client.raw.put_api_for_id.assert_called_once()
+
+    def test_the_log_filename_template_comes_from_the_task_context_on_airflow_2(self):
+        conf = Mock()
+        conf.get.return_value = "{{ ti.dag_id }}/{{ try_number }}.log"
+
+        self.assertEqual(
+            "{{ ti.dag_id }}/{{ try_number }}.log", du.get_log_filename_template({"conf": conf})
+        )
+
+    def test_the_log_filename_template_comes_from_the_airflow_configuration_on_airflow_3(self):
+        configuration = Mock()
+        configuration.conf.get.return_value = "{{ ti.dag_id }}/{{ try_number }}.log"
+        airflow = Mock(configuration=configuration)
+
+        with patch.dict(sys.modules, {"airflow": airflow, "airflow.configuration": configuration}):
+            template = du.get_log_filename_template({})
+
+        self.assertEqual("{{ ti.dag_id }}/{{ try_number }}.log", template)
+
+    def test_without_airflow_configuration_there_is_no_log_filename_template(self):
+        with patch.dict(sys.modules, {"airflow": None, "airflow.configuration": None}):
+            self.assertIsNone(du.get_log_filename_template({}))
 
 class DagUtilitiesErrorLog(unittest.TestCase):
     def _task_instance(self, folder):

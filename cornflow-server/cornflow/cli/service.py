@@ -39,16 +39,45 @@ from cornflow.shared.const import (
     PLANNER_ROLE,
     DATABRICKS_BACKEND,
     AIRFLOW_BACKEND,
-    SIGNUP_WITH_AUTH,
     OID_PROVIDER_AZURE,
     OID_OTHER,
     USER_ACCESS_ALL_OBJECTS_NO,
 )
 from cornflow.shared import db
-from cryptography.fernet import Fernet
+from cornflow.shared.exceptions import ConfigurationError
+from cornflow.shared.secret_keys import (
+    EPHEMERAL_KEY_SHARED_INFO,
+    EPHEMERAL_SECRET_KEY_ENV_VAR,
+    uses_random_secret_key,
+)
 from flask_migrate import Migrate, upgrade
 
 MAIN_WD = "/usr/src/app"
+
+
+def _share_ephemeral_secret_key(app):
+    """
+    Security level 1 without FERNET_KEY / SECRET_KEY: passes the random key of
+    this startup (generated once, when config.py was imported) to the gunicorn
+    workers, so that all of them, and the ones gunicorn recycles, sign with the
+    same key. Never writes FERNET_KEY nor SECRET_KEY, and never logs the key.
+    """
+    if not uses_random_secret_key(app.config):
+        return
+    os.environ[EPHEMERAL_SECRET_KEY_ENV_VAR] = app.config["SECRET_TOKEN_KEY"]
+    logger.info(EPHEMERAL_KEY_SHARED_INFO)
+
+
+def _create_app_or_exit(factory, environment, cornflow_db_conn):
+    """
+    Creates the application and stops `service init` with exit code 1 when the
+    configuration is not valid: no users are created and gunicorn is not started.
+    """
+    try:
+        return factory(environment, cornflow_db_conn)
+    except ConfigurationError as exc:
+        logger.error(f"Cornflow can not start: {exc.error}")
+        sys.exit(f"FATAL: {exc.error}")
 
 
 @click.group(name="service", help="Commands to run the cornflow service")
@@ -77,7 +106,8 @@ def init_cornflow_service():
 
     if external_application == 0:
         click.echo("Initializing standard Cornflow application")
-        app = create_app(environment, cornflow_db_conn)
+        app = _create_app_or_exit(create_app, environment, cornflow_db_conn)
+        _share_ephemeral_secret_key(app)
         with app.app_context():
             _initialize_database(app)
             _create_initial_users(
@@ -108,7 +138,10 @@ def init_cornflow_service():
         from importlib import import_module
 
         external_app_lib = import_module(external_app_module)
-        app = external_app_lib.create_wsgi_app(environment, cornflow_db_conn)
+        app = _create_app_or_exit(
+            external_app_lib.create_wsgi_app, environment, cornflow_db_conn
+        )
+        _share_ephemeral_secret_key(app)
         with app.app_context():
 
             _initialize_database(app, external_app_module)
@@ -189,13 +222,6 @@ def _setup_environment_variables():
     # Cornflow app config
     os.environ.setdefault("cornflow_url", "http://cornflow:5000")
     os.environ["FLASK_APP"] = "cornflow.app"
-    # The key must be stable across restarts: it signs the sessions and encrypts
-    # the MFA secrets. A random one is only generated when none is configured.
-    os.environ["SECRET_KEY"] = (
-        os.getenv("FERNET_KEY")
-        or os.getenv("SECRET_KEY")
-        or Fernet.generate_key().decode()
-    )
 
     # Cornflow db defaults
     os.environ["DEFAULT_POSTGRES"] = "1"
@@ -217,20 +243,18 @@ def _setup_environment_variables():
     cornflow_admin_email = os.getenv(
         "CORNFLOW_ADMIN_EMAIL", "cornflow_admin@cornflow.com"
     )
-    cornflow_admin_pwd = os.getenv("CORNFLOW_ADMIN_PWD", "Granito-Vela-Oruga7")
+    cornflow_admin_pwd = os.getenv("CORNFLOW_ADMIN_PWD", "Cornflow_admin1234")
     cornflow_service_user = os.getenv("CORNFLOW_SERVICE_USER", "service_user")
     cornflow_service_email = os.getenv(
         "CORNFLOW_SERVICE_EMAIL", "service_user@cornflow.com"
     )
-    cornflow_service_pwd = os.getenv("CORNFLOW_SERVICE_PWD", "Mimbre-Faro-Ciervo4")
+    cornflow_service_pwd = os.getenv("CORNFLOW_SERVICE_PWD", "Service_user1234")
 
     # Cornflow logging and deployment config
     cornflow_logging = os.getenv("CORNFLOW_LOGGING", "console")
     os.environ["CORNFLOW_LOGGING"] = cornflow_logging
     open_deployment = os.getenv("OPEN_DEPLOYMENT", 1)
     os.environ["OPEN_DEPLOYMENT"] = str(open_deployment)
-    signup_activated = os.getenv("SIGNUP_ACTIVATED", SIGNUP_WITH_AUTH)
-    os.environ["SIGNUP_ACTIVATED"] = str(signup_activated)
     user_access_all_objects = os.getenv("USER_ACCESS_ALL_OBJECTS", USER_ACCESS_ALL_OBJECTS_NO)
     os.environ["USER_ACCESS_ALL_OBJECTS"] = str(user_access_all_objects)
     default_role = int(os.getenv("DEFAULT_ROLE", PLANNER_ROLE))
@@ -461,21 +485,33 @@ def _start_application(external_application, environment, external_app_module=No
 
 
 def _register_ssh_host(host):
-    if host is not None:
-        add_host = f"ssh-keyscan {host} >> {MAIN_WD}/.ssh/known_hosts"
-        config_ssh_host = f"echo Host {host} >> {MAIN_WD}/.ssh/config"
-        config_ssh_key = (
-            'echo "   IdentityFile {MAIN_WD}/.ssh/id_rsa" >> {MAIN_WD}/.ssh/config'
-        )
-        os.system(add_host)
-        os.system(config_ssh_host)
-        os.system(config_ssh_key)
+    if host is None:
+        return
+
+    known_hosts = f"{MAIN_WD}/.ssh/known_hosts"
+    ssh_config = f"{MAIN_WD}/.ssh/config"
+
+    # ssh-keyscan the host and append its keys to known_hosts. Using an
+    # argument list (no shell) so the host value cannot be used for command
+    # injection, and doing the file append in Python instead of via '>>'.
+    scan = subprocess.run(["ssh-keyscan", host], capture_output=True, text=True)
+    if scan.returncode == 0:
+        with open(known_hosts, "a") as f:
+            f.write(scan.stdout)
+    else:
+        error(f"Error running ssh-keyscan for host {host}: {scan.stderr}")
+
+    with open(ssh_config, "a") as f:
+        f.write(f"Host {host}\n")
+        f.write(f"   IdentityFile {MAIN_WD}/.ssh/id_rsa\n")
 
 
 def _register_key():
-    if os.path.isfile(f"{MAIN_WD}/.ssh/id_rsa"):
-        add_key = f"chmod 0600 {MAIN_WD}/.ssh/id_rsa && ssh-add {MAIN_WD}/.ssh/id_rsa"
-        os.system(add_key)
-        return True
-    else:
+    key_path = f"{MAIN_WD}/.ssh/id_rsa"
+    if not os.path.isfile(key_path):
         return False
+    os.chmod(key_path, 0o600)
+    result = subprocess.run(["ssh-add", key_path], capture_output=True, text=True)
+    if result.returncode != 0:
+        error(f"Error adding ssh key: {result.stderr}")
+    return True

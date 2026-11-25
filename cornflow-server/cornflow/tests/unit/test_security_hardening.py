@@ -34,7 +34,10 @@ from cornflow.models import UserModel, UserRoleModel
 from cornflow.shared import db
 from cornflow.shared.authentication.auth import BIAuth
 from cornflow.shared.const import ADMIN_ROLE, PLATFORM_ADMIN_ROLE, SERVICE_ROLE
-from cornflow.shared.exceptions import InvalidCredentials
+from cornflow.shared.exceptions import (
+    InvalidToken,
+    bearer_challenge,
+)
 from cornflow.shared.security import resolve_cors_origins
 from cornflow.shared.validators import check_password_pattern, passwords_too_similar
 from cornflow.tests.const import PREFIX, LOGIN_URL, SIGNUP_URL, USER_URL, INSTANCE_URL
@@ -612,8 +615,13 @@ class TestBITokenExpiry(TestCase):
         expired = jwt.encode(
             payload, current_app.config["SECRET_BI_KEY"], algorithm="HS256"
         )
-        with self.assertRaises(InvalidCredentials):
+        with self.assertRaises(InvalidToken) as ctx:
             BIAuth.decode_token(expired)
+        self.assertEqual(401, ctx.exception.status_code)
+        self.assertEqual(
+            bearer_challenge("The BI token has expired, please generate a new one"),
+            ctx.exception.headers["WWW-Authenticate"],
+        )
 
 
 class TestApiKey(TestCase):
@@ -854,90 +862,142 @@ class TestGetDbConn(unittest.TestCase):
 
 class TestConfigSecurityClamping(unittest.TestCase):
     """
-    Tests that the helpers reading security configuration values from the
-    environment clamp them to their floors/ceilings, so a tampered
-    environment can not weaken the policy. The helpers are tested directly
-    (with scratch variable names) to avoid reloading the config module,
-    which would corrupt the app_config references used by other tests.
+    Tests that the inventory resolution clamps the values to the limits of
+    the level, so a tampered environment can not weaken the policy. The pure
+    resolution is tested with mappings, which avoids reloading the config
+    module (that would corrupt the app_config references used by other tests).
     """
 
-    ENV_NAME = "CORNFLOW_TEST_CLAMP_VALUE"
+    LEVEL = {"CORNFLOW_SECURITY_LEVEL": "3"}
 
-    def tearDown(self):
-        os.environ.pop(self.ENV_NAME, None)
+    def _resolve(self, **env):
+        from cornflow.shared.security_levels import resolve_security_settings
 
-    def _set(self, value):
-        os.environ[self.ENV_NAME] = value
+        return resolve_security_settings({**self.LEVEL, **env})
 
     def test_floor_blocks_weaker_values(self):
-        from cornflow.config import _env_int_floor
-
-        self._set("4")
-        self.assertEqual(12, _env_int_floor(self.ENV_NAME, 12, 12))
-        self._set("20")
-        self.assertEqual(20, _env_int_floor(self.ENV_NAME, 12, 12))
+        self.assertEqual(12, self._resolve(PWD_MIN_LENGTH="4").values["PWD_MIN_LENGTH"])
+        self.assertEqual(20, self._resolve(PWD_MIN_LENGTH="20").values["PWD_MIN_LENGTH"])
 
     def test_ceiling_blocks_weaker_values(self):
-        from cornflow.config import _env_float_ceiling, _env_int_ceiling
-
-        self._set("9999")
-        self.assertEqual(24, _env_int_ceiling(self.ENV_NAME, 8, 24))
-        self.assertEqual(24.0, _env_float_ceiling(self.ENV_NAME, 8, 24))
-        self._set("4")
-        self.assertEqual(4, _env_int_ceiling(self.ENV_NAME, 8, 24))
+        resolved = self._resolve(
+            TOKEN_DURATION="9999", ACCESS_TOKEN_DURATION_MINUTES="9999"
+        )
+        self.assertEqual(24.0, resolved.values["TOKEN_DURATION"])
+        self.assertEqual(60, resolved.values["ACCESS_TOKEN_DURATION_MINUTES"])
+        resolved = self._resolve(ACCESS_TOKEN_DURATION_MINUTES="4")
+        self.assertEqual(4, resolved.values["ACCESS_TOKEN_DURATION_MINUTES"])
 
     def test_invalid_values_fall_back_to_defaults(self):
-        from cornflow.config import _env_int_ceiling, _env_int_floor
+        from cornflow.shared.security_levels import INVALID_VALUE
 
-        self._set("not-a-number")
-        self.assertEqual(12, _env_int_floor(self.ENV_NAME, 12, 12))
-        self.assertEqual(8, _env_int_ceiling(self.ENV_NAME, 8, 24))
+        resolved = self._resolve(
+            PWD_MIN_LENGTH="not-a-number",
+            ACCESS_TOKEN_DURATION_MINUTES="not-a-number",
+        )
+        self.assertEqual(12, resolved.values["PWD_MIN_LENGTH"])
+        self.assertEqual(15, resolved.values["ACCESS_TOKEN_DURATION_MINUTES"])
+        self.assertEqual(
+            [INVALID_VALUE, INVALID_VALUE], [a.reason for a in resolved.adjusted]
+        )
 
-    def test_default_config_uses_hardened_values(self):
-        from cornflow.config import DefaultConfig
+    def test_level_3_defaults_respect_the_thresholds(self):
+        from cornflow.config import Testing
+        from cornflow.shared.security_levels import default_values
 
-        # The values loaded at import time must respect the thresholds
-        # whatever the environment says
-        self.assertLessEqual(DefaultConfig.TOKEN_DURATION, 24)
-        self.assertLessEqual(DefaultConfig.PWD_ROTATION_TIME, 365)
-        self.assertGreaterEqual(DefaultConfig.PWD_MIN_LENGTH, 12)
-        self.assertGreaterEqual(DefaultConfig.PWD_MIN_ZXCVBN_SCORE, 3)
-        self.assertGreaterEqual(DefaultConfig.PWD_HISTORY_SIZE, 10)
-        self.assertLessEqual(DefaultConfig.PWD_MAX_SIMILARITY, 0.9)
-        self.assertLessEqual(DefaultConfig.LOGIN_MAX_ATTEMPTS, 10)
-        self.assertLessEqual(DefaultConfig.MFA_SETUP_TOKEN_DURATION_MINUTES, 30)
+        # The values of the level must respect the thresholds whatever the
+        # environment says (Testing ignores it, and BCRYPT_LOG_ROUNDS is the
+        # fast one of the test suite)
+        sources = {
+            "default_values(3)": default_values(3),
+            "Testing": {
+                key: getattr(Testing, key) for key in default_values(3)
+            },
+        }
+        for name, values in sources.items():
+            with self.subTest(source=name):
+                self.assertLessEqual(values["TOKEN_DURATION"], 24)
+                self.assertLessEqual(values["PWD_ROTATION_TIME"], 365)
+                self.assertGreaterEqual(values["PWD_MIN_LENGTH"], 12)
+                self.assertGreaterEqual(values["PWD_MIN_ZXCVBN_SCORE"], 3)
+                self.assertGreaterEqual(values["PWD_HISTORY_SIZE"], 10)
+                self.assertLessEqual(values["PWD_MAX_SIMILARITY"], 0.9)
+                self.assertGreaterEqual(values["LOGIN_MAX_ATTEMPTS"], 1)
+                self.assertLessEqual(values["LOGIN_MAX_ATTEMPTS"], 10)
+                self.assertLessEqual(values["MFA_SETUP_TOKEN_DURATION_MINUTES"], 30)
 
 
 class TestSecretKeyLength(unittest.TestCase):
     """
-    Tests that the application refuses to start with a JWT signing key
-    shorter than 256 bits.
+    Tests the minimum length of the JWT signing keys (256 bits) per security
+    level: levels 2 and 3 refuse to start with a shorter key, level 1 only warns.
     """
 
+    LEVELS = (1, 2, 3)
+    LONG = "x" * MINIMUM_SECRET_KEY_LENGTH
+    SHORT = "tooshort"
+
     @staticmethod
-    def build_app(token_key, bi_key):
+    def build_app(token_key, bi_key, level, source="config"):
         app = Flask(__name__)
+        app.config["SECURITY_LEVEL"] = level
+        app.config["SECRET_KEY_SOURCE"] = source
         app.config["SECRET_TOKEN_KEY"] = token_key
         app.config["SECRET_BI_KEY"] = bi_key
         return app
 
-    def test_short_secret_key_is_rejected(self):
+    def warnings_of(self, app):
+        with self.assertLogs(app.logger, "WARNING") as logs:
+            _check_secret_keys(app)
+        return [record.getMessage() for record in logs.records]
+
+    def test_short_keys_are_rejected_at_levels_2_and_3(self):
         from cornflow.shared.exceptions import ConfigurationError
 
-        long_key = "x" * MINIMUM_SECRET_KEY_LENGTH
-        app = self.build_app("tooshort", long_key)
-        with self.assertRaises(ConfigurationError):
-            _check_secret_keys(app)
+        for level in (2, 3):
+            with self.subTest(level=level, key="SECRET_TOKEN_KEY"):
+                app = self.build_app(self.SHORT, self.LONG, level)
+                with self.assertRaises(ConfigurationError) as ctx:
+                    _check_secret_keys(app)
+                self.assertIn("at least 32 bytes", ctx.exception.error)
+                self.assertIn("SECRET_TOKEN_KEY", ctx.exception.error)
+                self.assertNotIn(self.SHORT, ctx.exception.error)
+            with self.subTest(level=level, key="SECRET_BI_KEY"):
+                app = self.build_app(self.LONG, self.SHORT, level)
+                with self.assertRaises(ConfigurationError) as ctx:
+                    _check_secret_keys(app)
+                self.assertIn("at least 32 bytes", ctx.exception.error)
+                self.assertIn("SECRET_BI_KEY", ctx.exception.error)
+                self.assertNotIn(self.SHORT, ctx.exception.error)
 
-        app = self.build_app(long_key, "tooshort")
-        with self.assertRaises(ConfigurationError):
-            _check_secret_keys(app)
+    def test_short_keys_only_warn_at_level_1(self):
+        app = self.build_app(self.SHORT, self.SHORT, 1)
+        messages = self.warnings_of(app)
+        self.assertEqual(2, len(messages), messages)
+        self.assertIn("SECRET_TOKEN_KEY", messages[0])
+        self.assertIn("SECRET_BI_KEY", messages[1])
 
-    def test_long_or_missing_keys_are_accepted(self):
-        long_key = "x" * MINIMUM_SECRET_KEY_LENGTH
-        _check_secret_keys(self.build_app(long_key, long_key))
-        # Missing keys only log a warning: token generation fails at runtime
-        _check_secret_keys(self.build_app(None, None))
+    def test_long_keys_are_accepted(self):
+        for level in self.LEVELS:
+            with self.subTest(level=level):
+                app = self.build_app(self.LONG, self.LONG, level)
+                with self.assertNoLogs(app.logger, "WARNING"):
+                    _check_secret_keys(app)
+
+    def test_missing_keys(self):
+        from cornflow.shared import secret_keys
+        from cornflow.shared.exceptions import ConfigurationError
+
+        app = self.build_app(None, None, 1)
+        self.assertEqual(
+            [secret_keys.TOKEN_KEY_MISSING_WARNING, secret_keys.BI_KEY_MISSING_WARNING],
+            self.warnings_of(app),
+        )
+
+        app = self.build_app(None, None, 2)
+        with self.assertRaises(ConfigurationError) as ctx:
+            _check_secret_keys(app)
+        self.assertEqual(secret_keys.missing_key_error(2), ctx.exception.error)
 
 
 class TestLoginLockout(TestCase):
@@ -979,6 +1039,7 @@ class TestLoginLockout(TestCase):
             ),
             headers=JSON_HEADER,
         )
+
 
     def test_lockout_after_max_attempts(self):
         # A wrong password always returns the same generic error (no
@@ -1868,6 +1929,27 @@ class TestAuditLogging(TestCase):
         db.session.remove()
         db.drop_all()
 
+    def test_user_created_event(self):
+        # A quietly provisioned account is a persistence vector: every account
+        # creation leaves an audit event saying who created whom
+        response = self.client.post(
+            SIGNUP_URL,
+            data=json.dumps(
+                {
+                    "username": "createdbyaudit",
+                    "email": "createdbyaudit@test.com",
+                    "password": STRONG_PASSWORD,
+                }
+            ),
+            headers=JSON_HEADER,
+        )
+        self.assertEqual(201, response.status_code)
+        events = self.capture.by_event("user.created")
+        self.assertEqual(1, len(events))
+        self.assertEqual("createdbyaudit", events[0].get("target"))
+        # open signup: nobody else created it
+        self.assertEqual("self-signup", events[0].get("actor"))
+
     def log_in(self, password):
         return self.client.post(
             LOGIN_URL,
@@ -1986,7 +2068,7 @@ class TestSecurityHeaders(TestCase):
 
 class TestCorsOrigins(unittest.TestCase):
     """
-    Tests for the CORS_ORIGINS normalisation (default-closed in production).
+    Tests for the CORS_ORIGINS normalisation (default-closed at security level 3).
     """
 
     def test_wildcard_allows_any(self):

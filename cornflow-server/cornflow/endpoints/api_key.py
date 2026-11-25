@@ -22,6 +22,10 @@ from cornflow.endpoints.meta_resource import BaseMetaResource
 from cornflow.models import UserModel
 from cornflow.schemas.user import ApiKeyRequest, ApiKeyResponse
 from cornflow.shared.audit import audit
+from cornflow.shared.secret_keys import (
+    api_key_random_key_warning,
+    uses_random_secret_key,
+)
 from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.const import (
     ALL_DEFAULT_ROLES,
@@ -98,17 +102,31 @@ class UserApiKeyEndpoint(BaseMetaResource):
                 )
 
         scope = kwargs.get("scope") or API_KEY_SCOPE_FULL
+        superseded = user.api_key_issued_at is not None
         user.rotate_api_key(scope=scope)
         api_key = self.auth_class.generate_api_key(user.id, scope=scope)
+        if uses_random_secret_key(current_app.config):
+            current_app.logger.warning(api_key_random_key_warning(user.id))
         expires_at = user.api_key_expires_at()
         current_app.logger.info(
             f"User {user.id} generated a personal API key (scope {scope})"
         )
+        # The previous key (if any) is superseded by this rotation: leave its
+        # own trace instead of letting it disappear silently. It may outlive
+        # this moment by the rotation grace window.
+        if superseded:
+            audit(
+                "apikey.revoked",
+                actor_id=user.id,
+                actor=user.username,
+                source="api",
+                reason="superseded",
+            )
         audit(
             "apikey.issued",
             actor_id=user.id,
             actor=user.username,
-            source="ui",
+            source="api",
             scope=scope,
             expires_at=expires_at,
         )
@@ -128,5 +146,5 @@ class UserApiKeyEndpoint(BaseMetaResource):
         user = self.get_user()
         user.revoke_api_keys()
         current_app.logger.info(f"User {user.id} revoked their personal API key")
-        audit("apikey.revoked", actor_id=user.id, actor=user.username, source="ui")
+        audit("apikey.revoked", actor_id=user.id, actor=user.username, source="api")
         return {"message": "The API key has been revoked"}, 200

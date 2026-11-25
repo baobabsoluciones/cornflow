@@ -4,9 +4,9 @@ sessions, renewal and inactivity timeout (block 6), platform roles and data
 isolation (block 7) and attribution of the changes made by the service
 account (block 9).
 
-Each test is named after the id of its case in the UAT sheet. Run it in both
-profiles with ``CORNFLOW_UAT_PROFILE=strict|relaxed`` (see
-``cornflow/tests/uat_hardening_support.py``).
+Each test is named after the id of its case in the UAT sheet and checks what
+the case means at the security level selected with ``CORNFLOW_SECURITY_LEVEL``
+(see ``uat_hardening_support``).
 """
 
 import email as email_lib
@@ -14,7 +14,6 @@ import json
 import re
 from datetime import datetime, timedelta, timezone
 
-import jwt
 from click.testing import CliRunner
 from flask import current_app, g
 from freezegun import freeze_time
@@ -22,6 +21,7 @@ from freezegun import freeze_time
 from cornflow.cli import cli
 from cornflow.models import ExecutionModel, InstanceModel, SessionModel, UserModel
 from cornflow.shared import db
+from cornflow.models import UserRoleModel
 from cornflow.shared.const import (
     ADMIN_ROLE,
     PLANNER_ROLE,
@@ -44,13 +44,14 @@ from cornflow.tests.const import (
     USER_URL,
 )
 from cornflow.tests.uat_hardening_support import (
-    SETTINGS,
+    JSON_HEADER,
+    LEVEL,
     FakeSMTP,
     UatTestCase,
+    at_least,
     auth_header,
-    is_relaxed,
-    JSON_HEADER,
-    pending_fix,
+    by_level,
+    requires_token_renewal,
     ui_only,
 )
 
@@ -63,9 +64,6 @@ USER_ROLE_URL = PREFIX + "/user/role/"
 UI_URL = "https://cornflow-ui.example.com"
 NEW_PASSWORD = "Jp7-nDv.Bf8Tk2"
 THIRD_PASSWORD = "Hq3-sLw.Yc6Mz4"
-
-ACCESS_MINUTES = int(SETTINGS["ACCESS_TOKEN_DURATION_MINUTES"])
-INACTIVITY_MINUTES = int(SETTINGS["REFRESH_TOKEN_INACTIVITY_MINUTES"])
 
 
 def load_file(path):
@@ -138,12 +136,17 @@ class SessionsTestCase(UatTestCase):
         self.assertEqual(200, response.status_code, response.json)
         return [item["id"] for item in response.json]
 
-    def grant(self, token, user_id, role_id):
+    def grant(self, token, user_id, role_id, totp_code=None):
+        body = {"user_id": user_id, "role_id": role_id}
+        if totp_code:
+            body["totp_code"] = totp_code
         return self.client.post(
-            USER_ROLE_URL,
-            data=json.dumps({"user_id": user_id, "role_id": role_id}),
-            headers=auth_header(token),
+            USER_ROLE_URL, data=json.dumps(body), headers=auth_header(token)
         )
+
+    def step_up_code(self, username):
+        """TOTP code to grant a platform role, when the user has MFA enrolled."""
+        return self.totp_now(username) if username in self.mfa_secrets else None
 
     def revoke(self, token, user_id, role_id):
         return self.client.delete(
@@ -207,9 +210,21 @@ class TestUatPasswordRecovery(SessionsTestCase):
 
     def test_uat_5_3_reset_link_sets_valid_password(self):
         """5.3 Open the link and set a valid password: 200 and the new
-        password can be used to log in."""
+        password can be used to log in (the policy of the level applies)."""
         _, sent = self.request_recovery(self.user.email)
         token = self.token_from(sent)
+        weak = "Abc1!x"
+        if LEVEL == 1:
+            # Valid with the rules of 1.3.9, not with the policy of levels 2 and 3
+            response = self.reset(token, weak)
+            self.assertEqual(200, response.status_code, response.json)
+            self.assertEqual(200, self.login("recoveruser", weak).status_code)
+            self.assertNotEqual(200, self.login("recoveruser").status_code)
+            return
+        response = self.reset(token, weak)
+        self.assertEqual(400, response.status_code, response.json)
+        self.assertIn("at least 12 characters", json.dumps(response.json))
+        # The link is not spent: the validation runs before the change
         response = self.reset(token)
         self.assertEqual(200, response.status_code, response.json)
         self.assertEqual(200, self.login("recoveruser", NEW_PASSWORD).status_code)
@@ -221,8 +236,7 @@ class TestUatPasswordRecovery(SessionsTestCase):
         token = self.token_from(sent)
         self.assertEqual(200, self.reset(token).status_code)
         response = self.reset(token, THIRD_PASSWORD)
-        self.assertEqual(401, response.status_code, response.json)
-        self.assertIn("error", response.json)
+        self.assert_invalid_token(response)
 
     def test_uat_5_5_reset_token_is_purpose_restricted(self):
         """5.5 Use the link token against another endpoint (e.g. GET
@@ -236,7 +250,6 @@ class TestUatPasswordRecovery(SessionsTestCase):
         # against its own endpoint the same token is valid
         self.assertEqual(200, self.reset(token).status_code)
 
-    @pending_fix("4deffdf5")
     def test_uat_5_6_reset_link_expires(self):
         """5.6 Wait more than PWD_RESET_TOKEN_DURATION_MINUTES and open the
         link: expired-link error."""
@@ -246,7 +259,7 @@ class TestUatPasswordRecovery(SessionsTestCase):
             token = self.token_from(sent)
             frozen.tick(timedelta(minutes=minutes + 1))
             response = self.reset(token)
-        self.assertEqual(401, response.status_code, response.json)
+        self.assert_invalid_token(response)
         self.assertIn("expired", response.json["error"].lower())
         # the old password was not replaced
         self.assertEqual(200, self.login("recoveruser").status_code)
@@ -263,31 +276,42 @@ class TestUatSessions(SessionsTestCase):
         return self.full_login(username)
 
     def test_uat_6_1_login_returns_tokens_and_stores_session(self):
-        """6.1 Log in (interactive user): token and refresh_token are returned
-        and a row exists in session_tokens."""
-        # the first login enrolls the user when the profile requires MFA
+        """6.1 Log in (interactive user): a 24 h (level 1) or 8 h (level 2)
+        token without session row, or token and refresh_token with a row in
+        session_tokens (level 3)."""
+        # the first login enrolls the user when the level requires MFA
         self.open_session()
         with self.assertLogs("cornflow.audit", level="INFO") as logs:
             body = self.open_session()
         self.assertIn("token", body)
-        self.assertIn("refresh_token", body)
-        session = self.last_session(self.user.id)
-        self.assertIsNotNone(session)
-        self.assertFalse(session.revoked)
         events = [e["event"] for e in self.audit_events(logs)]
         self.assertIn("login.success", events)
+        if at_least(3):
+            self.assertIn("refresh_token", body)
+            session = self.last_session(self.user.id)
+            self.assertIsNotNone(session)
+            self.assertFalse(session.revoked)
+            claims = self.token_claims(body["token"])
+            self.assertEqual(15 * 60, claims["exp"] - claims["iat"])
+        else:
+            self.assertNotIn("refresh_token", body)
+            self.assertIsNone(self.last_session(self.user.id))
+            claims = self.token_claims(body["token"])
+            self.assertEqual(by_level(24, 8, 8) * 3600, claims["exp"] - claims["iat"])
 
     def test_uat_6_2_access_token_works(self):
         """6.2 Use the token in GET /instance/: 200."""
         token = self.open_session()["token"]
         self.assertEqual(200, self.get(INSTANCE_URL, token).status_code)
 
+    @requires_token_renewal
     def test_uat_6_3_refresh_token_rejected_on_normal_endpoint(self):
         """6.3 Use the refresh_token in GET /instance/: 401, a refresh token
         is not valid on normal endpoints."""
         refresh_token = self.open_session()["refresh_token"]
-        self.assertEqual(401, self.get(INSTANCE_URL, refresh_token).status_code)
+        self.assert_invalid_token(self.get(INSTANCE_URL, refresh_token))
 
+    @requires_token_renewal
     def test_uat_6_4_refresh_rotates_tokens(self):
         """6.4 POST /token/refresh/ with the refresh_token: 200 with a new
         token and a new refresh_token (rotation)."""
@@ -299,7 +323,7 @@ class TestUatSessions(SessionsTestCase):
         self.assertNotEqual(body["token"], response.json["token"])
         self.assertNotEqual(body["refresh_token"], response.json["refresh_token"])
 
-    @pending_fix("2f64a0df")
+    @requires_token_renewal
     def test_uat_6_5_refresh_reuse_revokes_session(self):
         """6.5 Repeat POST /token/refresh/ with the old refresh_token: 401 and
         the session is revoked; the new token is no longer valid either."""
@@ -307,67 +331,77 @@ class TestUatSessions(SessionsTestCase):
         rotated = self.refresh(body["refresh_token"])
         self.assertEqual(200, rotated.status_code)
         replay = self.refresh(body["refresh_token"])
-        self.assertEqual(401, replay.status_code)
-        self.assertEqual(401, self.refresh(rotated.json["refresh_token"]).status_code)
+        self.assert_invalid_token(replay)
+        self.assert_invalid_token(self.refresh(rotated.json["refresh_token"]))
         self.assertTrue(self.last_session(self.user.id).revoked)
         # the access tokens already issued die with the session
-        self.assertEqual(401, self.get(INSTANCE_URL, rotated.json["token"]).status_code)
-        self.assertEqual(401, self.get(INSTANCE_URL, body["token"]).status_code)
+        self.assert_invalid_token(self.get(INSTANCE_URL, rotated.json["token"]))
+        self.assert_invalid_token(self.get(INSTANCE_URL, body["token"]))
 
-    @pending_fix("4deffdf5")
     def test_uat_6_6_expired_access_token_gives_401(self):
-        """6.6 Wait longer than the access token duration and use the access
-        token: 401 (expired)."""
+        """6.6 Wait longer than the session duration (24 h, 8 h or the 15 min
+        access token) and use the token: 401 (expired)."""
         with clock() as frozen:
             token = self.open_session()["token"]
-            frozen.tick(timedelta(minutes=ACCESS_MINUTES - 1))
+            minutes = self.session_minutes()
+            self.assertEqual(by_level(1440, 480, 15), minutes)
+            frozen.tick(timedelta(minutes=minutes - 1))
             self.assertEqual(200, self.get(INSTANCE_URL, token).status_code)
             frozen.tick(timedelta(minutes=2))
             response = self.get(INSTANCE_URL, token)
-        self.assertEqual(401, response.status_code, response.json)
+        self.assert_invalid_token(response)
 
+    @requires_token_renewal
     def test_uat_6_7_refresh_inside_inactivity_window_slides_it(self):
         """6.7 After 6.6, refresh inside the inactivity window: 200, the
         session stays alive and the window slides."""
         with clock() as frozen:
             body = self.open_session()
-            frozen.tick(timedelta(minutes=ACCESS_MINUTES + 1))
+            frozen.tick(
+                timedelta(minutes=int(current_app.config["ACCESS_TOKEN_DURATION_MINUTES"]) + 1)
+            )
             first = self.refresh(body["refresh_token"])
             self.assertEqual(200, first.status_code, first.json)
             self.assertEqual(200, self.get(INSTANCE_URL, first.json["token"]).status_code)
             # the total time since login exceeds the window but not the time
             # since the last refresh: the window has slid
-            frozen.tick(timedelta(minutes=INACTIVITY_MINUTES - 1))
+            inactivity = int(current_app.config["REFRESH_TOKEN_INACTIVITY_MINUTES"])
+            frozen.tick(timedelta(minutes=inactivity - 1))
             second = self.refresh(first.json["refresh_token"])
             self.assertEqual(200, second.status_code, second.json)
 
+    @requires_token_renewal
     def test_uat_6_8_inactivity_window_closes_session(self):
         """6.8 Wait longer than the inactivity window without refreshing and
         then refresh: 401, session closed for inactivity."""
         with clock() as frozen:
             body = self.open_session()
-            frozen.tick(timedelta(minutes=INACTIVITY_MINUTES + 1))
+            inactivity = int(current_app.config["REFRESH_TOKEN_INACTIVITY_MINUTES"])
+            frozen.tick(timedelta(minutes=inactivity + 1))
             response = self.refresh(body["refresh_token"])
-        self.assertEqual(401, response.status_code, response.json)
+        self.assert_invalid_token(response)
 
+    @requires_token_renewal
     def test_uat_6_9_logout_revokes_session(self):
         """6.9 POST /logout/ with the refresh_token: 200, a later refresh
         gives 401 and the row is revoked."""
         body = self.open_session()
         response = self.logout(body["refresh_token"])
         self.assertEqual(200, response.status_code, response.json)
-        self.assertEqual(401, self.refresh(body["refresh_token"]).status_code)
+        self.assert_invalid_token(self.refresh(body["refresh_token"]))
         self.assertTrue(self.last_session(self.user.id).revoked)
 
     def test_uat_6_10_logout_is_idempotent(self):
         """6.10 POST /logout/ again with the same token: 200 (idempotent)."""
         body = self.open_session()
-        self.assertEqual(200, self.logout(body["refresh_token"]).status_code)
-        self.assertEqual(200, self.logout(body["refresh_token"]).status_code)
+        # Without refresh tokens (levels 1 and 2) the logout accepts the session token
+        token = body["refresh_token"] if at_least(3) else body["token"]
+        self.assertEqual(200, self.logout(token).status_code)
+        self.assertEqual(200, self.logout(token).status_code)
 
     def test_uat_6_11_password_change_revokes_sessions(self):
-        """6.11 Change the password and refresh with a previous token: 401,
-        the change revokes every session."""
+        """6.11 Change the password and use a previous token: 401 with the
+        invalid_token challenge, the change revokes every session."""
         body = self.open_session()
         change = self.client.put(
             f"{USER_URL}{self.user.id}/",
@@ -380,8 +414,9 @@ class TestUatSessions(SessionsTestCase):
             headers=auth_header(body["token"]),
         )
         self.assertEqual(200, change.status_code, change.json)
-        self.assertEqual(401, self.refresh(body["refresh_token"]).status_code)
-        self.assertEqual(401, self.get(INSTANCE_URL, body["token"]).status_code)
+        if at_least(3):
+            self.assert_invalid_token(self.refresh(body["refresh_token"]))
+        self.assert_invalid_token(self.get(INSTANCE_URL, body["token"]))
 
     def test_uat_6_12_service_user_gets_long_lived_token_only(self):
         """6.12 Service user login: only a token (no refresh_token), long
@@ -391,13 +426,12 @@ class TestUatSessions(SessionsTestCase):
         self.assertEqual(200, response.status_code, response.json)
         self.assertIn("token", response.json)
         self.assertNotIn("refresh_token", response.json)
-        claims = jwt.decode(
-            response.json["token"],
-            current_app.config["SECRET_TOKEN_KEY"],
-            algorithms=["HS256"],
-        )
+        claims = self.token_claims(response.json["token"])
         lifetime = claims["exp"] - claims["iat"]
-        self.assertGreater(lifetime, ACCESS_MINUTES * 60)
+        self.assertGreater(
+            lifetime, int(current_app.config["ACCESS_TOKEN_DURATION_MINUTES"]) * 60
+        )
+        self.assertEqual(by_level(24, 8, 8) * 3600, lifetime)
         self.assertEqual(
             int(float(current_app.config["TOKEN_DURATION"]) * 3600), lifetime
         )
@@ -407,30 +441,31 @@ class TestUatSessions(SessionsTestCase):
         """6.13 In the UI, leave the tab idle longer than the window and
         click any action: redirect to login with an expired-session notice."""
 
-    @pending_fix("4deffdf5")
+    @requires_token_renewal
     def test_uat_6_14_continuous_work_renews_transparently(self):
         """6.14 Work continuously longer than the access token duration:
         nothing is noticed, the token is renewed transparently (server part:
         refreshing keeps the session alive; an unrenewed token answers 401)."""
         with clock() as frozen:
             body = self.open_session()
+            minutes = int(current_app.config["ACCESS_TOKEN_DURATION_MINUTES"])
             for _ in range(3):
-                frozen.tick(timedelta(minutes=ACCESS_MINUTES - 1))
+                frozen.tick(timedelta(minutes=minutes - 1))
                 self.assertEqual(200, self.get(INSTANCE_URL, body["token"]).status_code)
                 renewed = self.refresh(body["refresh_token"])
                 self.assertEqual(200, renewed.status_code, renewed.json)
                 body = renewed.json
             # without renewing, the token expires and the client is told so
             # with the status code that triggers the renewal
-            frozen.tick(timedelta(minutes=ACCESS_MINUTES + 1))
-            self.assertEqual(401, self.get(INSTANCE_URL, body["token"]).status_code)
+            frozen.tick(timedelta(minutes=minutes + 1))
+            self.assert_invalid_token(self.get(INSTANCE_URL, body["token"]))
 
     @ui_only("file download after the access token expires (renew and retry)")
     def test_uat_6_15_ui_download_after_token_expiry(self):
         """6.15 In the UI, download a file (Excel) after the access token
         expires: the download works (renews and retries)."""
 
-    @pending_fix("4deffdf5")
+    @requires_token_renewal
     def test_uat_6_16_logout_revokes_and_audits_actor(self):
         """6.16 Log out: the session is revoked on the server and the
         session.logout event is audited with who closed it."""
@@ -451,8 +486,13 @@ class TestUatSessions(SessionsTestCase):
     def test_uat_6_17_sessions_purge_cli(self):
         """6.17 cornflow sessions purge: deletes the expired/revoked rows and
         reports the number."""
-        body = self.open_session()
-        self.logout(body["refresh_token"])
+        if at_least(3):
+            body = self.open_session()
+            self.logout(body["refresh_token"])
+        else:
+            # The login creates no session rows at levels 1 and 2
+            SessionModel.create_for_user(self.user)
+            SessionModel.revoke_all_for_user(self.user.id)
         db.session.commit()
         stale = SessionModel.query.filter_by(revoked=True).count()
         self.assertGreaterEqual(stale, 1)
@@ -521,13 +561,23 @@ class TestUatPlatformRoles(SessionsTestCase):
         self.assertEqual(403, response.status_code)
         self.assertIn("Only a platform administrator", response.json["error"])
         # the same call by a platform admin works
-        response = self.grant(self.token_of("padmin"), self.target.id, PLATFORM_ADMIN_ROLE)
+        response = self.grant(
+            self.token_of("padmin"),
+            self.target.id,
+            PLATFORM_ADMIN_ROLE,
+            self.step_up_code("padmin"),
+        )
         self.assertIn(response.status_code, (200, 201), response.json)
 
     def test_uat_7_6_client_admin_cannot_revoke_platform_viewer(self):
         """7.6 Client admin tries to revoke platform_viewer from a user: 403."""
         self.assertIn(
-            self.grant(self.token_of("padmin"), self.target.id, PLATFORM_VIEWER_ROLE).status_code,
+            self.grant(
+                self.token_of("padmin"),
+                self.target.id,
+                PLATFORM_VIEWER_ROLE,
+                self.step_up_code("padmin"),
+            ).status_code,
             (200, 201),
         )
         response = self.revoke(self.token_of("cadmin"), self.target.id, PLATFORM_VIEWER_ROLE)
@@ -539,7 +589,9 @@ class TestUatPlatformRoles(SessionsTestCase):
         both cases, audited."""
         token = self.token_of("padmin")
         with self.assertLogs("cornflow.audit", level="INFO") as logs:
-            granted = self.grant(token, self.target.id, PLATFORM_PLANNER_ROLE)
+            granted = self.grant(
+                token, self.target.id, PLATFORM_PLANNER_ROLE, self.step_up_code("padmin")
+            )
             revoked = self.revoke(token, self.target.id, PLATFORM_PLANNER_ROLE)
         self.assertIn(granted.status_code, (200, 201), granted.json)
         self.assertEqual(200, revoked.status_code, revoked.json)
@@ -550,23 +602,32 @@ class TestUatPlatformRoles(SessionsTestCase):
             self.assertEqual(PLATFORM_PLANNER_ROLE, events[name]["role_id"])
         roles = self.get(USER_ROLE_URL, token)
         self.assertEqual(200, roles.status_code)
+        # With MFA (level 3) the grant goes with a TOTP code
+        self.assertEqual(at_least(3), "padmin" in self.mfa_secrets)
 
     def test_uat_7_8_client_admin_cannot_revoke_admin_role(self):
-        """7.8 Client admin tries to remove the admin role from another admin:
-        403 (only the platform can)."""
+        """7.8 Client admin removes the admin role from another admin: allowed
+        at level 1, 403 from level 2 (only the platform can)."""
         other = self.make_user("otheradmin", [ADMIN_ROLE])
         response = self.revoke(self.token_of("cadmin"), other.id, ADMIN_ROLE)
+        if LEVEL == 1:
+            self.assertEqual(200, response.status_code, response.json)
+            db.session.expire_all()
+            self.assertIsNone(
+                UserRoleModel.query.filter_by(user_id=other.id, role_id=ADMIN_ROLE).first()
+            )
+            return
         self.assertEqual(403, response.status_code)
         self.assertIn("Only a platform administrator", response.json["error"])
         response = self.revoke(self.token_of("padmin"), other.id, ADMIN_ROLE)
         self.assertEqual(200, response.status_code, response.json)
 
     def test_uat_7_9_client_admin_is_not_offered_platform_roles(self):
-        """7.9 Editing a user as client admin: the platform_* roles are not
-        offered (server part: GET /roles/, the source of the dropdown, is
-        closed to client admins)."""
+        """7.9 Client admin and the platform roles: GET /roles/ is open to
+        client admins only at level 1; granting a platform role is always
+        refused (7.5)."""
         response = self.get(ROLES_URL, self.token_of("cadmin"))
-        self.assertEqual(403, response.status_code)
+        self.assertEqual(by_level(200, 403, 403), response.status_code)
 
     def test_uat_7_10_platform_admin_is_offered_platform_roles(self):
         """7.10 Editing a user as platform admin: the platform_* roles do
@@ -586,7 +647,6 @@ class TestUatPlatformRoles(SessionsTestCase):
         self.assertNotIn(pexecution, self.ids(EXECUTION_URL, token))
         self.assertIn(cexecution, self.ids(EXECUTION_URL, token))
 
-    @pending_fix("e86f9a3f")
     def test_uat_7_12_client_admin_does_not_see_platform_data(self):
         """7.12 The same instance, listed by a client admin: it does not
         appear (although the admin sees everything else of the client)."""

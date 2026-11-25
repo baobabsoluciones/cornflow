@@ -1,5 +1,11 @@
 def create_user_with_role(
-    username, email, password, role_name, role, verbose: bool = False
+    username,
+    email,
+    password,
+    role_name,
+    role,
+    verbose: bool = False,
+    force_password_change: bool = False,
 ):
     from cornflow.models import UserModel, UserRoleModel, RoleModel
     from cornflow.shared.exceptions import InvalidCredentials
@@ -8,7 +14,12 @@ def create_user_with_role(
     user = UserModel.get_one_user_by_username(username)
 
     if user is None:
-        data = dict(username=username, email=email, password=password)
+        data = dict(
+            username=username,
+            email=email,
+            password=password,
+            pwd_change_required=force_password_change,
+        )
         try:
             user = UserModel(data=data)
         except InvalidCredentials as err:
@@ -21,6 +32,27 @@ def create_user_with_role(
         user.save()
         user_role = UserRoleModel({"user_id": user.id, "role_id": role})
         user_role.save()
+        from cornflow.shared.audit import audit
+
+        if force_password_change:
+            from cornflow.shared.validators import password_change_flag_enforced
+
+            if not password_change_flag_enforced():
+                current_app.logger.warning(
+                    f"User {username} is flagged to change the password on "
+                    f"first login, but security level "
+                    f"{current_app.config.get('SECURITY_LEVEL')} ignores the "
+                    f"flag: it only applies from security level 2."
+                )
+
+        audit(
+            "user.created",
+            actor="cli",
+            target_id=user.id,
+            target=username,
+            source="cli",
+            role_id=role,
+        )
         if verbose:
             current_app.logger.info(
                 f"User {username} is created and assigned {role_name} role"

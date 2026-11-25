@@ -60,8 +60,8 @@ class TestRawCornflowClientUser(TestCase):
         statuses = [] if initial_state is None else [initial_state]
         response = self.client.raw.get_status(execution_id)
         statuses.append(response.json()["state"])
-        while end_state not in statuses and len(statuses) < 100:
-            time.sleep(2)
+        while end_state not in statuses and len(statuses) < 400:
+            time.sleep(0.5)
             response = self.client.raw.get_status(execution_id)
             statuses.append(response.json()["state"])
 
@@ -253,7 +253,10 @@ class TestRawCornflowClientUser(TestCase):
 
     def test_instance_data_check_solution(self):
         execution = self.test_create_instance_data_check()
-        time.sleep(15)
+        for _ in range(400):
+            if self.client.raw.get_status(execution["id"]).json()["state"] == STATUS_OPTIMAL:
+                break
+            time.sleep(0.5)
         results = self.client.raw.get_solution(execution["id"])
         self.assertEqual(results.status_code, 200)
         self.assertEqual(results.json()["state"], 1)
@@ -693,11 +696,11 @@ class TestRawCornflowClientService(TestCase):
 
         # Wait for the solve to finish instead of a fixed sleep: task start-up is
         # slower on Airflow 3 and 15 seconds was not always enough.
-        for _ in range(100):
+        for _ in range(400):
             solution = client.raw.get_solution(execution["id"]).json()
             if solution["state"] == STATUS_OPTIMAL:
                 break
-            time.sleep(2)
+            time.sleep(0.5)
         self.assertEqual(STATUS_OPTIMAL, solution["state"])
 
         payload = dict(

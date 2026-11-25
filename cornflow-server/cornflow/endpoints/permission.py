@@ -14,11 +14,29 @@ from cornflow.schemas.permissions import (
 )
 from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.compress import compressed
-from cornflow.shared.const import PLATFORM_ADMIN_ROLE
-from cornflow.shared.exceptions import ObjectAlreadyExists
+from cornflow.shared.admin_access import is_reserved_role_id
+from cornflow.shared.const import PLATFORM_ADMIN_ROLE, PLATFORM_ROLE_PERMISSION_ERROR
+from cornflow.shared.exceptions import NoPermission, ObjectAlreadyExists
+
+
+def _deny_platform_role_permission(actor, role_id, action):
+    """
+    403 when an actor that is not a platform administrator touches a permission
+    of a role in the reserved range (DA7).
+    """
+    if is_reserved_role_id(role_id) and not actor.is_platform_admin():
+        raise NoPermission(
+            error=PLATFORM_ROLE_PERMISSION_ERROR,
+            log_txt=f"Error while user {actor} tries to {action} a permission "
+            f"of role {role_id}. Only platform administrators can manage the "
+            f"permissions of the platform roles.",
+        )
 
 
 class PermissionsViewRoleEndpoint(BaseMetaResource):
+    # At security level 1 the client admin also reaches this endpoint
+    # (LEVEL_PERMISSION_ASSIGNATION in shared/const.py); the permissions of the
+    # platform roles stay with the platform administrator at every level.
     ROLES_WITH_ACCESS = [PLATFORM_ADMIN_ROLE]
 
     def __init__(self):
@@ -43,6 +61,9 @@ class PermissionsViewRoleEndpoint(BaseMetaResource):
     @use_kwargs(PermissionViewRoleRequest, location="json")
     @marshal_with(PermissionViewRoleResponse)
     def post(self, **kwargs):
+        _deny_platform_role_permission(
+            self.get_user(), kwargs.get("role_id"), "create"
+        )
         if PermissionViewRoleModel.get_permission(
             role_id=kwargs.get("role_id"),
             api_view_id=kwargs.get("api_view_id"),
@@ -58,6 +79,9 @@ class PermissionsViewRoleEndpoint(BaseMetaResource):
 
 
 class PermissionsViewRoleDetailEndpoint(BaseMetaResource):
+    # At security level 1 the client admin also reaches this endpoint
+    # (LEVEL_PERMISSION_ASSIGNATION in shared/const.py); the permissions of the
+    # platform roles stay with the platform administrator at every level.
     ROLES_WITH_ACCESS = [PLATFORM_ADMIN_ROLE]
 
     def __init__(self):
@@ -88,6 +112,12 @@ class PermissionsViewRoleDetailEndpoint(BaseMetaResource):
     @authenticate(auth_class=Auth())
     @use_kwargs(PermissionViewRoleEditRequest, location="json")
     def put(self, idx, **kwargs):
+        actor = self.get_user()
+        permission = PermissionViewRoleModel.get_one_object(idx=idx)
+        if permission is not None:
+            _deny_platform_role_permission(actor, permission.role_id, "edit")
+        if kwargs.get("role_id") is not None:
+            _deny_platform_role_permission(actor, kwargs["role_id"], "edit")
         response = self.put_detail(kwargs, idx=idx, track_user=False)
         current_app.logger.info(f"User {self.get_user()} edits permission {idx}")
         return response
@@ -95,6 +125,11 @@ class PermissionsViewRoleDetailEndpoint(BaseMetaResource):
     @doc(description="Delete a permission", tags=["PermissionViewRole"])
     @authenticate(auth_class=Auth())
     def delete(self, idx):
+        permission = PermissionViewRoleModel.get_one_object(idx=idx)
+        if permission is not None:
+            _deny_platform_role_permission(
+                self.get_user(), permission.role_id, "delete"
+            )
         response = self.delete_detail(idx=idx)
         current_app.logger.info(f"User {self.get_user()} deletes permission {idx}")
         return response

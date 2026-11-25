@@ -3,7 +3,10 @@ This file contains the RoleModel
 """
 # Imports from internal modules
 from cornflow.models.meta_models import TraceAttributesModel
+from sqlalchemy import func
+
 from cornflow.shared import db
+from cornflow.shared.const import RESERVED_ROLE_RANGE
 
 
 class RoleModel(TraceAttributesModel):
@@ -50,6 +53,20 @@ class RoleModel(TraceAttributesModel):
         super().__init__()
         self.id = data.get("id")
         self.name = data.get("name")
+
+    @classmethod
+    def next_free_id_below_reserved_range(cls):
+        """
+        Id for a new role created without an explicit id: the highest id below
+        the reserved range (900-999) plus one, counting also the soft-deleted
+        roles, so a new role never lands among the platform roles (a role
+        stored there under another name stops the next start, see
+        check_reserved_role_ids). None if there is no free id below the range.
+        """
+        low, _ = RESERVED_ROLE_RANGE
+        highest = db.session.query(func.max(cls.id)).filter(cls.id < low).scalar()
+        candidate = 0 if highest is None else highest + 1
+        return candidate if candidate < low else None
 
     def __repr__(self):
         return f"<Role {self.name}>"

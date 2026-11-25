@@ -7,6 +7,7 @@ from cornflow.commands.auxiliar import (
 )
 from cornflow.models import ViewModel, PermissionViewRoleModel
 from cornflow.shared import db
+from cornflow.shared.admin_access import level_permission_assignation
 from cornflow.shared.const import ALL_DEFAULT_ROLES, GET_ACTION
 from cornflow.shared.plugins import get_plugins_resources
 import click
@@ -23,11 +24,19 @@ def register_base_permissions_command(external_app: str = None, verbose: bool = 
     Register base permissions for the application.
     external_app: If provided, it will register the permissions for the external app.
     verbose: If True, it will print the permissions that are being registered.
+
+    The permissions of the client admin on the access-management views and on
+    the unlock endpoint depend on the security level
+    (LEVEL_PERMISSION_ASSIGNATION): running it again with another level adds or
+    removes them.
     """
     # Get all resources, extra permissions, and custom roles actions
     resources_to_register, extra_permissions, custom_roles_actions = get_all_external(
         external_app
     )
+
+    # Rights of the client admin that depend on the security level (DP5)
+    extra_permissions = list(extra_permissions) + level_permission_assignation()
 
     # Get all views in the database
     views_in_db = {view.name: view.id for view in ViewModel.get_all_objects()}
@@ -385,10 +394,9 @@ def register_dag_permissions_command(
             and (user.is_service_user() or user.is_admin())
         ]
 
-    if len(permissions) > 0:
-        db.session.bulk_save_objects(permissions)
-
     try:
+        if len(permissions) > 0:
+            db.session.bulk_save_objects(permissions)
         db.session.commit()
     except IntegrityError as e:
         db.session.rollback()

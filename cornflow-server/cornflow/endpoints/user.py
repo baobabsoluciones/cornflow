@@ -18,6 +18,7 @@ from cornflow.schemas.user import (
     UserSchema,
 )
 from cornflow.shared import db
+from cornflow.shared.admin_access import client_admin_can_revoke_admin
 from cornflow.shared.audit import audit
 from cornflow.shared.authentication import Auth, authenticate
 from cornflow.shared.const import (
@@ -49,6 +50,8 @@ from cornflow.shared.rate_limit import (
 from cornflow.shared.validators import (
     check_email_pattern,
     check_password_pattern,
+    password_change_flag_enforced,
+    password_policy_enforced,
     passwords_too_similar,
 )
 
@@ -207,24 +210,34 @@ class UserDetailsEndpoint(BaseMetaResource):
                     f"The new password is not valid.",
                 )
             if self.get_user_id() == user_id:
-                # A user changing their own password must confirm the one in use
-                if not current_password or not user_obj.check_hash(current_password):
-                    raise InvalidCredentials(
-                        "The current password is missing or incorrect",
-                        log_txt=f"Error while user {self.get_user()} tries to change "
-                        f"their password. The current password is missing or incorrect.",
-                    )
-                if passwords_too_similar(new_password, current_password):
-                    raise InvalidCredentials(
-                        "The new password is too similar to the current one",
-                        log_txt=f"Error while user {self.get_user()} tries to change "
-                        f"their password. The new password is too similar to the "
-                        f"current one.",
-                    )
+                # From security level 2 a user changing their own password must
+                # confirm the one in use and can not just tweak it. Level 1 keeps
+                # the 1.3.9 behaviour: current_password is neither required nor
+                # checked.
+                if password_policy_enforced():
+                    if not current_password or not user_obj.check_hash(
+                        current_password
+                    ):
+                        raise InvalidCredentials(
+                            "The current password is missing or incorrect",
+                            log_txt=f"Error while user {self.get_user()} tries to change "
+                            f"their password. The current password is missing or incorrect.",
+                        )
+                    if passwords_too_similar(new_password, current_password):
+                        raise InvalidCredentials(
+                            "The new password is too similar to the current one",
+                            log_txt=f"Error while user {self.get_user()} tries to change "
+                            f"their password. The new password is too similar to the "
+                            f"current one.",
+                        )
             else:
-                # A password set by an admin is temporary: the user must
-                # change it at their next access
-                data["pwd_change_required"] = True
+                # From security level 2 a password set by an admin is
+                # single-use: the user must change it at their next access.
+                # Level 1 keeps the 1.3.9 behaviour: it works as a normal
+                # password (and, as any password change, clears a pending
+                # flag in UserModel.update).
+                if password_change_flag_enforced():
+                    data["pwd_change_required"] = True
 
         if data.get("email") is not None:
             check, msg = check_email_pattern(data.get("email"))
@@ -249,9 +262,14 @@ class UserDetailsEndpoint(BaseMetaResource):
 class UserUnlockEndpoint(BaseMetaResource):
     """
     Endpoint to unlock an account locked after too many failed login
-    attempts. Only platform administrators can unlock accounts.
+    attempts. Platform administrators can unlock any account; at security
+    levels 1 and 2 the client admin can unlock the accounts of users without
+    platform roles.
     """
 
+    # At security levels 1 and 2 the client admin also reaches this endpoint
+    # (LEVEL_PERMISSION_ASSIGNATION); it can only unlock users without platform
+    # roles.
     ROLES_WITH_ACCESS = [PLATFORM_ADMIN_ROLE]
 
     def __init__(self):
@@ -276,10 +294,19 @@ class UserUnlockEndpoint(BaseMetaResource):
                 log_txt=f"Error while user {self.get_user()} tries to unlock "
                 f"user {user_id}. The user does not exist."
             )
+        if not self.get_user().is_platform_admin() and UserRoleModel.is_platform_user(
+            user_id
+        ):
+            raise NoPermission(
+                error="Only a platform administrator can unlock the account of a "
+                "platform user",
+                log_txt=f"Error while user {self.get_user()} tries to unlock user "
+                f"{user_id}. The user has a platform role and only platform "
+                f"administrators can unlock it.",
+            )
         user_obj.unlock_account()
         current_app.logger.info(
-            f"User {user_id} was unlocked by platform administrator "
-            f"{self.get_user()}"
+            f"User {user_id} was unlocked by user {self.get_user()}"
         )
         audit("account.unlocked", target_id=user_id, target=user_obj.username)
         return {"message": "The user account has been unlocked"}, 200
@@ -323,9 +350,12 @@ class ToggleUserAdmin(BaseMetaResource):
                 role="admin",
             )
         else:
-            # A client admin can not revoke the admin role from another admin;
-            # only a platform administrator can do it
-            if not self.get_user().is_platform_admin():
+            # Level 1 keeps the 1.3.9 behaviour (a client admin can revoke the
+            # admin role); from level 2 only a platform administrator can.
+            if (
+                not self.get_user().is_platform_admin()
+                and not client_admin_can_revoke_admin()
+            ):
                 raise NoPermission(
                     error="Only a platform administrator can revoke the admin "
                     "role from a user",
@@ -485,8 +515,7 @@ class RecoverPassword(BaseMetaResource):
             return {"message": message}, 200
 
         # Legacy fallback (CORNFLOW_UI_URL not configured, e.g. API-only
-        # deployments): a temporary password that must be changed at the
-        # next login
+        # deployments): a temporary password, single-use from security level 2
         new_password = self.data_model.generate_random_password()
 
         text_email = get_password_recover_email(
@@ -505,8 +534,10 @@ class RecoverPassword(BaseMetaResource):
             receiver=receiver,
         )
 
-        # The temporary password must be changed at the next login
-        data = {"password": new_password, "pwd_change_required": True}
+        # Level 1 keeps the 1.3.9 behaviour: it works as a normal password.
+        data = {"password": new_password}
+        if password_change_flag_enforced():
+            data["pwd_change_required"] = True
         user_obj.update(data)
 
         current_app.logger.info(
