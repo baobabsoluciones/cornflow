@@ -60,8 +60,10 @@ class TestCornflowClientBasic(CustomTestCaseLive):
 
     def check_status_evolution(self, execution, end_state=EXEC_STATE_CORRECT):
         statuses = [execution["state"]]
-        while end_state not in statuses and len(statuses) < 100:
-            time.sleep(1)
+        # Poll often: an execution can go through RUNNING in well under a second
+        deadline = time.monotonic() + 120
+        while end_state not in statuses and time.monotonic() < deadline:
+            time.sleep(0.1)
             status = self.client.get_status(execution["id"])
             statuses.append(status["state"])
 
