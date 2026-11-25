@@ -4,6 +4,8 @@ Unit test for the log in endpoint
 
 import json
 import logging as log
+import statistics
+import time
 from unittest import mock
 import requests
 import jwt
@@ -16,7 +18,7 @@ from cornflow.app import create_app
 from cornflow.commands.access import access_init_command
 from cornflow.commands.dag import register_deployed_dags_command_test
 from cornflow.models import UserModel
-from cornflow.shared import db
+from cornflow.shared import bcrypt, db
 from cornflow.shared.const import SERVICE_ROLE, INTERNAL_TOKEN_ISSUER, AUTH_OID
 from cornflow.tests.const import LOGIN_URL
 from cornflow.tests.custom_test_case import CustomTestCase, LoginTestCases
@@ -30,7 +32,7 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
         self.data = {
             "username": "testname",
             "email": "test@test.com",
-            "password": "Testpassword1!",
+            "password": "Kx9#tR2m!Qw7Zp",
         }
         user = UserModel(data=self.data)
         user.save()
@@ -46,9 +48,68 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
         super().test_successful_log_in()
         self.assertEqual(self.idx, self.response.json["id"])
 
-    @mock.patch("cornflow.endpoints.login.Auth.generate_token")
+    def test_log_in_timing_no_user_enumeration(self):
+        """
+        Tests that a log in attempt with a non-existent username takes a time
+        similar to one with a wrong password for an existing user, so that
+        valid usernames can not be enumerated through response timing.
+        """
+        # The test configuration uses a very low bcrypt work factor, which
+        # makes the hash cost negligible next to the rest of the request. Use
+        # a realistic one, and rehash the stored password with it, so that the
+        # comparison is the one that happens in a real deployment.
+        patcher = mock.patch.object(bcrypt, "_log_rounds", 10)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        user = UserModel.query.filter_by(username="testname").first()
+        user.password = bcrypt.generate_password_hash(self.data["password"]).decode("utf8")
+        user.save()
+        db.session.commit()
+
+        existing_user_payload = {
+            "username": "testname",
+            "password": "Wrongpassword1!",
+        }
+        missing_user_payload = {
+            "username": "nonexistentname",
+            "password": "Wrongpassword1!",
+        }
+
+        def time_log_in(payload):
+            start = time.perf_counter()
+            response = self.client.post(
+                LOGIN_URL,
+                data=json.dumps(payload),
+                follow_redirects=True,
+                headers={"Content-Type": "application/json"},
+            )
+            elapsed = time.perf_counter() - start
+            self.assertEqual(400, response.status_code)
+            return elapsed
+
+        # Warm-up requests so neither case pays one-time setup costs
+        time_log_in(existing_user_payload)
+        time_log_in(missing_user_payload)
+
+        repetitions = 5
+        existing_user_times = []
+        missing_user_times = []
+        for _ in range(repetitions):
+            existing_user_times.append(time_log_in(existing_user_payload))
+            missing_user_times.append(time_log_in(missing_user_payload))
+
+        median_existing = statistics.median(existing_user_times)
+        median_missing = statistics.median(missing_user_times)
+
+        # Both paths run a bcrypt hash, so their times should be comparable.
+        # Without the dummy hash on the missing-user path that case is at
+        # least an order of magnitude faster, failing this bound widely.
+        self.assertGreaterEqual(median_missing, 0.5 * median_existing)
+        self.assertGreaterEqual(median_existing, 0.5 * median_missing)
+
+    @mock.patch("cornflow.endpoints.login.Auth.issue_session_tokens")
     def test_exception_on_token_generation(self, mock_generate_token):
-        # Simulate an exception when generate_token is called
+        # Simulate an exception when the session tokens are issued
         mock_generate_token.side_effect = Exception("Custom exception")
 
         # Prepare login payload
@@ -64,8 +125,10 @@ class TestLogIn(LoginTestCases.LoginEndpoint):
 
         # Assert that the response is a 400 error
         self.assertEqual(400, response.status_code)
-        # Assert that the error message contains the expected text
-        self.assertIn("Error in generating user token", response.json["error"])
+        # The client-facing message is generic (the internal exception detail
+        # is only written to the server log, not leaked to the caller)
+        self.assertIn("Could not complete the login", response.json["error"])
+        self.assertNotIn("Custom exception", response.json["error"])
 
 
 class TestLogInOpenAuth(CustomTestCase):
@@ -88,7 +151,7 @@ class TestLogInOpenAuth(CustomTestCase):
         self.user_data = {
             "username": "testname",
             "email": "test@test.com",
-            "password": "Testpassword1!",
+            "password": "Kx9#tR2m!Qw7Zp",
         }
 
         test_user = UserModel(data=self.user_data)
@@ -101,7 +164,7 @@ class TestLogInOpenAuth(CustomTestCase):
         self.service_data = {
             "username": "service_user",
             "email": "service@test.com",
-            "password": "Testpassword1!",
+            "password": "Kx9#tR2m!Qw7Zp",
         }
 
         service_user = UserModel(data=self.service_data)
@@ -172,9 +235,14 @@ class TestLogInOpenAuth(CustomTestCase):
             },
         )
 
-        self.assertEqual(400, response.status_code)
+        self.assertEqual(401, response.status_code)
         self.assertEqual(
-            response.json["error"], "Invalid token format, signature, or configuration"
+            "Invalid token format, signature, or configuration", response.json["error"]
+        )
+        self.assertEqual(
+            'Bearer error="invalid_token", error_description='
+            '"Invalid token format, signature, or configuration"',
+            response.headers.get("WWW-Authenticate"),
         )
 
     @mock.patch("cornflow.shared.authentication.auth.jwt")
@@ -210,9 +278,14 @@ class TestLogInOpenAuth(CustomTestCase):
             },
         )
 
-        self.assertEqual(400, response.status_code)
+        self.assertEqual(401, response.status_code)
         self.assertEqual(
             "Invalid token format, signature, or configuration", response.json["error"]
+        )
+        self.assertEqual(
+            'Bearer error="invalid_token", error_description='
+            '"Invalid token format, signature, or configuration"',
+            response.headers.get("WWW-Authenticate"),
         )
 
     @mock.patch("cornflow.shared.authentication.auth.requests.get")
@@ -264,10 +337,14 @@ class TestLogInOpenAuth(CustomTestCase):
             },
         )
 
-        self.assertEqual(400, response.status_code)
+        self.assertEqual(401, response.status_code)
         self.assertEqual(
-            "Invalid token format, signature, or configuration",
-            response.json["error"],
+            "Invalid token format, signature, or configuration", response.json["error"]
+        )
+        self.assertEqual(
+            'Bearer error="invalid_token", error_description='
+            '"Invalid token format, signature, or configuration"',
+            response.headers.get("WWW-Authenticate"),
         )
 
     @mock.patch("cornflow.shared.authentication.Auth.decode_token")
@@ -413,9 +490,16 @@ class TestLogInOpenAuth(CustomTestCase):
             },
         )
 
-        self.assertEqual(400, response.status_code)
+        # 401: an expired credential is an authentication failure, and it is
+        # what tells a client to renew the session instead of failing
+        self.assertEqual(401, response.status_code)
         self.assertEqual(
             "The token has expired, please login again", response.json["error"]
+        )
+        self.assertEqual(
+            'Bearer error="invalid_token", error_description='
+            '"The token has expired, please login again"',
+            response.headers.get("WWW-Authenticate"),
         )
 
     def test_missing_auth_header(self):
@@ -428,6 +512,7 @@ class TestLogInOpenAuth(CustomTestCase):
 
         self.assertEqual(400, response.status_code)
         self.assertEqual(response.json["error"], "Authorization header is missing")
+        self.assertNotIn("WWW-Authenticate", response.headers)
 
     def test_invalid_auth_header(self):
         """
@@ -447,6 +532,7 @@ class TestLogInOpenAuth(CustomTestCase):
             "Invalid Authorization header format. Must be 'Bearer <token>'",
             response.json["error"],
         )
+        self.assertNotIn("WWW-Authenticate", response.headers)
 
 
 class TestLogInOpenAuthService(CustomTestCase):
@@ -470,7 +556,7 @@ class TestLogInOpenAuthService(CustomTestCase):
         self.user_data = {
             "username": "testname",
             "email": "test@test.com",
-            "password": "Testpassword1!",
+            "password": "Kx9#tR2m!Qw7Zp",
         }
 
         test_user = UserModel(data=self.user_data)
@@ -483,7 +569,7 @@ class TestLogInOpenAuthService(CustomTestCase):
         self.service_data = {
             "username": "service_user",
             "email": "service@test.com",
-            "password": "Testpassword1!",
+            "password": "Kx9#tR2m!Qw7Zp",
         }
 
         service_user = UserModel(data=self.service_data)
@@ -519,6 +605,7 @@ class TestLogInOpenAuthService(CustomTestCase):
 
         self.assertEqual(400, response.status_code)
         self.assertEqual(response.json["error"], "Authorization header is missing")
+        self.assertNotIn("WWW-Authenticate", response.headers)
 
     def test_other_user_password(self):
         """
@@ -565,7 +652,12 @@ class TestLogInOpenAuthService(CustomTestCase):
             },
         )
 
-        self.assertEqual(400, response.status_code)
+        self.assertEqual(401, response.status_code)
         self.assertEqual(
-            response.json["error"], "Invalid token format, signature, or configuration"
+            "Invalid token format, signature, or configuration", response.json["error"]
+        )
+        self.assertEqual(
+            'Bearer error="invalid_token", error_description='
+            '"Invalid token format, signature, or configuration"',
+            response.headers.get("WWW-Authenticate"),
         )

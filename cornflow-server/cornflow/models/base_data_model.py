@@ -12,6 +12,82 @@ from cornflow.shared.const import USER_ACCESS_ALL_OBJECTS_NO
 from cornflow.shared.utils import hash_json_256
 
 
+def _hide_platform_objects(query, cls, user):
+    """
+    Keeps the data owned by internal (platform) users out of the sight of
+    client users.
+
+    Objects created by a user holding a platform role (platform_admin,
+    platform_viewer, platform_planner) are only visible to platform users. So
+    on a shared or staging deployment the test data an operator creates never
+    shows up for a client user — not even for a client admin, who otherwise
+    sees every object of the deployment.
+
+    The reverse is not restricted: platform users are the operators and keep
+    the visibility their role grants them.
+
+    :param query: the query being built
+    :param cls: the model class being queried
+    :param user: the user performing the query (may be None for internal calls)
+    :return: the query, filtered when applicable
+    """
+    if user is None:
+        return query
+    if not int(current_app.config.get("PLATFORM_DATA_ISOLATION", 1)):
+        return query
+    # Service accounts act on behalf of every user: airflow must be able to
+    # read a platform user's instance to solve it (found in UAT 12.1, where
+    # the executions of a platform user never left the queue because the
+    # service account could not see their data and every task got a 404)
+    if user.is_service_user():
+        return query
+    # Imported here to avoid a circular import at module load
+    from cornflow.models.user_role import UserRoleModel
+
+    if UserRoleModel.is_platform_user(user.id):
+        return query
+    # The platform users are the internal operators: a handful of rows, so
+    # the id list is materialised instead of correlating a subquery (keeps the
+    # filter portable across SQLAlchemy versions).
+    platform_user_ids = UserRoleModel.get_platform_user_ids()
+    if not platform_user_ids:
+        return query
+    return query.filter(
+        db.or_(
+            cls.user_id.is_(None),
+            ~cls.user_id.in_(platform_user_ids),
+        )
+    )
+
+
+def apply_visibility(query, cls, user):
+    """
+    Applies the visibility rules of a data object to a query: the per-user
+    restriction (USER_ACCESS_ALL_OBJECTS) and the platform/client isolation.
+
+    Every listing or lookup of data objects must go through here. Some models
+    re-implement their own listing query for performance (deferred columns,
+    extra filters), so keeping the rules in a single function is what stops
+    the paths from drifting apart: that drift is exactly how the executions of
+    a platform user stayed visible to a client admin in the list while the
+    detail view already answered 404.
+
+    :param query: the query being built
+    :param cls: the model class being queried
+    :param user: the user performing the query (None for internal calls)
+    :return: the query with the visibility rules applied
+    """
+    user_access = int(current_app.config["USER_ACCESS_ALL_OBJECTS"])
+    if (
+        user is not None
+        and not user.is_admin()
+        and not user.is_service_user()
+        and user_access == USER_ACCESS_ALL_OBJECTS_NO
+    ):
+        query = query.filter(cls.user_id == user.id)
+    return _hide_platform_objects(query, cls, user)
+
+
 class BaseDataModel(TraceAttributesModel):
     """ """
 
@@ -80,14 +156,7 @@ class BaseDataModel(TraceAttributesModel):
         query = cls.query.filter(cls.deleted_at == None)
         if options:
             query = query.options(*options)
-        user_access = int(current_app.config["USER_ACCESS_ALL_OBJECTS"])
-        if (
-            user is not None
-            and not user.is_admin()
-            and not user.is_service_user()
-            and user_access == 0
-        ):
-            query = query.filter(cls.user_id == user.id)
+        query = apply_visibility(query, cls, user)
 
         if schema:
             query = query.filter(cls.schema == schema)
@@ -124,6 +193,5 @@ class BaseDataModel(TraceAttributesModel):
         if options:
             query = query.options(*options)
         query = query.filter_by(id=idx, deleted_at=None)
-        if not user.is_admin() and not user.is_service_user() and user_access == USER_ACCESS_ALL_OBJECTS_NO:
-            query = query.filter_by(user_id=user.id)
+        query = apply_visibility(query, cls, user)
         return query.first()

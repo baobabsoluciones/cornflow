@@ -5,6 +5,7 @@ colorama
 coverage
 docutils
 Flask-Testing
+freezegun
 imagesize
 orloge
 packaging
@@ -23,3 +24,6 @@ sphinxcontrib-serializinghtml
 sphinxcontrib-redoc
 sphinx_design
 shibuya
+pytest
+pytest-cov
+pytest-xdist

@@ -34,16 +34,24 @@ Before running cornflow we have to create some environment variables::
 
   export FLASK_APP=cornflow.app
   export FLASK_ENV=development
-  export SECRET_KEY=THISNEEDSTOBECHANGED
+  export FERNET_KEY=THIS_NEEDS_TO_BE_CHANGED_TO_32_BYTES_OR_MORE
   export AIRFLOW_URL=http://localhost:8080
   export AIRFLOW_USER=admin
   export AIRFLOW_PWD=admin
+
+``FERNET_KEY`` is the secret key that signs the sessions and the API keys
+(``SECRET_KEY`` is still read when ``FERNET_KEY`` is not set). Give it a
+value of at least 32 bytes, for example the Fernet key printed by
+``python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"``.
+At security level 1, the default, cornflow also starts without it, using a
+random key that changes on every start; at levels 2 and 3 it is mandatory
+(see :ref:`Security levels`).
 
 Then we run the following commands::
 
   flask db upgrade -d cornflow/migrations
   flask access_init
-  flask create_admin_user -u admin -e admin@cornflow.org -p Adminpassword1!
+  flask create_admin_user -u admin -e admin@cornflow.org -p Kd8-rVt.Nq2Wp5
   flask create_service_user -u service_user -e service_user@cornflow.org -p Service_password1
   flask run
 

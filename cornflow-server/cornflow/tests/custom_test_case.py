@@ -105,7 +105,7 @@ class CustomTestCase(TestCase):
         data = {
             "username": "testname",
             "email": "test@test.com",
-            "password": "Testpassword1!",
+            "password": "Kx9#tR2m!Qw7Zp",
         }
 
         self.client.post(
@@ -209,7 +209,7 @@ class CustomTestCase(TestCase):
         data = {
             "username": "testuser" + str(role_id),
             "email": "testemail" + str(role_id) + "@test.org",
-            "password": "Testpassword1!",
+            "password": "Kx9#tR2m!Qw7Zp",
         }
         response = self.create_user(data)
         self.assign_role(response.json["id"], role_id)
@@ -1049,9 +1049,16 @@ class LoginTestCases:
                 },
             )
 
-            self.assertEqual(400, response.status_code)
+            # 401: an expired credential is an authentication failure, and it
+            # is the status that tells a client to renew the session
+            self.assertEqual(401, response.status_code)
             self.assertEqual(
                 "The token has expired, please login again", response.json["error"]
+            )
+            self.assertEqual(
+                'Bearer error="invalid_token", error_description='
+                '"The token has expired, please login again"',
+                response.headers.get("WWW-Authenticate"),
             )
 
         def test_bad_format_token(self):
@@ -1077,6 +1084,8 @@ class LoginTestCases:
                 },
             )
             self.assertEqual(400, response.status_code)
+            # no token to assess: no challenge
+            self.assertNotIn("WWW-Authenticate", response.headers)
 
         def test_invalid_token(self):
             """
@@ -1115,10 +1124,15 @@ class LoginTestCases:
                 },
             )
 
-            self.assertEqual(400, response.status_code)
+            self.assertEqual(401, response.status_code)
             self.assertEqual(
                 "Invalid token format or signature",
                 response.json["error"],
+            )
+            self.assertEqual(
+                'Bearer error="invalid_token", error_description='
+                '"Invalid token format or signature"',
+                response.headers.get("WWW-Authenticate"),
             )
 
         def test_token(self):

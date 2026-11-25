@@ -3,10 +3,43 @@ This file has several validators
 """
 
 import re
-from typing import Tuple, Union
+from difflib import SequenceMatcher
+from typing import Optional, Tuple, Union
 
+from flask import current_app
 from jsonschema import Draft7Validator, validators
 from disposable_email_domains import blocklist
+from zxcvbn import zxcvbn
+
+from cornflow.shared.const import (
+    DEFAULT_PWD_MAX_SIMILARITY,
+    DEFAULT_PWD_MIN_LENGTH,
+    DEFAULT_PWD_MIN_ZXCVBN_SCORE,
+    EMAIL_PATTERN,
+    LEGACY_PWD_MIN_LENGTH,
+    MIN_PERSONAL_TOKEN_LENGTH,
+    PASSWORD_SPECIAL_CHARACTERS,
+    PWD_CHANGE_FLAG_MIN_SECURITY_LEVEL,
+    PWD_POLICY_MIN_SECURITY_LEVEL,
+    PWD_FORBIDDEN_DIGIT_SEQUENCE_LENGTH,
+)
+
+
+def _get_config_value(key: str, default):
+    """
+    Reads a value from the application config, falling back to the given
+    default when there is no application context (e.g. some CLI usages).
+    """
+    try:
+        value = current_app.config.get(key, default)
+    except RuntimeError:
+        return default
+    if value is None:
+        return default
+    try:
+        return type(default)(value)
+    except (TypeError, ValueError):
+        return default
 
 
 def is_special_character(character):
@@ -17,37 +50,210 @@ def is_special_character(character):
     :return: a boolean if the character is a special character or not
     :rtype: bool
     """
-    return character in [char for char in "!¡?¿#$%&'()*+-_./:;,<>=@[]^`{}|~\"\\"]
+    return character in PASSWORD_SPECIAL_CHARACTERS
 
 
-def check_password_pattern(password: str):
+def _get_personal_tokens(user_data: dict) -> list:
     """
-    Method to validate the pattern of a password
+    Extracts the pieces of personal information (username, names and email
+    local part) that must not appear inside a password.
+
+    :param dict user_data: dict with username, first_name, last_name and email
+    :return: the list of lowercase personal tokens
+    :rtype: list
+    """
+    if not user_data:
+        return []
+    tokens = []
+    for key in ("username", "first_name", "last_name"):
+        value = user_data.get(key)
+        if value:
+            tokens.append(str(value))
+    email = user_data.get("email")
+    if email:
+        local_part = str(email).split("@")[0]
+        tokens.append(local_part)
+        tokens.extend(re.split(r"[._-]", local_part))
+    return [token.lower() for token in tokens if len(token) >= MIN_PERSONAL_TOKEN_LENGTH]
+
+
+def password_policy_enforced() -> bool:
+    """
+    Tells whether the full password policy (security levels 2 and 3) applies.
+    Without an application context (some CLI usages) the strictest rules
+    apply, as before the security levels existed.
+
+    :return: True if the full password policy applies
+    :rtype: bool
+    """
+    level = _get_config_value("SECURITY_LEVEL", PWD_POLICY_MIN_SECURITY_LEVEL)
+    return level >= PWD_POLICY_MIN_SECURITY_LEVEL
+
+
+def password_change_flag_enforced() -> bool:
+    """
+    Tells whether passwords set by someone other than their owner are
+    single-use and whether the pwd_change_required flag forces a password
+    change (security levels 2 and 3). Without an application context the
+    flag applies, as before the security levels existed.
+
+    :return: True if the forced password change applies
+    :rtype: bool
+    """
+    level = _get_config_value("SECURITY_LEVEL", PWD_CHANGE_FLAG_MIN_SECURITY_LEVEL)
+    return level >= PWD_CHANGE_FLAG_MIN_SECURITY_LEVEL
+
+
+def password_rotation_enforced() -> bool:
+    """
+    Tells whether an expired password (older than PWD_ROTATION_TIME days)
+    blocks every endpoint but the password change (PWD_ROTATION_ENFORCE=1,
+    the security level 3 default). Without an application context, or if the
+    setting is missing, rotation is enforced, as before the security levels
+    existed.
+
+    :return: True if password rotation is enforced
+    :rtype: bool
+    """
+    return _get_config_value("PWD_ROTATION_ENFORCE", 1) == 1
+
+
+def _check_zxcvbn_score(
+    password: str, personal_tokens: list, min_score: int
+) -> Tuple[bool, Optional[str]]:
+    """
+    Checks the zxcvbn strength score of a password against a minimum.
+    """
+    result = zxcvbn(password, user_inputs=personal_tokens or None)
+    if result["score"] < min_score:
+        warning = (result.get("feedback") or {}).get("warning") or (
+            "It is too similar to commonly used passwords or patterns."
+        )
+        return False, f"Password is too easy to guess. {warning}"
+    return True, None
+
+
+def check_password_pattern(
+    password: str, user_data: dict = None, strict: bool = None
+) -> Tuple[bool, Union[str, None]]:
+    """
+    Method to validate the pattern of a password. There are two variants:
+
+    - The full policy (security levels 2 and 3), following the CCN-STIC-807
+      hardening guidelines: minimum length, character variety, no whitespace,
+      no personal information, no long digit sequences (dates, phone numbers...)
+      and a minimum zxcvbn strength score.
+    - The 1.3.9 rules (security level 1): minimum length, upper and lower case
+      letters, a number and a special character, and a zxcvbn score only if
+      one is configured.
 
     :param str password: password to be validated
-    :return: a boolean if the password is validated or not
-    :rtype: bool
+    :param dict user_data: optional dict with the user's username, first_name,
+      last_name and email, used by the full policy to reject passwords
+      containing personal data
+    :param bool strict: if True the full policy is applied whatever the
+      security level; if None the security level decides
+    :return: a tuple with a boolean (valid or not) and the error message
+    :rtype: Tuple[bool, Union[str, None]]
     """
     # TODO: handle better None passwords that can be found when using ldap
     if password is None:
         return True, None
-    if len(password) < 5:
-        return False, "Password must contain at least 5 characters."
+    if strict is None:
+        strict = password_policy_enforced()
+    if strict:
+        return _check_policy_password_pattern(password, user_data)
+    return _check_legacy_password_pattern(password, user_data)
+
+
+def _check_legacy_password_pattern(
+    password: str, user_data: dict = None
+) -> Tuple[bool, Optional[str]]:
+    """
+    Password rules of version 1.3.9, applied at security level 1.
+    """
+    min_length = _get_config_value("PWD_MIN_LENGTH", LEGACY_PWD_MIN_LENGTH)
+    if len(password) < min_length:
+        return False, f"Password must contain at least {min_length} characters."
     if password.islower() or password.isupper():
         return False, "Password must contain uppercase and lowercase letters."
-    if len(list(filter(str.isdigit, password))) == 0:
-        return (
-            False,
-            "Password must contain at least one number and one special character.",
+    special_msg = "Password must contain at least one number and one special character."
+    if not any(char.isdigit() for char in password):
+        return False, special_msg
+    if not any(is_special_character(char) for char in password):
+        return False, special_msg
+    min_score = _get_config_value("PWD_MIN_ZXCVBN_SCORE", 0)
+    if min_score > 0:
+        return _check_zxcvbn_score(
+            password, _get_personal_tokens(user_data), min_score
         )
-
-    if len(list(filter(is_special_character, password))) == 0:
-        return (
-            False,
-            "Password must contain at least one number and one special character.",
-        )
-
     return True, None
+
+
+def _check_policy_password_pattern(
+    password: str, user_data: dict = None
+) -> Tuple[bool, Optional[str]]:
+    """
+    Full password policy, applied at security levels 2 and 3.
+    """
+    min_length = max(
+        _get_config_value("PWD_MIN_LENGTH", DEFAULT_PWD_MIN_LENGTH),
+        DEFAULT_PWD_MIN_LENGTH,
+    )
+    if len(password) < min_length:
+        return False, f"Password must contain at least {min_length} characters."
+    if not any(char.islower() for char in password):
+        return False, "Password must contain at least one lowercase letter."
+    if not any(char.isupper() for char in password):
+        return False, "Password must contain at least one uppercase letter."
+    if not any(char.isdigit() for char in password):
+        return False, "Password must contain at least one number."
+    if not any(is_special_character(char) for char in password):
+        return False, "Password must contain at least one special character."
+    if any(char.isspace() for char in password):
+        return False, "Password must not contain whitespace characters."
+    if re.search(rf"\d{{{PWD_FORBIDDEN_DIGIT_SEQUENCE_LENGTH},}}", password):
+        return (
+            False,
+            f"Password must not contain sequences of "
+            f"{PWD_FORBIDDEN_DIGIT_SEQUENCE_LENGTH} or more digits "
+            "(such as dates or phone numbers).",
+        )
+
+    personal_tokens = _get_personal_tokens(user_data)
+    password_lower = password.lower()
+    for token in personal_tokens:
+        if token in password_lower:
+            return (
+                False,
+                "Password must not contain your username, name or email address.",
+            )
+
+    min_score = max(
+        _get_config_value("PWD_MIN_ZXCVBN_SCORE", DEFAULT_PWD_MIN_ZXCVBN_SCORE),
+        DEFAULT_PWD_MIN_ZXCVBN_SCORE,
+    )
+    return _check_zxcvbn_score(password, personal_tokens, min_score)
+
+
+def passwords_too_similar(new_password: str, old_password: str) -> bool:
+    """
+    Checks whether two passwords are too similar to one another (e.g. only a
+    number was rotated). Used to prevent trivial variations of the previous
+    password when it is changed.
+
+    :param str new_password: the candidate password
+    :param str old_password: the password being replaced
+    :return: True if the passwords are too similar
+    :rtype: bool
+    """
+    if new_password is None or old_password is None:
+        return False
+    threshold = _get_config_value("PWD_MAX_SIMILARITY", DEFAULT_PWD_MAX_SIMILARITY)
+    ratio = SequenceMatcher(
+        None, new_password.lower(), old_password.lower()
+    ).ratio()
+    return ratio >= threshold
 
 
 def check_email_pattern(email: str) -> Tuple[bool, Union[str, None]]:
@@ -58,8 +264,7 @@ def check_email_pattern(email: str) -> Tuple[bool, Union[str, None]]:
     :return: a boolean if the email is valid
     :rtype: bool
     """
-    email_pattern = r"\b[A-Za-z0-9._-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
-    if re.match(email_pattern, email) is None:
+    if re.match(EMAIL_PATTERN, email) is None:
         return False, "Invalid email address."
     domain = email.split("@")[1]
     if domain in blocklist:

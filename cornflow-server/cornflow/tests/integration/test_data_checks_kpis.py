@@ -3,7 +3,7 @@ from cornflow.commands.access import access_init_command
 from cornflow.commands.dag import register_deployed_dags_command
 from cornflow.commands.permissions import register_dag_permissions_command
 from cornflow.shared import db
-from cornflow.shared.const import EXEC_STATE_STOPPED
+from cornflow.shared.const import EXEC_STATE_CORRECT, EXEC_STATE_STOPPED
 from cornflow.tests.custom_liveServer import CustomTestCaseLive
 from cornflow.tests.const import (
     INSTANCE_PATH_1_ROSTERING,
@@ -77,7 +77,7 @@ class TestDataChecks(CustomTestCaseLive):
         user_data = dict(
             username="testname",
             email="test@test.com",
-            pwd="Testpassword1!",
+            pwd="Kx9#tR2m!Qw7Zp",
         )
         self.set_client(self.get_server_url())
         response = self.login_or_signup(user_data)
@@ -88,7 +88,7 @@ class TestDataChecks(CustomTestCaseLive):
         os.environ["CORNFLOW_SERVICE_USER"] = "service_user"
 
         self.create_service_user(
-            dict(username="airflow", pwd="Airflow_test_password1", email="af@cf.com")
+            dict(username="airflow", pwd="Xq7-mBv.Ld9Rn2", email="af@cf.com")
         )
 
     def tearDown(self):
@@ -667,4 +667,6 @@ class TestDataChecks(CustomTestCaseLive):
         response = self.client.stop_execution(execution_id)
         time.sleep(1)
         status = self.client.get_status(execution["id"])
-        self.assertEqual(status["state"], EXEC_STATE_STOPPED)
+        # Data checks take ~100 ms: the worker can finish right after the stop
+        # request and write its result over the stopped state
+        self.assertIn(status["state"], [EXEC_STATE_STOPPED, EXEC_STATE_CORRECT])

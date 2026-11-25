@@ -68,6 +68,9 @@ EXECUTION_FILES_STATUS_DELETED = -2
 EXECUTION_FILES_STATUS_NOT_UP_TO_DATE = -3
 EXECUTION_FILES_STATUS_OK = 1
 
+# characters of the Airflow task log saved in a failed execution: the tail is kept, it is where the failure is
+MAX_AIRFLOW_LOG_CHARS = 100_000
+
 PYOMO_STOP_MAPPING = {
     "unbounded": STATUS_UNBOUNDED,
     "infeasible": STATUS_INFEASIBLE,

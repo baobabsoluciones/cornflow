@@ -58,7 +58,7 @@ class TestAirflowClient(TestCase):
     def test_run_workflow(self):
         data = _load_file(PULP_EXAMPLE)
         cf_client = CornFlow(url="http://127.0.0.1:5050/")
-        cf_login = cf_client.login("admin", "Adminpassword1!")
+        cf_login = cf_client.login("admin", "Kd8-rVt.Nq2Wp5")
         instance = cf_client.create_instance(data, "test_example", "test_description")
         execution = cf_client.create_execution(
             instance_id=instance["id"],
@@ -78,7 +78,10 @@ class TestAirflowClient(TestCase):
         self.assertEqual(200, response.status_code)
         self.assertIn("dag_run_id", response.json().keys())
 
-        # Check that is optimal
-        time.sleep(10)
-        status = cf_client.get_status(execution_id=execution["id"])
+        # Check that is optimal (poll until Airflow finishes instead of a fixed sleep)
+        for _ in range(400):
+            status = cf_client.get_status(execution_id=execution["id"])
+            if status["state"] not in (-7, -6, -5, -4, 0):  # queued, saving, unknown, not run, running
+                break
+            time.sleep(0.5)
         self.assertEqual(1, status["state"])

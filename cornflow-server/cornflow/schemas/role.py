@@ -11,6 +11,7 @@ class RolesRequest(Schema):
     Schema used in the post methods
     """
 
+    id = fields.Int(required=False)
     name = fields.Str()
 
 

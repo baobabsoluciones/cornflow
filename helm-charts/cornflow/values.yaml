@@ -40,8 +40,8 @@
 #
 # 3. In the airflow.env section:
 #    - AIRFLOW_CONN_CF_URI: Automatically configured based on EXTERNAL_APP setting
-#      If EXTERNAL_APP=0: "http://service_user:Service_user1234@RELEASE_NAME-cornflow-server:5000/"
-#      If EXTERNAL_APP=1: "http://service_user:Service_user1234@RELEASE_NAME-cornflow-server:5000/cornflow/"
+#      If EXTERNAL_APP=0: "http://service_user:Mimbre-Faro-Ciervo4@RELEASE_NAME-cornflow-server:5000/"
+#      If EXTERNAL_APP=1: "http://service_user:Mimbre-Faro-Ciervo4@RELEASE_NAME-cornflow-server:5000/cornflow/"
 #
 # =============================================================================
 
@@ -168,6 +168,22 @@ cornflow:
     targetCPUUtilizationPercentage: 80
     targetMemoryUtilizationPercentage: 80
 
+  # Secret keys of cornflow. They live in a Kubernetes Secret, never in cornflow.env:
+  #   FERNET_KEY     signs the sessions, API keys and temporary tokens and encrypts the
+  #                  TOTP secrets of MFA. Changing it invalidates all of them.
+  #   SECRET_BI_KEY  signs the BI tokens. Changing it invalidates them.
+  # By default the chart creates the Secret <release>-cornflow-keys with random keys on
+  # install and reuses them on every upgrade (it reads the Secret from the cluster).
+  # "helm uninstall" keeps that Secret (helm.sh/resource-policy: keep): delete it by hand
+  # when the keys are no longer needed.
+  keys:
+    # Name of an existing Secret in the release namespace with the keys FERNET_KEY and
+    # SECRET_BI_KEY (32 bytes or more each). When set, the chart does not create the Secret.
+    # Use it with "helm template" or GitOps tools that render without a cluster (the
+    # generated keys would change on every render), to manage the keys yourself, or to
+    # keep the FERNET_KEY you already had in your values.
+    existingSecret: ""
+
   # Environment variables
   env:
     # =============================================================================
@@ -188,18 +204,37 @@ cornflow:
     # IMPORTANT: If you are running as external app, you must set the EXTERNAL_APP_MODULE to the name of the folder where the external app is located
     #EXTERNAL_APP_MODULE: "my-external-app" # Set to external app module name if running as external app
     SERVICE_NAME: "Cornflow"
-    SECRET_KEY: "your-secret-key-here" # CHANGE THIS FOR PRODUCTION
-    SECRET_BI_KEY: "your-bi-secret-key-here" # CHANGE THIS FOR PRODUCTION
+    # FERNET_KEY and SECRET_BI_KEY come from a Kubernetes Secret (see cornflow.keys).
+    # Do not set them here, nor SECRET_KEY: the chart refuses to render.
+    # Security level of cornflow: 1, 2 or 3 (1 when unset).
+    #   1: same behaviour as cornflow 1.3.9 (default).
+    #   2: password policy, single-use password on user creation, account lockout after
+    #      5 failed logins, 8-hour sessions and a mandatory secret key (32 bytes or more).
+    #   3: level 2 plus mandatory MFA, sessions with token refresh, password rotation,
+    #      BI tokens that expire, and production CORS, Swagger and HSTS settings.
+    # SIGNUP_ACTIVATED, CORS_ORIGINS, TOKEN_DURATION and PWD_ROTATION_TIME below override
+    # the level: at levels 2 and 3 remove them (or set them to null in your values file).
+    # Keep the value quoted; on the command line use --set-string.
+    CORNFLOW_SECURITY_LEVEL: "1"
     AUTH_TYPE: "1" # Database authentication (1=DB, 2=OID)
     DEFAULT_ROLE: "2" # Planner role
+    # Overrides the security level: remove it at levels 2 and 3 (or set it to null).
     CORS_ORIGINS: "*" # Restrict for production
     LOG_LEVEL: "20" # INFO level (10=DEBUG, 20=INFO, 30=WARNING, 40=ERROR)
+    # Overrides the security level: remove it at levels 2 and 3 (or set it to null).
     SIGNUP_ACTIVATED: "1" # Set to "0" for production
     SERVICE_USER_ALLOW_PASSWORD_LOGIN: "1" # Set to "0" for production
     OPEN_DEPLOYMENT: "1" # Set to "0" for production
     USER_ACCESS_ALL_OBJECTS: "0" # Planner users can access other users' objects
+    # Overrides the security level: remove it at levels 2 and 3 (or set it to null).
     TOKEN_DURATION: "24" # Token duration in hours
+    # Overrides the security level: remove it at levels 2 and 3 (or set it to null).
     PWD_ROTATION_TIME: "120" # Password rotation time in days
+    # Rate-limit counters of login, token refresh and password recovery.
+    # gunicorn runs several workers: with memory:// each worker keeps its own
+    # counters and the effective limit is the configured one times the number
+    # of workers. Point it to a shared Redis in production, e.g.:
+    #RATELIMIT_STORAGE_URI: "redis://<redis-host>:6379/0"
 
     # =============================================================================
     # FLASK CONFIGURATION
@@ -250,13 +285,13 @@ cornflow:
     # SERVICE USER CONFIGURATION
     # =============================================================================
     CORNFLOW_SERVICE_USER: "service_user"
-    CORNFLOW_SERVICE_PWD: "Service_user1234" # CHANGE THIS FOR PRODUCTION
+    CORNFLOW_SERVICE_PWD: "Mimbre-Faro-Ciervo4" # CHANGE THIS FOR PRODUCTION
 
     # =============================================================================
     # ADMIN USER CONFIGURATION
     # =============================================================================
     CORNFLOW_ADMIN_USER: "cornflow_admin"
-    CORNFLOW_ADMIN_PWD: "Cornflow_admin1234" # CHANGE THIS FOR PRODUCTION
+    CORNFLOW_ADMIN_PWD: "Granito-Vela-Oruga7" # CHANGE THIS FOR PRODUCTION
 
     # =============================================================================
     # AIRFLOW CONFIGURATION
@@ -480,10 +515,10 @@ airflow:
     # Cornflow configuration for Airflow
     - name: AIRFLOW_CONN_CF_URI
       # IMPORTANT: Change RELEASE_NAME to your release name (e.g., decision-ops-cornflow, my-project-cornflow, local-cornflow-cornflow, production-porject--cornflow, etc.)
-      # Example: value: "http://service_user:Service_user1234@my-project-cornflow-server:5000/" for helm install my-project ./helm-charts/cornflow
+      # Example: value: "http://service_user:Mimbre-Faro-Ciervo4@my-project-cornflow-server:5000/" for helm install my-project ./helm-charts/cornflow
       # Note: If EXTERNAL_APP=1, the URL should include /cornflow (e.g., :5000/cornflow/)
-      #value: "http://service_user:Service_user1234@RELEASE_NAME-cornflow-server:5000/"  # Change RELEASE_NAME to your release name
-      value: "http://service_user:Service_user1234@my-cornflow-cornflow-server:5000/" # This is the default value for the cornflow-server service
+      #value: "http://service_user:Mimbre-Faro-Ciervo4@RELEASE_NAME-cornflow-server:5000/"  # Change RELEASE_NAME to your release name
+      value: "http://service_user:Mimbre-Faro-Ciervo4@my-cornflow-cornflow-server:5000/" # This is the default value for the cornflow-server service
 
 
 # =============================================================================

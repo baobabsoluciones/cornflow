@@ -9,7 +9,11 @@ from flask import current_app
 from cornflow.models import UserModel
 from cornflow.shared import db
 from cornflow.shared.authentication.auth import BIAuth, Auth
-from cornflow.shared.exceptions import InvalidUsage
+from cornflow.shared.exceptions import (
+    InvalidCredentials,
+    InvalidToken,
+    InvalidUsage,
+)
 from cornflow.tests.const import LOGIN_URL
 from cornflow.tests.custom_test_case import CheckTokenTestCase, CustomTestCase
 
@@ -22,7 +26,7 @@ class TestCheckToken(CheckTokenTestCase.TokenEndpoint):
         self.data = {
             "username": "testname",
             "email": "test@test.com",
-            "password": "Testpassword1!",
+            "password": "Kx9#tR2m!Qw7Zp",
         }
         user = UserModel(data=self.data)
         user.save()
@@ -43,11 +47,14 @@ class TestCheckToken(CheckTokenTestCase.TokenEndpoint):
         self.assertEqual(1, self.response.json["valid"])
 
     def test_token_duration(self):
-        durations = [0.000000000001, 1]
+        # The interactive session token is now the short-lived access token,
+        # whose lifetime is ACCESS_TOKEN_DURATION_MINUTES (0 => immediately
+        # expired => invalid).
+        durations = [0, 15]
         asserts = [0, 1]
         payload = self.data
         for i in range(2):
-            current_app.config["TOKEN_DURATION"] = durations[i]
+            current_app.config["ACCESS_TOKEN_DURATION_MINUTES"] = durations[i]
             self.token = self.client.post(
                 LOGIN_URL,
                 data=json.dumps(payload),
@@ -126,3 +133,12 @@ class TestUnexpiringToken(CustomTestCase):
 
         auth = Auth()
         self.assertRaises(InvalidUsage, auth.decode_token, None)
+
+    def test_empty_bi_token_is_400_without_challenge(self):
+        # there is no token to assess: 400 and no challenge, not InvalidToken
+        for token in ("", None):
+            with self.assertRaises(InvalidCredentials) as ctx:
+                BIAuth.decode_token(token)
+            self.assertNotIsInstance(ctx.exception, InvalidToken)
+            self.assertEqual(400, ctx.exception.status_code)
+            self.assertNotIn("WWW-Authenticate", ctx.exception.headers)

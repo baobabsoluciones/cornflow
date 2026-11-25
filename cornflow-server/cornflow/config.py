@@ -3,15 +3,36 @@ from cornflow.shared.const import (
     AUTH_DB,
     PLANNER_ROLE,
     AUTH_OID,
-    SIGNUP_WITH_AUTH,
     SIGNUP_WITH_NO_AUTH,
     OID_OTHER,
     AIRFLOW_BACKEND,
     DATABRICKS_BACKEND,
     USER_ACCESS_ALL_OBJECTS_NO,
 )
+from cornflow.shared.secret_keys import (
+    KEY_SOURCE_CONFIG,
+    apply_secret_keys,
+    resolve_secret_keys,
+)
+from cornflow.shared.security_levels import (
+    SECURITY_LEVEL_ENV_VAR,
+    apply_security_settings,
+    resolve_security_settings,
+)
 from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
+
+# The security settings (CORNFLOW_SECURITY_LEVEL and the variables of the
+# inventory in cornflow/shared/security_levels.py) are resolved once, when this
+# module is imported. Invalid values never break the import: they are recorded
+# in SECURITY_LEVEL_ERROR / SECURITY_CONFIG_ERRORS and create_app refuses to
+# start with them.
+_SECURITY = resolve_security_settings(os.environ)
+# FERNET_KEY > SECRET_KEY > random (level 1 only), resolved once at import so
+# that the server and the CLI sign with the same key.
+_SECRET_KEYS = resolve_secret_keys(os.environ, _SECURITY.level)
+# Testing does not depend on the environment: level 3 defaults.
+_TESTING_SECURITY = resolve_security_settings({SECURITY_LEVEL_ENV_VAR: "3"})
 
 
 class DefaultConfig(object):
@@ -22,18 +43,14 @@ class DefaultConfig(object):
     APPLICATION_ROOT = os.getenv("APPLICATION_ROOT", "/")
     EXTERNAL_APP = int(os.getenv("EXTERNAL_APP", 0))
     SERVICE_NAME = os.getenv("SERVICE_NAME", "Cornflow")
-    SECRET_TOKEN_KEY = os.getenv("SECRET_KEY")
-    SECRET_BI_KEY = os.getenv("SECRET_BI_KEY")
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///cornflow.db")
 
     AUTH_TYPE = int(os.getenv("AUTH_TYPE", AUTH_DB))
     DEFAULT_ROLE = int(os.getenv("DEFAULT_ROLE", PLANNER_ROLE))
-    CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     DEBUG = True
     TESTING = True
     LOG_LEVEL = int(os.getenv("LOG_LEVEL", 20))
-    SIGNUP_ACTIVATED = int(os.getenv("SIGNUP_ACTIVATED", SIGNUP_WITH_AUTH))
     CORNFLOW_SERVICE_USER = os.getenv("CORNFLOW_SERVICE_USER", "service_user")
 
     # To change the tasks backend used by cornflow to solve the optimization models
@@ -51,10 +68,6 @@ class DefaultConfig(object):
     DATABRICKS_EP_CLUSTERS = os.getenv("DATABRICKS_EP_CLUSTERS")
     DATABRICKS_CLIENT_ID = os.getenv("DATABRICKS_CLIENT_ID")
     DATABRICKS_HEALTH_PATH = os.getenv("DATABRICKS_HEALTH_PATH", "default path")
-    # If service user is allowed to log with username and password
-    SERVICE_USER_ALLOW_PASSWORD_LOGIN = int(
-        os.getenv("SERVICE_USER_ALLOW_PASSWORD_LOGIN", 1)
-    )
 
     # Open deployment (all dags accessible to all users)
     OPEN_DEPLOYMENT = os.getenv("OPEN_DEPLOYMENT", 1)
@@ -121,11 +134,12 @@ class DefaultConfig(object):
         os.getenv("EXECUTION_FILES_CLEANUP_FREQUENCY", 90)
     )
 
-    # Token duration in hours
-    TOKEN_DURATION = os.getenv("TOKEN_DURATION", 24)
+    # Return the standard rate-limit headers on responses
+    RATELIMIT_HEADERS_ENABLED = True
 
-    # Password rotation time in days
-    PWD_ROTATION_TIME = os.getenv("PWD_ROTATION_TIME", 120)
+
+apply_security_settings(DefaultConfig, _SECURITY)
+apply_secret_keys(DefaultConfig, _SECRET_KEYS)
 
 
 class Development(DefaultConfig):
@@ -146,8 +160,10 @@ class Testing(DefaultConfig):
     DEBUG = False
     TESTING = True
     PROPAGATE_EXCEPTIONS = True
-    SECRET_TOKEN_KEY = "TESTINGSECRETKEY"
-    SECRET_BI_KEY = "THISISANOTHERKEY"
+    SECRET_TOKEN_KEY = "TESTINGSECRETKEY_TESTINGSECRETKEY_32B"
+    SECRET_BI_KEY = "THISISANOTHERKEY_THISISANOTHERKEY_32B"
+    SECRET_KEY_SOURCE = KEY_SOURCE_CONFIG
+    SECRET_KEYS_DIFFER = False
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///cornflow_test.db")
     AIRFLOW_URL = os.getenv("AIRFLOW_URL", "http://localhost:8080")
     PRESERVE_CONTEXT_ON_EXCEPTION = False
@@ -155,11 +171,39 @@ class Testing(DefaultConfig):
     AIRFLOW_PWD = os.getenv("AIRFLOW_PWD", "admin")
     OPEN_DEPLOYMENT = 1
     LOG_LEVEL = int(os.getenv("LOG_LEVEL", 10))
+
+    # Test-suite deviations from the level 3 defaults applied below
+    CORS_ORIGINS = "*"
+    DOCS_ENABLED = 1
+    HSTS_ENABLED = 0
+    # MFA is not required for the generic test suite. Specific MFA tests
+    # activate it explicitly.
+    MFA_REQUIRED = 0
+    # Rate limiting is disabled for the generic test suite (which makes many
+    # rapid login calls). Specific rate-limit tests enable it explicitly.
+    RATELIMIT_ENABLED = 0
+    # Low bcrypt work factor to keep the test suite fast
+    BCRYPT_LOG_ROUNDS = 4
     SIGNUP_ACTIVATED = SIGNUP_WITH_NO_AUTH
+
+
+apply_security_settings(Testing, _TESTING_SECURITY)
 
 
 class TestingDatabricks(Testing):
     CORNFLOW_BACKEND = DATABRICKS_BACKEND
+
+
+class TestingRateLimit(Testing):
+    """
+    Configuration class for the rate-limiting tests (the feature is off in
+    the base testing config so the rest of the suite is not throttled).
+    """
+
+    RATELIMIT_ENABLED = 1
+    RATELIMIT_STORAGE_URI = "memory://"
+    RATELIMIT_LOGIN = "3 per minute"
+    RATELIMIT_RECOVER = "2 per hour"
 
 
 class TestingOpenAuth(Testing):
@@ -192,6 +236,8 @@ class Production(DefaultConfig):
     # needs to be on to avoid getting only 500 codes:
     # and https://medium.com/@johanesriandy/flask-error-handler-not-working-on-production-mode-3adca4c7385c
     PROPAGATE_EXCEPTIONS = True
+    # CORS_ORIGINS, DOCS_ENABLED and HSTS_ENABLED are not set here: they depend
+    # on CORNFLOW_SECURITY_LEVEL, whatever FLASK_ENV is.
 
 
 app_config = {
@@ -201,4 +247,5 @@ app_config = {
     "testing-oauth": TestingOpenAuth,
     "testing-root": TestingApplicationRoot,
     "testing-databricks": TestingDatabricks,
+    "testing-ratelimit": TestingRateLimit,
 }

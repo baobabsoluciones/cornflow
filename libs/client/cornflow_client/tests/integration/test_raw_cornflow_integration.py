@@ -35,7 +35,7 @@ def _get_file(relative_path):
 class TestRawCornflowClientUser(TestCase):
     def setUp(self):
         self.client = CornFlow(url="http://127.0.0.1:5050/")
-        login_result = self.client.raw.login("user", "UserPassword1!")
+        login_result = self.client.raw.login("user", "Zc4-hJm.Bt6Vx9")
         data = login_result.json()
         self.assertEqual(login_result.status_code, 200)
         self.assertIn("id", data.keys())
@@ -60,8 +60,8 @@ class TestRawCornflowClientUser(TestCase):
         statuses = [] if initial_state is None else [initial_state]
         response = self.client.raw.get_status(execution_id)
         statuses.append(response.json()["state"])
-        while end_state not in statuses and len(statuses) < 100:
-            time.sleep(2)
+        while end_state not in statuses and len(statuses) < 400:
+            time.sleep(0.5)
             response = self.client.raw.get_status(execution_id)
             statuses.append(response.json()["state"])
 
@@ -87,7 +87,7 @@ class TestRawCornflowClientUser(TestCase):
 
     def test_sign_up(self):
         response = self.client.raw.sign_up(
-            "test_username_2", "test_username_2@cornflow.org", "TestPassword2!"
+            "test_username_2", "test_username_2@cornflow.org", "Hn7-wKp.Rb4Vt9"
         )
         data = response.json()
         self.assertIn("id", data.keys())
@@ -253,7 +253,10 @@ class TestRawCornflowClientUser(TestCase):
 
     def test_instance_data_check_solution(self):
         execution = self.test_create_instance_data_check()
-        time.sleep(15)
+        for _ in range(400):
+            if self.client.raw.get_status(execution["id"]).json()["state"] == STATUS_OPTIMAL:
+                break
+            time.sleep(0.5)
         results = self.client.raw.get_solution(execution["id"])
         self.assertEqual(results.status_code, 200)
         self.assertEqual(results.json()["state"], 1)
@@ -613,11 +616,11 @@ class TestRawCornflowClientUser(TestCase):
 class TestRawCornflowClientAdmin(TestCase):
     def setUp(self):
         self.client = CornFlow(url="http://127.0.0.1:5050/")
-        login_result = self.client.login("admin", "Adminpassword1!")
+        login_result = self.client.login("admin", "Kd8-rVt.Nq2Wp5")
         self.assertIn("id", login_result.keys())
         self.assertIn("token", login_result.keys())
         self.base_user_id = CornFlow(url="http://127.0.0.1:5050/").login(
-            "user", "UserPassword1!"
+            "user", "Zc4-hJm.Bt6Vx9"
         )["id"]
 
     def tearDown(self):
@@ -643,7 +646,7 @@ class TestRawCornflowClientAdmin(TestCase):
 class TestRawCornflowClientService(TestCase):
     def setUp(self):
         self.client = CornFlow(url="http://127.0.0.1:5050/")
-        login_result = self.client.login("airflow", "Airflow_test_password1")
+        login_result = self.client.login("airflow", "Xq7-mBv.Ld9Rn2")
         self.assertIn("id", login_result.keys())
         self.assertIn("token", login_result.keys())
 
@@ -652,7 +655,7 @@ class TestRawCornflowClientService(TestCase):
 
     def test_get_execution_data(self):
         client = CornFlow(url="http://127.0.0.1:5050/")
-        _ = client.login("user", "UserPassword1!")
+        _ = client.login("user", "Zc4-hJm.Bt6Vx9")
         data = _load_file(PULP_EXAMPLE)
         instance = client.raw.create_instance(
             data, "test_example", "test_description"
@@ -678,7 +681,7 @@ class TestRawCornflowClientService(TestCase):
 
     def test_write_execution_solution(self):
         client = CornFlow(url="http://127.0.0.1:5050/")
-        _ = client.login("user", "UserPassword1!")
+        _ = client.login("user", "Zc4-hJm.Bt6Vx9")
         data = _load_file(PULP_EXAMPLE)
         instance = client.raw.create_instance(
             data, "test_example", "test_description"
@@ -693,11 +696,11 @@ class TestRawCornflowClientService(TestCase):
 
         # Wait for the solve to finish instead of a fixed sleep: task start-up is
         # slower on Airflow 3 and 15 seconds was not always enough.
-        for _ in range(100):
+        for _ in range(400):
             solution = client.raw.get_solution(execution["id"]).json()
             if solution["state"] == STATUS_OPTIMAL:
                 break
-            time.sleep(2)
+            time.sleep(0.5)
         self.assertEqual(STATUS_OPTIMAL, solution["state"])
 
         payload = dict(

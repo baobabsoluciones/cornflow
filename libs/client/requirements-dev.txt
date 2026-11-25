@@ -1,3 +1,5 @@
 -r requirements.txt
 coverage
 pandas==2.2.0
+# not a runtime requirement (Airflow ships it): the tests render the Airflow log filename template
+jinja2

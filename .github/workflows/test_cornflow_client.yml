@@ -2,7 +2,8 @@ name: cornflow-client tests
 
 on:
   pull_request:
-    types: [opened, edited, synchronize, reopened]
+    # `edited` is left out on purpose: it fires when the PR title or description changes
+    types: [opened, synchronize, reopened]
     paths:
       - 'libs/client/**'
       - '.github/workflows/test_cornflow_client.yml'
@@ -17,6 +18,11 @@ on:
       - '!libs/client/README.rst'
       - '!libs/client/setup.py'
 
+# A new push to the same PR cancels the run still going for the previous one
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   unit:
     runs-on: ${{ matrix.os }}
@@ -25,22 +31,26 @@ jobs:
       run:
         working-directory: ./libs/client
     strategy:
-      max-parallel: 21
+      fail-fast: false
       matrix:
         python-version: ['3.10', '3.11', '3.12']
-        os: [ubuntu-latest, macOS-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: 'libs/client/requirements*.txt'
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements-dev.txt
-          pip install .
+          uv pip install --system -r requirements-dev.txt
+          uv pip install --system .
       - name: Test
         run: |
           coverage run --source=./cornflow_client/ --rcfile=./.coveragerc -m unittest discover -s cornflow_client/tests/unit
@@ -48,23 +58,27 @@ jobs:
 
   integration:
     name: Run all test suites on cornflow-client
-    needs: unit
     runs-on: ${{ matrix.os }}
     defaults:
       run:
         working-directory: ./libs/client
     strategy:
-      max-parallel: 21
+      fail-fast: false
       matrix:
         python-version: ['3.10', '3.11', '3.12']
         os: [ubuntu-latest]
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: '**/requirements*.txt'
       - name: Copy DAG files
         run: |
           cd ..
@@ -73,15 +87,14 @@ jobs:
           cp cornflow-dags/requirements.txt cornflow-server/airflow_config/
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements-dev.txt
-          pip install .
+          uv pip install --system -r requirements-dev.txt
+          uv pip install --system .
       - name: Install airflow
         run: |
           cd ..
           cd ..
           cd cornflow-server
-          python -m venv afvenv
+          uv venv afvenv --python "$(python -c 'import sys; print(sys.executable)')"
           source afvenv/bin/activate
           AIRFLOW_VERSION=3.2.2
           PYTHON_VERSION="$(python3 --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
@@ -89,10 +102,10 @@ jobs:
           CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
           # The fab extra provides FabAuthManager and the `airflow users create` CLI,
           # which moved out of Airflow core in Airflow 3.
-          python -m pip install "apache-airflow[fab]==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
-          python -m pip install -U -r airflow_config/requirements.txt
-          python -m pip uninstall cornflow-client -y
-          python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
+          uv pip install "apache-airflow[fab]==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
+          uv pip install -r airflow_config/requirements.txt
+          uv pip install --reinstall-package cornflow-client \
+            "cornflow-client @ git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
           # Airflow 3 replaced `db init` with the idempotent `db migrate`
           airflow db migrate
           airflow users create -u admin -f admin -l admin -r Admin -p admin -e admin@example.org
@@ -127,24 +140,24 @@ jobs:
           AIRFLOW__API_AUTH__JWT_SECRET: 4f8c1b2e9d7a6c5b3e2f1a0d9c8b7a6e5f4d3c2b1a0f9e8d7c6b5a4f3e2d1c0b
           AIRFLOW__API__SECRET_KEY: e9adafa751fd35adfc1fdd3285019be15eea0758f76e38e1e37a1154fb36
           AIRFLOW__CORE__LOAD_EXAMPLES: 0
-          AIRFLOW_CONN_CF_URI: http://airflow:Airflow_test_password1@localhost:5050
+          AIRFLOW_CONN_CF_URI: http://airflow:Xq7-mBv.Ld9Rn2@localhost:5050
       - name: Run cornflow
         run: |
           cd ..
           cd ..
           cd cornflow-server
-          python -m venv cfvenv
+          uv venv cfvenv --python "$(python -c 'import sys; print(sys.executable)')"
           source cfvenv/bin/activate
-          python -m pip install -U -r requirements.txt
+          uv pip install -r requirements.txt
           CLIENT_BRANCH="${{ github.head_ref || github.ref_name }}"
-          python -m pip uninstall cornflow-client -y
-          python -m pip install -U "git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
+          uv pip install --reinstall-package cornflow-client \
+            "cornflow-client @ git+https://github.com/baobabsoluciones/cornflow@${CLIENT_BRANCH}#subdirectory=libs/client"
           flask db upgrade -d cornflow/migrations/
           flask access_init
           flask register_deployed_dags -r http://127.0.0.1:8080 -u admin -p admin
-          flask create_admin_user -u admin -e admin@cornflow.org -p Adminpassword1!
-          flask create_service_user -u airflow -e airflow@cornflow.org -p Airflow_test_password1
-          flask create_base_user -u user -e user@cornflow.org -p UserPassword1!
+          flask create_admin_user -u admin -e admin@cornflow.org -p Kd8-rVt.Nq2Wp5
+          flask create_service_user -u airflow -e airflow@cornflow.org -p Xq7-mBv.Ld9Rn2
+          flask create_base_user -u user -e user@cornflow.org -p Zc4-hJm.Bt6Vx9
           flask register_dag_permissions -o 1
           flask run -p 5050 &
           deactivate
@@ -155,12 +168,22 @@ jobs:
           AIRFLOW_URL: http://127.0.0.1:8080
           AIRFLOW_USER: admin
           AIRFLOW_PWD: admin
-          SECRET_KEY: THISNEEDSTOBECHANGED
+          SECRET_KEY: THISNEEDSTOBECHANGED_THISNEEDSTOBECHANGED
+          SECRET_BI_KEY: THISNEEDSTOBECHANGED_THISNEEDSTOBECHANGED_BI
           OPEN_DEPLOYMENT: 1
           AUTH_TYPE: 1
           LOG_LEVEL: 10
           CORNFLOW_SERVICE_USER: airflow
           SIGNUP_ACTIVATED: 1
+          # The client integration tests exercise the API, not the security
+          # policies: the server (started with `flask run`, i.e. the factory's
+          # default "development" config) must not require MFA nor rate-limit
+          # the repeated logins these tests perform.
+          MFA_REQUIRED: 0
+          RATELIMIT_ENABLED: 0
+          # The client integration tests exercise refresh and logout, and at the
+          # default security level (1) refresh tokens are disabled.
+          REFRESH_TOKEN_ENABLED: 1
       - name: Run unit tests
         run: |
           coverage run --source=./cornflow_client/ --rcfile=./.coveragerc -m unittest discover -s cornflow_client/tests/unit

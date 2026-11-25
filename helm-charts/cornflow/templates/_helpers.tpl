@@ -67,4 +67,29 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 */}}
 {{- define "cornflow.postgresql.fullname" -}}
 {{- printf "%s-%s" .Release.Name "postgresql" | trunc 63 | trimSuffix "-" -}}
-{{- end -}} 
+{{- end -}}
+
+{{/*
+Name of the Secret with the cornflow keys (FERNET_KEY and SECRET_BI_KEY):
+cornflow.keys.existingSecret if set, otherwise <release>-cornflow-keys, created by this chart.
+*/}}
+{{- define "cornflow.keysSecretName" -}}
+{{- if (.Values.cornflow.keys).existingSecret }}
+{{- .Values.cornflow.keys.existingSecret }}
+{{- else }}
+{{- printf "%s-cornflow-keys" .Release.Name }}
+{{- end }}
+{{- end }}
+
+{{/*
+Fails the render when a cornflow key is set in cornflow.env: the keys come from the
+keys Secret, and a second definition of the same variable in the pod would be ambiguous.
+*/}}
+{{- define "cornflow.validateKeys" -}}
+{{- $env := .Values.cornflow.env | default dict }}
+{{- range $name := list "FERNET_KEY" "SECRET_KEY" "SECRET_BI_KEY" }}
+{{- if hasKey $env $name }}
+{{- fail (printf "cornflow.env.%s is not allowed. FERNET_KEY and SECRET_BI_KEY come from a Kubernetes Secret: the one this chart generates on install, or your own with cornflow.keys.existingSecret. SECRET_KEY is not needed: FERNET_KEY takes precedence. Remove %s from cornflow.env; to keep the key you already use, store it in your own Secret (keys FERNET_KEY and SECRET_BI_KEY) and set cornflow.keys.existingSecret (see the chart README)." $name $name) }}
+{{- end }}
+{{- end }}
+{{- end }}

@@ -12,6 +12,7 @@ from cornflow.endpoints import alarms_resources, get_resources
 # Imports from internal libraries
 from cornflow.models import ViewModel
 from cornflow.shared import db
+from cornflow.shared.plugins import get_plugins_resources
 
 
 def register_views_command(external_app: str = None, verbose: bool = False):
@@ -120,6 +121,20 @@ def get_views_to_update(
     ]
 
 
+def _get_url_from_map(endpoint):
+    """Return the real URL rule from Flask's URL map (includes Blueprint prefix)."""
+    try:
+        rules_map = current_app.url_map._rules_by_endpoint
+        # Try exact match first, then with blueprint prefix (e.g. "cornflow.instance")
+        for key in (endpoint, f"cornflow.{endpoint}"):
+            rules = list(rules_map.get(key, []))
+            if rules:
+                return rules[0].rule
+    except Exception:
+        pass
+    return None
+
+
 def get_views_to_update_and_delete(
     resources_to_register, views_registered_urls_all_attributes
 ):
@@ -130,7 +145,7 @@ def get_views_to_update_and_delete(
     """
     all_resources_to_register_views_endpoints = {
         view["endpoint"]: {
-            "url_rule": view["urls"],
+            "url_rule": _get_url_from_map(view["endpoint"]) or view["urls"],
             "description": view["resource"].DESCRIPTION,
         }
         for view in resources_to_register
@@ -157,7 +172,7 @@ def get_views_to_register(resources_to_register, views_registered_urls_all_attri
         ViewModel(
             {
                 "name": view["endpoint"],
-                "url_rule": view["urls"],
+                "url_rule": _get_url_from_map(view["endpoint"]) or view["urls"],
                 "description": view["resource"].DESCRIPTION,
             }
         )
@@ -190,6 +205,14 @@ def get_resources_to_register(external_app):
         if current_app.config["ALARMS_ENDPOINTS"]:
             resources_to_register = resources + alarms_resources
             current_app.logger.info(" ALARMS ENDPOINTS ENABLED ")
+        # Plugin mode: the views of the loaded plugins are kept (and updated),
+        # so they are not deleted as obsolete
+        core_endpoints = {res["endpoint"] for res in resources_to_register}
+        resources_to_register = resources_to_register + [
+            res
+            for res in get_plugins_resources(current_app)
+            if res["endpoint"] not in core_endpoints
+        ]
     else:
         current_app.logger.info(f" USING EXTERNAL APP: {external_app} ")
         sys.path.append("./")
