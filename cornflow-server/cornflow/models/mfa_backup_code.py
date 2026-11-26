@@ -54,8 +54,10 @@ class MFABackupCodeModel(TraceAttributesModel):
     def try_consume(cls, user_id: int, code: str) -> bool:
         """
         Checks the given code against the unused backup codes of the user and
-        marks it as used when it matches. The change is committed by the
-        caller through the user save/update flow.
+        marks it as used when it matches. The code is claimed with a
+        conditional update (only while ``used_at`` is still null), so two
+        concurrent requests with the same code can not both use it. The
+        change is committed by the caller through the user save/update flow.
 
         :param int user_id: the id of the user
         :param str code: the plain backup code provided on login
@@ -67,9 +69,13 @@ class MFABackupCodeModel(TraceAttributesModel):
         unused_codes = cls.query.filter_by(user_id=user_id, used_at=None).all()
         for row in unused_codes:
             if bcrypt.check_password_hash(row.code_hash, code):
-                row.used_at = datetime.now(timezone.utc)
-                db.session.add(row)
-                return True
+                claimed = cls.query.filter(
+                    cls.id == row.id, cls.used_at.is_(None)
+                ).update(
+                    {"used_at": datetime.now(timezone.utc)},
+                    synchronize_session=False,
+                )
+                return claimed == 1
         return False
 
     def __repr__(self):

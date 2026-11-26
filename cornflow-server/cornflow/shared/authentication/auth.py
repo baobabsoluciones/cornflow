@@ -560,7 +560,23 @@ class Auth:
                 log_txt=f"Error while user {user.id} refreshes a session. The "
                 f"session expired (inactivity or absolute cap).",
             )
-        session.rotate()
+        if session.rotate(expected_jti=payload.get("jti")) is None:
+            # A concurrent refresh with the same token rotated the session
+            # first: the same token was used twice, so it is reuse as above
+            session.revoke()
+            audit(
+                "session.reuse_detected",
+                outcome="revoked",
+                actor_id=user.id,
+                actor=user.username,
+                session_id=session.session_id,
+            )
+            raise InvalidToken(
+                "The session has been revoked, please log in again",
+                log_txt=f"Error while user {user.id} refreshes a session. The "
+                f"refresh token was used by a concurrent request; session "
+                f"revoked.",
+            )
         audit(
             "session.refreshed",
             actor_id=user.id,

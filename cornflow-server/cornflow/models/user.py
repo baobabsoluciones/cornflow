@@ -573,10 +573,19 @@ class UserModel(TraceAttributesModel):
                 ):
                     # The code (or an older one) was already used
                     return False
-                self.totp_last_counter = step
-                db.session.add(self)
+                # Conditional update, so that two concurrent requests with
+                # the same code can not both pass the check above: only the
+                # one that moves the counter forward is accepted
+                model = type(self)
+                claimed = model.query.filter(
+                    model.id == self.id,
+                    db.or_(
+                        model.totp_last_counter.is_(None),
+                        model.totp_last_counter < step,
+                    ),
+                ).update({"totp_last_counter": step}, synchronize_session=False)
                 db.session.commit()
-                return True
+                return claimed == 1
         return False
 
     @classmethod

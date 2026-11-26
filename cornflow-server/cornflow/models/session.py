@@ -157,19 +157,36 @@ class SessionModel(TraceAttributesModel):
         """
         return datetime.now(timezone.utc) > _as_utc(self.expires_at)
 
-    def rotate(self) -> str:
+    def rotate(self, expected_jti: str) -> str:
         """
         Issues a new refresh-token id for this session and refreshes the
         activity timestamp (sliding window). Returns the new jti.
 
+        The rotation is a compare-and-swap: it only happens while the stored
+        jti is still ``expected_jti`` and the session is not revoked, so of two
+        concurrent refreshes with the same token only one rotates. The other
+        gets None.
+
+        :param str expected_jti: the jti of the refresh token being consumed
+        :return: the new jti, or None if the session was rotated or revoked
+          in the meantime
         :rtype: str
         """
-        self.jti = _new_id()
-        self.last_activity_at = datetime.now(timezone.utc)
-        self.updated_at = datetime.now(timezone.utc)
-        db.session.add(self)
+        new_jti = _new_id()
+        now = datetime.now(timezone.utc)
+        model = type(self)
+        rotated = model.query.filter(
+            model.id == self.id,
+            model.jti == expected_jti,
+            model.revoked.is_(False),
+        ).update(
+            {"jti": new_jti, "last_activity_at": now, "updated_at": now},
+            synchronize_session=False,
+        )
         self.commit_changes("rotating session")
-        return self.jti
+        if rotated != 1:
+            return None
+        return new_jti
 
     def revoke(self):
         """Marks the session as revoked (idempotent)."""
