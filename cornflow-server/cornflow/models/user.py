@@ -373,7 +373,20 @@ class UserModel(TraceAttributesModel):
         max_attempts = self.login_max_attempts()
         if max_attempts <= 0:
             return
-        self.failed_login_attempts = (self.failed_login_attempts or 0) + 1
+        # Incremented in the database, not read-modify-write, so that a burst
+        # of parallel failures can not try more than max_attempts passwords
+        # before the lock. The commit reloads the counter on the object.
+        model = type(self)
+        model.query.filter(model.id == self.id).update(
+            {
+                "failed_login_attempts": db.func.coalesce(
+                    model.failed_login_attempts, 0
+                )
+                + 1
+            },
+            synchronize_session=False,
+        )
+        db.session.commit()
         if not self.locked and self.failed_login_attempts >= max_attempts:
             self._lock_after_failed_logins(max_attempts)
         db.session.add(self)

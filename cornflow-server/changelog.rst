@@ -69,7 +69,7 @@ version 1.4.0
 
     - Account lockout
         After ``LOGIN_MAX_ATTEMPTS`` consecutive failed logins (wrong password or wrong second-factor
-        code) the account is locked until someone unlocks it: 0 at level 1 (no lockout, as in version
+        code, also a wrong ``current_password`` in a password change) the account is locked until someone unlocks it: 0 at level 1 (no lockout, as in version
         1.3.9) and 5 at levels 2 and 3, where it must be between 1 and 10. The lock revokes the sessions
         and the personal API keys of the user. A locked account gets 403 with
         ``error_code: account_locked`` only when the password is correct. Platform administrators unlock

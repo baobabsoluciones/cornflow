@@ -245,6 +245,10 @@ class UserDetailsEndpoint(BaseMetaResource):
                     if not current_password or not user_obj.check_hash(
                         current_password
                     ):
+                        # A wrong current password counts towards the lockout,
+                        # so a stolen session can not be used to guess it
+                        if current_password:
+                            user_obj.register_failed_login()
                         raise InvalidCredentials(
                             "The current password is missing or incorrect",
                             log_txt=f"Error while user {self.get_user()} tries to change "

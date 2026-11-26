@@ -41,6 +41,7 @@ REVOKED_API_KEY_ERROR = "The API key has been revoked, please generate a new one
 USER_PASSWORD = "Kx9#tR2m!Qw7Zp"
 SERVICE_PASSWORD = "Sv7&kM2x!Bd5Ln"
 WRONG_PASSWORD = "Wrong#Password9!x"
+NEW_PASSWORD = "Vb2#nQ8w!Lz5Tr"
 JSON_HEADER = {"Content-Type": "application/json"}
 
 
@@ -364,6 +365,48 @@ class _LockoutCases(_LockoutApiCases):
     def test_lockout_helpers(self):
         self.assertTrue(UserModel.login_lockout_enabled())
         self.assertEqual(self.max_attempts, UserModel.login_max_attempts())
+
+    def test_concurrent_failures_are_not_lost(self):
+        user = self.user_row()
+        self.assertFalse(user.failed_login_attempts)
+        # Concurrent failures are stored after this request read the counter
+        UserModel.query.filter_by(id=user.id).update(
+            {"failed_login_attempts": self.max_attempts - 1},
+            synchronize_session=False,
+        )
+        user.register_failed_login()
+        user = self.user_row()
+        self.assertEqual(self.max_attempts, user.failed_login_attempts)
+        self.assertTrue(user.locked)
+
+    def test_wrong_current_password_counts_towards_the_lockout(self):
+        if self.security_level == 1:
+            self.skipTest("current_password is only checked from level 2")
+        token = self.login().json["token"]
+        for _ in range(self.max_attempts):
+            response = self.client.put(
+                f"{USER_URL}{self.user.id}/",
+                data=json.dumps(
+                    {"password": NEW_PASSWORD, "current_password": WRONG_PASSWORD}
+                ),
+                headers=auth_header(token),
+            )
+            self.assertEqual(400, response.status_code, response.json)
+        self.assertTrue(self.user_row().locked)
+        self.assertEqual(401, self.get_me(token).status_code)
+        self.assertTrue(self.user_row().check_hash(USER_PASSWORD))
+
+    def test_missing_current_password_does_not_count(self):
+        if self.security_level == 1:
+            self.skipTest("current_password is only checked from level 2")
+        token = self.login().json["token"]
+        response = self.client.put(
+            f"{USER_URL}{self.user.id}/",
+            data=json.dumps({"password": NEW_PASSWORD}),
+            headers=auth_header(token),
+        )
+        self.assertEqual(400, response.status_code, response.json)
+        self.assertFalse(self.user_row().failed_login_attempts)
 
 
 class TestLockoutLevel1WithMaxAttempts(

@@ -193,7 +193,8 @@ whole feature can be disabled with ``RATELIMIT_ENABLED=0``.
 Account lockout: when ``LOGIN_MAX_ATTEMPTS`` is greater than 0 (5 at levels
 2 and 3, where it must be between 1 and 10), the account is locked after
 that number of consecutive failed login attempts — wrong password or wrong
-two-factor code. At level 1 the default is 0: there is no lockout and
+two-factor code, or a wrong ``current_password`` when users change their own
+password. At level 1 the default is 0: there is no lockout and
 failed attempts are not counted; a value above 0 turns the lockout on at
 level 1 too. While locked, the login endpoint answers 403 with
 ``error_code: account_locked`` (``The account is locked due to too many
