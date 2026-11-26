@@ -160,7 +160,13 @@ class SignUpEndpoint(BaseMetaResource):
             if int(current_app.config.get("MFA_REQUIRED", 0)) == 1:
                 # The new user still has to enroll in two-factor
                 # authentication: a temporary enrollment token is issued
-                # instead of a full session token
+                # instead of a full session token. When an administrator
+                # creates the account the token is not returned: whoever holds
+                # it chooses the second factor of the new user, so the user
+                # enrolls at their first login instead.
+                if signup_requires_auth and actor is not None:
+                    current_app.logger.info(f"New user created: {user}")
+                    return {"id": user.id, "mfa_setup_required": True}, 201
                 token = self.auth_class.generate_token(
                     user.id, purpose=TOKEN_PURPOSE_MFA_SETUP
                 )

@@ -62,7 +62,8 @@ version 1.4.0
         1 at level 3): with ``MFA_ENABLED=0``, ``/mfa/setup/`` and ``/mfa/verify/`` answer 501 and users
         who already enrolled keep using their second factor. With ``MFA_REQUIRED=1`` (level 3) every
         internal user except service users must enroll at the next login, which returns
-        ``mfa_setup_required`` and a short-lived enrollment token. ``MFA_REQUIRED``,
+        ``mfa_setup_required`` and a short-lived enrollment token; ``/signup/`` returns that token only
+        on a self sign-up, not to the administrator who creates the account. ``MFA_REQUIRED``,
         ``API_KEY_STEPUP_TOTP`` and ``PLATFORM_ROLE_STEPUP_TOTP`` set to 1 need ``MFA_ENABLED=1``, or
         cornflow does not start. Service users and LDAP and OpenID users are exempt.
 

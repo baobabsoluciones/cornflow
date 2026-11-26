@@ -23,6 +23,7 @@ import unittest
 from importlib import import_module
 from unittest.mock import patch
 
+import pyotp
 from click.testing import CliRunner
 from flask_testing import TestCase
 
@@ -1036,6 +1037,47 @@ class TestSignupLevel3(_SignupCases, _LevelCase):
     security_level = 3
     config_overrides = level_overrides(3)
     expected_signup_activated = 3
+
+
+class TestSignupMfaRequiredLevel3(_LevelCase):
+    """
+    With MFA_REQUIRED=1 (the level 3 default) the enrollment token of an
+    account created by an administrator is not returned to the administrator:
+    whoever holds it chooses the second factor of the new user.
+    """
+
+    security_level = 3
+
+    def test_admin_does_not_get_the_enrollment_token(self):
+        secret = pyotp.random_base32()
+        admin = self.fresh_user("cfplatform")
+        admin.set_totp_secret(secret)
+        admin.mfa_enabled = True
+        admin.save()
+        login = self.client.post(
+            LOGIN_URL,
+            data=json.dumps(
+                {
+                    "username": "cfplatform",
+                    "password": P,
+                    "totp_code": pyotp.TOTP(secret).now(),
+                }
+            ),
+            headers=JSON_HEADER,
+        )
+        self.assertEqual(200, login.status_code, login.json)
+        response = self.client.post(
+            SIGNUP_URL,
+            data=json.dumps(
+                {"username": "newuser", "email": "newuser@test.org", "password": P}
+            ),
+            headers={**JSON_HEADER, "Authorization": f"Bearer {login.json['token']}"},
+        )
+        self.assertEqual(201, response.status_code, response.json)
+        self.assertTrue(response.json["mfa_setup_required"])
+        self.assertNotIn("token", response.json)
+        self.assertNotIn("refresh_token", response.json)
+        self.assertEqual(self.fresh_user("newuser").id, response.json["id"])
 
 
 # --------------------------------------------------------------------------
