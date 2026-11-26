@@ -167,7 +167,8 @@ version 1.4.0
         are kept per process by default and cornflow logs a warning at startup: with several gunicorn
         workers set ``RATELIMIT_STORAGE_URI`` to a shared storage (Redis is supported). Behind a reverse
         proxy set ``RATELIMIT_TRUST_FORWARDED_FOR=1``, so that the limit counts each client IP and not
-        the proxy. ``RATELIMIT_ENABLED=0`` turns the limits off.
+        the proxy; the IP is the right-most ``X-Forwarded-For`` entry, added by that proxy, also in the
+        audit log. ``RATELIMIT_ENABLED=0`` turns the limits off.
 
     - Security headers, CORS and interactive API docs
         Every response carries security headers for browsers (``X-Content-Type-Options``,

@@ -569,6 +569,25 @@ class TestFailuresOnlyTrustedProxy(_RateLimitBase, SecurityLevelTestMixin, TestC
             200, self.good_login(headers={"X-Forwarded-For": "10.0.0.2"}).status_code
         )
 
+    def test_client_set_forwarded_entries_are_ignored(self):
+        # The proxy appends the address it sees on the right; whatever the
+        # client sends on the left must not give it a fresh counter
+        responses = [
+            self.bad_login(headers={"X-Forwarded-For": f"198.51.100.{i}, 10.0.0.1"})
+            for i in range(3)
+        ]
+        self.assert_statuses([400] * 3, responses)
+        response = self.good_login(
+            headers={"X-Forwarded-For": "198.51.100.99, 10.0.0.1"}
+        )
+        self.assertEqual(429, response.status_code)
+
+    def test_audit_records_the_proxy_reported_ip(self):
+        with self.assertLogs("cornflow.audit", level="INFO") as logs:
+            self.bad_login(headers={"X-Forwarded-For": "198.51.100.7, 10.0.0.1"})
+        ips = {json.loads(record.getMessage()).get("ip") for record in logs.records}
+        self.assertEqual({"10.0.0.1"}, ips)
+
     def test_successes_behind_proxy_do_not_consume(self):
         header = {"X-Forwarded-For": "10.0.0.1"}
         responses = [self.good_login(headers=header) for _ in range(20)]

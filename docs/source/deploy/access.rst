@@ -184,7 +184,9 @@ when rate limiting is on and the storage is ``memory://``. The Helm chart
 (``RATELIMIT_STORAGE_URI`` in ``values.yaml``) and ``docker-compose.yml``
 carry the variable, commented, ready to point to a Redis.
 When behind a reverse proxy, set ``RATELIMIT_TRUST_FORWARDED_FOR=1`` so the
-real client IP (from ``X-Forwarded-For``) is used instead of the proxy's;
+real client IP is used instead of the proxy's: cornflow takes the right-most
+``X-Forwarded-For`` entry, the one added by the proxy in front of it, so
+the entries a client sends itself are ignored;
 leave it off on direct deployments so the header can not be spoofed. The
 whole feature can be disabled with ``RATELIMIT_ENABLED=0``.
 

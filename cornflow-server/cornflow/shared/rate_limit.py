@@ -29,26 +29,17 @@ def get_client_ip() -> str:
     """
     Returns the client IP used as the rate-limit key.
 
-    When RATELIMIT_TRUST_FORWARDED_FOR is enabled (the deployment is behind a
-    trusted reverse proxy that sets X-Forwarded-For), the left-most address
-    of that header is used; otherwise the direct connection address is used.
-    The header is only trusted when the flag is on, so clients can not spoof
-    their IP on a direct deployment.
+    It is the address of the direct connection. When
+    RATELIMIT_TRUST_FORWARDED_FOR is enabled (the deployment is behind a
+    trusted reverse proxy), app.py wraps the application in ProxyFix, which
+    sets that address from the right-most X-Forwarded-For entry (the one
+    added by the trusted proxy). The entries on its left are set by the
+    client and are never used, so a client can not get a fresh counter by
+    sending its own header.
 
     :return: the client IP address
     :rtype: str
     """
-    try:
-        trust_forwarded = int(
-            current_app.config.get("RATELIMIT_TRUST_FORWARDED_FOR", 0)
-        )
-    except (TypeError, ValueError):
-        trust_forwarded = 0
-
-    if trust_forwarded:
-        forwarded_for = request.headers.get("X-Forwarded-For")
-        if forwarded_for:
-            return forwarded_for.split(",")[0].strip()
     return request.remote_addr or "127.0.0.1"
 
 

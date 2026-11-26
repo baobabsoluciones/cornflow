@@ -20,6 +20,7 @@ import jwt
 import pyotp
 from flask import Flask, current_app
 from flask_testing import TestCase
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from cornflow.app import (
     MINIMUM_SECRET_KEY_LENGTH,
@@ -1291,7 +1292,8 @@ class TestRateLimiting(TestCase):
         self.assertEqual(429, response.status_code)
 
     def test_forwarded_for_used_when_trusted(self):
-        current_app.config["RATELIMIT_TRUST_FORWARDED_FOR"] = 1
+        # What create_app installs with RATELIMIT_TRUST_FORWARDED_FOR=1
+        self.app.wsgi_app = ProxyFix(self.app.wsgi_app, x_for=1)
         # Different forwarded IPs are limited independently
         for _ in range(3):
             self.client.post(

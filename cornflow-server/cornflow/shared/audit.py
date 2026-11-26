@@ -22,17 +22,14 @@ audit_logger = logging.getLogger("cornflow.audit")
 
 
 def _client_ip():
-    """Source IP of the current request, honouring the trusted-proxy config."""
+    """
+    Source IP of the current request. Behind a trusted proxy
+    (RATELIMIT_TRUST_FORWARDED_FOR=1) ProxyFix has already set it from the
+    right-most X-Forwarded-For entry; the client-controlled entries on its
+    left are never recorded.
+    """
     if not has_request_context():
         return None
-    try:
-        trust = int(current_app.config.get("RATELIMIT_TRUST_FORWARDED_FOR", 0))
-    except (RuntimeError, TypeError, ValueError):
-        trust = 0
-    if trust:
-        forwarded = request.headers.get("X-Forwarded-For")
-        if forwarded:
-            return forwarded.split(",")[0].strip()
     return request.remote_addr
 
 
