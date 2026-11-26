@@ -313,3 +313,63 @@ class TestRawClientRefresh(TestCase):
         self.client.set_api_key("an-api-key")
         self.assertEqual("an-api-key", self.client.token)
         self.assertIsNone(self.client.refresh_token)
+
+
+class TestTwoFactorLoginAndApiKeyRequests(TestCase):
+    """Request bodies of the login with a second factor and of create_api_key."""
+
+    def setUp(self):
+        self.client = RawCornFlow(url="http://cornflow.test/")
+
+    def login_body(self, client, *args, **kwargs):
+        with mock.patch(
+            RAW + ".requests.post", return_value=_response(200, LOGIN_BODY)
+        ) as post:
+            client.login(*args, **kwargs)
+        self.assertEqual("http://cornflow.test/login/", post.call_args[0][0])
+        return post.call_args[1]["json"]
+
+    def test_login_sends_totp_code(self):
+        body = self.login_body(self.client, "someuser", "somepassword", totp_code="123456")
+        self.assertEqual(
+            {"username": "someuser", "password": "somepassword", "totp_code": "123456"},
+            body,
+        )
+
+    def test_login_without_totp_code_does_not_send_it(self):
+        body = self.login_body(self.client, "someuser", "somepassword")
+        self.assertEqual({"username": "someuser", "password": "somepassword"}, body)
+
+    def test_third_positional_argument_of_login_is_the_totp_code(self):
+        # Breaking change of 1.4.0: encoding is no longer the third argument
+        body = self.login_body(self.client, "someuser", "somepassword", "654321")
+        self.assertEqual("654321", body["totp_code"])
+        body = self.login_body(
+            CornFlow(url="http://cornflow.test/"), "someuser", "somepassword", "654321"
+        )
+        self.assertEqual("654321", body["totp_code"])
+
+    def create_api_key_body(self, **kwargs):
+        self.client.token = "access-1"
+        with mock.patch(
+            RAW + ".requests.post",
+            return_value=_response(201, {"api_key": "key", "scope": "read"}),
+        ) as post:
+            self.client.create_api_key(**kwargs)
+        self.assertEqual("http://cornflow.test/user/api-key/", post.call_args[0][0])
+        self.assertEqual(
+            "Bearer access-1", post.call_args[1]["headers"]["Authorization"]
+        )
+        return post.call_args[1]["json"]
+
+    def test_create_api_key_read_only_sends_the_read_scope(self):
+        self.assertEqual({"scope": "read"}, self.create_api_key_body(read_only=True))
+
+    def test_create_api_key_full_by_default(self):
+        self.assertEqual({}, self.create_api_key_body())
+
+    def test_create_api_key_with_step_up_code(self):
+        self.assertEqual(
+            {"totp_code": "123456", "scope": "read"},
+            self.create_api_key_body(totp_code="123456", read_only=True),
+        )
