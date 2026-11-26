@@ -126,7 +126,9 @@ version 1.4.0
         ``platform_admin`` (903), with the permissions of their client counterpart. Only a platform
         administrator grants or revokes platform roles, and granting one through the API asks for a
         fresh TOTP code when the administrator has two-factor authentication and
-        ``PLATFORM_ROLE_STEPUP_TOTP=1`` (level 3). Create these users with
+        ``PLATFORM_ROLE_STEPUP_TOTP=1`` (level 3). At every level, only the user or a platform
+        administrator edits, deletes or resets the two-factor authentication of a user with a platform
+        role (``PUT`` and ``DELETE /user/<id>/``, ``DELETE /user/<id>/mfa/``). Create these users with
         ``cornflow users create platform_viewer``, ``platform_planner`` or ``platform_admin``, or set
         ``CORNFLOW_PLATFORM_ADMIN_USER``, ``CORNFLOW_PLATFORM_ADMIN_EMAIL`` and
         ``CORNFLOW_PLATFORM_ADMIN_PWD`` before ``cornflow service init``. At levels 2 and 3 only

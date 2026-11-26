@@ -38,7 +38,7 @@ from flask_apispec import doc, use_kwargs
 
 # Imports from internal modules
 from cornflow.endpoints.meta_resource import BaseMetaResource
-from cornflow.models import MFABackupCodeModel, UserModel
+from cornflow.models import MFABackupCodeModel, UserModel, UserRoleModel
 from cornflow.schemas.user import MFAVerifyRequest
 from cornflow.shared import db
 from cornflow.shared.audit import audit
@@ -223,7 +223,8 @@ class UserMFAResetEndpoint(BaseMetaResource):
     def delete(self, user_id):
         """
         API (DELETE) method to reset the MFA enrollment of a user. Only the
-        user themselves or an admin can do it.
+        user themselves or an admin can do it; the MFA of a user with platform
+        roles can only be reset by that user or a platform administrator.
 
         :param int user_id: the id of the user to reset
         :return: a message and an integer with the HTTP status code
@@ -239,6 +240,20 @@ class UserMFAResetEndpoint(BaseMetaResource):
             raise ObjectDoesNotExist(
                 log_txt=f"Error while user {self.get_user()} tries to reset "
                 f"the MFA of user {user_id}. The user does not exist."
+            )
+        # A client admin can not reset the MFA of a user with platform roles
+        # (same rule as the unlock endpoint)
+        if (
+            self.get_user_id() != user_id
+            and not self.get_user().is_platform_admin()
+            and UserRoleModel.is_platform_user(user_id)
+        ):
+            raise NoPermission(
+                error="Only a platform administrator can reset the two-factor "
+                "authentication of a platform user",
+                log_txt=f"Error while user {self.get_user()} tries to reset "
+                f"the MFA of user {user_id}. The user has a platform role and "
+                f"only platform administrators can reset it.",
             )
         user_obj.set_totp_secret(None)
         user_obj.mfa_enabled = False

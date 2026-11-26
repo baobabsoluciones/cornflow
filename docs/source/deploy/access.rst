@@ -248,7 +248,8 @@ locally.
   returns ``mfa_required`` when the code is missing; sending ``totp_code``
   (a TOTP code or an unused backup code) returns the session token.
 * Reset: ``DELETE /user/<id>/mfa/`` (the user themselves or an admin, e.g.
-  when a phone is lost). It revokes every session and the personal API key
+  when a phone is lost; only a platform administrator resets the MFA of
+  another user with a platform role). It revokes every session and the personal API key
   of the user, including a superseded key still in its rotation grace
   window, as the account lock does. With ``MFA_REQUIRED=1`` the user will
   enroll again at the next login.

@@ -144,6 +144,19 @@ class UserDetailsEndpoint(BaseMetaResource):
                 log_txt=f"Error while user {self.get_user()} tries to delete user {user_id}. "
                 f"The user to delete is a service user and therefore can not be deleted."
             )
+        # A client admin can not delete a user with platform roles (same rule
+        # as the unlock endpoint)
+        if (
+            self.get_user_id() != user_id
+            and not self.get_user().is_platform_admin()
+            and UserRoleModel.is_platform_user(user_id)
+        ):
+            raise NoPermission(
+                error="Only a platform administrator can delete a platform user",
+                log_txt=f"Error while user {self.get_user()} tries to delete user "
+                f"{user_id}. The user has a platform role and only platform "
+                f"administrators can delete it.",
+            )
         current_app.logger.info(
             f"User {user_obj.id} was deleted by user {self.get_user()}"
         )
@@ -173,6 +186,20 @@ class UserDetailsEndpoint(BaseMetaResource):
             raise ObjectDoesNotExist(
                 log_txt=f"Error while user {self.get_user()} tries to edit user {user_id}. "
                 f"The user to edit does not exist."
+            )
+        # A client admin can not edit a user with platform roles: setting the
+        # password of a platform administrator would hand over that account
+        # (same rule as the unlock endpoint)
+        if (
+            self.get_user_id() != user_id
+            and not self.get_user().is_platform_admin()
+            and UserRoleModel.is_platform_user(user_id)
+        ):
+            raise NoPermission(
+                error="Only a platform administrator can edit a platform user",
+                log_txt=f"Error while user {self.get_user()} tries to edit user "
+                f"{user_id}. The user has a platform role and only platform "
+                f"administrators can edit it.",
             )
         # working with a ldap service users cannot be edited.
         if (

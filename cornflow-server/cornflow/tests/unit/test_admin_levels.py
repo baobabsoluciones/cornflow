@@ -1172,5 +1172,138 @@ class TestUnlockLevel3(_UnlockCases, _LevelCase):
     admin_reaches_unlock = False
 
 
+# --------------------------------------------------------------------------
+# H. Edit, MFA reset and delete of platform users
+# --------------------------------------------------------------------------
+EDIT_PLATFORM_USER_ERROR = "Only a platform administrator can edit a platform user"
+MFA_RESET_PLATFORM_USER_ERROR = (
+    "Only a platform administrator can reset the two-factor authentication of "
+    "a platform user"
+)
+DELETE_PLATFORM_USER_ERROR = "Only a platform administrator can delete a platform user"
+NEW_P = "Vb2#nQ8w!Lz5Tr"  # valid at the three levels
+
+
+class _PlatformUserGuardCases:
+    """
+    A client admin passes ``is_admin()`` but must not take over, strip the
+    second factor of, or delete a user with platform roles (same rule as the
+    unlock endpoint). A platform administrator still can.
+    """
+
+    def enable_mfa(self, user):
+        user = self.fresh_user(user.username)
+        user.mfa_enabled = True
+        user.save()
+
+    def login_status(self, username, password):
+        return self.client.post(
+            LOGIN_URL,
+            data=json.dumps({"username": username, "password": password}),
+            headers=JSON_HEADER,
+        ).status_code
+
+    def test_admin_cannot_set_password_of_platform_admin(self):
+        response = self.request(
+            "put",
+            f"{USER_URL}{self.platform_admin.id}/",
+            "cfadmin",
+            {"password": NEW_P},
+        )
+        self.assert_error(response, 403, EDIT_PLATFORM_USER_ERROR)
+        self.assertTrue(self.fresh_user("cfplatform").check_hash(P))
+        self.assertNotEqual(200, self.login_status("cfplatform", NEW_P))
+
+    def test_admin_cannot_edit_platform_viewer(self):
+        response = self.request(
+            "put",
+            f"{USER_URL}{self.platform_viewer.id}/",
+            "cfadmin",
+            {"email": "taken@test.org"},
+        )
+        self.assert_error(response, 403, EDIT_PLATFORM_USER_ERROR)
+        self.assertEqual("cfpviewer@test.org", self.fresh_user("cfpviewer").email)
+
+    def test_admin_still_edits_client_users(self):
+        response = self.request(
+            "put", f"{USER_URL}{self.planner.id}/", "cfadmin", {"password": NEW_P}
+        )
+        self.assertEqual(200, response.status_code, response.json)
+        self.assertTrue(self.fresh_user("cfplanner").check_hash(NEW_P))
+
+    def test_platform_admin_edits_platform_user(self):
+        response = self.request(
+            "put",
+            f"{USER_URL}{self.platform_viewer.id}/",
+            "cfplatform",
+            {"first_name": "Edited"},
+        )
+        self.assertEqual(200, response.status_code, response.json)
+        self.assertEqual("Edited", self.fresh_user("cfpviewer").first_name)
+
+    def test_platform_user_edits_themselves(self):
+        response = self.request(
+            "put",
+            f"{USER_URL}{self.platform_viewer.id}/",
+            "cfpviewer",
+            {"first_name": "Self"},
+        )
+        self.assertEqual(200, response.status_code, response.json)
+
+    def test_admin_cannot_reset_mfa_of_platform_admin(self):
+        self.enable_mfa(self.platform_admin)
+        # the client admin logs in before the platform admin has MFA in the way
+        headers = self.headers("cfadmin")
+        response = self.client.delete(
+            f"{USER_URL}{self.platform_admin.id}/mfa/", headers=headers
+        )
+        self.assert_error(response, 403, MFA_RESET_PLATFORM_USER_ERROR)
+        self.assertTrue(self.fresh_user("cfplatform").mfa_enabled)
+        self.assertEqual([], self.capture.by_event("mfa.reset"))
+
+    def test_admin_still_resets_mfa_of_client_users(self):
+        self.enable_mfa(self.planner)
+        response = self.request("delete", f"{USER_URL}{self.planner.id}/mfa/", "cfadmin")
+        self.assertEqual(200, response.status_code, response.json)
+        self.assertFalse(self.fresh_user("cfplanner").mfa_enabled)
+
+    def test_platform_admin_resets_mfa_of_platform_user(self):
+        self.enable_mfa(self.platform_viewer)
+        response = self.request(
+            "delete", f"{USER_URL}{self.platform_viewer.id}/mfa/", "cfplatform"
+        )
+        self.assertEqual(200, response.status_code, response.json)
+        self.assertFalse(self.fresh_user("cfpviewer").mfa_enabled)
+
+    def test_admin_cannot_delete_platform_admin(self):
+        response = self.request(
+            "delete", f"{USER_URL}{self.platform_admin.id}/", "cfadmin"
+        )
+        self.assert_error(response, 403, DELETE_PLATFORM_USER_ERROR)
+        self.assertIsNotNone(self.fresh_user("cfplatform"))
+
+    def test_platform_admin_deletes_platform_user(self):
+        response = self.request(
+            "delete", f"{USER_URL}{self.platform_viewer.id}/", "cfplatform"
+        )
+        self.assertEqual(200, response.status_code, response.json)
+        self.assertIsNone(self.fresh_user("cfpviewer"))
+
+
+class TestPlatformUserGuardLevel1(_PlatformUserGuardCases, _LevelCase):
+    security_level = 1
+    config_overrides = level_overrides(1)
+
+
+class TestPlatformUserGuardLevel2(_PlatformUserGuardCases, _LevelCase):
+    security_level = 2
+    config_overrides = level_overrides(2)
+
+
+class TestPlatformUserGuardLevel3(_PlatformUserGuardCases, _LevelCase):
+    security_level = 3
+    config_overrides = level_overrides(3)
+
+
 if __name__ == "__main__":
     unittest.main()
