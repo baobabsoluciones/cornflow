@@ -326,8 +326,12 @@ either credential. It is meant for unattended automation.
   keeps working for ``API_KEY_ROTATION_GRACE_MINUTES`` (default 60, at most
   a day at level 3; 0 disables it), so a key wired into running automation can be
   replaced without a gap: **generate first, redeploy after**. Only the
-  immediately superseded key benefits. An explicit revocation, an account
-  lock and an MFA reset revoke both keys at once, with no grace.
+  immediately superseded key benefits, and it never has more scope than the
+  new key: replacing a full key with a read-only one makes the old key
+  read-only at once. An explicit revocation, an account
+  lock and an MFA reset revoke both keys at once, with no grace. For a
+  leaked key, revoke it with ``DELETE /user/api-key/`` before generating a
+  new one: regenerating alone leaves the leaked key working for the grace window.
 - **Scope: full or read-only.** A key can be minted read-only (``"scope":
   "read"`` on the request, the *read-only* checkbox in the Settings screen,
   ``create_api_key(read_only=True)`` in the library, or ``--read-only`` in the

@@ -158,10 +158,17 @@ class Auth:
         not a safe method, whatever the user's own permissions are. Meant for
         reporting / BI consumers that must never write.
 
+        A key superseded by a rotation and still in its grace window never
+        has more scope than the key that replaced it: replacing a full key
+        with a read-only one makes the old key read-only at once.
+
         :param user: the user the key belongs to
         :param dict payload: the decoded token payload
         """
         scope = payload.get("scp", API_KEY_SCOPE_FULL)
+        superseded = int(payload.get("akv", -1)) != int(user.api_key_version or 0)
+        if superseded and user.api_key_scope == API_KEY_SCOPE_READ:
+            scope = API_KEY_SCOPE_READ
         if scope != API_KEY_SCOPE_READ:
             return
         if request.method in READ_ONLY_HTTP_METHODS:

@@ -100,7 +100,8 @@ version 1.4.0
         two-factor authentication and ``API_KEY_STEPUP_TOTP=1``, the default at level 3) or with
         ``cornflow users api_key -u <username>``, and revoked with ``DELETE /user/api-key/``. Each user
         has one active key: a new key replaces the previous one, which keeps working for
-        ``API_KEY_ROTATION_GRACE_MINUTES`` (60). A read-only key (``"scope": "read"``, or
+        ``API_KEY_ROTATION_GRACE_MINUTES`` (60), with no more scope than the new key; a leaked key is
+        revoked at once with ``DELETE /user/api-key/``. A read-only key (``"scope": "read"``, or
         ``--read-only`` in the CLI) is refused on any request other than GET, HEAD and OPTIONS. A key
         can not be used to change passwords, two-factor authentication, API keys, users, roles or
         permissions. The account lock and the two-factor reset revoke the keys; a password change does

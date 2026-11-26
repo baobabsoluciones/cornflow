@@ -221,6 +221,32 @@ class TestApiKeyRotationGrace(ApiKeyTestBase):
         response = self.client.get(INSTANCE_URL, headers=auth_header(oldest))
         self.assertEqual(401, response.status_code)
 
+    def test_full_key_replaced_by_read_only_key_is_read_only_in_the_grace(self):
+        first = self.mint_key()["api_key"]
+        self.mint_key(scope=API_KEY_SCOPE_READ)
+        # the superseded key still reads...
+        self.assertEqual(
+            200, self.client.get(INSTANCE_URL, headers=auth_header(first)).status_code
+        )
+        # ...but no longer writes
+        response = self.client.post(
+            INSTANCE_URL, data=json.dumps(self.payload), headers=auth_header(first)
+        )
+        self.assertEqual(403, response.status_code)
+        self.assertEqual("api_key_read_only", response.json.get("error_code"))
+
+    def test_read_only_key_replaced_by_full_key_stays_read_only(self):
+        first = self.mint_key(scope=API_KEY_SCOPE_READ)["api_key"]
+        second = self.mint_key()["api_key"]
+        response = self.client.post(
+            INSTANCE_URL, data=json.dumps(self.payload), headers=auth_header(first)
+        )
+        self.assertEqual(403, response.status_code)
+        response = self.client.post(
+            INSTANCE_URL, data=json.dumps(self.payload), headers=auth_header(second)
+        )
+        self.assertEqual(201, response.status_code)
+
 
 class TestApiKeyExpiryThresholds(TestCase):
     """Pure threshold logic: no database needed."""
