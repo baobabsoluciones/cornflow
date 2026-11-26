@@ -229,7 +229,10 @@ version 1.4.0
         every ``access_init`` cornflow keeps the views mounted by the plugins, calls the
         ``register_access`` of each plugin by ``priority`` and leaves the permissions on their views as
         their code declares them (``ROLES_WITH_ACCESS`` and ``get_custom_roles_actions``), deleting the
-        ones added by hand. With ``EXTERNAL_APP=1`` cornflow keeps working as an external application.
+        ones added by hand. ``init_app`` runs in the order the entry points are discovered. A plugin that
+        fails to load, or that mounts an endpoint name or a URL already used by cornflow or by another
+        plugin, stops cornflow from starting with an error that names it. With ``EXTERNAL_APP=1``
+        cornflow keeps working as an external application.
 
         Breaking change: ``APPLICATION_ROOT`` now only applies with ``EXTERNAL_APP=1``, where
         cornflow is mounted under it; in version 1.3.9 it only applied with ``EXTERNAL_APP=0``. A

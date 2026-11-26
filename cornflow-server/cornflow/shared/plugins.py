@@ -12,13 +12,27 @@ code declares them.
 
 import importlib.metadata
 
+from cornflow.shared.const import CORNFLOW_BLUEPRINT_NAME, LEGACY_ENDPOINT_SUFFIX
+
 PLUGIN_ENTRY_POINT_GROUP = "cornflow.plugins"
 PLUGINS_EXTENSION = "cornflow_plugins"
+CORE_OWNER = "cornflow"
+# Methods that Flask adds to every rule: they do not make two rules clash
+_AUTOMATIC_METHODS = {"HEAD", "OPTIONS"}
+
+
+class PluginLoadError(RuntimeError):
+    """A plugin could not be loaded or clashes with cornflow or another plugin."""
 
 
 class CornflowPlugin:
     """
     Base class for the cornflow plugins.
+
+    ``init_app`` runs in the order the entry points are discovered, not by
+    ``priority``. A plugin that fails to load, or that mounts an endpoint name
+    or a URL already used by cornflow or by another plugin, stops cornflow
+    from starting with an error that names the plugin.
 
     :cvar int priority: order in which the plugins register their access,
       lower values first. Plugins with the same priority keep the discovery order.
@@ -46,9 +60,11 @@ class CornflowPlugin:
         :meth:`get_custom_roles_actions`): the missing ones are created and the
         ones not declared, including those added by hand, are deleted.
 
-        The default implementation does nothing: a plugin that does not
-        override it has to register its access by itself, and cornflow does
-        not touch the permissions on its views.
+        The default implementation does nothing, but cornflow still leaves the
+        permissions on the views of the plugin as its code declares them, as
+        described above. Only an object that does not have a
+        ``register_access`` method (one that does not subclass this class)
+        is left out: cornflow does not touch the permissions on its views.
 
         :param app: the cornflow Flask application
         """
@@ -112,18 +128,101 @@ def _mounted_resources(app, view_functions_before):
     return resources
 
 
+def _view_name(endpoint):
+    """
+    Name of the view behind an endpoint in the permission system: the core
+    endpoints are mounted as ``cornflow.<name>`` and as the alias
+    ``<name>_compat``.
+    """
+    prefix = f"{CORNFLOW_BLUEPRINT_NAME}."
+    if endpoint.startswith(prefix):
+        return endpoint[len(prefix):]
+    if endpoint.endswith(LEGACY_ENDPOINT_SUFFIX):
+        return endpoint[: -len(LEGACY_ENDPOINT_SUFFIX)]
+    return endpoint
+
+
+def _rules_clash(rule, other):
+    """Whether two URL rules serve the same path for a common method."""
+    if rule.rule != other.rule:
+        return False
+    if rule.methods is None or other.methods is None:
+        return True
+    return bool((rule.methods & other.methods) - _AUTOMATIC_METHODS)
+
+
+def _check_collisions(app, plugin_name, view_functions_before, rules_before, owners):
+    """
+    Raises :class:`PluginLoadError` if the plugin just mounted replaced an
+    existing endpoint, used the name of an existing one (also of a core
+    endpoint, mounted as ``cornflow.<name>``) or mounted a URL already served
+    for the same method.
+
+    :param app: the cornflow Flask application
+    :param str plugin_name: the entry point name of the plugin
+    :param dict view_functions_before: the view functions before the plugin
+    :param list rules_before: the URL rules before the plugin
+    :param dict owners: who mounted each previous endpoint (cornflow or a plugin)
+    """
+    names_before = {_view_name(endpoint): endpoint for endpoint in view_functions_before}
+    for endpoint, view_function in app.view_functions.items():
+        previous = view_functions_before.get(endpoint)
+        if previous is view_function:
+            continue
+        if previous is not None:
+            raise PluginLoadError(
+                f"The plugin {plugin_name} replaces the endpoint {endpoint} of "
+                f"{owners.get(endpoint, CORE_OWNER)}"
+            )
+        clash = names_before.get(_view_name(endpoint))
+        if clash is not None:
+            raise PluginLoadError(
+                f"The plugin {plugin_name} mounts the endpoint {endpoint}, with the "
+                f"name of the endpoint {clash} of {owners.get(clash, CORE_OWNER)}"
+            )
+        try:
+            rules = list(app.url_map.iter_rules(endpoint))
+        except KeyError:
+            rules = []
+        for rule in rules:
+            for other in rules_before:
+                if _rules_clash(rule, other):
+                    raise PluginLoadError(
+                        f"The plugin {plugin_name} mounts the URL {rule.rule} "
+                        f"(endpoint {endpoint}), already served by the endpoint "
+                        f"{other.endpoint} of {owners.get(other.endpoint, CORE_OWNER)}"
+                    )
+
+
 def load_plugins(app):
     """
     Loads and mounts the plugins published under the ``cornflow.plugins``
     entry point group, recording the resources each one mounts.
 
+    A plugin that fails to load or to mount, or that mounts an endpoint name
+    or a URL already in use (by cornflow or by a plugin loaded before),
+    raises :class:`PluginLoadError` naming the plugin, so cornflow does not
+    start.
+
     :param app: the cornflow Flask application
     """
     loaded = []
+    owners = {endpoint: CORE_OWNER for endpoint in app.view_functions}
     for entry_point in importlib.metadata.entry_points(group=PLUGIN_ENTRY_POINT_GROUP):
-        plugin = entry_point.load()()
         view_functions_before = dict(app.view_functions)
-        plugin.init_app(app)
+        rules_before = list(app.url_map.iter_rules())
+        try:
+            plugin = entry_point.load()()
+            plugin.init_app(app)
+        except Exception as error:
+            raise PluginLoadError(
+                f"The plugin {entry_point.name} failed to load: {error}"
+            ) from error
+        _check_collisions(
+            app, entry_point.name, view_functions_before, rules_before, owners
+        )
+        for endpoint in app.view_functions:
+            owners.setdefault(endpoint, f"the plugin {entry_point.name}")
         loaded.append(
             LoadedPlugin(
                 entry_point.name,
@@ -164,10 +263,11 @@ def register_plugins_access(app):
     """
     Asks every plugin, by priority, to register its roles, views and
     permissions, and then leaves the permissions on its views exactly as its
-    code declares them. Each endpoint belongs to the first plugin, by
-    priority, that mounts it (the same rule as :func:`get_plugins_resources`).
-    Plugins without a ``register_access`` method are skipped and the
-    permissions on their views are not touched.
+    code declares them. :func:`load_plugins` refuses two plugins that mount
+    the same endpoint, so each endpoint belongs to a single plugin; the
+    ``claimed_endpoints`` guard below is only a safety net. Plugins without a
+    ``register_access`` method are skipped and the permissions on their
+    views are not touched.
 
     :param app: the cornflow Flask application
     """

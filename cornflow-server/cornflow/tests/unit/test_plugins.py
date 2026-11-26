@@ -11,6 +11,8 @@ import importlib.metadata
 from unittest.mock import patch
 
 from flask_restful import Api
+from flask_testing import TestCase
+from werkzeug.routing import Rule
 
 from cornflow.app import create_app
 from cornflow.commands import access_init_command
@@ -23,6 +25,7 @@ from cornflow.commands.permissions import (
     save_and_delete_permissions,
 )
 from cornflow.commands.views import (
+    _get_url_from_map,
     get_database_view,
     get_views_to_register,
     load_changes_to_db,
@@ -47,6 +50,7 @@ from cornflow.shared.const import (
 )
 from cornflow.shared.plugins import (
     CornflowPlugin,
+    PluginLoadError,
     get_loaded_plugins,
     get_plugins_resources,
 )
@@ -453,3 +457,161 @@ class TestNoPlugins(PluginAccessTestCase):
     def test_no_plugin_resources(self):
         self.assertEqual([], get_plugins_resources(self.app))
         self.assertEqual([], get_loaded_plugins(self.app))
+
+
+class MountOnlyPlugin(CornflowPlugin):
+    """Subclass that mounts a resource and keeps the default register_access."""
+
+    def init_app(self, app):
+        Api(app).add_resource(
+            OtherPluginItemsEndpoint, OTHER_PLUGIN_URL, endpoint="other-plugin-items"
+        )
+
+
+class TestSubclassWithDefaultRegisterAccess(PluginAccessTestCase):
+    PLUGINS = [("mount_only_plugin", MountOnlyPlugin)]
+
+    def test_permissions_on_its_views_are_the_declared_ones(self):
+        # The default register_access does nothing, but cornflow still leaves
+        # the permissions on the plugin views as the code declares them
+        declared = self.view_permissions("other-plugin-items")
+        self.assertIn((PLANNER_ROLE, GET_ACTION), declared)
+        self.assertNotIn((VIEWER_ROLE, GET_ACTION), declared)
+        view_id = ViewModel.query.filter_by(name="other-plugin-items").first().id
+        PermissionViewRoleModel(
+            {"role_id": VIEWER_ROLE, "action_id": GET_ACTION, "api_view_id": view_id}
+        ).save()
+        access_init_command(verbose=False)
+        self.assertEqual(declared, self.view_permissions("other-plugin-items"))
+
+
+def _plugin_with(url, endpoint, resource=PluginItemsEndpoint):
+    """A plugin class that mounts one resource at the given URL and endpoint."""
+
+    class _Plugin(CornflowPlugin):
+        def init_app(self, app):
+            Api(app).add_resource(resource, url, endpoint=endpoint)
+
+    return _Plugin
+
+
+class FailingPlugin(CornflowPlugin):
+    def init_app(self, app):
+        raise ValueError("broken configuration")
+
+
+class FailingConstructorPlugin(CornflowPlugin):
+    def __init__(self):
+        raise ImportError("missing dependency")
+
+
+class TestPluginLoadErrors(TestCase):
+    """
+    A plugin that can not be loaded, or that clashes with cornflow or with
+    another plugin, stops create_app with an error naming the plugin.
+    """
+
+    def create_app(self):
+        return create_app("testing")
+
+    @staticmethod
+    def create_app_with(plugins):
+        original = importlib.metadata.entry_points
+        entry_points = [FakeEntryPoint(name, cls) for name, cls in plugins]
+
+        def fake_entry_points(**kwargs):
+            if kwargs.get("group") == "cornflow.plugins":
+                return entry_points
+            return original(**kwargs)
+
+        with patch.object(importlib.metadata, "entry_points", fake_entry_points):
+            return create_app("testing")
+
+    def assert_load_error(self, plugins, *fragments):
+        with self.assertRaises(PluginLoadError) as context:
+            self.create_app_with(plugins)
+        for fragment in fragments:
+            self.assertIn(fragment, str(context.exception))
+
+    def test_init_app_error_names_the_plugin(self):
+        self.assert_load_error(
+            [("broken_plugin", FailingPlugin)],
+            "broken_plugin",
+            "broken configuration",
+        )
+
+    def test_constructor_error_names_the_plugin(self):
+        self.assert_load_error(
+            [("broken_plugin", FailingConstructorPlugin)],
+            "broken_plugin",
+            "missing dependency",
+        )
+
+    def test_same_endpoint_in_two_plugins(self):
+        self.assert_load_error(
+            [
+                ("first_plugin", _plugin_with("/first/items/", "shared-items")),
+                (
+                    "second_plugin",
+                    _plugin_with("/second/items/", "shared-items", OtherPluginItemsEndpoint),
+                ),
+            ],
+            "second_plugin",
+        )
+
+    def test_same_url_in_two_plugins(self):
+        self.assert_load_error(
+            [
+                ("first_plugin", _plugin_with("/shared/items/", "first-items")),
+                ("second_plugin", _plugin_with("/shared/items/", "second-items")),
+            ],
+            "second_plugin",
+            "/shared/items/",
+            "first-items",
+            "the plugin first_plugin",
+        )
+
+    def test_endpoint_with_the_name_of_a_core_endpoint(self):
+        self.assert_load_error(
+            [("shadow_plugin", _plugin_with("/shadow/instance/", "instance"))],
+            "shadow_plugin",
+            "endpoint instance,",
+            "of cornflow",
+        )
+
+    def test_url_of_a_core_alias(self):
+        self.assert_load_error(
+            [("shadow_plugin", _plugin_with("/instance/", "my-instances"))],
+            "shadow_plugin",
+            "/instance/",
+            "of cornflow",
+        )
+
+    def test_plugins_without_clashes_load(self):
+        app = self.create_app_with(
+            [("test_plugin", ResourcesPlugin), ("other_plugin", OtherResourcesPlugin)]
+        )
+        self.assertEqual(
+            {"test_plugin", "other_plugin"},
+            {plugin.name for plugin in get_loaded_plugins(app)},
+        )
+
+
+class TestUrlFromMap(TestCase):
+    def create_app(self):
+        return create_app("testing")
+
+    def test_core_view_keeps_its_url_with_a_bare_endpoint_of_the_same_name(self):
+        # A rule with the bare name of a core endpoint must not give its URL
+        # to the core view
+        self.app.url_map.add(Rule("/shadow/instance/", endpoint="instance"))
+        self.assertEqual("/cornflow/instance/", _get_url_from_map("instance"))
+        self.assertEqual("/shadow/instance/", list(
+            self.app.url_map.iter_rules("instance"))[0].rule)
+
+    def test_bare_endpoint_without_core_counterpart(self):
+        self.app.url_map.add(Rule("/plugin/things/", endpoint="plugin-things"))
+        self.assertEqual("/plugin/things/", _get_url_from_map("plugin-things"))
+
+    def test_unknown_endpoint(self):
+        self.assertIsNone(_get_url_from_map("does-not-exist"))

@@ -123,15 +123,16 @@ def get_views_to_update(
 
 def _get_url_from_map(endpoint):
     """Return the real URL rule from Flask's URL map (includes Blueprint prefix)."""
-    try:
-        rules_map = current_app.url_map._rules_by_endpoint
-        # Try exact match first, then with blueprint prefix (e.g. "cornflow.instance")
-        for key in (endpoint, f"cornflow.{endpoint}"):
-            rules = list(rules_map.get(key, []))
-            if rules:
-                return rules[0].rule
-    except Exception:
-        pass
+    # The core endpoint (blueprint prefix, e.g. "cornflow.instance") goes
+    # first, so that an endpoint with the same bare name can never give its
+    # URL to the core view; then the bare name (plugins, external apps)
+    for key in (f"cornflow.{endpoint}", endpoint):
+        try:
+            rules = list(current_app.url_map.iter_rules(key))
+        except KeyError:
+            continue
+        if rules:
+            return rules[0].rule
     return None
 
 
